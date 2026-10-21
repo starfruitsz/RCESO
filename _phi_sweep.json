@@ -1,0 +1,50 @@
+{
+ "Base": {
+  "dip": -339.2,
+  "a_echo": 80.2,
+  "steady": 29.32,
+  "trig_pre": 0,
+  "trig_echo": 0,
+  "trig_post": 0
+ },
+ "FB_c0": {
+  "dip": -338.9,
+  "a_echo": 33.0,
+  "steady": 29.76,
+  "trig_pre": 6,
+  "trig_echo": 1,
+  "trig_post": 10
+ },
+ "FB_c20": {
+  "dip": -340.8,
+  "a_echo": 63.5,
+  "steady": 29.82,
+  "trig_pre": 9,
+  "trig_echo": 3,
+  "trig_post": 14
+ },
+ "DFB_c20": {
+  "dip": -332.6,
+  "a_echo": 49.8,
+  "steady": 29.8,
+  "trig_pre": 9,
+  "trig_echo": 3,
+  "trig_post": 14
+ },
+ "FB_c40": {
+  "dip": -337.1,
+  "a_echo": 66.0,
+  "steady": 30.24,
+  "trig_pre": 9,
+  "trig_echo": 3,
+  "trig_post": 15
+ },
+ "DFB_c40": {
+  "dip": -276.8,
+  "a_echo": 52.5,
+  "steady": 30.21,
+  "trig_pre": 9,
+  "trig_echo": 3,
+  "trig_post": 15
+ }
+}

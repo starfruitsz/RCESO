@@ -1,0 +1,48 @@
+{
+ "Base": [
+  {
+   "seed": 20261018,
+   "a_echo": 79.3,
+   "dip": -327.4,
+   "trig_echo": 0,
+   "trig_post": 0
+  },
+  {
+   "seed": 20261019,
+   "a_echo": 83.5,
+   "dip": -287.8,
+   "trig_echo": 0,
+   "trig_post": 0
+  },
+  {
+   "seed": 20261021,
+   "a_echo": 83.3,
+   "dip": -317.6,
+   "trig_echo": 0,
+   "trig_post": 0
+  }
+ ],
+ "FB": [
+  {
+   "seed": 20261018,
+   "a_echo": 91.3,
+   "dip": -329.2,
+   "trig_echo": 1,
+   "trig_post": 11
+  },
+  {
+   "seed": 20261019,
+   "a_echo": 32.7,
+   "dip": -288.4,
+   "trig_echo": 1,
+   "trig_post": 10
+  },
+  {
+   "seed": 20261021,
+   "a_echo": 28.5,
+   "dip": -314.8,
+   "trig_echo": 2,
+   "trig_post": 11
+  }
+ ]
+}

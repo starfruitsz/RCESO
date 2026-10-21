@@ -1,0 +1,43 @@
+% UUB 证明段（独立保存，供 v3 重建时插入）
+\subsection{名义闭环的一致有界性（UUB）：完整证明}\label{sec:uub}
+\textbf{设定}：名义闭环指 $\tau\equiv\tau_0$、$Q\equiv Q_0$ 固定、调度全关（$g\equiv0$）的闭环。
+记 $e_1=x_1-z_1$、$e_2=x_2-z_2$，$x_2$ 为含输入失配的扩张状态，$\dot x_2=:h$。
+\textbf{假设}：(A1) $|h(t)|\le H$；(A2) $b,b_0,k_p,\omega_o,\tau_0,\zeta>0$、$Q_0\in(0,1)$、$\beta_3\ge0$；(A3) $r$ 为常数、$d$ 有界。
+
+\noindent\textbf{引理 1（重复通道自持 UUB）}：由 $|\tanh(\cdot)|\le1$，重复通道输入满足
+$|Q_0v(t-T)+\beta_3\tanh(e_1/\zeta)|\le Q_0\bar V+\beta_3$（$\bar V:=\sup_{[t-T,t]}|v|$）；
+一阶低通在 $|w|\le W$ 下满足 $|v(t)|\le W+(|v(0)|-W)e^{-t/\tau_0}$，逐周期迭代得
+\begin{equation}
+\limsup_{t\to\infty}|v(t)|\le\bar v:=\frac{\beta_3}{1-Q_0}.
+\label{eq:uub-v}
+\end{equation}
+\emph{关键}：该界\textbf{与 $e_1$ 的大小无关}（因 $\tanh$ 有界），故 $v$ 通道"自持"，不构成代数环。
+
+\noindent\textbf{引理 2（ESO 误差 UUB）}：ESO 误差动态为 $\dot e_1=-2\omega_o e_1+e_2-v$、$\dot e_2=-\omega_o^{2}e_1+h$。
+取尺度化坐标 $\xi=[e_1,\ e_2/\omega_o]^{\!\top}$，则 $\dot\xi=\omega_o A_0\xi+w_d$，
+$A_0=\left[\begin{smallmatrix}-2&1\\-1&0\end{smallmatrix}\right]$（特征值 $-1$ 二重），$w_d=[-v,\ h/\omega_o]^{\!\top}$。
+解 $A_0^{\!\top}P_0+P_0A_0=-I$ 得 $P_0=\left[\begin{smallmatrix}0.5&-0.5\\-0.5&1.5\end{smallmatrix}\right]\succ0$（特征值 $0.191/1.809$），$\|P_0B_0\|_F=\sqrt3$。
+取 $V=\xi^{\!\top}P_0\xi$ 得 $\dot V\le-\omega_o\|\xi\|^{2}+2\sqrt3\,\|\xi\|\,\|w_d\|$，故
+\begin{equation}
+\limsup_{t\to\infty}\|\xi(t)\|\le\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} .
+\label{eq:uub-eso}
+\end{equation}
+
+\noindent\textbf{引理 3（跟踪误差 UUB）}：令 $\sigma=r-y$，由 $\dot y=\frac{b}{b_0}(k_p\sigma-z_2-v)+d$ 得
+$\sigma\dot\sigma\le-\frac{bk_p}{b_0}\sigma^{2}+|\sigma|\bigl(|d|+\frac{b}{b_0}(|z_2|+\bar v)\bigr)$，而 $z_2=x_2-e_2$ 有界，故
+\begin{equation}
+\limsup_{t\to\infty}|\sigma(t)|\le\frac{b_0}{bk_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr).
+\label{eq:uub-track}
+\end{equation}
+
+\noindent\textbf{定理（名义闭环 UUB）}：在 (A1)--(A3) 下，式 \eqref{eq:uub-v}--\eqref{eq:uub-track} 同时成立，
+闭环全部信号一致最终有界，界\textbf{显式}依赖 $(\beta_3,Q_0,\omega_o,k_p,b,b_0,H)$。
+\emph{注}：(a) 本例回代：$\beta_3=2000$、$Q_0=0.98\Rightarrow\bar v=10^{5}$、$\omega_o=40$；三个界都是\textbf{保守上界}
+（仿真实测 $|v|\approx4.5\times10^{2}$、$|e_1|\approx0.05$，相差 $10^{2}\sim10^{5}$ 倍），定量行为以仿真为准；
+(b) (A1) 的 $h$ 含 $\dot u$ 项，而 $u$ 由有界的 $z_2,v$ 构成，故 $h$ 的有界性由前述界隐式给出（有限）。
+
+\noindent\textbf{推论（含 $Q/B/D$ 调度）}：$g=\bar e_1^{2}/(\bar e_1^{2}+\varepsilon_g^{2})\in[0,1)$ 由构造保证，$\kappa_p,\kappa_B\ge0$，
+故 $k_p^{\rm eff}=k_p(1+\kappa_pg)\ge k_p$、$\omega_o^{\rm eff}=\omega_o(1+\kappa_Bg)\ge\omega_o$；
+式 \eqref{eq:uub-eso}\eqref{eq:uub-track} 的界对 $(\omega_o,k_p)$ \textbf{单调不增}，故\emph{名义界即调度闭环的界}：
+\textbf{调度可证地不放大一致最终界}。这与"调度放大噪声本底"的仿真事实不矛盾——噪声不在本确定性框架内，由敏感性一节单独量化。
+

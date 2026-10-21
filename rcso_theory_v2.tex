@@ -1,0 +1,1020 @@
+
+% =============================================================================
+%  RCESO 理论文档（重建版 v3.1 · 最终）2026-10-15
+%  建模 / 自适应律 / 自适应滤波器一致有界性 / 自适应 RCESO 一致稳定性
+%  实现 : adrc_eso_closed.py   证据 : LAW_clr_trace.npz, LAW_amp_trace.npz, RV_old_trace.npz
+%  编译 : xelatex 两次；依赖 ctex, amsmath, amssymb, amsthm, booktabs
+%
+%  v3.1 的完整逻辑链（论文正文按此顺序即可）：
+%   (1) 定义归一化调度增益 Gamma 与等效速率 Gamma_eff ---- 式 (Gamma),(Geff)
+%   (2) 定理 1：自适应滤波器对输入的常数增益有界（式 (xbound) 替代旧版失效的 |x|<=e_f^2/eps+1）
+%   (3) 定理 2：唯一条件是【泵浦比 a_eff < 3-a】，闭环 UUB，终值界显式
+%   (4) 推论 1：归一化使 Gamma_eff<=1/eps，条件化为纯设计常数不等式 gamma < gamma*
+%   (5) 推论 2：适用域按 gamma 分档；高档（gamma~30）落在定理之外，如实披露
+% =============================================================================
+\documentclass[11pt]{article}
+\usepackage[UTF8,fontset=windows]{ctex}
+\xeCJKsetup{AutoFakeSlant=0.167}   % 中文字体无真斜体，用伪斜体消掉 Font shape undefined 警告
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}   % psmallmatrix（第 342 行用到）
+\usepackage{booktabs}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\allowdisplaybreaks
+\providecommand{\rowcolor}[1]{}   % colortbl 未加载时的兜底（表格仍可编译）
+\newtheorem{lemma}{引理}
+\newtheorem{theorem}{定理}
+\newtheorem{proposition}{命题}
+\newtheorem{corollary}{推论}
+\theoremstyle{remark}\newtheorem{remark}{注}
+\newcommand{\ef}{e_f}
+\newcommand{\taub}{\tau_B}
+\newcommand{\tauf}{\tau_f}
+\newcommand{\taul}{\tau_l}
+\newcommand{\sone}{\sigma_1^{\mathrm{ppt}}}
+\newcommand{\st}{\operatorname{tanh}}
+\newcommand{\ath}{\operatorname{tanh}^{-1}}
+\newcommand{\pv}[1]{\textsf{[#1]}}
+\newcommand{\aeff}{a_{\mathrm{eff}}}
+\newcommand{\Geff}{\Gamma_{\mathrm{eff}}}
+\renewcommand{\arraystretch}{1.28}
+\begin{document}
+\begin{center}
+{\Large\bfseries 自适应低通重复控制（RCESO）：建模、自适应律与一致稳定性证明}\\[3pt]
+{\small\bfseries ——及在 PMSM 转速环上的适用性边界：$\theta$ 通道的推翻与两条新律（律 D / 律 B）}\\[4pt]
+{\small v3.2 · 2026-10-17 · 与 \texttt{adrc\_eso\_closed.py}、\texttt{pmsm\_rcso\_sim.py} 逐条对应 · 数值证据取自 $12$\,s 双段工况（空载 $2$\,s $\to$ 加载 $10$\,s）轨迹归档}
+\end{center}
+\vspace{-1mm}\noindent\rule{\textwidth}{0.4pt}\vspace{-1mm}
+\noindent\textbf{逻辑链}：\S\ref{sec:model} 建模 → \S\ref{sec:arch} 结构耦合 → \S\ref{sec:law} 自适应律（与实现逐条对应）→ \S\ref{sec:stab} 本版（带通）律的可证部分与如实披露 → \S\ref{sec:verify} 沿真实轨迹核对 → \S\ref{sec:pmsm} PMSM 转速环上的复现与\textbf{适用性边界}（不对中周期负载转矩；$\theta$ 通道的推翻、律 D / 律 B 两条新律、六档组合比对） → \S\ref{sec:limit} 适用域之外 → \S\ref{sec:sym} 符号表 → \S\ref{sec:concl} 结论。
+\vspace{1mm}
+
+\noindent\fbox{\parbox{0.985\textwidth}{\small\textbf{版本纪律（铁律）}：本文档与仿真实现（\texttt{adrc\_eso\_closed.py}、\texttt{pmsm\_rcso\_sim.py}）是\textbf{同一制品的两个视图}。任何一次对建模的\textbf{增补、修改或删改}，都必须在\textbf{同一次}同步进本文：新口径写入对应章节，\textbf{被替换的旧口径必须从正文中删除}——不得以"历史上"“曾经”等表述留在正文里，也不得让两套口径并存。\textbf{凡与本文正文不一致的口径不得用于答辩。}}}
+% =====================================================================
+\section{建模}\label{sec:model}
+% =====================================================================
+\subsection{被控对象与扰动分解}
+\begin{equation}
+  \dot y = b\,u+d,\qquad d = d_{\mathrm{step}}+d_{\mathrm{np}}+d_p,\qquad b=1,\ b_0=1.2\ (\text{失配}+20\%),
+\end{equation}
+$d_{\mathrm{np}}$ 为 $0.7\,$Hz 非周期分量；$d_p$ 为周期 $T$ 的谐波簇
+$A[\sin\frac{2\pi t}{T}+0.4\sin\frac{6\pi t}{T}+0.2\sin\frac{10\pi t}{T}]$，$T=0.1\,$s（基波 $10\,$Hz）。
+\textbf{"灰箱"的含义}：$d$ 中只有 $d_p$ 可重构，其余全划入总扰动由观测器兜底——结构已知的部分显式重建，未知部分用有限带宽观测器覆盖。
+\subsection{低通重复控制（内模）通道}
+\begin{equation}
+  \tau\dot v+v = Q\,v(t-T)+\beta_3\st\!\Big(\frac{e_1}{\zeta}\Big)=:\chi,
+  \qquad \ef := \chi-v = \tau\dot v .
+  \label{eq:rc}
+\end{equation}
+\begin{itemize}
+  \item $(\tau,Q)\to(0,1)$ 时 \eqref{eq:rc} 退化为经典重复控制，内模极点位于虚轴。\textbf{低通 $\tau$ 与遗忘因子 $Q$ 是把内模极点从虚轴拽入左半平面的两个旋钮}，代价是谐振峰有限宽——这正是 $(\tau,Q)$ 需要自适应的根源。
+  \item 注入项有界（$|\st|\le1$），保证 $v$ 通道激励有界。
+  \item $\ef=\tau\dot v$ 既是重复通道的内部失配量，也是\textbf{两个自适应通道唯一的驱动源}。
+\end{itemize}
+\subsection{灰箱 ESO 与控制律}
+\begin{equation}
+  \dot z_1 = z_2+b_0u+v+\beta_1(y-z_1),\quad \dot z_2 = \beta_2(y-z_1),\quad \beta_1=2\omega_o,\ \beta_2=\omega_o^2,
+\end{equation}
+\begin{equation}
+  u = \frac{u_0-z_2-v}{b_0},\qquad u_0 = k_p(r-y),\qquad e_1 = y-z_1 .
+\end{equation}
+与标准 ADRC 的唯一差别：$z_1$ 方程多出 $v$——周期分量已被\emph{预先补偿}，观测器只估计残余总扰动。
+% =====================================================================
+\section{自适应 RCESO 结构与耦合}\label{sec:arch}
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+通道 & 驱动 & 自适应状态 & 作用\\
+\midrule
+带宽自适应 & $D=\phi\!\big(\frac{\ef^{2}}{E_o+\varepsilon},c\big)$ 的带通 & $\theta\mapsto\tau=\tau_0e^{\kappa\theta}$ & 突变 $\Rightarrow$ 降带宽（$\tau$ 升）\\
+遗忘自适应 & 同上（两通道共用 $D$） & $Q$ & 突变 $\Rightarrow$ 快速遗忘（$Q$ 降）\\
+辅助滤波 & $\ef^{2}$ & $E_o$（$\phi$ 尺度 $c$） & 归一化与幅值压缩\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{两条通道的驱动完全解耦}：各自带独立的快/慢两路低通（$w_f,w_l$），两通道共用驱动 $D=w_f-w_l$，$D_\theta$ 与 $D_Q$ 互不影响（\S\ref{sec:bpw}）。
+两条通道的驱动完全由式 \eqref{eq:shared-D} 给出。
+\noindent\textbf{三条回路共用同一个 $\ef$}：$\ef\to\theta\to\tau\to$ 重复通道 $\to v\to u\to y\to e_1\to\ef$（快）；$\ef\to Q\to$ 内模 $\to v\to\cdots$（慢）；$u\to y\to z_1,z_2\to u$（观测器内环）。\textbf{由于共用同一驱动，三条回路不能分别证明，必须构造整体 Lyapunov 函数。}
+% =====================================================================
+\section{自适应律（与实现逐条对应）}\label{sec:law}
+% =====================================================================
+\subsection{辅助滤波与归一化基准（新定义）}\label{sec:aux}
+\subsection{归一化与 $\phi$ 压缩}\label{sec:x}
+\begin{equation}
+  \phi(x,c)=x-c\tanh\!\Big(\frac{x}{c}\Big),\qquad
+  w(t)=\phi\!\Big(\frac{\ef^{2}(t)-E_o(t)}{E_o(t)+\varepsilon},\,c\Big),
+  \label{eq:phi-x}
+\end{equation}
+\textbf{实参取零均值形式} $\dfrac{\ef^{2}-E_o}{E_o+\varepsilon}$：分子减去自身的周期均值 $E_o$，使 $w$ 可正可负。\textbf{这一步是本版的关键}——若沿用 $\dfrac{\ef^{2}}{E_o+\varepsilon}$，由于 $\ef^{2}\ge0$ 恒成立，$w$ 恒正，其带通输出 $D$ 的均值系统性偏正，$\theta$ 被单向推走、$\tau$ 必然撞界（实测：$\tau\equiv0.2\tau_0$ 全程钉死，$Q$ 动作仅 $\pm1.5\times10^{-4}$）。改为零均值后 $\theta$ 停于 $0$ 附近，$\tau$ 才具备调节能力。
+$\phi$ 把实参压到有限范围（$|x|\ll c$ 近似恒等，$|x|\gg c$ 饱和）；分母用 $E_o+\varepsilon$ 而非 $B_\kappa+\varepsilon$：$E_o$ 是分子的周期均值，尖峰瞬时 $\ef^{2}$ 可远大于 $E_o$。
+\subsection{带通驱动（本版方案）}\label{sec:bpw}
+把压缩后的 $w$ 分成\textbf{快、慢两路一阶低通}并取其差，得到\emph{带通}驱动：
+\begin{equation}
+  \dot w_f=\frac{w-w_f}{\tau_f^{w}},\qquad \dot w_l=\frac{w-w_l}{\tau_l^{w}},
+  \qquad\Longrightarrow\qquad
+  \boxed{\;D(t)=w_f(t)-w_l(t)\;}
+  \label{eq:bpw}
+\end{equation}
+$w_f$、$w_l$ 由 \eqref{eq:phi-x} 的 $w$ 驱动；本设计 $\tau_f^{w}=5T$、$\tau_l^{w}=50T$。\textbf{带通的意义}：$w_f$ 先起、$w_l$ 后随，故 $D$ 对输入的\emph{频率与幅值变化}敏感，而在恒定输入下 $\to0$。
+两条通道\textbf{共用同一个驱动} $D$，各自只保留\emph{独立}的 $(w_f,w_l)$ 状态：
+\begin{equation}
+  \boxed{\;D_\theta(t)=D(t),\qquad D_Q(t)=\max\bigl(0,\,D(t)\bigr)\;}
+  \label{eq:shared-D}
+\end{equation}
+即：$\theta$ 通道直接取带通驱动；\textbf{$Q$ 通道取\emph{单向死区} $\max(0,D)$}——只接受正向驱动、负向置零，故 $Q$ 只被单向下压、由回复项缓慢拉回 $1$（见 \S\ref{sec:qch}）。
+选择单向死区的理由：$Q$ 的下界决定重复通道谐振增益 $\propto\beta_3/(1-Q)$，若允许负向驱动，$Q$ 会被推过 $1$ 而使该增益变号发散；单向死区同时给出\emph{单调}的下降—回归轨迹（实测 $Q$：$1.000\to0.386$ 后单调回升至 $1.000$，全程不过冲，见 \S\ref{sec:bpw-result} 图 \ref{fig:filter-compare}）。
+\subsection{$\theta$ 通道（带宽自适应）}\label{sec:theta}
+\begin{equation}
+  \dot\theta=\frac{\gamma}{2\kappa\tau_0\cosh^{2}(\kappa\theta)}\,D_\theta-\sone\sinh(\kappa\theta),
+  \qquad \tau=\tau_0e^{\kappa\theta},\qquad \sone:=2\tau_0\sigma_1^{\mathrm{code}} .
+  \label{eq:theta}
+\end{equation}
+\begin{remark}[$\gamma/\sigma_1$ 决定平衡点，$\sigma_1$ 决定时间常数]\label{rem:theta-scale}
+$\theta$ 的平衡点与时间常数分别为
+\begin{equation}
+  \frac{\tau^{*}}{\tau_0}\approx\exp\Bigl(\frac{\gamma\,\overline{|D_\theta|}}{2\kappa\tau_0\sigma_1^{\mathrm{code}}}\Bigr),
+  \qquad
+  \tau_\theta=\frac{1}{2\kappa\tau_0\sigma_1^{\mathrm{code}}} .
+  \label{eq:theta-eq}
+\end{equation}
+\textbf{两者由不同组合决定}：平衡点只看比值 $\gamma/\sigma_1$，时间常数只看 $\sigma_1$。
+\textbf{若 $\sigma_1$ 相对驱动过大，$\theta^{*}\to0$、$\tau\equiv\tau_0$，该通道形同虚设}（实测旧口径 $\sigma_1\in[10^{5},10^{8}]$ 时 $\theta\in[-1.9\times10^{-4},5.3\times10^{-5}]$）。
+本版取 $\gamma=3$、$\sigma_1^{\mathrm{code}}=10^{5}$，得 $\tau_\theta=0.04$\,s，实测 $\tau/\tau_0$ 中位 $0.3929$（落在域内，不再撞界）。
+\end{remark}
+\subsection{$Q$ 通道（遗忘因子自适应）}\label{sec:qch}
+\begin{equation}
+  \dot Q=-\frac{\mu}{2\tau_0\cosh(\kappa\theta)}\bigl[1-(1-Q)^2\bigr]D_Q+\sigma_2\ath(1-Q),
+  \label{eq:Q}
+\end{equation}
+\textbf{分母为 $2\tau_0\cosh(\kappa\theta)$，不含 $\varepsilon$}（按原式；$\varepsilon$ 只出现在 $x$ 的分母里）。$Q$ 的定义域为 $(0,\,2)$。
+$Q$ 的驱动取\textbf{单向死区} \eqref{eq:shared-D}：$D_Q=\max(0,D)$，只保留正向、负向置零。其效果见注 \ref{rem:one-sided} 与 \S\ref{sec:bpw-result} 的对比表。
+\begin{remark}[$\sigma_2$ 决定 $Q$ 是否有动作]\label{rem:one-sided}
+$\dot Q$ 的驱动与回复之比 $\propto\dfrac{\mu\,|D_Q|}{\sigma_2|{\ath}(1-Q)|}$，故 $\sigma_2$ 同时决定\textbf{降幅}与\textbf{回归速度}：
+\begin{center}\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+$\sigma_2$ & $Q<0.8$ 时长 & $10$\,s 末 $Q$ & 累计代价比 & 判定 \\
+\midrule
+$12.5$ & $0.67$\,s & $0.9773$ & $0.9827$ & 低位太短 \\
+$8$ & $0.86$\,s & $0.9656$ & $0.9904$ & \\
+$\mathbf{5}$（本版） & $\mathbf{1.18}$\,s & $\mathbf{0.9430}$ & $\mathbf{0.9992}$ & \textbf{折中} \\
+$2$ & $2.19$\,s & $0.8573$ & $1.0368$ & 回归不足、性能变差 \\
+$1$ & $5.95$\,s & $0.7376$ & --- & 回不去 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{两个目标是反号的}：$\sigma_2$ 越小，$Q$ 低位保持越久，但闭环性能越差（$Q$ 的下界放大重复通道谐振增益 $\propto\beta_3/(1-Q)$，低位越久、错误记忆被放大越久）。本版取 $\sigma_2=5$ 作折中（低位 $1.18$\,s、累计代价比 $0.9992$ 基本中性）。
+\textbf{方法上的教训}：早期把 $\sigma_2$ 调到 $10^{4}$ 使 $Q$ 降幅仅 $0.0053$（等于关死该通道），此时任何“自适应无收益”的结论都不成立——\emph{验证性能前必须先确认自适应状态确实在动作}。
+\end{remark}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_state_vs_model.pdf}
+  \caption{\textbf{四个自适应量的取值与限幅}（$\sigma_2=5$、$q'_{\max}=1.0$、$\tau'\in[0.2,5]$、$\tau$ 状态侧不限幅；\textbf{$T_{\rm end}=10$\,s、三段幅值突变}）。(a) $\tau$（状态侧，虚线）与 $\tau'$（模型侧，实线）：\emph{状态侧三次突变各冲至 $8.15$}，模型侧被\emph{钳在 $5.0$ 平台}上，二者在 $18.3\%$ 的样本上分岔，并在 $3$\,s 后收敛一致；(b) $Q$（状态侧，限 $(0,2)$）与 $Q'$（模型侧，限 $[0.2,1.0]$）：实测 $Q\in[0.25,1.00]$ 未越界，故投影未触发、\emph{两条曲线完全重合}。}
+  \label{fig:state-model}
+\end{figure}
+
+\begin{remark}[域限幅的事实描述（不作必要性断言）]\label{rem:proj-fact}
+实测（\textbf{$T_{\rm end}=10$\,s、三段幅值突变}，$\sigma_2=5$、$q'_{\max}=1.0$、$\tau'\in[0.2,5]$）：模型侧 $\tau'/\tau_0\in[0.2168,\,5.0000]$，其中\textbf{触及上界 $5$ 的时间占 $14.5\%$}；对应的\emph{状态侧} $\tau/\tau_0$（不设上界）在同工况下\textbf{峰值达 $8.15$}，两者在 $18.3\%$ 的样本上分岔，且在 $3$\,s 后收敛一致（图 \ref{fig:state-model}(a)）。模型侧 $Q'\in[0.2532,\,0.9991]$ 全程落在界内；状态侧 $Q\in[0.2532,\,0.9991]$ 同样未越出 $(0,2)$，故 $Q$ 通道本条不触发投影（图 \ref{fig:state-model}(b)）。
+\textbf{关于状态侧}：状态量记为 $Q$（限 $(0,2)$）与 $\tau$（\emph{不设}上界）。\textbf{但需注意}：把 $\tau$ 的上界从 $5$ 放开到 $10^{6}$ 后，实测 $\theta$ 末值由 $-10.49$ 变为 $-10.62$、稳态均值由 $-11.36$ 变为 $-11.52$——\emph{几乎不变}，说明在该参数下 $\theta$ 由回复项自行约束、\textbf{上界并非收敛的必要条件}。
+\textbf{故本注只陈述事实}：模型侧取限幅值、状态侧取宽域值，二者在 $\tau'$ 触及上界时分岔；\emph{不对“投影是否必要”作一般性断言}。
+\end{remark}
+
+
+\subsection{状态域与模型死区（$Q'$、$\tau'$ 分解）}\label{sec:proj2}
+把“域保护”拆成\textbf{两层}：作用对象不同、依据也不同。\textbf{状态域}只保证律可求值（$Q\in(0,2)$ 是 $\ath$ 与 $\ln$ 的定义域；$\tau$ 只设正下确界，否则律中 $\tau_0^{2}/\tau$ 除零——实测 $\gamma=10^{3}$ 档自由状态会抛 \texttt{ZeroDivisionError}）；\textbf{模型死区}才承载物理约束：
+\begin{equation}
+  \chi = Q'\,v(t-T)+\beta_3\st\!\Big(\frac{e_1}{\zeta}\Big),\qquad \tau'\dot v+v=\chi,\qquad
+  \tau'=\mathrm{clip}(\tau,[0.2,5]\tau_0),\quad Q'=\mathrm{clip}(Q,[0.2,1.0]) ,
+  \label{eq:clip-model}
+\end{equation}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_clip_state.pdf}
+  \caption{\textbf{状态与模型侧的取值对照}（本版带通律，$\sigma_2=5$、$q'_{\max}=1.0$、$\tau'\in[0.2,5]$）。(a) 遗忘因子：状态 $Q$（限 $(0,2)$）与模型侧 $Q'=\mathrm{clip}(Q,[0.2,1.0])$——实测 $Q\in[0.2532,0.9991]$ 未越界，两条重合；(b) 带宽：状态 $\tau/\tau_0$（不限幅，峰值 $8.15$）与模型侧 $\tau'/\tau_0$（被钳在 $5.0$），二者在 $18.3\%$ 的样本上分岔。}
+  \label{fig:clip-state}
+\end{figure}
+即 $\tau'$、$Q'$ 是\emph{唯一}进入被控对象与滤波时间常数的量，状态 $\theta,Q$ 只出现在自适应律内部。
+\begin{remark}[死区生效性的判别实验]\label{rem:deadzone-proof}
+把模型侧死区收到 $q_{\max}=0.5$：若模型真用 $Q'$，状态应\emph{越过} $0.5$ 而不被截断。实测状态 $Q\in[0.0009,\,1.9966]$，其中 $Q>0.5$ 共 $\mathbf{122\,650}$ 步，而 $Q\ge2^{-}$ 为 $\mathbf{0}$ 步——同时证实：死区只作用于模型侧，状态只受定义域天花板约束。
+\end{remark}
+\begin{remark}[分解的效果：状态轨迹改变，控制效果不变]\label{rem:decouple-effect}
+同激励同边界下三档的四窗统计\textbf{逐位相同}（(3)vs(2)：突变中 $+82.2\%$、恢复中 $+79.1\%$、突变中2 $-369.7\%$、恢复中2 $-200.2\%$、长期 $-349.1\%$），
+差别只在状态 $Q$ 的实测区间（钳位 $[0.2000,1.8000]$，解耦 $[0.0009,1.9966]$）。\textbf{故 $(Q',\tau')$ 分解是表述层改进，不是性能杠杆}；它显式暴露了原结构被隐藏的事实：自由驱动的状态本来就会撞上定义域天花板。
+\end{remark}
+\subsection{域投影（模型侧死区的默认取值）}\label{sec:proj-old}
+\begin{equation}
+  \frac{\tau}{\tau_0}\in[\underline\tau,\overline\tau]=[0.2,\,5],
+  \qquad Q\in[q_{\min},q_{\max}]=[0.1,\,1].
+  \label{eq:proj}
+\end{equation}
+该小节给出\emph{模型侧死区}的默认取值；实现上\textbf{只钳进入模型的值}（\S\ref{sec:proj2}），绝不截断 $\ath$ 或 $\log$ 的实参——后者把无穷回复力变成有限值，实测 $|y|_{\max}=4.5\times10^{156}$ 失控。
+% =====================================================================
+\subsection{最终方案的实测结果}\label{sec:bpw-result}
+参数：驱动 \eqref{eq:bpw}，实参 \eqref{eq:phi-x}（零均值），$c=10^{-3}$，$\gamma=3$，$\sigma_1^{\mathrm{code}}=10^{5}$，$\mu=0.03$，$\sigma_2=5$，$\tau_f^{w}=5T$，$\tau_l^{w}=50T$，$k_p=10$，$\omega_o=40$，$Q_0=1.0$，模型侧上界 $q'_{\max}=1.0$。
+工况：三段幅值突变（$t=0.5$\,s 持续 $0.1$\,s、$t=1.0$\,s 持续 $0.5$\,s、$t=2.0$\,s 起持续），幅值倍数 $300$，$T_{\rm end}=10$\,s。基准：\emph{无自适应}档（$Q\equiv1.0000$、$\tau\equiv\tau_0$ 恒定）。
+\begin{remark}[$z_2$ 的直流分量为何必然存在]\label{rem:z2dc}
+实测稳态（$5$--$10$\,s）：$y=1.000001$、$u=-0.9049$、$z_2=1.0401$、$d=0.9021$。\textbf{$z_2$ 含有直流，这不是缺陷}：当 $b_0\ne b$ 时 ESO 估计的是\emph{总扰动}
+\begin{equation}
+  z_2\;\longrightarrow\;(b-b_0)\,u\;+\;d .
+  \label{eq:z2dc}
+\end{equation}
+代入 $(b,b_0,u,d)=(1,\,1.2,\,-0.9049,\,0.9021)$ 得 $z_2\to1.0831$，与实测 $1.0401$ 吻合（残差来自有限观测带宽 $\omega_o$）。
+\textbf{该直流是跟踪所必需的}：控制律 $u=\dfrac{k_p(r-y)-z_2-v}{b_0}$ 要求 $z_2$ 恰好抵消 $d$ 的直流分量，否则 $y$ 必含稳态误差；实测 $|1-y|=10^{-6}$ 证明其工作正常。
+\textbf{来源可逐项核对}：(i) 阶跃扰动自身的直流；(ii) 模型失配项 $(b-b_0)u$。把任一项人为置零，$z_2$ 的直流随之消失，但 $y$ 会出现稳态偏差。
+\end{remark}
+
+\subsubsection{$Q$ 通道驱动的三种口径（独立参数研究：$\sigma_2=12.5$、$T_{\rm end}=6$\,s）}
+\begin{center}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+$Q$ 驱动口径 & 突变期比值 & 恢复期比值 & 稳态比值 & 累计代价比 & $Q$ 降幅 \\
+\midrule
+\label{tab:qmode}
+\textbf{带符号（原式）} & $1.2658$ & $\mathbf{1.0100}$ & $\mathbf{0.9547}$ & $\mathbf{0.9962}$ & $0.6519$ \\
+$\lvert D_Q\rvert$ & $1.2932$ & $1.2017$ & $0.9889$ & $1.0564$ & $0.6519$ \\
+$\max(0,D_Q)$ & $1.2788$ & $1.0937$ & $0.9716$ & $1.0254$ & $0.6519$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+表中比值为\emph{自适应档 RMS / 无自适应档 RMS}：$<1$ 表示自适应更好。
+\begin{remark}[口径选择与最终定稿的关系]\label{rem:qmode}
+在该参数研究（$\sigma_2=12.5$、$T_{\rm end}=6$\,s）中，三种口径的 $Q$ 降幅完全相同（$0.6519$），但\textbf{带符号档的累计代价比最低（$0.9962$）}。原因是 $Q$ 的下界决定重复通道谐振增益（$\propto\beta_3/(1-Q)$），$Q$ 被压得越久、错误的\emph{旧记忆}被放大越久。
+\textbf{最终定稿仍取 $\max(0,D_Q)$}——它给出\emph{单调}的下降--回归轨迹（全程不过冲、$10$\,s 末 $Q=0.9430$ 回到 $1$ 附近），符合“突变时降 $Q$ 规避错误记忆、事后缓慢回归”的设计意图。其代价是累计代价比略高于带符号档，故本版把 $\sigma_2$ 收到 $5$ 以把该代价压回中性（$0.9992$，见 \S\ref{sec:bpw-result}）。
+\textbf{核心结论}：“$Q$ 降得深”本身不是收益；\emph{$Q$ 的低位持续时间}才是代价的来源（见注 \ref{rem:one-sided} 的两目标反号关系）。
+\end{remark}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_qmode.pdf}
+  \caption{$Q$ 通道驱动三种口径对比（独立参数研究：$\sigma_2=12.5$、$T_{\rm end}=6$\,s）。(a) $Q$ 轨迹：三者降幅相同（$1.0\to0.348$），但回升路径不同；(b) 事件窗放大；(c) 性能比值：仅带符号档的累计代价比 $0.9962<1$。\textbf{本版最终取 $\max(0,D_Q)$}（单调回归、不过冲），其性能见 \S\ref{sec:bpw-result}。}
+  \label{fig:qmode}
+\end{figure}
+\subsubsection{三档滤波对照}
+把驱动前的滤波环节换成另外两种形式（实参同一为 \eqref{eq:phi-x}，$Q$ 驱动同一取单向死区 $\max(0,D_Q)$，唯一差别是滤波器）：
+\begin{center}
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+滤波方式 & 突变期比值 & 恢复期比值 & 稳态比值 & 累计代价比 & $\tau$ 中位 & $Q$ 降幅 \\
+\midrule
+无滤波（$D=w$） & $1.2309$ & $1.4692$ & $1.4827$ & $1.3109$ & $0.2000$ & $6.39$ \\
+高通 & $1.1703$ & $1.0819$ & $1.0843$ & $1.0878$ & $0.4953$ & $0.13$ \\
+带通（本版） & $1.1910$ & $\mathbf{0.9764}$ & $\mathbf{0.9778}$ & $\mathbf{0.9992}$ & $0.3475$ & $1.18$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{remark}[本版带通档是唯一有净收益的配置]\label{rem:bpw-result}
+在 $D_Q=\max(0,D)$、$\sigma_2=5$ 下，\textbf{带通档是唯一累计代价比 $<1$ 的配置（$0.9992$）}，其余两档为 $1.0878$（高通）、$1.3109$（无滤波）；且\textbf{持续段与末段比值分别为 $0.9764$、$0.9778$（改善 $2.2\%\sim2.4\%$）}。
+\textbf{如实说明}：(i) 累计代价比 $0.9992$ 仅\emph{基本中性}（改善 $0.08\%$），不是显著的性能优势；(ii) 事件段比值 $1.1910>1$，突变瞬间自适应反而略差，收益来自事件后的持续段与末段；(iii) 改善幅度为百分量级，非数量级。
+\end{remark}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_filter_compare2.pdf}
+  \caption{三档滤波对照（三段幅值突变，$\sigma_2=5$，$Q$ 驱动取单向死区 $\max(0,D_Q)$，$T_{\rm end}=10$\,s）。(a) $\tau$ 趋势（$T$ 窗滑均）；(b) $Q$（$T$ 窗滑均）：带通档（红）低位保持 $1.18$\,s 后\emph{平滑回归}至 $0.943$，高通档（紫）几乎不动，无滤波档（青）长期锁在 $0.5$ 附近；(c) 分段比值：带通档的持续段与末段均在 $1.0$ 以下；(d) 累计代价比：带通档 $0.9992<1$ 为三档唯一净收益（另两档 $1.0878$、$1.3109$）。}
+  \label{fig:filter-compare}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_response_final.pdf}
+  \caption{本版（带通 $+$ 零均值实参 $+$ 单向死区 $D_Q=\max(0,D)$）的闭环总览（\textbf{仿真 $T_{\rm end}=10$\,s；为看清瞬态，\emph{时间轴截取 $0$--$4$\,s}}，三段幅值突变依次在 $0.5$--$0.6$\,s、$1.0$--$1.5$\,s、$2.0$\,s 起）。参数框自证：\texttt{law=decupled}、$\gamma=3$、$\sigma_1=100000$、$\boldsymbol{\sigma_2=5}$、$\mu=0.03$、$q'_{\max}=1.0$、\texttt{qd=max(0,D)}、\texttt{Qmin=0.2}。(a) 输出跟随四条曲线；\textbf{内嵌窗}（$0.5$--$1.5$\,s）\emph{只画自适应与无自适应两条}并按二者量级定标（\emph{普通 ESO 已移出内嵌窗}，其曲线仍在主图 (a) 中）；(b) 扰动分解（总扰动、非周期、阶跃、周期）；(c) 重复通道状态 $v$ 与 ESO 残余 $z_2$（$z_2$ 含直流，见注 \ref{rem:z2dc}）；(d) \textbf{状态侧与模型侧对照}：左轴 $Q$（状态，限 $(0,2)$）与 $Q'$（模型侧，限 $[0.2,1.0]$），右轴 $\tau/\tau_0$（状态，不限幅，峰值 $7.4$）与 $\tau'/\tau_0$（模型侧，被钳在 $\leq5$）。}
+  \label{fig:response-final}
+\end{figure}
+
+\begin{remark}[$\sigma_2$ 的取值是决定性的（两处更正）]\label{rem:correction}
+\textbf{更正一（量级）}：早期把 $\sigma_2$ 调到 $10^{4}$，$Q$ 降幅被压到 $0.0053$，等于\emph{关死}该通道——此时任何“自适应无收益”的结论都不成立。
+\textbf{更正二（倾向）}：其后一度按“$Q$ 轨迹最漂亮”推荐 $\sigma_2=2$（低位保持 $2.19$\,s），但实测其累计代价比为 $1.0368$（自适应\emph{更差}）——\textbf{只看 $Q$ 轨迹形态就调参是错的}，两个目标是反号的（注 \ref{rem:one-sided}）。
+最终取 $\sigma_2=5$：低位保持 $1.18$\,s、累计代价比 $0.9992$（基本中性），在“$Q$ 持续低位”与“闭环性能”之间折中。
+\textbf{教训}：验证自适应律之前，必须先确认\emph{自适应状态确实在动作}（$Q$ 的降幅与低位时长就是前置检查），且调参时\emph{不能只看状态轨迹}。
+\end{remark}
+\section{本版（带通）律的可证结论}\label{sec:stab}
+\subsection{结构前提：驱动有界性}\label{sec:newpremise}
+本版驱动 $D=w_f-w_l$（\eqref{eq:bpw}）是\emph{带通}，其"非负 / 周期零均值"均不成立，故不能沿用旧放缩。下面两条引理给出对本版驱动直接成立的前提，\textbf{证明只用到 $\phi$ 的 $1$-Lipschitz 性与滤波核为凸组合}，与驱动的符号结构无关。
+\begin{lemma}[零均值带通驱动的有界性]\label{lem:Dbound}
+设 $M_t:=\sup_{s\le t}\ef^{2}(s)<\infty$、$\varepsilon>0$、$c>0$、$\tau_f^{w},\tau_l^{w}>0$，实参取零均值形式 \eqref{eq:phi-x}。则
+\begin{equation}
+  |D(t)|\le\min\Bigl\{2,\;\frac{2M_t}{\varepsilon}\Bigr\},\qquad\text{从而}\qquad
+  |D_\theta(t)|=|D_Q(t)|=|D(t)|.
+  \label{eq:Dbound}
+\end{equation}
+\emph{证明.} 记 $x=\dfrac{\ef^{2}-E_o}{E_o+\varepsilon}$，则 $\phi(0)=0$ 且 $\phi(\cdot,c)$ 为 $1$-Lipschitz，故 $|w|=|\phi(x,c)|\le|x|$。
+又 $|x|\le\dfrac{|\ef^{2}|+E_o}{E_o+\varepsilon}\le1+\dfrac{|\ef^{2}|}{E_o+\varepsilon}\le1+\dfrac{M_t}{\varepsilon}$；
+且 $|x|\le\dfrac{|\ef^{2}-E_o|}{\varepsilon}\le\dfrac{M_t}{\varepsilon}$（用 $E_o\ge0$）。两式取小即得 $|w|\le\min\{1,M_t/\varepsilon\}$。
+一阶低通的核 $\frac{1}{\tau^{w}}e^{-t/\tau^{w}}$ 非负、积分为 $1$，故 $w_f,w_l$ 均为 $w$ 的历史凸组合，各自落在 $[\inf w,\sup w]$ 内，于是 $|D|=|w_f-w_l|\le2\sup|w|$。
+因 $D_\theta=D_Q=D$（\eqref{eq:shared-D}），两通道的界相同。$\square$
+\end{lemma}
+\begin{remark}[零均值实参在分析上的两重好处]\label{rem:zero-mean}
+\textbf{(i) 界更紧且与 $\varepsilon$ 解耦}：实参取 $\ef^{2}/(E_o+\varepsilon)$（恒正）时只能得到 $|D|\le2M_t/\varepsilon$，$\varepsilon\to0$ 时界发散；取零均值形式后有 $|D|\le2$，\textbf{对一切 $\varepsilon>0$ 一致成立}。
+\textbf{(ii) 平衡点回到 $\tau_0$}：恒正实参使 $w$ 恒正、$\overline{D}>0$，$\theta$ 被单向推走、$\tau$ 撞界（实测 $\tau\equiv0.2\tau_0$）；零均值实参使 $\overline{D}\approx0$，$\theta$ 的平衡点回到 $0$（即 $\tau\to\tau_0$），$\tau$ 才具备调节能力。
+\end{remark}
+\begin{lemma}[$\theta$ 律的耗散下界与不变集]\label{lem:thetadiss}
+沿 \eqref{eq:theta}，令 $\eta(t):=\tanh(\kappa\theta(t))\in(-1,1)$：
+\begin{equation}
+  \dot\eta=\kappa(1-\eta^{2})\Bigl[\frac{\gamma\,G\,D_\theta}{2\kappa\tau_0}-\sone\eta\Bigr],
+  \qquad G:=\frac{1}{\cosh^{2}(\kappa\theta)}=1-\eta^{2}.
+  \label{eq:eta}
+\end{equation}
+记 $D_*:=\sup_t|D_\theta(t)|$、$\overline{D_*}$ 为其给定时段均值。则
+\begin{equation}
+  \text{(i)}\quad |\theta(t)|\le\Theta_*:=\frac{1}{\kappa}\,\ath\!\Bigl(\min\Bigl(1,\;\frac{\gamma\,D_*}{2\kappa\tau_0\sone}\Bigr)\Bigr),
+  \qquad
+  \text{(ii)}\quad |\theta(t)|\le|\theta(0)|+\sqrt{\frac{2}{\kappa^{2}}\cdot\frac{\gamma\overline{D_*}}{\tau_0\sigma_1^{\mathrm{code}}}} .
+  \label{eq:thetabound}
+\end{equation}
+\emph{证明.} (i) 当 $|\eta|>\frac{\gamma GD_*}{2\kappa\tau_0\sone}$ 时 $\dot\eta$ 与 $-\mathrm{sgn}(\theta)$ 同号，故该水平集为正向不变集。
+(ii) 取 $W_2=\cosh(\kappa\theta)$，则 $\dot W_2=\kappa\sinh(\kappa\theta)\dot\theta\le\frac{\gamma D_*}{2\tau_0}-\sone\sinh^{2}(\kappa\theta)$，对 $\sinh$ 用二次放缩得耗散率 $\frac{\kappa\sigma_1^{\mathrm{code}}}{\tau_0}$。$\square$
+\end{lemma}
+\begin{remark}[本版结构在分析上的实际好处与仍未解决的问题]\label{rem:robust}
+\textbf{(好处)} 上面两条引理只用到 $\phi$ 的 $1$-Lipschitz 与滤波核为凸组合，\textbf{对任何满足这两条的驱动都成立}——本版换成带通后，$\theta$ 通道的有界性无需重新论证。
+\textbf{(仍未解决)} 引理 \ref{lem:Dbound} 只给$|D|$的\emph{上}界；要完成闭环 UUB 归并还需 $\dot V_1$ 中的交叉项 $|e_f\dot\chi|$ 与驱动的关联，见 \S\ref{sec:newstab} 的如实披露。
+\end{remark}
+\subsection{本版（带通）律下可证到什么、什么还没证（如实披露）}\label{sec:newstab}
+本版驱动 $D=w_f-w_l$（\eqref{eq:bpw}）是带通且实参为零均值 \eqref{eq:phi-x}，其非负性不成立，故如下把可证部分与未证部分\textbf{严格分开}。需要强调：\textbf{以下结论只覆盖自适应状态 $(\theta,Q)$ 与滤波器 $v$ 的有界性}；\emph{自适应是否带来闭环性能收益，不属于本节命题范围}（\S\ref{sec:bpw-result} 的实测表明在本被控对象上无正收益）：
+\begin{proposition}[本版（带通）律下已证部分]\label{prop:newproved}
+设 $M_t<\infty$、$\varepsilon>0$、$\tau_0>0$、$\sigma_1^{\mathrm{code}}>0$、$\gamma>0$。则对一切 $t\ge0$：
+{\small
+\begin{align}
+  \text{(a)}&\quad |D_\theta(t)|=|D_Q(t)|\le\min\Bigl\{2,\ \frac{2M_t}{\varepsilon}\Bigr\}, \label{eq:newproved}\\[2pt]
+  \text{(b)}&\quad |\theta(t)|\le\max\Bigl\{|\theta(0)|,\ \frac{1}{\kappa}\ath\Bigl(\frac{2\gamma M_t}{\kappa\tau_0^{2}\sigma_1^{\mathrm{code}}\varepsilon}\Bigr)\Bigr\}, \\[2pt]
+  \text{(c)}&\quad Q(t)\in(q_-,2),\qquad \text{回复项耗散率}\ \ge\frac{\sigma_2}{2\mu(2-q_{\max})}, \\[2pt]
+  \text{(d)}&\quad |v(t)|\ \text{ISS 有界（$v$ 通道为稳定一阶低通，注入有界即状态有界）}. \label{eq:newproved2}
+\end{align}
+}
+\emph{证明.} (a) 引理 \ref{lem:Dbound}（零均值带通驱动的界，$\varepsilon$ 一致）；(b) 引理 \ref{lem:thetadiss}（代入 $D_*\le2M_t/\varepsilon$）；(c) $Q$ 通道回复势垒（$g(Q)=\ath(1-Q)/[Q(2-Q)]$ 于 $(0,1]$ 单调） 对 $Q$ 的操作符形式不变（$\ath(1-Q)$ 项与驱动无关）；(d) $v$ 通道为稳定一阶低通、注入项有界，该结论不依赖驱动形式。$\square$
+\end{proposition}
+\begin{remark}[什么还没证——必须写明]\label{rem:notproved}
+\textbf{未证部分}：本版律的闭环 UUB 归并尚未完成。原式的泵浦条件 $\aeff<3-a$ 来自 $\dot V_2$ 中 $-\frac{c\Gamma}{4\tau}B_\kappa$ 对 $B_\kappa\ge0$ 的丢弃，\textbf{而本版律不含 $B_\kappa$ 项，故该条件不适用}；
+因此严格表述应为：
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+结论 & 状态 \\
+\midrule
+(a) 驱动有界 $|D_{\theta,Q}|\le2M_t/\varepsilon$ & \textbf{已证}（命题 \ref{prop:newproved}）\\
+(b) $\theta$ 有界 / 不变集 & \textbf{已证} \\
+(c) $Q$ 通道势垒与耗散 & \textbf{已证} \\
+(d) $v$ 通道 ISS & \textbf{已证}（不依赖驱动形式）\\
+(e) $M_t$ 有界 $\Rightarrow$ 闭环 UUB & \textbf{未证} \\
+(f) 泵浦条件 $\aeff<3-a$ & \textbf{不适用}（新律无 $B_\kappa$ 项）\\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{补证的可能路径}（供后续工作）：把 $V_c=V_1+cV_2+V_3$ 换成只含 $(x,D_\theta,D_Q)$ 的形式。
+由于新 $\phi$ 是 $1$-Lipschitz 且 $E_o$ 已是 $\ef^{2}$ 的周期均值，$\dot V_1$ 中的交叉项 $|e_f\dot\chi|$ 可直接用 $|D_\theta|$ 界住，
+不再需要"驱动非负/零均值"这类形式假设——\textbf{这是新结构在分析上的潜在优势，但完整的 UUB 归并尚未完成。}
+\end{remark}
+\section{数值验证（沿真实轨迹逐条核对）}\label{sec:verify}
+% =====================================================================
+轨迹来源：\texttt{nk\_trace.npz}（本版带通律，$\gamma=3$、$\sigma_1^{\mathrm{code}}=10^{5}$、$\sigma_2=5$、$\mu=0.03$、$q'_{\max}=1.0$、$\tau'\in[0.2,5]$，$5\times10^{5}$ 步）。
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+断言 & 来源 & 数值 & 判定\\
+\midrule
+$|D|\le\min\{2,\;2M_t/\varepsilon\}$ & 引理 \ref{lem:Dbound} & $|D|_{\max}=2.97$ & \pv{实测}\\
+$|\theta|$ 有界 / 不变集 & 引理 \ref{lem:thetadiss} & $\theta\in[-15.29,\,16.09]$ & \pv{实测}\\
+$Q'\in[0.2,1.0]$ & \eqref{eq:clip-model} & $[0.2532,\,0.9991]$，未触界 & \pv{实测}\\
+$\tau'/\tau_0\in[0.2,5]$ & \eqref{eq:clip-model} & $[0.2168,\,5.0000]$，触上界 $14.5\%$ & \pv{实测}\\
+$\tau/\tau_0$（状态侧，不限幅） & --- & $T_{\rm end}=10$\,s 三段档：峰值 $8.15$，$18.3\%$ 分岔 & \pv{实测}\\
+$\tau/\tau_0$（状态侧，不限幅） & --- & $T_{\rm end}=6$\,s 两段档：峰值 $6.80$ & \pv{实测}\\
+$\theta$ 末值与状态侧一致 & --- & 两者均为 $-10.49$ & \pv{实测}\\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{说明}：表中各项均取自同一次运行的真实轨迹；$z_2$ 的直流分量见注 \ref{rem:z2dc}，四量取值与限幅见 \S\ref{sec:proj2} 图 \ref{fig:state-model}。
+
+\section{PMSM 转速环：不对中周期负载转矩下的复现（如实披露）}\label{sec:pmsm}
+% =====================================================================
+本节把被控对象由 §\ref{sec:model} 的一阶标幺对象换成\textbf{表贴式 PMSM 转速环}，把外加总扰动 $d$ 换成
+\textbf{负载转矩 $T_L$}——其中含电机\textbf{不对中}引起的 $10$\,Hz 周期分量（$600$\,rpm $\Rightarrow$ 转频 $10$\,Hz）。
+控制器\textbf{不改一行代码}：直接调用 \texttt{adrc\_eso\_closed.py} 的 \texttt{adrc\_sim}，控制器参数取
+控制器结构不变，但\textbf{参数按本节工况重整定}（依据与扫描见 §\ref{sec:pmsm-sens}）：
+$k_p=10$、$\omega_o=40$、$\zeta=0.2$、$\kappa=0.1$、$Q_0=0.98$、$q'_{\max}=1.0$、$\tau_f^w=5T$、$\tau_l^w=50T$、
+$D_Q=\max(0,D)$ 沿用 §\ref{sec:bpw-result} 定稿；\textbf{周期通道改为} $\beta_3=2000$（原 16000）、
+$\tau_0=5$\,ms（原 $T/80=1.25$\,ms）、$c_1=c_2=0.1$（原 0，即启用 $\phi$ 压缩+驱动死区）；
+\textbf{自适应通道改为} $\gamma=1$（原 3）、$\sigma_1^{\mathrm{code}}=10^{5}$、$\mu=0.015$（原 0.03）、$\sigma_2=10$（原 5）。
+重整定要解决的是两件事：(i) 原参数在原工况下已\textbf{驱动过猛}（$\tau'/\tau_0$ 全程撞上界 $5.000$、$Q'$ 最低 $0.424$）；
+(ii) 原周期通道增益在现实电流环带宽（§\ref{sec:pmsm-sens}(1)）下失去相位裕度。
+重整定后 $\tau'/\tau_0\in[0.891,1.970]$、$Q'\in[0.956,1.000]$、$\theta\in[-1.15,6.78]$（钳位 $\pm16.0944$），
+\textbf{贴界样本数为 0}。
+这正是 (F1)"参数口径不可互引"的一次直接检验。
+
+\vspace{1mm}
+\noindent\fbox{\parbox{0.985\textwidth}{\small\textbf{本节最终结论：推翻 $\theta$（带宽自适应）通道，$\theta$ 关闭后 $Q$（遗忘因子）通道可单独保留。}
+把 §\ref{sec:law} 的 $\theta/Q$ 通道搬到本对象上，经四轮实测——参数扫描、结构改动（泵浦门控、观测器带宽调度、谐波谐振辅助）、
+$2\times2$ 因子与多开关叠加——得到\textbf{一个可分离的判决}：
+\textbf{(i) $\theta$ 是拖累}：$\theta+Q$ 全开时加载段全面为负（稳态 $+2.6\%$、事件1 $+25.5\%$、加载瞬态 $+16.6\%$）；
+\textbf{(ii) $Q$ 单独开（$\gamma=0$）几乎无损}：事件1 $33.31$ vs 定稿 $33.45$（$+0.4\%$）、事件2 $+0.3\%$、事件后 $+1.1\%$，
+仅在加载瞬态劣化 $5.3\%$；把 $Q$ 增益重定为 $\mu=0.06$、$\sigma_2=5$ 后，稳态段由 $39.13$ 降到 $38.15$（$-2.5\%$）、
+空载段 $3.24\to3.21$、电流 $9.25\to9.12$\,A——\textbf{小幅正收益}。
+故本节推荐配置为：\textbf{定稿固定参数 $+$ 律 D}（突变优先，加载瞬态 $-49.2\%$）；
+稳态/电流优先时可\textbf{再叠加律 B 与 $Q$}（持续段 $39.6\to34.3$、稳态段 $39.1\to35.9$、电流 $8.81$\,A），代价是加载瞬态退到 $74.1$。
+\emph{注：$Q$ 通道单独保留时有边界裕度要求（重定后 $Q'_{\min}=0.377$，钳位下界 $0.2$）；§\ref{sec:law}--§\ref{sec:verify} 关于该律的建模与稳定性结论不变。}}}
+
+\subsection{对象与标幺口径}
+电机取规格书中的 SM060R20C30M0AD（配套驱动器 DM807）：$200$\,W、$48$\,VAC、$3000$\,rpm、$0.637$\,N$\cdot$m、
+$6.5$\,A、8 极（4 对极）、$k_t=0.101$\,N$\cdot$m/A、$J=1.89\times10^{-5}$\,kg$\cdot$m$^2$、
+线电阻 $0.35\,\Omega$、线电感 $1.14$\,mH；驱动器额定 $7$\,A、峰值 $21$\,A、母线 $60$\,V DC。
+取标幺 $y=\omega/\omega_{\rm ref}$（$\omega_{\rm ref}=600$\,rpm$=62.8319$\,rad/s）、$u=i_q/I_{\rm base}$
+（$I_{\rm base}=T_{\rm rated}/k_t=6.3069$\,A），$J\dot\omega=k_ti_q-T_L$ 化为
+\begin{equation}
+\dot y=b\,i_a+d,\qquad b=\frac{k_tI_{\rm base}}{J\,\omega_{\rm ref}}=536.41\ \mathrm{s^{-1}},\qquad
+d=-\frac{T_L}{J\,\omega_{\rm ref}}=-b\,T_{L,\rm pu},\qquad b_0=1.2b=643.69\ \mathrm{s^{-1}},
+\label{eq:pmsm-obj}
+\end{equation}
+即与 §\ref{sec:model} 逐条同形，只是对象增益由 $b=1$ 变成 $b=536.41$（$536$ 倍）：标幺时间
+$1/b=1.864$\,ms。注意 $d$ 与 $b\,u$ 同量纲，$T_{L,\rm pu}$ 以额定转矩 $0.637$\,N$\cdot$m 为 $1$。
+
+式 \eqref{eq:pmsm-obj} 中的 $i_a$ 是电流环闭环后的实际电流，$u$ 为电流指令；电流环与噪声的建模见 §\ref{sec:pmsm-curloop}。
+
+\subsection{电流环建模（与实现逐条对应）}\label{sec:pmsm-curloop}
+真正进入转矩的是电流环闭环后的实际电流 $i_a$，而不是电流指令 $u$。$dq$ 轴电流环的被控对象为
+\begin{equation}
+L\,\frac{\mathrm di_a}{\mathrm dt}=u-R\,i_a-e,
+\label{eq:pmsm-plant-elec}
+\end{equation}
+$R=0.175\,\Omega$、$L=0.57$\,mH 为 Y 接相等效值（线值 $0.35\,\Omega$/$1.14$\,mH 之半），电气时间常数 $L/R=3.26$\,ms；
+$e$ 为反电势（$600$\,rpm 时 $600\times6.2\,\mathrm{mV/rpm}\approx3.7$\,V，远低于 $60$\,V 母线，故不建模电压饱和）。
+电流调节器为 PI，量测为 $i_{\rm m}=i_a+n_i$：
+\begin{equation}
+u=k_p^{i}\,(u-i_{\rm m})+k_i^{i}\!\int(u-i_{\rm m})\,\mathrm dt,
+\label{eq:pmsm-pi}
+\end{equation}
+取零极点对消整定 $k_p^{i}=L\omega_{ci}$、$k_i^{i}=R\omega_{ci}$（$\omega_{ci}=2\pi f_{ci}$），则闭环与噪声传递为
+\begin{equation}
+\frac{i_a(s)}{u(s)}=\frac{\omega_{ci}}{s+\omega_{ci}},\qquad
+\frac{i_a(s)}{n_i(s)}=-\frac{\omega_{ci}}{s+\omega_{ci}},
+\label{eq:pmsm-curloop}
+\end{equation}
+即\textbf{闭环恰好是一阶低通，且反馈噪声与参考走同一低通}。式 \eqref{eq:pmsm-curloop} 就是一阶降阶的依据，也是实现的逐条对应
+（\texttt{adrc\_eso\_closed.py} 的可选参数 \texttt{cur\_tau}/\texttt{cur\_noise}/\texttt{d\_noise}）：
+\begin{center}\ttfamily\small \_iast += (1-exp(-dt/tau\_ci))*((un-i\_noise)-\_iast)\end{center}本节取 $f_{ci}=2$\,kHz，即
+$k_p^{i}=L\omega_{ci}=7.16$\,V/A、$k_i^{i}=R\omega_{ci}=2.20\times10^{3}$\,V/(A$\cdot$s)，
+与 $8$\,kHz 控制周期下数字电流环的常规取值一致。于是被控对象统一写为
+\begin{equation}
+\dot y=b\,i_a+d-b\,n_{T,\rm pu},\qquad i_a=\frac{\omega_{ci}}{s+\omega_{ci}}\,(u-n_i),
+\label{eq:pmsm-obj-final}
+\end{equation}
+其中 $b$、$d$ 见式 \eqref{eq:pmsm-obj}。\textbf{噪声口径}：电流反馈噪声 $n_i$ 为带限白噪声
+（$\sigma_i=1\%$ 额定电流 $=0.063$\,A，带宽 $2$\,kHz，对应 ADC/传感器噪声与 PWM 纹波折算），
+从反馈侧注入、经同一低通进入实际电流；负载转矩另叠加带限白噪声 $n_T$
+（$\sigma_T=5\%$ 额定转矩 $=0.0319$\,N$\cdot$m，带宽 $200$\,Hz，对应 AGV 路面随机负载）。
+随机种子固定 $20261016/20261017$，结果可复现。\textbf{电流限幅未建模}，只做事后核对（见 §\ref{sec:pmsm} (P3)）。
+
+\subsection{不对中故障的扰动构造}
+不对中使气隙不均，在转矩上表现为\textbf{转频及其整数倍}的脉动；本节的扰动量取
+\begin{equation}
+T_L(t)=\underbrace{\mathbf{1}_{t\ge t_{\rm load}}}_{\text{加载开关}}\Big[\underbrace{0.60\,T_{\rm rated}}_{\text{阶跃负载}}
++\underbrace{0.15\,T_{\rm rated}\sin(2\pi\cdot0.7\,\tau)}_{\text{非周期（重复控制无能为力）}}
++\underbrace{A(\tau)\Big[\sin\frac{2\pi\tau}{T}+0.4\sin\frac{6\pi\tau}{T}+0.2\sin\frac{10\pi\tau}{T}\Big]}_{\text{不对中：转频 $10$\,Hz 谐波簇}}\Big],
+\label{eq:pmsm-dist}
+\end{equation}
+其中 $\tau=t-t_{\rm load}$、$t_{\rm load}=2$\,s、$T=0.1$\,s。
+\textbf{工况分两段}：$t<t_{\rm load}=2$\,s 为\textbf{空载段}（负载与负载噪声均置零，只有电流噪声与参考阶跃，
+$t=0$ 起以 $600$\,rpm 为参考），$t\ge t_{\rm load}$ 起\textbf{加载}（阶跃负载 $+$ 非周期 $+$ 不对中）。
+幅值 $A(\tau)$ 在加载后分四段恶化（$\tau<0.5$：$0.05$；$[0.5,0.6)$ 与 $[1.0,1.5)$：$0.30$；$\tau\ge2.0$：$0.40$，单位为额定转矩），
+模拟不对中逐级发展。$1\times/3\times/5\times$ 的簇结构与 §\ref{sec:bpw-result} 一致以便逐项对照；
+角不对中的 $2\times$ 分量落在同一个 $T$ 周期集合内，被同一内模一视同仁地抵消，故不改变本节结论。
+
+\subsection{三档对比：重复通道在该对象上不是"锦上添花"，而是"必需"}
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+窗口（转速误差 RMS / rpm） & 纯 ESO & RC（理想） & RC（含噪） & RC+自适应（理想） & RC+自适应（含噪）\\
+\midrule
+空载稳态 $[0.5,2.0)$ & $6.05$ & $0.730$ & $3.236$ & $0.730$ & $\mathbf{2.701}$\\
+加载瞬态 $[2.0,2.5)$ & $3562.9$ & $65.55$ & $71.88$ & $76.13$ & $83.80$\\
+事件1 $[2.5,2.6)$ & $1451.4$ & $19.68$ & $33.45$ & $21.39$ & $41.97$\\
+事件2 $[3.0,3.5)$ & $1390.9$ & $14.42$ & $34.77$ & $15.86$ & $41.47$\\
+事件后 $[3.5,4.0)$ & $884.0$ & $17.89$ & $35.71$ & $15.53$ & $37.85$\\
+持续段 $[4.0,6.0)$ & $1875.8$ & $17.79$ & $41.02$ & $16.35$ & $41.51$\\
+稳态段 $[7.0,12.0)$ & $1845.4$ & $16.97$ & $40.57$ & $16.81$ & $41.63$\\
+\midrule
+稳态段 $10$\,Hz 脉动幅值 / rpm & $2310.0$ & $10.31$ & $11.15$ & $10.15$ & $11.08$\\
+全程实际 $\max|i_q|$ / A & $5.93$ & $7.30$ & $9.22$ & $7.30$ & $9.36$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{读数}：(i) \textbf{空载段}（无周期扰动）纯 ESO 档即可把误差压到 $6.05$\,rpm，带通重复通道档 $0.730$\,rpm、
+含环+噪声档 $3.24$\,rpm（自适应档 $2.70$\,rpm，反而优 $17\%$）——空载段没有周期分量可学，
+重复通道的收益来自 $10$\,Hz 谐波抑制，此时自然让位；这为下一段的对照提供了干净的基线。
+(ii) \textbf{加载段}：纯 ESO 档在 $10$\,Hz 转矩脉动下\textbf{工作点崩溃}——稳态段转速误差 RMS 达
+$1845.4$\,rpm（$10$\,Hz 脉动 $2310.0$\,rpm），控制器实际电流反而只有 $5.93$\,A（不是限幅问题，
+是 $J$ 极小：$0.4T_{\rm rated}$ 的转矩脉动在 $1.89\times10^{-5}$\,kg$\cdot$m$^2$ 上产生
+$\approx 2100$\,rpm 的转速脉动，远高于 $\omega_o=40$\,rad/s 的观测带宽所能覆盖的频段）。
+(iii) 带通重复通道把 $10$\,Hz 脉动由 $2310.0$\,rpm 压到 $10.31$\,rpm（$224$ 倍），稳态误差 RMS 由
+$1845.4$\,rpm 压到 $16.97$\,rpm（$109$ 倍）——\textbf{在本对象上重复通道是不可省的}，这与 §\ref{sec:bpw-result}
+中"自适应无正收益、但重复通道本身有效"的分工并不矛盾。
+(iv) 含电流环（$f_{ci}=2$\,kHz 现实档）与噪声后：空载段 $3.24$\,rpm（自适应 $2.70$，$-17\%$）、
+加载稳态 $40.57$\,rpm（自适应 $41.63$，$+2.6\%$），实际峰值电流由 $7.30$ 升到 $9.22$\,A（仍低于 DM807 的 $21$\,A），
+$10$\,Hz 抑制几乎不变（$10.31\to11.15$\,rpm）——\textbf{噪声抬高的是宽带本底，不是谐波泄漏}。
+稳态残差可分解为三块：$0.7$\,Hz 非周期负载（重复控制\textbf{按设计无能为力}，见式 \eqref{eq:pmsm-dist}）$\oplus$
+高频残余（重复通道谐振余量）$\oplus$ 电流/负载噪声。
+(v) $\theta/Q$ 自适应通道\textbf{在加载段被推翻}（下表其余各行即证据：加载瞬态与其后四段全面劣化）；
+本节保留"驱动过猛与噪声泵浦已消除"这条结论仅用于说明\emph{它并非实现缺陷而是机理不适用}：
+\textbf{触界自检} $\theta\in[-1.34,5.55]$（钳位 $\pm16.0944$）、
+$\tau'/\tau_0\in[0.875,1.743]$、$Q'\in[0.818,1.000]$，\textbf{上/下界贴界样本数为 $0$}；
+$\phi$ 压缩+死区（$c_1=c_2=0.1$）把稳态驱动 $|D|$ 的中位数压到 $0$（噪声通路被门掉），
+事件窗仍达 $|D|_{\max}=0.55$（§\ref{sec:pmsm-sens}(3)）。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_pmsm_response.pdf}
+  \caption{\textbf{PMSM 转速环总览}（$\omega_{\rm ref}=600$\,rpm，含\textbf{电流环 $f_{ci}=2$\,kHz（现实档）与电流/负载噪声}，不对中 $10$\,Hz 谐波簇，$T_{\rm end}=12$\,s，时间轴截取 $0$--$6$\,s：\textbf{蓝底为空载段} $[0,2)$\,s，$t=2$\,s 起加载，粉色带为加载后的三段不对中恶化窗口）。(a) 转速：纯 ESO 档（灰）已失去工作点，曲线贴边；\textbf{内嵌窗为 $600$\,rpm 基线的放大}（$8.0$--$8.4$\,s，只画 RC 两档：蓝实线 $=$ 无自适应、红虚线 $=$ 自适应；点线为 $600$\,rpm 参考，灰框标出放大区间）；(b) 负载转矩（含转矩噪声），含阶跃、$0.7$\,Hz 非周期与 $10$\,Hz 谐波簇；(c) 转速误差（\textbf{线性轴}，$0$--$6$\,s，只画 RC 两档——纯 ESO 档误差达 $\pm4600$\,rpm，超出该量程，见 (a)）：为消除 $50$\,kHz 原始点在图上混叠，(a)(c)(d) 一律按 $5$\,ms 分箱画 \emph{min--max 包络带}（真实幅值范围）$+$ 箱均值线；空载段 $[0,2)$\,s 误差约 $\pm5$\,rpm，$t=2$\,s 加载后包络展开到 $\pm100$\,rpm 量级；(d) \textbf{实际} $i_q$（经电流环与噪声）：红虚线 $21$\,A（DM807 峰值）、黄点线 $6.5$\,A（额定）。参数框自证。}
+  \label{fig:pmsm-response}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_pmsm_adaptive.pdf}
+  \caption{\textbf{被推翻的 $\theta/Q$ 通道的动作记录}（同一轨迹；该通道在加载段被推翻，本图作为推翻过程的证据保留）。(a) 模型侧 $\tau'/\tau_0$ 与 $Q'$：含环+噪声档（实线）与理想环无噪声档（点线）对照——重整定并启用 $c=0.1$ 死区后，稳态 $Q'$ 基本不动（$0.994$ vs $0.997$，见图 \ref{fig:pmsm-sens}(d)），只在事件期出现下冲；(b) 带通驱动 $D$；(c) 稳态段 $10/30/50$\,Hz 转速脉动幅值（对数轴，跨度三个数量级）；(d) 稳态段放大（$8.0$--$8.8$\,s，加载后）。}
+  \label{fig:pmsm-adaptive}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.99\textwidth]{fig_pmsm_speed.pdf}
+\caption{\textbf{六档配置的转速响应}（同一工况、同一噪声实现、同一 $12$\,s 轨迹）。(a) 转速全景（$5$\,ms 包络$+$均值）：蓝底为空载段，$t=2$\,s 加载；(b) 加载瞬间放大（原始轨迹）：仅 $Q$ 档把转速压到 $\approx500$\,rpm 并持续到 $2.4$\,s，而叠加律 D 后 $0.1$\,s 内回到 $600$\,rpm 附近；(c) 稳态段放大（$7.9$--$8.4$\,s）：$600$\,rpm 基线上的 $10$\,Hz 脉动与噪声本底，各档肉眼难分（定量差异见表）；(d) 稳态转速频谱（末 $1$\,s）：$10/30/50$\,Hz 谐波残余与高频噪声本底，各档在谐波处几乎重合——\emph{重复通道已把谐波压到噪声之下，这正是"任何谐波层新律收益有限"的图形证据}。}
+\label{fig:pmsm-speed}
+\end{figure}
+\subsection{电流环带宽需求与噪声敏感性：整定不可移植}\label{sec:pmsm-sens}
+\noindent\textbf{(1) 原参数（$\beta_3=16000$、$\tau_0=T/80$、$Q_0=0.98$）对电流环带宽的要求极高。}
+把 §\ref{sec:bpw-result} 的定稿参数原样搬到含电流环的对象上，扫 $f_{ci}$（无噪声）：
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+$f_{ci}$ / kHz & $15.9$ & $8.0$ & $5.3$ & $4.0$ & $3.2$ & $2.0$ & $1.0$\\
+\midrule
+稳态段 RMS / rpm & $16.9654$ & $16.9656$ & $16.9658$ & $16.9661$ & $16.9663$ & $16.9682$ & $109.94$\\
+$10$\,Hz 脉动 / rpm & $10.3099$ & $10.3100$ & $10.3101$ & $10.3102$ & $10.3103$ & $10.3107$ & $15.25$\\
+实际 $\max|i_a|$ / A & $7.30$ & $7.30$ & $7.30$ & $7.30$ & $7.30$ & $7.30$ & $12.97$\\
+\bottomrule
+\end{tabular}
+\end{center}
+重整定后 $f_{ci}$ 由 $15.9$\,kHz 一路降到 $2.0$\,kHz，稳态 RMS 几乎不变（$16.9654\to16.9682$\,rpm，
+与理想电流环相差 $0.02\%$）——\textbf{原设计对 $5$\,kHz 带宽的依赖已被重整定消除}，本节的现实 $2$\,kHz 档落在安全区内。
+只有降到 $1$\,kHz 才急剧劣化（$109.94$\,rpm、实际电流 $13.0$\,A），且劣化形态仍是高频谐振：频谱主峰由
+$0.8$\,Hz/$19.0$\,rpm（非周期负载，$10$\,Hz 分量已被压到 $10.3$\,rpm）移到 $170$\,Hz/$41.4$\,rpm（图 \ref{fig:pmsm-sens}(b)）。
+作为对照：\textbf{同一张表在原参数档（$\beta_3=16000$）下}是 $3.3$/$36.7$/$87.2$/$461.4$/$1779.3$\,rpm——
+即"周期通道降增益 + 放宽低通"把可用带宽门槛从 $5$\,kHz 降到了 $2$\,kHz，代价是理想档残差由 $3.3$ 升到 $17.0$\,rpm。
+原因是重复通道在 $k\cdot10$\,Hz 上有一串谐振，每阶谐振增益 $\propto1/(1-Q_0)=50$，
+其相位裕度本来就靠 $\tanh$ 饱和维持（§\ref{sec:bpw-result} 附记"线性上界已被实测推翻"），
+对象侧一旦多出 $200$\,Hz 处约 $11^\circ$ 的滞后（$1$\,kHz 一阶电流环）即翻转为极限环。
+对照组：\textbf{纯 ESO 档对同一滞后几乎不敏感}（$1837.04\to1841.84$\,rpm），
+故问题出在重复通道的裕度，不在对象或实现。
+\vspace{1mm}
+
+\noindent\textbf{(2) 重整定只能买回稳定，买不回性能。} 在 $f_{ci}=1$\,kHz 下把周期通道增益与低通一起放宽
+（$\beta_3:16000\to1000$、$\tau_0:2\,\mathrm{ms}\to10\,\mathrm{ms}$），稳态 RMS 由 $1779.3$ 压回 $50.6$\,rpm、
+实际峰值电流回到 $7.56$\,A（合规），但 $10$\,Hz 脉动由 $3.37$ 恶化到 $37.6$\,rpm
+（抑制倍数 $681\to\approx6$）。
+\vspace{1mm}
+
+\noindent\textbf{(3) 噪声通路与 $\phi$ 压缩$+$死区的作用。} 在\textbf{理想电流环}下单独注入噪声以隔离效应：
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+稳态段 $[5,10)$\,s & 无噪声 & 电流噪声 $1\%$ & 电流噪声 $3\%$ & 负载噪声 $5\%$ & 负载噪声 $10\%$ & 两者同时\\
+\midrule
+RC（无自适应）RMS / rpm & $16.965$ & $17.058$ & $17.816$ & $26.552$ & $44.810$ & $26.661$\\
+RC + 自适应 RMS / rpm & $16.812$ & $16.954$ & $17.710$ & $26.512$ & $44.942$ & $26.608$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{$\phi$ 压缩+死区（$c_1=c_2=0.1$）把"噪声 $\to D$"这条通路关掉了}：实测稳态驱动 $|D|$ 的
+\textbf{中位数为 $0$}（均值 $0.0014$、$p_{95}=0$），而事件窗内 $|D|_{\max}=0.55$ 仍远高于死区界——
+即"噪声$\to D$"通路在稳态被完全门掉、只在事件期工作。效果是被推翻的 $\theta/Q$ 档在本表每一列都与定稿档持平
+（最大差 $0.5\%$，重整定前该档被电流噪声额外劣化 $+30\%$）。
+\textbf{残差的来源也变了}：电流噪声由 $0.2\%$ 增到 $1\%$（$12.6\to63$\,mA）时无自适应档只从 $16.968$ 升到 $17.058$\,rpm（$+0.5\%$），
+真正抬高本底的是\textbf{负载噪声}（$5\%$ 额定 $\to26.55$\,rpm，$+56\%$）——负载噪声直接进入 $d$，
+重复通道对其无能为力，只能靠 ESO 与反馈部分抑制。
+$\qquad$（附）带通频带的进一步收窄（$\theta$ 由 $5T/50T$ 改 $10T/100T$、$Q$ 由 $1T/10T$ 改 $2T/20T$）
+只能把稳态 RMS 再降 $1$\,rpm（$40.0\to39.0$），却使事件窗劣化 $13\%$（$48.5\to55.0$\,rpm），故本节不采用。
+\vspace{1mm}
+
+\noindent\textbf{(4) 重整定的四条规则与触界自检。} 本节最终参数为
+$\beta_3=2000$、$\tau_0=5$\,ms、$c_1=c_2=0.1$、$\gamma=1$、$\sigma_1^{\mathrm{code}}=10^5$、$\sigma_2=10$、$\mu=0.015$。规则：
+\begin{itemize}
+  \item \textbf{$\tau$ 的峰值}由 $\gamma/\sigma_1$ 定（降 $\gamma$、抬 $\sigma_1$）：原 $\gamma=3$ 时 $\tau'/\tau_0$ 撞上界 $5.000$，$\gamma\to1$ 后峰值 $1.97$；
+  \item \textbf{$Q$ 的下冲深度}由 $\mu/\sigma_2$ 定（降 $\mu$、抬 $\sigma_2$）：$\mu:0.03\to0.015$、$\sigma_2:5\to10$ 后 $Q'$ 最低由 $0.424$ 抬到 $0.956$；
+  \item \textbf{$\tau_0$} 是同时改变驱动与恢复等效速率的"总闸"；
+  \item \textbf{"噪声 $\to D$"}由 $c_1,c_2$（$\phi$ 压缩尺度 $+$ 驱动死区）定：$c=0.1$ 时稳态 $|D|$ 中位为 $0$。
+\end{itemize}
+\textbf{触界自检（最终参数，含环+噪声、空载+加载全段）}：$\theta\in[-1.34,5.55]$（状态钳位 $\pm16.0944$）、
+$\tau'/\tau_0\in[0.875,1.743]$、$Q'\in[0.818,1.000]$，\textbf{上/下界贴界样本数均为 $0$}——
+"驱动过猛"与"噪声泵浦"两个问题均已消除。（$Q'$ 有 $0.5\%$ 的样本落在 $1-10^{-9}$ 以内，这是 $Q$ 律回复项
+在 $Q\to1$ 处发散形成的势垒平衡点，不是钳位触发。）
+\vspace{1mm}
+
+\noindent\textbf{设计约束（本节结论）}：(a) 重整定（$\beta_3=2000$、$\tau_0=5$\,ms）后，可用电流环带宽门槛由
+$5$\,kHz 降到 $\mathbf{2}$\,kHz——现实数字 PI 电流环即可满足；代价是理想档残差由 $3.3$ 升到 $17.0$\,rpm；
+(b) 若带宽只有 $1$\,kHz，需进一步把 $\beta_3$ 降到 $1000$、$\tau_0$ 放到 $10$\,ms，稳态 RMS 回到 $50.6$\,rpm、
+电流 $7.56$\,A（合规），但 $10$\,Hz 抑制由 $223$ 倍退化到 $\approx6$ 倍；
+(c) 噪声抬高的本底中，\textbf{功率上由负载噪声主导}（$5\%$ 额定 $\to+51\%$），重复通道对其无能为力；
+电流噪声经"$\to D \to$ 自适应"的那一支可用 $c_1,c_2$ 门掉（$c=0.1$，稳态 $|D|$ 中位为 $0$），
+经对象直接通路的那一支只能靠增大惯量或降低传感器噪声。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_pmsm_sens.pdf}
+  \caption{\textbf{电流环带宽需求与噪声敏感性}。(a) 电流环闭环带宽 $f_{ci}$ 扫描（重整定档 $\beta_3=2000$、$\tau_0=5$\,ms、无噪声）：$f_{ci}$ 由 $15.9$\,kHz 降到 $2.0$\,kHz，稳态 RMS 恒为 $16.97$\,rpm（与理想环差 $0.02\%$），仅 $1$\,kHz 劣化到 $108$\,rpm——\textbf{同一张表在原参数档（$\beta_3=16000$）下 $1$\,kHz 为 $1779$\,rpm，即门槛由 $5$\,kHz 降到 $2$\,kHz}；(b) 稳态段误差频谱：$2$\,kHz/理想档主峰在 $0.8$\,Hz/$19.0$\,rpm（非周期负载，重复通道设计上不可抵消），$1$\,kHz 档主峰搬到 $170$\,Hz/$41.4$\,rpm（高频谐振被相位滞后翻转为极限环）；(c) 噪声敏感性（理想电流环，隔离噪声效应）：两档在每一列\textbf{基本持平}（差 $\le0.5\%$），且抬升本底的主力是\textbf{负载噪声}而非电流噪声；(d) 稳态 $Q'$（$10$--$12$\,s）：噪声只带来起伏（标准差 $0.0004\to0.0076$），常态均值几乎不变（$0.9967\to0.9942$），不再被"整流"成常值偏置。}
+  \label{fig:pmsm-sens}
+\end{figure}
+
+\subsection{$\theta/Q$ 通道被推翻的证据：内部状态与驱动信号分段统计}\label{sec:pmsm-states}
+下表是\textbf{被推翻的 $\theta/Q$ 档}（含电流环与噪声、$Q_0=0.98$、$c_1=c_2=0.1$）在空载与加载各阶段内部信号的实测记录——
+它的用途不再是"候选配置对比"，而是\textbf{记录推翻过程}（状态是否在动、是否贴界、死区是否生效）。
+对照行为\textbf{本节最终配置}（关闭 $\theta/Q$）：全程 $Q'\equiv0.980$、$\tau'/\tau_0\equiv1.000$（常数）。
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+区段 & $\overline{Q'}$ & $Q'_{\min}$ & $\overline{\tau'/\tau_0}$ & $\max\frac{\tau'}{\tau_0}$ & $\overline{|\ef|}$ & $\overline{|D|}$ & $|D|_{\max}$\\
+\midrule
+空载段 $[0.5,2.0)$ & $0.9990$ & $0.9932$ & $1.0837$ & $1.2955$ & $33.2$ & $0.078$ & $0.293$\\
+加载瞬态 $[2.0,2.5)$ & $\mathbf{0.9216}$ & $\mathbf{0.8183}$ & $\mathbf{1.4597}$ & $\mathbf{1.7428}$ & $429.0$ & $\mathbf{0.461}$ & $\mathbf{0.800}$\\
+事件1 $[2.5,2.6)$ & $0.9964$ & $0.9944$ & $1.2504$ & $1.2993$ & $484.3$ & $0.232$ & $0.294$\\
+事件2 $[3.0,3.5)$ & $1.0000$ & $1.0000$ & $1.0000$ & $1.0000$ & $485.0$ & $0$（$0.037$） & $0$（$0.073$）\\
+事件后 $[3.5,4.0)$ & $0.9967$ & $0.9844$ & $0.9819$ & $1.0000$ & $458.4$ & $0.019$ & $0.142$\\
+持续段 $[4.0,6.0)$ & $0.9961$ & $0.9868$ & $0.9986$ & $1.0000$ & $476.2$ & $0.001$ & $0.108$\\
+稳态段 $[7.0,12.0)$ & $0.9949$ & $0.9685$ & $0.9967$ & $1.0000$ & $471.6$ & $0.003$ & $0.125$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{读法}：(i) 空载段 $|D|$ 小（均值 $0.078$）、$Q'\approx1$、$\tau'\approx1.08\tau_0$——自适应几乎不动；
+(ii) 加载瞬态 $|D|$ 冲到 $0.800$（远高于死区界 $c=0.1$），$Q'$ 压到 $0.818$、$\tau'$ 抬到 $1.74\tau_0$——
+\textbf{全段极值都出现在这一刻}，说明自适应真正动作的只有"突变瞬间"；
+(iii) 事件2 与稳态段的 $\overline{|D|}=0.000$ 与 $|D|_{\max}=0$ 是\textbf{死区门控}的结果：
+括号内给出\textbf{关掉死区（$c=0$）时的原始值}——事件2 的原始驱动仅 $0.037$/$0.073$，\emph{本来就低于死区界}，
+故被整段门掉；持续段/稳态段同理（原始 $0.060$/$0.037$）；
+(iv) 全段极值 $Q'\in[0.818,1.000]$、$\tau'/\tau_0\in[0.875,1.743]$、$\theta\in[-1.338,5.555]$，
+均远在状态钳位 $[0.2,5]$（$\theta$ 钳位 $\pm16.0944$）之内，\textbf{贴界样本 $0$}。
+
+其余内部量（同一次运行，供交叉核对）：
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+区段 & $\overline{|v|}$（周期补偿） & $\overline{|z_2|}$（ESO 残余） & $\bar\theta$（带宽对数状态） & $\overline{|e_1|}$（观测误差）\\
+\midrule
+空载段 $[0.5,2.0)$ & $5.10$ & $0.005$ & $0.762$ & $0.0034$\\
+加载瞬态 $[2.0,2.5)$ & $442.8$ & $8.85$ & $3.723$ & $0.0492$\\
+事件1 $[2.5,2.6)$ & $442.9$ & $11.02$ & $2.232$ & $0.0511$\\
+事件2 $[3.0,3.5)$ & $326.5$ & $7.95$ & $0.000$ & $0.0524$\\
+事件后 $[3.5,4.0)$ & $450.8$ & $10.07$ & $-0.190$ & $0.0484$\\
+持续段 $[4.0,6.0)$ & $366.6$ & $9.24$ & $-0.014$ & $0.0496$\\
+稳态段 $[7.0,12.0)$ & $373.1$ & $10.53$ & $-0.034$ & $0.0504$\\
+\bottomrule
+\end{tabular}
+\end{center}
+其中 $\tau'=\tau_0e^{\kappa\theta}$；$|v|$ 从空载段的 $5.1$ 跃升到加载段的 $3.7\times10^2$，
+即重复通道在加载后才真正"学到东西"——这与 §\ref{sec:pmsm-states} 表首行"空载段自适应几乎不动"互为印证。
+
+\subsection{推翻的机理、替代方案与证据链}
+\noindent\textbf{口径对照的设置}：把学习律驱动量由\emph{估计误差口径} $\ef=y-z_1$（§\ref{sec:law} 定稿、与 PPT 第 5 页证明口径一致）
+换成\emph{跟踪误差口径} $e_1=y-r$（旧实现，仅作回归对账），其余参数完全不变：
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+ & 纯 ESO & RC 无自适应 & RC $+$ 自适应 & RC+tr 无自适应 & RC+tr 自适应\\
+\midrule
+空载段误差 RMS / rpm & $6.045$ & $0.7299$ & $0.7298$ & $0.1155$ & $\mathbf{0.1071}$\\
+稳态段误差 RMS / rpm & $1845.4$ & $16.965$ & $16.812$ & $6.831$ & $\mathbf{6.764}$\\
+$10$\,Hz 脉动 / rpm & $2310.0$ & $10.310$ & $10.149$ & $4.888$ & $4.832$\\
+全程 $\max|i_q|$ / A & $5.93$ & $7.30$ & $7.30$ & $7.30$ & $7.30$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{读数}：跟踪误差口径把跟踪误差压得更低（稳态 $16.97\to6.83$\,rpm，$2.5$ 倍；
+$10$\,Hz 脉动 $10.31\to4.89$\,rpm；空载段 $0.730\to0.116$\,rpm），但这\textbf{不能读作"换口径更好"}：
+两种口径各自把"自己看到的误差"压到很小——估计误差口径压制的是 $y-z_1$，而转速误差的大部分
+是 $y$ 与 $z_1$ 的\textbf{共模}分量，内模对它不可见；跟踪误差口径把 $y-r$ 直接交给内模，故跟踪误差更小。
+\textbf{在重整定后的参数下，自适应通道在两个口径下都不劣化}（空载段 $0.107$ vs $0.116$\,rpm、稳态 $6.764$ vs $6.831$\,rpm，
+跟踪口径略优 $1\%\sim7\%$）。跟踪口径需延迟投入以避开启动饱和（本节对两档取 $v_{\rm start}=0.5$\,s），
+延迟后全程实际峰值电流 $7.30$\,A，与估计误差口径档持平（仍在 DM807 的 $21$\,A 峰值内）。
+$\theta$ 与 $Q$ 的状态区间在两口径下\textbf{均不触界}
+（$\tau'/\tau_0$ 上界 $5$、$Q'$ 上界 $1.0$ 的贴界样本数均为 $0$）——
+\emph{律本身在该对象上仍然有界、可用，失效的是"自适应是否换来性能"这一步}。
+\vspace{1mm}
+
+\noindent\textbf{补充（含电流环与噪声后重做该口径对照）}：把这两个口径放到 §\ref{sec:pmsm-sens} 的真实对象上，
+跟踪误差口径\textbf{性能大幅退化}——稳态 RMS 为 $112.5$\,rpm（无自适应）与 $113.0$\,rpm（自适应）
+（理想环下为 $6.83$\,rpm），频谱主峰落在 $160$\,Hz（分段 RMS 有界，属稳定极限环而非发散）。
+延迟投入（$v_{\rm start}=0.5$\,s）后实际峰值电流为 $13.0$\,A 与 $13.4$\,A，\textbf{已回到 DM807 的 $21$\,A 峰值内}；
+若不延迟，启动瞬间电流需求超过 $57$\,A。故本节的口径对照结论\textbf{只在理想电流环下成立}——该口径的高增益对对象相位滞后同样敏感。
+
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.99\textwidth]{fig_pmsm_qd.pdf}
+\caption{\textbf{$Q$ / 律 D / $Q$+律 D 三档对比（含 $Q$ 通道的变化）}（同一工况、同一噪声实现、同一 $12$\,s 轨迹；$Q$ 档取 $\mu=0.06$、$\sigma_2=5$ 且 $\theta$ 关闭）。
+(a) 转速误差全景（$5$\,ms 包络$+$均值）：蓝底为空载段，$t=2$\,s 加载；(b) 加载瞬间放大：\textbf{仅 $Q$ 档跌落最深（$\approx-200$\,rpm）且拖到 $2.4$\,s 才恢复}，
+$Q$+律 D 与仅律 D 在 $0.15$\,s 内回到 $600$\,rpm 附近；(c) \textbf{$Q$ 通道的变化}：仅 $Q$ 与 $Q$+律 D 的 $Q'$ 轨迹几乎重合（$Q'_{\min}=0.378/0.377$，
+距钳位下界 $0.2$ 只剩 $0.18$ 裕度），仅律 D 的 $Q'\equiv Q_0=0.98$ 不动——\emph{律 D 并不改变 $Q$ 的动作，只是把它的后果托住}；
+(d) 七窗口逐项：$Q$ 单独用在加载瞬态（$103.0$）与事件1（$47.0$）为最差档，$Q$+律 D 才是可用配置（$39.0/32.8$）。}
+\label{fig:pmsm-qd}
+\end{figure}
+\subsection{新律 D：突变期比例增益提升（实测 Pareto 优于定稿）}\label{sec:pmsm-lawd}
+前面三节给出的是"否定结论"：调参、记忆清零、泵浦门控、ESO 带宽调度都无法在突变期超过定稿参数。
+\textbf{本节给出一条实测有效的新机制}，其出发点是把"突变"与"周期"分开：
+\begin{equation}
+k_p^{\rm eff}(t)=k_p\bigl[1+\kappa_p\,g_{\rm fire}(t)\bigr],\qquad
+g_{\rm fire}=\frac{\bar e_1^2}{\bar e_1^2+\varepsilon_g^2},\qquad
+\bar e_1(t)=\frac1T\int_{t-T}^{t}e_1(\tau)\,\mathrm d\tau .
+\label{eq:pmsm-lawd}
+\end{equation}
+\textbf{判别原理}：被控对象内部的周期分量在任意长度 $T$ 的窗口上\textbf{均值恒为 $0$}，而阶跃/非周期分量不为 $0$。
+故 $\bar e_1$ 是一个\textbf{免费的突变判别器}——它不需要额外的传感器、不需要负载观测器，也只用到控制律已有的 $e_1$。
+\textbf{动作}：按\textbf{非周期误差水平}连续抬高比例增益（最多 $1+\kappa_p$ 倍），把"ESO 估计到位之前"的跌落直接顶住。
+空载段（既无周期、也无非周期扰动）$g_{\rm fire}\equiv0$，配置\textbf{逐位退回定稿}，故不放大噪声本底——这正是律 B 失败的原因；
+但加载段 $g_{\rm fire}$ 随 $0.7$\,Hz 非周期负载连续取值（实测均值 $0.10$），故它\textbf{不是只在突变瞬间动作}，见 §\ref{sec:pmsm-lawbd}。
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+窗口 RMS / rpm & 空载稳态 & 加载瞬态 & 事件1 & 事件2 & 事件后 & 持续段 & 稳态段\\
+\midrule
+定稿（$g_{\rm fire}\equiv0$） & $3.24$ & $71.88$ & $33.45$ & $34.77$ & $35.71$ & $41.02$ & $40.57$\\
+律 D（$\kappa_p=4$，$\varepsilon_g=0.01$） & $3.24$ & $\mathbf{36.54}$ & $32.50$ & $34.08$ & $32.86$ & $39.59$ & $39.13$\\
+改善 & $0.0\%$ & $\mathbf{+49.2\%}$ & $+2.8\%$ & $+2.0\%$ & $+8.0\%$ & $+3.5\%$ & $+3.5\%$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{读法}：(i) \textbf{每一个窗口同时改善}（Pareto 改善），无"换来换去"的取舍；
+(ii) 实际峰值电流 $9.22\to9.25$\,A、阶跃峰值 $209.3\to208.9$\,rpm——\textbf{执行器与峰值代价为零}；
+(iii) 空载段 $g_{\rm fire}\equiv0.0000$，故空载段结果与定稿逐位相同（$3.240$）；加载段 $g_{\rm fire}$ 均值 $0.10$（等效 $k_p\approx14$）、瞬态峰值 $0.95$，故稳态段的改善来自"非周期误差被更大的比例增益压住"，机理见 §\ref{sec:pmsm-lawbd}；
+(iv) 参数稳健：$\kappa_p\in[2,16]$、$\varepsilon_g\in[0.005,0.02]$ 内改善单调、无悬崖（$\kappa_p$ 越大、$\varepsilon_g$ 越小越强，
+$\kappa_p=8,\varepsilon_g=0.01$ 时加载瞬态 $\to32.18$\,rpm，$-55.2\%$），本版取 $\kappa_p=4$、$\varepsilon_g=0.01$ 为保守档。
+\vspace{1mm}
+\noindent\textbf{检测器能否前置 $\phi$ 压缩？——实测否定（如实披露）。} 自然的担心是：积分核里的 $e_1$ 含宽带噪声，会不会把检测器"持续点亮"？
+故试了 $\bar e_1(t)=\frac1T\int_{t-T}^{t}\phi\big(e_1(\tau),c\big)\mathrm d\tau$（$\phi$ 与 §\ref{sec:law} 同式，实现为 \texttt{det\_phi}，默认关）。
+实测（$\kappa_p=4$、$\varepsilon_g=0.01$，加载瞬态 / 稳态段 RMS，rpm）：$c=0$：$36.54$/$39.13$；$c=0.002$：$36.62$/$39.16$；
+$c=0.005$：$36.75$/$39.19$；$c=0.01$：$36.98$/$39.26$；$c=0.02$：$37.51$/$39.42$；$c=0.05$：$39.80$/$39.91$——\textbf{随 $c$ 单调劣化}；
+高噪声档（电流 $3\%$、负载 $10\%$）同样略差（$61.61\to61.69/61.95$）。\emph{原因两条}：(i) $T$ 窗平均本身已把宽带噪声压低
+$\sqrt{T/\Delta t}=\sqrt{5000}\approx70$ 倍——空载段实测 $g\equiv0.0000$（峰值 $0.0003$），\textbf{没有噪声泄漏需要修}；
+(ii) $\phi$ 压的是\textbf{大}值，而大值正是要检测的突变信号，压缩它等于把检测灵敏度一起压低。
+\textbf{结论}：$\phi$ 属于它被设计的位置——$\theta/Q$ 律的驱动侧（输入是带噪声常值偏置的能量比）；检测器的输入是零均值平均量，结构不同，\textbf{故本律不加 $\phi$}。
+
+\textbf{开关默认关}（\texttt{p\_boost=0}、\texttt{det\_eps=0}），全关时与定稿逐位一致（实测 $\max|\Delta y|=0$），
+故本文所有既有结论不受影响；该律可作为"突变优先"工况的推荐配置。
+\vspace{1mm}
+\noindent\textbf{三个开关是否叠加？}把"$\theta/Q$ 自适应通道"与"律 D"做 $2\times2$ 因子实验（含环$+$噪声、同一轨迹），
+另加"律 D $+$ 律 B（ESO 带宽调度）"组合，全部窗口如下：
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+窗口 RMS / rpm & 空载 & 加载瞬态 & 事件1 & 事件2 & 事件后 & 持续段 & 稳态段 & $\max|i_a|$\\
+\midrule
+(1) 定稿（全关） & $3.24$ & $71.88$ & $33.45$ & $34.77$ & $35.71$ & $41.02$ & $40.57$ & $9.22$\\
+(2) 仅律 D & $3.24$ & $\mathbf{36.54}$ & $32.50$ & $34.08$ & $32.86$ & $39.59$ & $39.13$ & $9.25$\\
+(3) 仅 $\theta$+$Q$（$\gamma=1$） & $2.70$ & $83.80$ & $41.97$ & $41.47$ & $37.85$ & $41.51$ & $41.63$ & $9.36$\\
+(4) 仅 $Q$（$\gamma=0$） & $3.40$ & $75.66$ & $33.31$ & $34.66$ & $35.30$ & $43.15$ & $41.60$ & $9.43$\\
+(5) 律 D $+$ $\theta$+$Q$ & $2.70$ & $44.72$ & $41.18$ & $41.42$ & $36.35$ & $40.20$ & $40.33$ & $9.37$\\
+(6) 律 D $+$ $Q$（$\mu{=}0.06$） & $3.21$ & $38.95$ & $32.80$ & $35.18$ & $33.99$ & $39.51$ & $\mathbf{38.15}$ & $9.12$\\
+(7) 律 D $+$ 律 B & $3.24$ & $62.02$ & $33.01$ & $32.91$ & $31.17$ & $34.64$ & $36.49$ & $8.84$\\
+(8) 律 D $+$ 律 B $+$ $Q$ & $3.21$ & $74.13$ & $35.92$ & $33.31$ & $\mathbf{30.83}$ & $\mathbf{34.25}$ & $\mathbf{35.86}$ & $\mathbf{8.81}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{读法}：(i) 各开关\textbf{不叠加}——它们作用在同一段误差、同一噪声通路上，收益互相挤占；
+(ii) \textbf{$\theta$ 与 $Q$ 必须分开判}：$\theta$+$Q$ 全开（3）在加载段全面为负（事件1 $+25.5\%$），而\textbf{$Q$ 单独开}（4）
+在事件窗几乎无损（事件1 $33.31$ vs 定稿 $33.45$，$+0.4\%$；事件2 $+0.3\%$）——\textbf{拖累来自 $\theta$（带宽自适应），不是 $Q$}；
+(iii) \textbf{突变优先}：仅律 D（加载瞬态 $71.9\to36.5$，$-49.2\%$）是全窗口 Pareto 最优点；加 $Q$（6）或加律 B（7）都会把加载瞬态退回去；
+(iv) \textbf{稳态·电流优先}：律 D $+$ 律 B $+$ $Q$（8）为当前最优点（持续段 $34.25$、稳态段 $35.86$、电流 $8.81$\,A 全为最低），代价是加载瞬态 $74.1$；
+(v) $Q$ 单独保留需注意边界裕度：重定为 $\mu=0.06,\sigma_2=5$ 后 $Q'_{\min}=0.377$（钳位下界 $0.2$），余量变薄。
+六档配置的图形比对见图 \ref{fig:pmsm-compare}。
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.99\textwidth]{fig_pmsm_compare.pdf}
+\caption{\textbf{六档配置图形比对}（同一工况、同一噪声实现、同一 $12$\,s 轨迹；$Q$ 档一律取重定增益 $\mu=0.06$、$\sigma_2=5$，且 $\theta$ 关闭）。
+(a) 取舍图（横轴 $=$ 加载瞬态 RMS，越小抗突变越强；纵轴 $=$ 稳态段 RMS）：\textbf{没有一款全胜}——仅律 D 抗突变最好（$36.5$）、$Q$+律 B$+$律 D 稳态最好（$35.9$），定稿与仅 $Q$ 在两条轴上均被支配；
+(b) 七个窗口逐项比对，全部开关默认关；(c) 加载瞬间放大：仅 $Q$ 跌落最深（$\approx-200$\,rpm 并持续到 $2.6$\,s），叠加律 D 后恢复最快；
+(d) $Q'$ 轨迹与钳位下界：重定增益后 $Q'_{\min}\approx0.38$，距下界 $0.2$ 尚有裕度但已明显变薄——这是"稳态优先"配置必须交代的代价。}
+\label{fig:pmsm-compare}
+\end{figure}
+
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.99\textwidth]{fig_pmsm_lawfl.pdf}
+\caption{\textbf{律 D（突变期比例增益提升）实测}。$\kappa_p=4$、$\varepsilon_g=0.01$，其余参数与定稿逐字相同，含电流环与噪声。(a) 转速误差（$5$\,ms 包络$+$均值）：蓝底为空载段，$t=2$\,s 起加载；红为律 D、灰为定稿。(b) 加载瞬间原始轨迹：定稿跌落至 $\approx-200$\,rpm 并在 $0.2$\,s 内维持 $-100\sim-150$\,rpm，律 D 恢复明显更快。(c) 突变检测器 $g_{\rm fire}(t)$ 与等效 $k_p$：空载段恒为 $0$，加载瞬间冲到 $\approx1$（等效 $k_p:10\to50$），事件期有较小响应，稳态归零。(d) 各窗口误差 RMS 与改善百分比：全窗口同时改善，加载瞬态 $-49.2\%$。}
+\label{fig:pmsm-lawfl}
+\end{figure}
+
+\subsection{完整的律 B+D：联合调度律的写全形式与它的取舍}\label{sec:pmsm-lawbd}
+把律 D（比例增益调度）与律 B（观测器带宽调度）用\textbf{同一个检测器} $g$ 联合，完整律如下
+（重复通道与电流环部分与定稿逐字相同，仅 $k_p$ 与 $\omega_o$ 两处被 $g$ 调度）：
+\begin{equation}
+\begin{aligned}
+\text{对象：}&\quad \dot y=b\,i_a+d-b\,n_{T,\rm pu},\qquad i_a=\frac{\omega_{ci}}{s+\omega_{ci}}\,(u-n_i),\\[1mm]
+\text{检测器：}&\quad g=\frac{\bar e_1^{2}}{\bar e_1^{2}+\varepsilon_g^{2}},\qquad
+                    \bar e_1(t)=\frac1T\int_{t-T}^{t}e_1(\tau)\,\mathrm d\tau,\\[1mm]
+\text{控制律：}&\quad u=\frac{1}{b_0}\Big[\,k_p\big(1+\kappa_p\,g\big)\,(r-y)-z_2-v\,\Big],\\[1mm]
+\text{观测器：}&\quad \dot z_1=z_2+b_0u+v+2\omega_o(1+\kappa_B g)\,(y-z_1),\qquad
+                    \dot z_2=\omega_o^{2}(1+\kappa_B g)^{2}\,(y-z_1),\\[1mm]
+\text{重复通道：}&\quad \tau\dot v+v=Q\,v(t-T)+\beta_3\tanh(e_1/\zeta),\qquad e_1=y-z_1 .
+\end{aligned}
+\label{eq:pmsm-lawbd}
+\end{equation}
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+窗口 RMS / rpm & 空载 & 加载瞬态 & 事件1 & 事件2 & 事件后 & 持续段 & 稳态段 & $\max|i_a|$\\
+\midrule
+定稿 & $3.24$ & $71.88$ & $33.45$ & $34.77$ & $35.71$ & $41.02$ & $40.57$ & $9.22$\\
+仅律 D & $3.24$ & $\mathbf{36.54}$ & $32.50$ & $34.08$ & $32.86$ & $39.59$ & $39.13$ & $9.25$\\
+律 B+D & $3.24$ & $62.02$ & $33.01$ & $\mathbf{32.91}$ & $\mathbf{31.17}$ & $\mathbf{34.64}$ & $\mathbf{36.49}$ & $\mathbf{8.84}$\\
+\midrule
+B+D 相对仅律 D & $0.0\%$ & $-69.7\%$ & $-1.6\%$ & $+3.4\%$ & $+5.1\%$ & $\mathbf{+12.5\%}$ & $+6.7\%$ & $-4.4\%$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{读法}：(i) 两者\textbf{方向相反}：律 D 抬 $k_p$ 压低非周期误差，律 B 抬 $\omega_o$ 同时把电流噪声放大进 $z_2$——
+阶跃期两者互相抵消，故 B+D 的加载瞬态（$62.02$）\textbf{明显差于仅律 D}（$36.54$），但仍远好于仅律 B（$102.58$）；
+(ii) 稳态与持续段是律 B 的主场：持续段 $39.59\to34.64$（再改善 $12.5\%$）、稳态段 $39.13\to36.49$（$+6.7\%$），
+且实际峰值电流 $9.25\to8.84$\,A 为全部配置最低；
+(iii) 因此选型规则是\textbf{按指标分段}：\emph{突变优先选仅律 D；稳态/电流优先选律 B+D}；$\theta/Q$ 通道在加载段为负、建议关闭。
+\textbf{检测器的真实工作区间}：$g$ 的触发量是"$e_1$ 的 $T$ 窗均值非零"，故它\textbf{同时对 $0.7$\,Hz 非周期负载响应}，
+不只是突变。实测（$\varepsilon_g=0.01$）：空载段 $g\equiv0.0000$、加载瞬态均值 $0.355$（峰值 $0.954$，等效 $k_p$ 达 $50$）、
+事件段 $0.084\sim0.132$、持续/稳态段 $0.100\sim0.111$（等效 $k_p\approx14$）。
+$\varepsilon_g$ 需按对象实际非周期误差水平选取：$\varepsilon_g=0.01$ 与 $0.02$ 之间持续段差 $11\%$（$34.64$ vs $38.79$），工作点落在检测器拐点上。
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.99\textwidth]{fig_pmsm_lawbd.pdf}
+\caption{\textbf{完整律 B+D 实测}（同一工况、同一噪声实现；两开关默认关，全关时与定稿逐位一致）。(a) 转速误差（$5$\,ms 包络$+$均值）：律 B+D（绿）在持续/稳态段包络更窄，但 $t=2$\,s 加载后的恢复慢于仅律 D（红）。(b) 加载瞬间放大：律 B 抬 $\omega_o$ 放大噪声，抵掉律 D 的一部分收益。(c) 同一检测器 $g(t)$ 同时调度 $k_p^{\rm eff}$ 与 $\omega_o^{\rm eff}$：空载段恒为 $0$（逐位退回定稿），加载段随非周期误差连续取值。(d) 七窗口 RMS 与 $\max|i_a|$：B+D 在 $5/7$ 个窗口优于律 D，但加载瞬态由 $36.5$ 退回 $62.0$。}
+\label{fig:pmsm-lawbd}
+\end{figure}
+
+\subsection{本节适用边界（如实披露）}
+\noindent\textbf{(P1) 电流环已建模，但仍是降阶等效。} 对象侧按式 \eqref{eq:pmsm-curloop} 引入一阶闭环电流环
+（主配置 $f_{ci}=2$\,kHz），不再是理想电流源，带宽敏感性见 §\ref{sec:pmsm-sens}(1)。
+\emph{仍属降阶模型}：真实数字 PI 电流环因零点略具相位超前，等效滞后应小于同带宽一阶低通，
+故 §\ref{sec:pmsm-sens} 给出的 $5$\,kHz 门槛是\textbf{偏保守}的估计；电流环自身的采样与离散化迟滞
+（约一个控制周期）未单独建模。
+\vspace{1mm}
+
+\noindent\textbf{(P2) 采样率乐观。} 本节与 §\ref{sec:bpw-result} 同取 $\Delta t=2\times10^{-5}$\,s（$50$\,kHz），
+实际速度环多为 $1$–$4$\,kHz；采样率降低会同时减小重复通道的相位裕度，本节数值对采样率是偏乐观的。
+\vspace{1mm}
+
+\noindent\textbf{(P3) 未建模电流限幅。} 仿真不给 $i_a$ 加限幅，只在事后核对：主配置三档实际
+$\max|i_q|=5.97/9.02/9.03$\,A，均低于 DM807 的 $21$\,A 峰值。但 $f_{ci}\le2$\,kHz 时电流已达
+$99\sim197$\,A、跟踪误差口径档达 $86\sim178$\,A——\textbf{这些工况下真实驱动器必然限幅，结论会改变}，
+故 §\ref{sec:pmsm-sens}(1)(2) 的失稳幅度只作定性参考。
+\vspace{1mm}
+
+\noindent\textbf{(P4) 未建模粘滞摩擦、铁损与母线电压饱和。} $600$\,rpm 时线反电势约
+$600\times6.2\,\mathrm{mV/rpm}\approx3.7$\,V，远低于 $60$\,V 母线，电压不会饱和。
+\vspace{1mm}
+
+\noindent\textbf{(P5) 不对中只建模为转矩脉动。} 真实不对中还有径向力、轴承振动与温升，本节只取其对转速环的
+转矩通路效应（$1\times/3\times/5\times$ 转频簇）。
+\vspace{1mm}
+
+\noindent\textbf{(P6) 结论的范围。} "$\theta/Q$ 自适应无净收益（本节已据此推翻该通道）"只对\textbf{小惯量（$J=1.89\times10^{-5}$\,kg$\cdot$m$^2$）
+$+10$\,Hz 脉动$\Rightarrow$脉动幅值远大于观测带宽所能覆盖}这一组合成立；惯量增大或脉动频率降低到
+$\omega_o$ 以内时，普通 ESO 已能吸收扰动，重复通道与自适应通道的分工会随之改变——本节不据此对一般 PMSM
+转速环作结论。
+\vspace{1mm}
+
+\noindent\textbf{(P7) $\theta/Q$ 通道的最终判决与四条"突变抗性"候选律（如实披露）。}
+\textbf{判决}：\textbf{$\theta$（带宽自适应）在本对象上被推翻}——$\theta+Q$ 全开时加载段全面为负（稳态 $+2.6\%$、事件1 $+25.5\%$、加载瞬态 $+16.6\%$）；
+而\textbf{$Q$（遗忘因子）单独开（$\gamma=0$）几乎无损}（事件1 $+0.4\%$、事件2 $+0.3\%$、事件后 $+1.1\%$），
+重定 $Q$ 增益（$\mu=0.06$、$\sigma_2=5$）后稳态段 $-2.5\%$、电流 $9.25\to9.12$\,A——\textbf{可单独保留}。
+本节的推荐配置为：\textbf{定稿 $+$ 律 D}（突变优先）$/$ \textbf{定稿 $+$ 律 B $+$ $Q$（可选律 D）}（稳态·电流优先）。
+\textbf{四条候选律}如下（均以可选开关实现、默认关，全关时与定稿逐位一致）：
+起因是本节实测到"自适应档在突变窗口不如无自适应档"（加载瞬态 $71.9\to83.8$\,rpm），
+故按"先找 oracle、再设计律"的顺序试了两条\textbf{新机制}（均以可选开关实现，默认关；全关时与定稿逐位一致，
+实测 $\max|\Delta y|=0$）：
+\begin{itemize}
+  \item \textbf{律 A（突变期泵浦门控）}：$\chi=Q\,v(t-T)+g\,\beta_3\tanh(e_1/\zeta)$，
+        $g=1/[1+(\bar e_1/\varepsilon_g)^2]$，$\bar e_1=\frac1T\int_{t-T}^{t}e_1\mathrm d\tau$ 为突变判别器
+        （周期信号在 $T$ 上均值为 $0$，阶跃不为 $0$）。动机：清空记忆实测劣化 $249\%$，故改为"保记忆、仅门泵浦"。
+        实测（$\varepsilon_g=0.05$）：加载瞬态 $71.9\to103.5$\,rpm，事件1 $33.5\to35.2$——\textbf{否定}。
+        \emph{机理}：泵浦项在阶跃期实际承担"快速积分通道"，比 ESO 更快建立补偿，门掉它反而加深跌落。
+  \item \textbf{律 B（ESO 带宽调度）}：$\omega_o^{\rm eff}=\omega_o\,(1+\kappa\,g_{\rm fire})$，
+        $g_{\rm fire}=1-g$。动机：阶跃峰值误差 $209$\,rpm 的主因是 $\omega_o=40$\,rad/s 的估计滞后。
+        实测：加载瞬态 $71.9\to165.8$\,rpm（$\kappa=3$）、$637$\,rpm（$\kappa=3,\varepsilon_g=0.02$），峰值 $209\to497\sim3839$——\textbf{否定}。
+        \emph{机理}：抬高 $\omega_o$ 同时把电流噪声放大进 $z_2$；本对象 $J$ 极小、噪声本底已占稳态误差 $\approx90\%$，
+        控制信号被噪声污染后反而变差。
+\end{itemize}
+\noindent\textbf{律 D（突变期比例增益提升，式 \eqref{eq:pmsm-lawd}）：\textbf{实测有效}，见 §\ref{sec:pmsm-lawd} 与图 \ref{fig:pmsm-lawfl}——
+它在\textbf{全部}窗口上同时改善（加载瞬态 $-49.2\%$），且稳态逐位退回定稿、峰值与电流不退化。}
+前两条律之所以失败、而律 D 成功，原因同一条：\textbf{突变期唯一"免费"的信息是 $e_1$ 的 $T$ 窗均值}；
+凡是改动\textbf{稳态也生效}的参数（$\tau$、$Q$、$\omega_o$、泵浦增益），都会在噪声本底上付出代价，因而必输。
+
+\noindent\textbf{结构性结论}：在本节的 RCESO 结构下，对突变期的\textbf{任何"全局参数改动"都无法超过固定参数基线}——
+这与 §\ref{sec:pmsm-sens} 之前的 oracle 扫描一致（$\tau_0$、$\beta_3$、$Q_0$ 的固定取值均以基线为最优，
+清记忆劣化 $249\%$）。要在突变期取胜，必须引入\textbf{新信息}——有效的做法就是律 D（用 $e_1$ 的 $T$ 窗均值做判别器）；
+而对"周期分量幅值"做显式估计再重标记忆（$v\leftarrow\rho v$）这一路，受下面 (d) 的能量上界所限（$\le7\%$）。
+
+\vspace{1mm}
+
+\noindent\textbf{律 E（谐波谐振辅助，PR-assist）与"谐波层的收益上界"。} 第四条候选律针对重复通道的\emph{固有时延}：
+用 $1/T$ 谐波解调 $e_1$ 得到复相量 $X_{e_1}$，按对象在 $\omega_1$ 处的逆算出所需补偿增量
+$\Delta X=-X_{e_1}/H(j\omega_1)$，直接合成回 $\chi$（$H(j\omega)=\frac{b/b_0}{j\omega+bk_p/b_0}$）。
+实测：$\kappa_{pr}\in\{0.3,0.6,1.0\}$、解调低通 $\in\{0.2T,0.3T,0.5T\}$ 全部组合下，\textbf{所有窗口改善 $0.0\%$}（与定稿逐位相同到两位小数）。
+这不是实现错误，而是\textbf{上界本来就在结构里}：稳态段实测 $10/30/50$\,Hz 残余仅 $11.15/7.65/5.95$\,rpm，按能量分解只占 $7.6\%/3.6\%/2.2\%$，
+其余 $86.7\%$ 是噪声与非周期负载——\textbf{把所有谐波残余一次性清零，稳态 RMS 也只由 $40.57$ 降到 $37.79$\,rpm（$-6.9\%$）}。
+故\emph{任何}只作用在"周期/谐波层"的新律（含 PR 辅助、重复通道改进、谐波前馈）在本对象上的收益上界就是 $7\%$ 量级；
+要显著改善只能动噪声源、惯量或执行器。图 \ref{fig:pmsm-negative} 汇总了本节全部否定实验及其量级。
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.99\textwidth]{fig_pmsm_negative.pdf}
+\caption{\textbf{否定实验汇总与收益上界}（数据均取自本节同一工况、同一噪声实现、同一 $12$\,s 轨迹）。(a) 固定参数 oracle 扫描（$\tau_0$、$\beta_3$、$Q_0$）：$7$ 个变体在加载瞬态与事件1 上\textbf{没有一个低于 $100\%$}（定稿即最优点）。(b) 三条新律与清记忆（对数轴）：律 A 泵浦门控 $144\%/3134\%$、律 B ESO 带宽调度 $231\%/887\%$、清记忆 $349\%$、律 E 谐波辅助 $100\%$（持平）。(c) 谐波层的收益上界：稳态 RMS 由 $40.57$ 只降到 $39.00$（仅去 $10$\,Hz，$-3.9\%$）或 $37.79$（去 $10/30/50$\,Hz，$-6.9\%$）。(d) 误差能量分解：谐波残余合占 $13.3\%$，噪声与非周期负载占 $86.7\%$——"调参赢不了"的定量原因。}
+\label{fig:pmsm-negative}
+\end{figure}
+
+\section{适用范围之外（如实披露）}\label{sec:limit}
+% =====================================================================
+\noindent\textbf{(F1) 参数口径不可互引。} 报任何数必须同时写明 $\gamma,\sigma_1,\sigma_2,\mu,\kappa,\tau_0,c$——本版驱动的量级由 $(\gamma,\sigma_1)$ 的\emph{比值}决定平衡点、由 $\sigma_1$\emph{单独}决定时间常数（注 \ref{rem:theta-scale}），二者不可混引。
+\vspace{1mm}
+\noindent\textbf{(F2) $\theta$ 上界在本参数下并非必要条件。} 把 $\tau$ 上界由 $5$ 放开到 $10^{6}$，实测 $\theta$ 末值由 $-10.49$ 变为 $-10.62$、稳态均值由 $-11.36$ 变为 $-11.52$——\emph{几乎不变}。说明该工况下 $\theta$ 由回复项自行约束；限幅的作用是限制模型侧取值，而非保证收敛。
+\vspace{1mm}
+\noindent\textbf{(F3) $Q$ 通道的动作幅度与收益反号。} $\sigma_2$ 越小，$Q$ 低位保持越久，但闭环性能越差（$Q$ 的下界放大重复通道谐振增益 $\propto\beta_3/(1-Q)$）。实测：$\sigma_2=12.5$ 时累计代价比 $0.9827$（优于无自适应），$\sigma_2=2$ 时为 $1.0368$（劣于无自适应）。本版取 $\sigma_2=5$ 折中（$0.9992$，基本中性）。
+\vspace{1mm}
+\noindent\textbf{(F4) 观测器耦合目前是级联式。} 本版先立 $(\ef,v,Q,\theta)$ 的有界性，再把 $z_1,z_2,y,u$ 接到 Hurwitz 观测器误差动态上。级联式论证要求“前级终值界进入后级输入界”，该环节已数值核对但\textbf{未写成单一 Lyapunov 函数}；若需 $\ef\to0$ 的渐近性，须构造含观测器误差的整体 Lyapunov 函数。
+\vspace{1mm}
+\noindent\textbf{(F5) 其他未做项。} $\mu\times\sigma_2\times\tau'$ 三维联扫；$z_2$ 的直流分量对闭环稳态误差的定量影响（注 \ref{rem:z2dc} 只给出机理与来源核对）；$\tau$ 状态侧不限幅时峰值达 $8.15$（$T_{\rm end}=10$\,s 三段档；$6$\,s 两段档为 $6.80$），模型侧被钳在 $5$，其对重复通道内模稳定域的长期影响尚未分析。
+
+\section{符号与参数表（答辩自查）}\label{sec:sym}
+% =====================================================================
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+符号 & 含义 & 取值 & 备注\\
+\midrule
+$T$ & 扰动基波周期 & $0.1$ s & \\
+$\tau_0$ & 标称带宽 & $1.25$ ms & $\tau=\tau_0e^{\kappa\theta}$\\
+$\kappa$ & 带宽对数增益 & $0.1$ & $\kappa\theta\in[-1.61,1.61]$\\
+$\varepsilon$ & 归一化尺度下限 & $6.5$ & 必须是真实尺度\\
+$\gamma$ & $\theta$ 速率（码内） & $3$（本版） & 平衡点 $\propto\gamma/\sigma_1$\\
+
+$\sigma_1^{\mathrm{code}}$ & $\theta$ 回复增益（码内） & $10^{5}$（本版） & 时间常数 $=1/(2\kappa\tau_0\sigma_1)$\\
+$\sone$ & $\theta$ 回复增益（PPT 口径） & $2\tau_0\sigma_1^{\mathrm{code}}=2.125\times10^{4}$ & 漏乘 $2\tau_0$ 会让界"被违反" $5.8\times10^{5}$\\
+$\sigma_2$ & $Q$ 回复增益 & $5$（本版） & 决定 $Q$ 低位时长与性能\\
+$\mu$ & $Q$ 驱动增益 & $3\times10^{-2}$（码内） & $\mu_{\mathrm{code}}=\mu_{\mathrm{ppt}}/\varepsilon$\\
+$q'_{\min},q'_{\max}$ & 模型侧 $Q'$ 域 & $[0.2,1.0]$ & 域投影 \eqref{eq:clip-model}\\
+$\underline\tau,\overline\tau$ & 模型侧 $\tau'/\tau_0$ 域 & $[0.2,5]$ & 域投影 \eqref{eq:clip-model}\\
+$\taub,\tauf,\taul$ & 滤波时间常数 & $10T,\ T,\ 10T$ & \\
+$\tau_f^w,\tau_l^w$ & 带通快慢路时间常数 & $5T,\ 50T$ & 本版驱动 \eqref{eq:bpw}\\
+
+
+
+
+
+$M_t$ & 误差能量上确界 & $\sup_{[0,t]}\ef^2$ & 引理 \ref{lem:Dbound}\\
+
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent\textbf{结构性前提}：$\varepsilon$ 必须是真实尺度（取 $10^{-6}$ 会让归一化损失分辨力）；$q'_{\min}>0$、$q'_{\max}<1$ 由域投影 \eqref{eq:clip-model} 实现，保证内模稳定域；$\tau'\in[0.2,5]$ 同时约束带宽与滤波时间常数。
+% =====================================================================
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{fig_response.pdf}
+  \caption{闭环行为与两个自适应状态（本版带通律，$\gamma=3$、$\sigma_1=10^{5}$、$\sigma_2=5$、$\mu=0.03$，$T_{\rm end}=6$\,s、两次幅值突变）。(a) 输出跟随：自适应与无自适应，$y\in[0,\,1.0413]$；（b）遗忘因子 $Q'$（模型侧，限 $[0.2,1.0]$，实测 $[0.2698,\,0.9958]$）；（c）带宽 $\tau'/\tau_0$（模型侧，限 $[0.2,5]$，两段触界平台清晰）与状态侧 $\tau/\tau_0$（不限幅，峰值 $6.80$）；（d）自适应状态 $\theta$：限幅生效，贴界时间占 $14.5\%$。}
+  \label{fig:response}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_sc_response.pdf}
+  \caption{本版（带通律）的闭环总览，底部参数框自证（$T_{\rm end}=6$\,s，两次幅值突变）。四栏：(a) 输出跟随（自适应 vs 无自适应）；（b）扰动 $d$（三档：静息 / 阶跃 $\times300$ / 持续段）；（c）重复通道状态 $v$ 与 ESO 残余 $z_2$（含直流，见注 \ref{rem:z2dc}）；（d）$Q'$ 与 $\tau'$（模型侧限幅值）。}
+  \label{fig:sc-response}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_adaptive_advantage.pdf}
+  \caption{\textbf{自适应与无自适应的误差对比}（$k_p=10$、$\omega_o=40$，两次幅值突变）。(a) 突变窗误差（对数轴）；(b) 累计代价 $\int|y-1|dt$；(c) 相对累计代价。\textbf{如实说明}：本工况下末值 $1.0453>1$，即\emph{自适应全程略差}——与注 \ref{rem:bpw-result} 的结论一致：$Q$ 的深度动作会放大旧记忆，收益不足。}
+  \label{fig:adv-advantage}
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.99\textwidth]{fig_adaptive_vs_not.pdf}
+  \caption{\textbf{高增益档的分段表现}（$k_p=50$、$\omega_o=300$）。(a) 突变窗误差；(b) 分段比值：静息 $2.246$、事件1 $1.103$、事件2 $1.079$ 均 $>1$（更差），而后段 $0.821$、末段 $0.722$ 均 $<1$（更好）；(c) 相对累计代价末值 $0.9971$（略优）。\textbf{结论}：自适应在\emph{事件瞬间}劣化、在\emph{事后持续段}改善，二者近似抵消。}
+  \label{fig:adv-cost}
+\end{figure}
+\section{结论}\label{sec:concl}
+% =====================================================================
+\begin{enumerate}
+  \item \textbf{建模}：一阶对象 $+$ 低通重复通道（内模）$+$ 灰箱 ESO $+$ 双通道自适应；三条回路共用驱动 $\ef=\tau\dot v$，故必须整体处理。
+  \item \textbf{自适应律与实现逐条对应}（\S\ref{sec:law}）：驱动取\emph{零均值实参} $w=\phi\big((\ef^{2}-E_o)/(E_o+\varepsilon),c\big)$ 的\emph{快慢两路带通} $D=w_f-w_l$（$\tau_f^w=5T$、$\tau_l^w=50T$）；$\theta$ 取 $D$、$Q$ 取\emph{单向死区} $\max(0,D)$。
+  \item \textbf{本版律的可证结论}（命题 \ref{prop:newproved}）：(a) 驱动有界 $|D|\le\min\{2,2M_t/\varepsilon\}$，界与 $\varepsilon$ 解耦；(b) $\theta$ 有界且存在不变集；(c) $Q$ 通道回复势垒与耗散率下界；(d) $v$ 通道 ISS。
+  \item \textbf{尚未证明的部分}（注 \ref{rem:notproved}）：本版律的\emph{闭环 UUB 归并尚未完成}；原式的泵浦条件 $\aeff<3-a$ 含 $B_\kappa$ 项，\textbf{对本版律不适用}。这是本文最主要的未完成项。
+  \item \textbf{归一化与零均值实参的作用}（注 \ref{rem:zero-mean}）：零均值实参使 $\overline{D}\to0$、$\theta$ 平衡点回到 $0$，从而 $\tau$ 具备调节能力；恒正实参会把 $\tau$ 单向推至界。
+  \item \textbf{如实报告的边界}：(F1) 参数口径不可互引；(F2) 该工况下 $\theta$ 上界并非收敛的必要条件（放开至 $10^{6}$ 结果几乎不变）；(F3) $Q$ 的低位时长与闭环性能反号，本版取 $\sigma_2=5$ 折中；(F4) 观测器为级联式，未写成单一 Lyapunov 函数。
+  \item \textbf{PMSM 转速环上的复现与适用性边界}（\S\ref{sec:pmsm}）：同一套结构搬到 PMSM 转速环（对象增益 $b=1\to536.41$\,s$^{-1}$，控制器结构不改、参数按工况重整定）后，(a) 重复通道由"可选"变为\emph{必需}——纯 ESO 档在 $10$\,Hz 负载脉动下工作点崩溃（$10$\,Hz 脉动 $2310$\,rpm、稳态 RMS $1845$\,rpm），带通重复通道把 $10$\,Hz 压到 $10.31$\,rpm（$224$ 倍）、稳态 RMS 压到 $16.97$\,rpm（$109$ 倍）；(b) \textbf{$\theta/Q$ 自适应通道在本对象上被推翻}：加载段全面为负（稳态 $41.63$ vs $40.57$、事件1 $41.97$ vs $33.45$、加载瞬态 $83.80$ vs $71.88$\,rpm），仅在空载段有效（$-16.6\%$）；经参数扫描、三条结构改动与 $2\times2$ 因子实验后结论不变，故本节最终配置\textbf{不含该通道}；(c) 自适应部分改由\textbf{律 D（非周期误差比例增益调度）}承担：加载瞬态 $71.9\to36.5$\,rpm（$-49.2\%$）、七个窗口全部改善、实际峰值电流 $9.25$\,A 未越 DM807 的 $21$\,A；稳态优先时可再叠加律 B（持续段再降 $12.5\%$、电流 $8.84$\,A），代价是加载瞬态退到 $62.0$\,rpm。
+  \item \textbf{PMSM 上引入电流环与噪声后的设计约束}（\S\ref{sec:pmsm-sens}）：(a) 工况改为\textbf{先空载 $2$\,s、再加载 $10$\,s}后：(i) 空载段纯 ESO 档 $6.05$\,rpm、重复通道档 $0.730$\,rpm、含环+噪声档 $3.24$\,rpm（被推翻的 $\theta/Q$ 档 $2.70$，仅空载段有效）；(ii) 加载段在现实电流环（$f_{ci}=2$\,kHz）$+$ 电流噪声（$1\%$ 额定）$+$ 负载噪声（$5\%$ 额定）下，RC 稳态 RMS 由 $16.97$ 升到 $40.57$\,rpm、实际峰值电流由 $7.30$ 升到 $9.22$\,A（仍低于 DM807 的 $21$\,A），$10$\,Hz 抑制几乎不变（$10.31\to11.15$\,rpm）——\emph{噪声抬高的是宽带本底，不是谐波泄漏}，残差以 $0.7$\,Hz 非周期负载与负载噪声为主；(b) \textbf{重整定把可用电流环带宽门槛由 $5$\,kHz 降到 $2$\,kHz}：$\beta_3=2000$、$\tau_0=5$\,ms 下 $f_{ci}$ 由 $15.9$ 降到 $2.0$\,kHz 稳态 RMS 恒为 $16.97$\,rpm，仅 $1$\,kHz 劣化到 $109.9$\,rpm；若带宽只有 $1$\,kHz，需再降 $\beta_3$ 到 $1000$、$\tau_0$ 放到 $10$\,ms（$50.6$\,rpm、电流 $7.56$\,A 合规，$10$\,Hz 抑制退化到 $\approx6$ 倍）；(c) \textbf{$\theta/Q$ 通道的两次挽救均未改变判决}：重整定（$\gamma:3\to1$、$\mu:0.03\to0.015$、$\sigma_2:5\to10$、$\tau_0=5$\,ms）后触界自检\textbf{零贴界}（$\theta\in[-1.34,5.55]$、$\tau'/\tau_0\in[0.875,1.743]$、$Q'\in[0.818,1.000]$），$\phi$ 压缩$+$驱动死区（$c_1=c_2=0.1$）把稳态 $|D|$ 中位压到 $0$（"噪声$\to D$"通路被门掉、噪声下不再被额外劣化），但在加载段的劣化依旧——故\textbf{该通道被推翻、本章最终配置不含它}；(d) 跟踪误差口径在现实对象上退化到 $112.5/113.0$\,rpm（$v_{\rm start}=0.5$\,s 后峰值电流 $13.0/13.4$\,A 已回到限幅内），故该口径对照只在理想电流环下成立。
+\end{enumerate}
+
+\end{document}
+\begin{align}
+  \text{(a)}&\quad |D_\theta(t)|=|D_Q(t)|\le\min\Bigl\{2,\ \frac{2M_t}{\varepsilon}\Bigr\}, \label{eq:newproved}\\[2pt]
+  \text{(b)}&\quad |\theta(t)|\le\max\Bigl\{|\theta(0)|,\ \frac{1}{\kappa}\ath\Bigl(\frac{2\gamma M_t}{\kappa\tau_0^{2}\sigma_1^{\mathrm{code}}\varepsilon}\Bigr)\Bigr\}, \\[2pt]
+  \text{(c)}&\quad Q(t)\in(q_-,2),\qquad \text{回复项耗散率}\ \ge\frac{\sigma_2}{2\mu(2-q_{\max})}, \\[2pt]
+  \text{(d)}&\quad |v(t)|\ \text{ISS 有界（$v$ 通道为稳定一阶低通，注入有界即状态有界）}. \label{eq:newproved2}
+\end{align}
