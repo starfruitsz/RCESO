@@ -24,7 +24,7 @@ TL = (0.50 * on + 0.30 * onp *
 
 # 新模型（默认：fci=1 kHz、beta3=2000、tau0=20 ms，针对开关级对象重整定）
 Y = sim_inv(t, TL, dict(i_noise_peak=NC.NOISE["i_noise_peak"],
-                        fci=2000.0, beta3=4000.0, tau0=20e-3))
+                        fci=500.0, beta3=4000.0, tau0=20e-3))
 
 # 旧模型（同一负载，一阶电流环；用 10 us 步长以控制内存）
 t_old = np.arange(0.0, TEND, 1e-5)
@@ -64,3 +64,4 @@ print("OLD: speed RMS with-load %.2f rpm, after %.2f rpm" %
       (np.sqrt(np.mean(((Y_old["y"] - 1.0) * N_DQ)[(t_old >= 4) & (t_old < 6)] ** 2)),
        np.sqrt(np.mean(((Y_old["y"] - 1.0) * N_DQ)[(t_old >= 7) & (t_old < 8)] ** 2))))
 print("saved _inv_base.npz")
+

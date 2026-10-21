@@ -2,7 +2,7 @@
 """真实逆变器对象上律 D 的 8 种子对比（Base vs LawD）
 
 口径：pmsm_inv_sim（10 kHz PWM、死区、±0.3 A dq 采样），
-fci=2 kHz、beta3=4000、tau0=20 ms；8 s 工况（2 s 加载、2–6 s 10 Hz 簇、6 s 撤除）。
+fci=500 Hz、beta3=4000、tau0=20 ms；8 s 工况（2 s 加载、2–6 s 10 Hz 簇、6 s 撤除）。
 用法：python run_inv_lawd.py → _inv_lawd.json
 """
 import math
@@ -41,7 +41,7 @@ def amp10(tt, e):
 def main():
     t, TL = build_case()
     base_kw = dict(i_noise_peak=NC.NOISE["i_noise_peak"],
-                   fci=2000.0, beta3=4000.0, tau0=20e-3)
+                   fci=500.0, beta3=4000.0, tau0=20e-3)
     CFG = [("Base", dict(det_eps=0.0)),
            ("LawD", dict(kp_boost=4.0, det_eps=0.01))]
     out = {"Base": [], "LawD": []}
@@ -73,3 +73,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

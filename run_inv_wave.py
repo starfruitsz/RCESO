@@ -18,7 +18,7 @@ nT = int(round(t[-1] / 1e-4)) + 2
 TLn = band_noise(nT, 0.025, 200.0, 1e-4, 20261017)
 
 base_kw = dict(i_noise_peak=NC.NOISE["i_noise_peak"],
-               fci=2000.0, beta3=4000.0, tau0=20e-3, seed_i=SEED)
+               fci=500.0, beta3=4000.0, tau0=20e-3, seed_i=SEED)
 CFG = [
     ("Base", dict(det_eps=0.0)),
     ("LawD", dict(kp_boost=4.0, det_eps=0.01)),
@@ -37,3 +37,4 @@ for name, kw in CFG:
     print(name, "dip_t", round(float(tt[m][e[m].argmin()]), 4),
           "steady", round(float(np.sqrt(np.mean(e[(tt >= 7) & (tt < 8)] ** 2))), 2))
 print("done")
+

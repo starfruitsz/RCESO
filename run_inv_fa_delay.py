@@ -38,7 +38,7 @@ def amp10(tt, e):
 def main():
     t, TL = build_case()
     base_kw = dict(i_noise_peak=NC.NOISE["i_noise_peak"],
-                   fci=2000.0, beta3=4000.0, tau0=20e-3)
+                   fci=500.0, beta3=4000.0, tau0=20e-3)
     out = {}
     for sd in SEEDS:
         for dly in DELAYS:
@@ -56,3 +56,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

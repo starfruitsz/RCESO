@@ -32,7 +32,7 @@ chk("figures", len(srcs) == 13 and not miss_img, "n=%d missing=%s" % (len(srcs),
 chk("h2", len(re.findall(r"<h2 ", b)) == 10, str(len(re.findall(r"<h2 ", b))))
 chk("h3", len(re.findall(r"<h3 ", b)) == 22, str(len(re.findall(r"<h3 ", b))))
 chk("h4", len(re.findall(r"<h4>", b)) == 2, str(len(re.findall(r"<h4>", b))))
-chk("tables", len(re.findall(r"<table>", b)) == 17, str(len(re.findall(r"<table>", b))))
+chk("tables", len(re.findall(r"<table>", b)) == 16, str(len(re.findall(r"<table>", b))))
 chk("tabcap", len(re.findall(r'class="tabcap"', b)) == 1, str(len(re.findall(r'class="tabcap"', b))))
 chk("notice", len(re.findall(r"box notice", b)) == 2, str(len(re.findall(r"box notice", b))))
 chk("figcaption", len(re.findall(r"<figcaption>", b)) == 13, str(len(re.findall(r"<figcaption>", b))))
@@ -50,7 +50,7 @@ sub = re.search(r'<div class="sub">([^<]*)</div>', h).group(1)
 chk("sub_v40", sub.startswith("v4.0"), sub[:40])
 chk("sub_clean", ("\\" not in sub) and ("{" not in sub) and ("$" not in sub), sub)
 
-must = ["6.20", "39.05", "5.69", "19.14", "2.73", "84.1", "37.49", "4.94", "33.09", "6.89", "pmsm_inv_sim", "记忆失配", "220"]
+must = ["7.91", "40.05", "7.24", "80.2", "37.24", "5.32", "32.80", "8.23", "3142", "pmsm_inv_sim", "记忆失配"]
 gone = ["v3.1", "71.9", "36.5", "648.62", "折中最优", "突变优先选", "-50.8", "23.30"]
 for m in must:
     chk("has:" + m, m in b, "" if m in b else "MISSING")

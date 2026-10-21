@@ -43,7 +43,7 @@ def amp10(tt, e):
 def main():
     t, TL = build_case()
     base_kw = dict(i_noise_peak=NC.NOISE["i_noise_peak"],
-                   fci=2000.0, beta3=4000.0, tau0=20e-3)
+                   fci=500.0, beta3=4000.0, tau0=20e-3)
     CFG = [("Base", dict(det_eps=0.0)),
            ("FB", dict(FB_MG)),
            ("FA", dict(flush_t=6.0, flush_alpha=0.0)),
@@ -89,3 +89,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -76,7 +76,7 @@ window.MathJax = {
 <div class="layout">
 <nav>
   <h1>目录</h1>
-  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l3" href="#sec:mism">回声重影：工况、标度律与记忆失配驱动</a><a class="l3" href="#sec:etsr">律 F：状态复位及其事件触发子类（ETSR）</a><a class="l2" href="#sec:stab">本版（带通）律的可证结论</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-10-19 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">稳定性重调：$220$\,Hz 极限环</a><a class="l3" href="#h6">四档算法：8 种子</a><a class="l3" href="#sec:lab">实验室工况：律 D 与 F-B</a><a class="l3" href="#sec:speedcases">额定转速 600/900/1200 rpm（10/15/20 Hz）</a><a class="l3" href="#h7">F-A 与 F-B：立即复位不是上界</a><a class="l3" href="#h8">本节适用边界（如实披露）</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:fb-dilemma">律 F 的检测量与门控（真实对象）</a><a class="l3" href="#h9">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a>
+  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l3" href="#sec:mism">回声重影：工况、标度律与记忆失配驱动</a><a class="l3" href="#sec:etsr">律 F：状态复位及其事件触发子类（ETSR）</a><a class="l2" href="#sec:stab">本版（带通）律的可证结论</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-10-19 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">参数与 500\,Hz 低带宽代价</a><a class="l3" href="#h6">四档算法：8 种子（标准工况）</a><a class="l3" href="#sec:lab">实验室工况：律 D 与 F-B</a><a class="l3" href="#h7">F-A 与 F-B：立即复位不是上界</a><a class="l3" href="#sec:speedcases">额定转速 600/900/1200 rpm（10/15/20 Hz）</a><a class="l3" href="#h8">本节适用边界（如实披露）</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:fb-dilemma">律 F 的检测量与门控（真实对象）</a><a class="l3" href="#h9">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a>
 </nav>
 <main>
 <header class="doc-h">
@@ -335,7 +335,7 @@ window.MathJax = {
 <p>其中 $\tau_{\mathrm{det}}\approx4\tau_f$（快包络 <a class="xref" href="#eq:fastdet">(13)</a> 的上升时间）、$\tau_{\mathrm{dec}}=N\Delta t$ 为判决窗，</p>
 <p>并要求冷却 $T_c$ 不小于一个扰动周期。</p>
 
-<div class="box remark" id="rem:fa-oracle"><div class="box-h">注 9（A 是上界，不是触发器）</div><div class="box-b">式 <a class="xref" href="#eq:etsr-reset">(18)</a>–<a class="xref" href="#eq:etsr-trig">(19)</a> 只规定"<strong>何时</strong>复位"，不规定"<strong>如何</strong>发现事件"——后者才是"事件触发"的定义。 <strong>F-B 自带触发判据</strong>（记忆失配 $D_m+g$，§<a class="xref" href="#sec:fb-dilemma">7.1</a>，加冷却），无外部信息即可独立工作，故是<strong>严格意义上的事件触发律，也是本文唯一可部署的律 F</strong>； <strong>F-A 不含任何检测环节</strong>，它把 $t_e$ 当作外部已知量（负载指令沿、驱动器状态位），只能作为"事件时刻精确已知"这一理想情形的<strong>上界（oracle）</strong>。 因此本文所有"F-A 优于 F-B"的数字都应读作<strong>事件时刻精度的价值</strong>，而不是两种律的优劣比较；B 档的 $88.9$ rpm 是<em>本节一阶对象、旧 $e_1$ 包络检测器</em>的历史指标；真实对象定稿用 $D_m+g$，首周期 $6.20\pm2.65$\,rpm（§<a class="xref" href="#sec:pmsm">6</a>），不可与 $88.9$ 混引。</div></div>
+<div class="box remark" id="rem:fa-oracle"><div class="box-h">注 9（A 是上界，不是触发器）</div><div class="box-b">式 <a class="xref" href="#eq:etsr-reset">(18)</a>–<a class="xref" href="#eq:etsr-trig">(19)</a> 只规定"<strong>何时</strong>复位"，不规定"<strong>如何</strong>发现事件"——后者才是"事件触发"的定义。 <strong>F-B 自带触发判据</strong>（记忆失配 $D_m+g$，§<a class="xref" href="#sec:fb-dilemma">7.1</a>，加冷却），无外部信息即可独立工作，故是<strong>严格意义上的事件触发律，也是本文唯一可部署的律 F</strong>； <strong>F-A 不含任何检测环节</strong>，它把 $t_e$ 当作外部已知量（负载指令沿、驱动器状态位），只能作为"事件时刻精确已知"这一理想情形的<strong>上界（oracle）</strong>。 因此本文所有"F-A 优于 F-B"的数字都应读作<strong>事件时刻精度的价值</strong>，而不是两种律的优劣比较；B 档的 $88.9$ rpm 是<em>本节一阶对象、旧 $e_1$ 包络检测器</em>的历史指标；真实对象定稿用 $D_m+g$，首周期 $7.91\pm3.45$\,rpm（§<a class="xref" href="#sec:pmsm">6</a>），不可与 $88.9$ 混引。</div></div>
 
 <p><strong>两条支撑性质。</strong></p>
 <p><strong>(P1) 不改变名义闭环</strong>：$\mathcal R_\alpha$ 只作用于状态 $v$，不改 $Q,\beta_3,\tau_0$；</p>
@@ -349,8 +349,8 @@ window.MathJax = {
 <p><strong>实现与边界</strong>：A 档用外部事件指示直接调用复位（<code>memflush</code>）；</p>
 <p>B 档定稿为记忆失配 $D_m&gt;0.2$ 且 $g&lt;0.05$、冷却 $0.3$\,s（§<a class="xref" href="#sec:fb-dilemma">7.1</a>）；</p>
 <p>旧包络开关仅保留回归，不得用于新结果。</p>
-<p>真实对象 8 种子：首周期 $6.20\pm2.65$\,rpm（$-84.1\%$），D$+$F-B $5.69$（$-85.4\%$），</p>
-<p>加载段 $0$ 误触发、跌落/稳态/电流不劣化；F-A 立即复位不是上界（$19.14$ 对延时 $20$\,ms 的 $2.73$）。</p>
+<p>真实对象 8 种子：首周期 $7.91\pm3.45$\,rpm（$-80.2\%$），D$+$F-B $7.24$（$-81.9\%$），</p>
+<p>加载段 $0$ 误触发；F-A 立即复位不是上界（$20.35$ 对延时 $20$\,ms 的 $3.44$）。</p>
 <p>“$\tau$ 越小收益越大”只在一阶对象上成立，真实对象最优在 $20$–$25$\,ms（§<a class="xref" href="#sec:pmsm">6</a>）。</p>
 
 <figure id="fig:echo-lawF"><img src="fig_echo_lawF.png" alt="图 7"><figcaption><span class="fignum">图 7</span> <strong>律 F 与三类对照的对比</strong>（同一工况、同一噪声实现；圆/方分别对应撤除/反相）。 (a)(b) 两种工况下的转速误差；(c) 首周期 $10$ Hz 回声（两工况并列）； (d) Pareto：横轴为稳态 $10$ Hz、纵轴为首周期回声——A 档（事件时刻复位）独占左下（$46.7/32.5$）， B 档次之（$48.7/88.9$），而 $Q$ 自适应几乎与定稿重合（$47.2/126.1$ 对 $46.7/127.7$）。 律 F 的两档把"复位时刻"这一唯一变量显式化了。</figcaption></figure>
@@ -412,7 +412,7 @@ window.MathJax = {
 <h3 id="h4">对象：三相 PWM 逆变器 + PMSM</h3>
 <p>模型为 <code>pmsm_inv_sim</code>：</p>
 
-<div class="tablewrap"><table><thead><tr><th>项目</th><th>取值</th><th>项目</th><th>取值</th></tr></thead><tbody><tr><td>母线 / 开关频率</td><td>$60$\,V / $10$\,kHz</td><td>死区 / 器件压降</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td>相电感 / 电阻</td><td>$L_d=L_q=0.57$\,mH / $0.175\,\Omega$</td><td>磁链 / 极对数</td><td>$\psi_f=0.01683$\,Wb / $4$</td></tr><tr><td>转动惯量</td><td>$J=1.89\times10^{-5}$ kg$\cdot$m$^2$</td><td>电流环带宽</td><td>$f_{ci}=2$\,kHz</td></tr><tr><td>重复通道</td><td>$\beta_3=4000$、$\tau_0=20$\,ms</td><td>速度环</td><td>$k_p=75.36$、$\omega_o=500$</td></tr><tr><td>dq 采样噪声</td><td>$\pm0.2$\,A（$10$\,kHz）</td><td>编码器</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>负载噪声 / 转速噪声</td><td>$0.025$\,N$\cdot$m / $6$\,rpm（$1\%$）</td><td>积分步长</td><td>$2\,\mu$s（$8$\,s 轨迹）</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>项目</th><th>取值</th><th>项目</th><th>取值</th></tr></thead><tbody><tr><td>母线 / 开关频率</td><td>$60$\,V / $10$\,kHz</td><td>死区 / 器件压降</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td>相电感 / 电阻</td><td>$L_d=L_q=0.57$\,mH / $0.175\,\Omega$</td><td>磁链 / 极对数</td><td>$\psi_f=0.01683$\,Wb / $4$</td></tr><tr><td>转动惯量</td><td>$J=1.89\times10^{-5}$ kg$\cdot$m$^2$</td><td>电流环带宽</td><td>$f_{ci}=500$\,Hz</td></tr><tr><td>重复通道</td><td>$\beta_3=4000$、$\tau_0=20$\,ms</td><td>速度环</td><td>$k_p=75.36$、$\omega_o=500$</td></tr><tr><td>dq 采样噪声</td><td>$\pm0.2$\,A（$10$\,kHz）</td><td>编码器</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>负载噪声 / 转速噪声</td><td>$0.025$\,N$\cdot$m / $6$\,rpm（$1\%$）</td><td>积分步长</td><td>$2\,\mu$s（$8$\,s 轨迹）</td></tr></tbody></table></div>
 
 <p>逆变器按中心对齐 PWM 比较、死区平均电压误差 $\mp V_{dc}T_d/T_{pwm}$、器件压降与导通电阻建模；</p>
 <p>电机侧 $L_d,L_q$ 与反电动势 $\omega_e\psi_f$ 显式进入 dq ODE；相电流由 dq 反变换得到，</p>
@@ -425,70 +425,62 @@ window.MathJax = {
 
 <figure id="fig:inv-demo"><img src="fig_inv_demo.png" alt="图 8"><figcaption><span class="fignum">图 8</span> <strong>真实逆变器对象的电流</strong>。(a) 转速误差；(b) 加载瞬态 $i_q/i_q^*$； (c) 相电流 $200\,\mu$s 放大（$10$\,kHz PWM 纹波）；(d) dq 电流 $20$\,ms 放大（$\pm0.2$\,A 采样噪声/纹波）； (e)(f) $i_q$/相电流频谱（$10$\,kHz 开关峰与死区谐波）。</figcaption></figure>
 
-<h3 id="h5">稳定性重调：$220$\,Hz 极限环</h3>
-<p>旧 dq 对象的 $\tau_0=5$\,ms、$\beta_3=2000$ 在真实对象上出现 $220$\,Hz 极限环</p>
-<p>（$i_q$ 标准差 $2.29$\,A、转速标准差 $81$\,rpm）：重复通道的 $1/\tau_0\approx200$\,Hz 极点</p>
-<p>叠加 PWM/电流环延迟，相位裕度不足。$4$\,s 周期负载实测：</p>
+<h3 id="h5">参数与 500\,Hz 低带宽代价</h3>
+<p>电流环取 $f_{ci}=500$\,Hz（$2\pi\cdot500\approx3142$\,rad/s），沿用 $\tau_0=20$\,ms、$\beta_3=4000$；</p>
+<p>$2$\,kHz 时扫出的 $220$\,Hz 极限环边界不再适用，500\,Hz 下未重做该扫描。$8$ 种子标准/实验室</p>
+<p>均稳定，但低带宽的代价直接体现在加载跌落：$2$\,kHz 时 Base 为 $-337$\,rpm，500\,Hz 下降到</p>
+<p>$-361$\,rpm（标准）与 $-480$\,rpm（实验室），稳态噪声底也由 $18.8$ 升到 $28.2$\,rpm。</p>
+<p>这是真实电流环带宽不足的物理结果，不是参数写错。</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>带载 RMS</th><th>撤除后 RMS</th><th>$i_q$ std</th></tr></thead><tbody><tr><td>无 RC</td><td>$258.05$</td><td>$17.98$</td><td>$1.68$</td></tr><tr><td>$\beta_3=2000,\ \tau_0=20$\,ms</td><td>$92.55$</td><td>$13.86$</td><td>$1.60$</td></tr><tr><td>$\beta_3=4000,\ \tau_0=20$\,ms, $f_{ci}=2$\,kHz</td><td>$\mathbf{56.03}$</td><td>$\mathbf{12.91}$</td><td>$1.58$</td></tr><tr><td>$\beta_3=4000,\ \tau_0=10$\,ms</td><td>$59.20$</td><td>$58.60$（不稳）</td><td>$2.10$</td></tr></tbody></table></div>
+<h3 id="h6">四档算法：8 种子（标准工况）</h3>
 
-<p>定稿取 $\tau_0=20$\,ms、$\beta_3=4000$、$f_{ci}=2$\,kHz；$\tau_0$ 不能再压到 $10$\,ms。</p>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>首周期 $10$\,Hz</th><th>加载跌落</th><th>稳态 $7$–$8$\,s</th><th>$7$–$8$\,s 复位</th></tr></thead><tbody><tr><td>Base</td><td>$40.05\pm0.77$</td><td>$-360.90\pm17.72$</td><td>$28.17\pm0.38$</td><td>0</td></tr><tr><td>律 D</td><td>$36.11\pm0.48$（$-9.8\%$）</td><td>$-362.81\pm15.58$</td><td>$27.67\pm0.53$</td><td>0</td></tr><tr><td>F-B（$D_m+g$）</td><td>$\mathbf{7.91\pm3.45}$（$-80.2\%$）</td><td>$\mathbf{-349.80\pm15.60}$</td><td>$27.79\pm0.60$</td><td>$3.1$</td></tr><tr><td>律 D $+$ F-B</td><td>$\mathbf{7.24\pm1.58}$（$-81.9\%$）</td><td>$\mathbf{-343.59\pm11.86}$</td><td>$27.85\pm0.41$</td><td>$3.1$</td></tr></tbody></table></div>
 
-<h3 id="h6">四档算法：8 种子</h3>
+<p>读数：(i) 500\,Hz 下律 D 只剩回声收益（$-9.8\%$），<strong>跌落均值反而略差</strong></p>
+<p>（$-362.81$ 对 Base $-360.90$），说明低带宽时抬 $k_p$ 已顶不住加载跌落；</p>
+<p>(ii) F-B 仍把回声压到 $7.91$（$-80.2\%$），跌落也比 Base 略好；</p>
+<p>(iii) D$+$F-B 回声 $7.24$（$-81.9\%$）、跌落 $-343.59$，两者兼顾；</p>
+<p>(iv) 稳态 $27.7$–$28.2$\,rpm，差异 $&lt;0.6$；残余复位约 $3$ 次/s。旧包络比值在 $2$\,kHz 已否决，</p>
+<p>500\,Hz 未再复测，不进入本表。</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>首周期 $10$\,Hz</th><th>加载跌落</th><th>稳态 $7$–$8$\,s</th><th>$7$–$8$\,s 复位</th></tr></thead><tbody><tr><td>Base</td><td>$39.05\pm0.47$</td><td>$-337.23\pm3.83$</td><td>$18.77\pm0.12$</td><td>0</td></tr><tr><td>律 D</td><td>$36.36\pm0.47$（$-6.9\%$）</td><td>$-331.39\pm4.83$（$-1.7\%$）</td><td>$18.70\pm0.16$</td><td>0</td></tr><tr><td>F-B（$D_m+g$）</td><td>$\mathbf{6.20\pm2.65}$（$-84.1\%$）</td><td>$-337.17\pm4.64$</td><td>$18.76\pm0.15$</td><td>$3.1$</td></tr><tr><td>律 D $+$ F-B</td><td>$\mathbf{5.69\pm2.78}$（$-85.4\%$）</td><td>$-330.46\pm3.89$（$-2.0\%$）</td><td>$18.76\pm0.16$</td><td>$3.2$</td></tr></tbody></table></div>
-
-<p>读数：(i) 律 D 仍 Pareto，但收益远小于旧对象（跌落仅 $-1.7\%$、回声 $-6.9\%$）：</p>
-<p>真实跌落由 PWM/电流环延迟、死区与噪声共同决定，抬 $k_p$ 能顶住的部分被压缩；</p>
-<p>(ii) F-B 用记忆失配 $D_m$ 与 $g$ 门控，$8/8$ 种子命中（首触发 $6.011$–$6.02$\,s），</p>
-<p>加载段 $0$ 次误触发；与律 D 组合 $-85.4\%$；</p>
-<p>(iii) 残余为 $7$–$8$\,s 每秒约 $3$ 次复位，稳态 $18.76$ 对 Base $18.77$（$6$\,rpm 噪声抬高基数，四者差 $&lt;0.1$）；</p>
-<p>(iv) 旧包络比值在同一对象上 $k=1.8$ 零触发、$k=1.3$ 虽命中但跌落 $-334\to-380$，</p>
-<p>已否决（§<a class="xref" href="#sec:fb-dilemma">7.1</a>）。</p>
-
-<figure id="fig:inv-mism"><img src="fig_inv_mism.png" alt="图 9"><figcaption><span class="fignum">图 9</span> <strong>记忆失配 F-B 的 8 种子结果</strong>。(a) 逐种子首周期 $10$\,Hz：$8/8$ 命中； (b) 均值$\pm$标准差；(c) 加载跌落与稳态：F-B 不劣化，D$+$F-B 略有改善。</figcaption></figure>
+<figure id="fig:inv-mism"><img src="fig_inv_mism.png" alt="图 9"><figcaption><span class="fignum">图 9</span> <strong>500\,Hz 下记忆失配 F-B 的 8 种子结果</strong>。(a) 逐种子首周期 $10$\,Hz； (b) 均值$\pm$标准差；(c) 加载跌落与稳态：F-B 回声最低，但跌落误差棒仍大。</figcaption></figure>
 
 <h3 id="sec:lab">实验室工况：律 D 与 F-B</h3>
-<p>按三档中的实验室工况（转速 $0.5\%=3$\,rpm、电流 $0.1$\,A、负载 $0.01$\,N$\cdot$m）重跑</p>
-<p>$8$ 种子；标准工况表保留，二者不混引。</p>
+<p>实验室工况（转速 $0.5\%=3$\,rpm、电流 $0.1$\,A、负载 $0.01$\,N$\cdot$m），8 种子：</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>首周期 $10$\,Hz</th><th>加载跌落</th><th>稳态 $7$–$8$\,s</th><th>$7$–$8$\,s 复位</th></tr></thead><tbody><tr><td>Base</td><td>$37.49\pm0.17$</td><td>$-336.19\pm2.66$</td><td>$8.45\pm0.11$</td><td>0</td></tr><tr><td>律 D</td><td>$35.38\pm0.19$（$-5.6\%$）</td><td>$\mathbf{-327.81\pm1.00}$（$-2.5\%$）</td><td>$8.33\pm0.06$</td><td>0</td></tr><tr><td>F-B（$D_m+g$）</td><td>$\mathbf{6.44\pm1.73}$（$-82.8\%$）</td><td>$-342.21\pm19.00$</td><td>$8.52\pm0.16$</td><td>$3.1$</td></tr><tr><td>律 D $+$ F-B</td><td>$\mathbf{4.94\pm1.93}$（$-86.8\%$）</td><td>$-346.73\pm28.14$</td><td>$8.45\pm0.14$</td><td>$3.2$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>首周期 $10$\,Hz</th><th>加载跌落</th><th>稳态 $7$–$8$\,s</th><th>$7$–$8$\,s 复位</th></tr></thead><tbody><tr><td>Base</td><td>$37.24\pm0.32$</td><td>$-480.43\pm21.84$</td><td>$14.82\pm0.22$</td><td>0</td></tr><tr><td>律 D</td><td>$34.86\pm0.18$（$-6.4\%$）</td><td>$-472.62\pm22.76$</td><td>$15.00\pm0.21$</td><td>0</td></tr><tr><td>F-B（$D_m+g$）</td><td>$\mathbf{6.19\pm0.57}$（$-83.4\%$）</td><td>$-475.25\pm23.46$</td><td>$14.62\pm0.30$</td><td>$3.1$</td></tr><tr><td>律 D $+$ F-B</td><td>$\mathbf{5.32\pm0.36}$（$-85.7\%$）</td><td>$-477.81\pm20.38$</td><td>$14.68\pm0.21$</td><td>$3.1$</td></tr></tbody></table></div>
 
-<p>读数：实验室工况下回声仍由 F-B 主导（$6.44$、D$+$F-B $4.94$，律 D 仅 $35.38$）；</p>
-<p>但<strong>跌落并不随噪声降低而变干净</strong>：律 D 为 $-327.81\pm1.00$，F-B 为 $-342.21\pm19.00$</p>
-<p>（种子 023 达 $-388.8$），D$+$F-B 为 $-346.73\pm28.14$（种子 025 达 $-385.1$）——低噪声下</p>
-<p>$g$ 门控在加载瞬态仍可能短暂失守，造成误复位与跌落种子离散。故实验室工况的结论是：</p>
-<p><strong>律 D 管跌落更稳，F-B 管回声更强；F-B 的跌落离群需带载门控修正</strong>（实验性</p>
-<p>$|i_q|&gt;1.5$\,A 门控可抑制，1 种子实测，未 8 种子定稿）。</p>
+<p>读数：500\,Hz 下加载跌落整体恶化到约 $-480$\,rpm，四者的均值差只有约 $8$\,rpm、标准差都在</p>
+<p>$20$\,rpm 以上——<strong>实验室低噪声并不能恢复低带宽丢失的跌落裕度</strong>；回声仍由 F-B 主导</p>
+<p>（$6.19$、D$+$F-B $5.32$，律 D $34.86$）。F-B 的跌落不再优于 Base（$-475.25$ 对 $-480.43$），</p>
+<p>但也不再出现 2\,kHz 时那种 $19$\,rpm 的离群；这是低带宽把瞬态普遍拉坏后的“均值接近”。</p>
 
-<figure id="fig:inv-lab"><img src="fig_inv_lab.png" alt="图 10"><figcaption><span class="fignum">图 10</span> <strong>实验室工况（$3$\,rpm / $0.1$\,A / $0.01$\,N$\cdot$m）</strong>： (a) 首周期 $10$\,Hz；(b) 加载跌落；(c) 稳态。F-B 回声最低，但跌落误差棒显著大于律 D。</figcaption></figure>
+<figure id="fig:inv-lab"><img src="fig_inv_lab.png" alt="图 10"><figcaption><span class="fignum">图 10</span> <strong>实验室工况（$3$\,rpm / $0.1$\,A / $0.01$\,N$\cdot$m，500\,Hz）</strong>： (a) 首周期 $10$\,Hz；(b) 加载跌落；(c) 稳态。F-B 回声最低，但四者跌落都在 $-480$ 附近且误差棒大。</figcaption></figure>
 
-<figure id="fig:inv-speed-lab"><img src="fig_inv_speed_lab.png" alt="图 11"><figcaption><span class="fignum">图 11</span> <strong>实验室工况：负载与完整转速</strong>（$3$\,rpm / $0.1$\,A / $0.01$\,N$\cdot$m）： (a) 负载转矩；(b) 完整转速 $0$–$8$\,s；(c) 突变窗 $1.9$–$2.5$\,s；(d) 回声窗 $5.9$–$6.4$\,s。转速为绝对转速。</figcaption></figure>
-
-<h3 id="sec:speedcases">额定转速 600/900/1200 rpm（10/15/20 Hz）</h3>
-<p>实验室噪声、$8$ 种子；同时改额定转速 $n_{\rm ref}$ 与重复周期 $T=1/f$（不能只改负载频率）。</p>
-
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>600 rpm（10 Hz）</th><th>900 rpm（15 Hz）</th><th>1200 rpm（20 Hz）</th></tr></thead><tbody><tr><td>Base</td><td>$37.49$ / $-336.2$</td><td>$33.09$ / $-340.1$</td><td>$28.19$ / $-354.8$</td></tr><tr><td>律 D</td><td>$35.38$ / $-327.8$</td><td>$32.11$ / $-334.4$</td><td>$27.81$ / $-349.8$</td></tr><tr><td>F-B</td><td>$\mathbf{6.44}$ / $-342.2$</td><td>$\mathbf{7.71}$ / $-343.9$</td><td>$\mathbf{7.54}$ / $-355.2$</td></tr><tr><td>D$+$F-B</td><td>$\mathbf{4.94}$ / $-346.7$</td><td>$\mathbf{7.06}$ / $-332.9$</td><td>$\mathbf{6.89}$ / $-348.8$</td></tr></tbody></table></div>
-
-<p>单元格为“首周期 $10$\,Hz / 加载跌落”。读数：无律的回声随转速升高由 $37.5$ 降到 $28.2$</p>
-<p>（高频被惯量衰减）；律 D 的相对收益由 $-5.6\%$ 缩到 $-1.3\%$、跌落由 $-2.5\%$ 缩到 $-1.4\%$；</p>
-<p>F-B 的绝对回声保持在 $6.4$–$7.7$，相对收益 $82.8\%\to76.7\%\to73.3\%$（分母变小）；</p>
-<p>D$+$F-B 在三个转速都最低。F-B 的跌落离散在 $600$\,rpm 最大（$\pm19.0$，种子 023 $-388.8$），</p>
-<p>$900/1200$\,rpm 降到 $\pm4.6/\pm2.9$，均值接近 Base。</p>
-
-<figure id="fig:inv-speeds"><img src="fig_inv_speeds.png" alt="图 12"><figcaption><span class="fignum">图 12</span> <strong>三个额定转速/负载频率</strong>（实验室噪声，8 种子）：(a) 首周期 $10$\,Hz； (b) 加载跌落；(c) 稳态。F-B 的回声在三个转速都低，但 $600$\,rpm 的跌落误差棒明显更大。</figcaption></figure>
+<figure id="fig:inv-speed-lab"><img src="fig_inv_speed_lab.png" alt="图 11"><figcaption><span class="fignum">图 11</span> <strong>实验室工况的负载与完整转速</strong>（500\,Hz）：(a) 负载转矩；(b) 完整转速 $0$–$8$\,s； (c) 突变窗 $1.9$–$2.5$\,s；(d) 回声窗 $5.9$–$6.4$\,s。转速为绝对转速。</figcaption></figure>
 
 <h3 id="h7">F-A 与 F-B：立即复位不是上界</h3>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>首周期 $10$\,Hz</th><th>加载跌落</th><th>稳态</th></tr></thead><tbody><tr><td>Base</td><td>$39.05\pm0.47$</td><td>$-337.23\pm3.83$</td><td>$18.77$</td></tr><tr><td>F-B（立即触发）</td><td>$6.20\pm2.65$</td><td>$-337.17\pm4.64$</td><td>$18.76$</td></tr><tr><td>F-A（$\tau=0$，立即）</td><td>$19.14\pm0.78$</td><td>$-337.23\pm3.83$</td><td>$18.59$</td></tr><tr><td>F-A（$\tau=20$\,ms）</td><td>$\mathbf{2.73\pm0.94}$</td><td>$-337.23\pm3.83$</td><td>$18.76$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>首周期 $10$\,Hz</th><th>加载跌落</th><th>稳态</th></tr></thead><tbody><tr><td>Base</td><td>$40.05\pm0.77$</td><td>$-360.90\pm17.72$</td><td>$28.17$</td></tr><tr><td>F-B（立即触发）</td><td>$7.91\pm3.45$</td><td>$-349.80\pm15.60$</td><td>$27.79$</td></tr><tr><td>F-A（$\tau=0$，立即）</td><td>$20.35\pm0.91$</td><td>$-360.90\pm17.72$</td><td>$27.60$</td></tr><tr><td>F-A（$\tau=20$\,ms）</td><td>$\mathbf{3.44\pm1.08}$</td><td>$-360.90\pm17.72$</td><td>$27.55$</td></tr></tbody></table></div>
 
-<p>“立即复位”的 F-A 反而比 F-B 差；延后 $20$\,ms 的 oracle 最好。复位时刻扫描（种子 018/021）</p>
-<p>在 $20$–$25$\,ms 取最小（$1.8$–$4.4$），$40$\,ms 回到 $23$\,rpm——旧时序律 $A_0(\tau)$ 的</p>
-<p>单调性在真实对象上不成立。原因是复位注入 $-v$，相位不对时与首周期回声相加；F-B 的</p>
-<p>$11$–$20$\,ms 检测滞后恰好落在最优附近，因此胜过“立即复位”的 F-A（图~<a class="xref" href="#fig:inv-fa">13</a>）。</p>
-<p>注意：这里的“回声”按<em>首周期 10 Hz</em> 定义；若改看 $6.0$–$6.1$\,s 的峰值，F-A 立即为 $129.9$、律 D 为 $105.2$（种子 018）——F-A 立即降低了 10 Hz 残余，但复位尖峰更大；两个指标不可互相替代。</p>
+<p>500\,Hz 下“立即复位”的 F-A 仍比 F-B 差（$20.35$ 对 $7.91$）；延时 $20$\,ms 的 oracle 最好</p>
+<p>（$3.44$）。复位时刻扫描（种子 018/021）在 $20$–$25$\,ms 取最小（$3.3$–$4.5$），$40$\,ms 回到</p>
+<p>$25.6$–$27.0$——旧时序律的单调性仍不成立。F-B 的 $11$–$20$\,ms 滞后接近最优；与 oracle 的</p>
+<p>残余差 $4.47$\,rpm 来自阈值/相位精度。注意“回声”按首周期 $10$\,Hz 定义，和复位尖峰是两个指标。</p>
 
-<figure id="fig:inv-fa"><img src="fig_inv_fa.png" alt="图 13"><figcaption><span class="fignum">图 13</span> <strong>F-B 与 F-A 对比</strong>。(a) 逐种子：F-B 优于“立即”F-A；(b) 均值$\pm$标准差； (c) 复位时刻扫描：最小值在 $20$–$25$\,ms，非单调。</figcaption></figure>
+<figure id="fig:inv-fa"><img src="fig_inv_fa.png" alt="图 12"><figcaption><span class="fignum">图 12</span> <strong>500\,Hz 下 F-B 与 F-A 对比</strong>。(a) 逐种子：F-B 优于“立即”F-A；(b) 均值$\pm$标准差； (c) 复位时刻扫描：最小值在 $20$–$25$\,ms，非单调。</figcaption></figure>
+
+<h3 id="sec:speedcases">额定转速 600/900/1200 rpm（10/15/20 Hz）</h3>
+<p>实验室噪声、$8$ 种子；同时改 $n_{\rm ref}$ 与 $T=1/f$：</p>
+
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>600 rpm（10 Hz）</th><th>900 rpm（15 Hz）</th><th>1200 rpm（20 Hz）</th></tr></thead><tbody><tr><td>Base</td><td>$37.24$ / $-480.4$</td><td>$32.80$ / $-450.8$</td><td>$29.66$ / $-463.5$</td></tr><tr><td>律 D</td><td>$34.86$ / $-472.6$</td><td>$31.51$ / $-436.8$</td><td>$29.23$ / $-447.1$</td></tr><tr><td>F-B</td><td>$\mathbf{6.19}$ / $-475.3$</td><td>$\mathbf{6.81}$ / $-465.7$</td><td>$\mathbf{9.80}$ / $-467.6$</td></tr><tr><td>D$+$F-B</td><td>$\mathbf{5.32}$ / $-477.8$</td><td>$\mathbf{6.40}$ / $-442.0$</td><td>$\mathbf{8.23}$ / $-451.8$</td></tr></tbody></table></div>
+
+<p>单元格为“首周期 $10$\,Hz / 加载跌落”。无律回声随转速 $37.2\to29.7$；律 D 相对收益</p>
+<p>$-6.4\%\to-1.5\%$；F-B 相对收益 $83.4\%\to79.2\%\to67.0\%$，绝对回声 $6.2$–$9.8$；</p>
+<p>D$+$F-B 在三个转速仍最低。500\,Hz 下所有跌落都在 $-437$ 到 $-481$，900/1200\,rpm 的 F-B 跌落</p>
+<p>甚至略差于 Base（$-465.7$ 对 $-450.8$、$-467.6$ 对 $-463.5$）——低带宽下 F-B 的瞬态代价更明显。</p>
+
+<figure id="fig:inv-speeds"><img src="fig_inv_speeds.png" alt="图 13"><figcaption><span class="fignum">图 13</span> <strong>三个额定转速/负载频率（500\,Hz，实验室噪声，8 种子）</strong>：(a) 首周期 $10$\,Hz； (b) 加载跌落；(c) 稳态。F-B 回声在三个转速都低，但跌落误差棒与均值都不再优于 Base。</figcaption></figure>
 
 <h3 id="h8">本节适用边界（如实披露）</h3>
 
@@ -500,13 +492,13 @@ window.MathJax = {
 
 <div class="eqwrap" id="eq:Dm-report"><div class="eq">\[D_m(t)=\frac{\bigl|E_v(t)-E_v(t-T)\bigr|}{E_v(t-T)+\varepsilon_v}, \qquad E_v(t)=\frac1T\int_{t-T}^{t}v^2\,\mathrm d\tau , \]</div><div class="eqno">(23)</div></div>
 <p>触发条件为 $D_m&gt;0.2$、$g&lt;0.05$（$g$ 为 $e_1$ 的 $T$ 窗均值检测器，挡加载阶跃）、冷却 $0.3$\,s。</p>
-<p>真实对象 $8$ 种子：首周期 $10$\,Hz 由 $39.05$ 降到 $6.20$（$-84.1\%$），与律 D 组合</p>
-<p>$5.69$（$-85.4\%$）；跌落/稳态/电流不劣化；加载段 $0$ 次误触发；首触发 $6.011$–$6.02$\,s。</p>
+<p>真实对象 $8$ 种子：首周期 $10$\,Hz 由 $40.05$ 降到 $7.91$（$-80.2\%$），与律 D 组合</p>
+<p>$7.24$（$-81.9\%$）；跌落 $-349.80/-343.59$；加载段 $0$ 次误触发；首触发 $6.011$–$6.02$\,s。</p>
 <p>旧包络比值在同一对象上 $k=1.8$ 零触发（事件 $R=1.32$，与加载段 $1.3\sim1.5$ 重叠），</p>
 <p>$k=1.3$ 虽在 $6.004$\,s 命中，但跌落 $-334\to-380$、加载段 $7$ 次误触发，已否决。</p>
 
 <p>F-A 是“复位时刻/相位已知”的 oracle，不是触发律；但<strong>立即复位（$\tau=0$）不是上界</strong>：</p>
-<p>实测 $\tau=0$ 为 $19.14$、$\tau=20$\,ms 为 $2.73$、F-B 为 $6.20$；复位时刻扫描最小值在</p>
+<p>实测 $\tau=0$ 为 $20.35$、$\tau=20$\,ms 为 $3.44$、F-B 为 $7.91$；复位时刻扫描最小值在</p>
 <p>$20$–$25$\,ms，$40$\,ms 回到 $21$\,rpm。原因是复位注入 $-v$，相位不对时与首周期回声相加；</p>
 <p>旧时序律 $A_0(\tau)$ 的单调性在真实对象上不成立。反相事件需 $\alpha=-1$ 的方向判别，</p>
 <p>清空型 F-B 在反相下 $8/8$ 种子 $0$ 触发（退化为基线 $174.0\pm0.9$\,rpm），不可复用。</p>
@@ -519,14 +511,14 @@ window.MathJax = {
 <p>本表只列<strong>真实逆变器对象</strong>（<code>pmsm_inv_sim</code>）的定稿参数；旧一阶/降阶电流环对象的</p>
 <p>参数与数字已从正文删除。加粗者为易被追问、正文中易漏标的参数。</p>
 
-<div class="tablewrap"><table><thead><tr><th>类别</th><th>参数</th><th>符号</th><th>取值</th></tr></thead><tbody><tr><td>电机</td><td>相电阻 / 相电感</td><td>$R$ / $L_d=L_q$</td><td>$0.175\,\Omega$ / $0.57$\,mH</td></tr><tr><td></td><td>磁链 / 极对数</td><td>$\psi_f$ / $p$</td><td>$0.01683$\,Wb / $4$</td></tr><tr><td></td><td>转动惯量</td><td>$J$</td><td>$1.89\times10^{-5}$ kg$\cdot$m$^2$</td></tr><tr><td></td><td>额定转矩 / 电流</td><td>$T_{\rm rated}$ / $I_{\rm rated}$</td><td>$0.637$ N$\cdot$m / $6.5$\,A（驱动器 $21$\,A）</td></tr><tr><td>逆变器</td><td>母线 / 开关频率</td><td>$V_{dc}$ / $f_{sw}$</td><td>$60$\,V / $10$\,kHz</td></tr><tr><td></td><td>死区 / 器件压降</td><td>$T_d$ / $V_d$</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td></td><td>导通电阻</td><td>$R_{on}$</td><td>$10$\,m$\Omega$</td></tr><tr><td>电流环</td><td>闭环带宽</td><td>$f_{ci}$</td><td>$2$\,kHz</td></tr><tr><td></td><td>PI 增益</td><td>$k_p^i$ / $k_i^i$</td><td>$7.16$ V/A / $2.20\times10^{3}$ V/(A$\cdot$s)</td></tr><tr><td>速度环</td><td>比例增益 / 观测器带宽</td><td>$k_p$ / $\omega_o$</td><td>$75.36$ / $500$ rad/s</td></tr><tr><td>重复通道</td><td>周期 / 内模增益</td><td>$T$ / $\beta_3$</td><td>$0.1$\,s / $4000$</td></tr><tr><td></td><td>低通常数 / 遗忘因子</td><td>$\tau_0$ / $Q_0$</td><td>$20$\,ms / $0.98$</td></tr><tr><td></td><td>饱和系数</td><td>$\zeta$</td><td>$0.2$</td></tr><tr><td>律 F-B</td><td>失配阈值 / 归一化下限</td><td>$D_m$ / $\varepsilon_v$</td><td>$0.2$ / $1\times10^{-6}$</td></tr><tr><td></td><td>门控阈值 / 冷却</td><td>$g_{\max}$ / $T_c$</td><td>$0.05$ / $0.3$\,s</td></tr><tr><td>噪声</td><td>dq 采样噪声</td><td>—</td><td>$\pm0.2$\,A（均匀，$10$\,kHz）</td></tr><tr><td></td><td>转速 / 负载噪声</td><td>—</td><td>$6$\,rpm（$1\%$）/ $0.025$\,N$\cdot$m（标准；三档见 §<a class="xref" href="#sec:pmsm">6</a>）</td></tr><tr><td>时序</td><td>积分 / PWM / 速度环</td><td>$\Delta t$ / $T_{pwm}$ / $T_s$</td><td>$2\,\mu$s / $100\,\mu$s / $1$\,ms</td></tr><tr><td></td><td>编码器</td><td>—</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>工况</td><td>阶跃 / 不对中簇</td><td>—</td><td>$0.50$ 额定 / $10$\,Hz、$A=0.30$（$2$–$6$\,s）</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>类别</th><th>参数</th><th>符号</th><th>取值</th></tr></thead><tbody><tr><td>电机</td><td>相电阻 / 相电感</td><td>$R$ / $L_d=L_q$</td><td>$0.175\,\Omega$ / $0.57$\,mH</td></tr><tr><td></td><td>磁链 / 极对数</td><td>$\psi_f$ / $p$</td><td>$0.01683$\,Wb / $4$</td></tr><tr><td></td><td>转动惯量</td><td>$J$</td><td>$1.89\times10^{-5}$ kg$\cdot$m$^2$</td></tr><tr><td></td><td>额定转矩 / 电流</td><td>$T_{\rm rated}$ / $I_{\rm rated}$</td><td>$0.637$ N$\cdot$m / $6.5$\,A（驱动器 $21$\,A）</td></tr><tr><td>逆变器</td><td>母线 / 开关频率</td><td>$V_{dc}$ / $f_{sw}$</td><td>$60$\,V / $10$\,kHz</td></tr><tr><td></td><td>死区 / 器件压降</td><td>$T_d$ / $V_d$</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td></td><td>导通电阻</td><td>$R_{on}$</td><td>$10$\,m$\Omega$</td></tr><tr><td>电流环</td><td>闭环带宽</td><td>$f_{ci}$</td><td>$2$\,kHz</td></tr><tr><td></td><td>PI 增益</td><td>$k_p^i$ / $k_i^i$</td><td>$1.79$ V/A / $5.50\times10^{2}$ V/(A$\cdot$s)</td></tr><tr><td>速度环</td><td>比例增益 / 观测器带宽</td><td>$k_p$ / $\omega_o$</td><td>$75.36$ / $500$ rad/s</td></tr><tr><td>重复通道</td><td>周期 / 内模增益</td><td>$T$ / $\beta_3$</td><td>$0.1$\,s / $4000$</td></tr><tr><td></td><td>低通常数 / 遗忘因子</td><td>$\tau_0$ / $Q_0$</td><td>$20$\,ms / $0.98$</td></tr><tr><td></td><td>饱和系数</td><td>$\zeta$</td><td>$0.2$</td></tr><tr><td>律 F-B</td><td>失配阈值 / 归一化下限</td><td>$D_m$ / $\varepsilon_v$</td><td>$0.2$ / $1\times10^{-6}$</td></tr><tr><td></td><td>门控阈值 / 冷却</td><td>$g_{\max}$ / $T_c$</td><td>$0.05$ / $0.3$\,s</td></tr><tr><td>噪声</td><td>dq 采样噪声</td><td>—</td><td>$\pm0.2$\,A（均匀，$10$\,kHz）</td></tr><tr><td></td><td>转速 / 负载噪声</td><td>—</td><td>$6$\,rpm（$1\%$）/ $0.025$\,N$\cdot$m（标准；三档见 §<a class="xref" href="#sec:pmsm">6</a>）</td></tr><tr><td>时序</td><td>积分 / PWM / 速度环</td><td>$\Delta t$ / $T_{pwm}$ / $T_s$</td><td>$2\,\mu$s / $100\,\mu$s / $1$\,ms</td></tr><tr><td></td><td>编码器</td><td>—</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>工况</td><td>阶跃 / 不对中簇</td><td>—</td><td>$0.50$ 额定 / $10$\,Hz、$A=0.30$（$2$–$6$\,s）</td></tr></tbody></table></div>
 
 <p><strong>七窗口定义</strong>：空载 $[0.5,2.0)$、加载瞬态 $[2.0,2.5)$、事件1 $[2.5,2.6)$、</p>
 <p>事件2 $[3.0,3.5)$、事件后 $[3.5,4.0)$、持续段 $[4.0,6.0)$、稳态段 $[7.0,8.0)$ 秒。</p>
 
 <h2 id="sec:concl">结论</h2>
 
-<ol><li><strong>建模</strong>：一阶对象 $+$ 低通重复通道（内模）$+$ 灰箱 ESO $+$ 双通道自适应；三条回路共用驱动 $e_f=\tau\dot v$，故必须整体处理。</li><li><strong>自适应律与实现逐条对应</strong>（§<a class="xref" href="#sec:law">3</a>）：驱动取<em>零均值实参</em> $w=\phi\big((e_f^{2}-E_o)/(E_o+\varepsilon),c\big)$ 的<em>快慢两路带通</em> $D=w_f-w_l$（$\tau_f^w=5T$、$\tau_l^w=50T$）；$Q$ 取<em>单向死区</em> $\max(0,D)$。</li><li><strong>一致有界性（UUB）</strong>（§<a class="xref" href="#sec:uub">4.2</a>、注 <a class="xref" href="#rem:robust">11</a>）：$v$ 通道自持 UUB（界 $\beta_3/(1-Q_0)$，与 $e_1$ 无关）；ESO 误差界 $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^2+(H/\omega_o)^2}$；跟踪误差界 $\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$。<strong>调度不放大界</strong>：$g\in[0,1)$ 且 $\kappa\ge0$ $\Rightarrow$ 增益只增不减 $\Rightarrow$ 名义界即调度闭环的界；<strong>仍开放</strong>的是随机噪声下的界（不在确定性框架内）与界的收紧。</li><li><strong>归一化与零均值实参的作用</strong>（注 <a class="xref" href="#rem:zero-mean">10</a>）：零均值实参使 $\overline{D}\to0$，$Q$ 的平衡点回到 $1$ 附近、具备调节能力；恒正实参会把 $Q$ 单向压到底。</li><li><strong>如实报告的边界</strong>：见 §<a class="xref" href="#sec:limit">7</a>（参数口径不可互引、$D_m$ 的噪声界、 F-A 的立即复位不是上界、UUB 与检测器无关、台架待测）。</li><li><strong>真实逆变器对象上的验证</strong>（§<a class="xref" href="#sec:pmsm">6</a>）：对象为三相 $10$\,kHz PWM、死区、 反电动势、编码器量化与 $\pm0.2$\,A dq 采样。重整定 $\tau_0=20$\,ms、$\beta_3=4000$、 $f_{ci}=2$\,kHz 后：(a) 律 D 仍是 Pareto 但收益缩小——跌落 $-337.23\to-331.39$\,rpm （$-1.7\%$）、回声 $39.05\to36.36$（$-6.9\%$）；(b) F-B 用记忆失配 $D_m+g$： 首周期 $10$\,Hz $39.05\to6.20$（$-84.1\%$），与律 D 组合 $5.69$（$-85.4\%$）， 加载段 $0$ 误触发、跌落/稳态/电流不劣化；(c) 旧包络比值与旧一阶对象数字 （$66.80\to48.36$、F-B $51.7$）已删除，不得再引用。</li><li><strong>律 F 的检测量与相位</strong>（§<a class="xref" href="#sec:fb-dilemma">7.1</a>）：$D_m&gt;0.2$ 且 $g&lt;0.05$， 首触发 $6.011$–$6.02$\,s；F-A 立即复位不是上界（$19.14$ 对延时 $20$\,ms 的 $2.73$）， F-B 的 $11$–$20$\,ms 滞后恰好接近最优；固定延时、裸 $v$ 阈值、$20$\,ms 正交相位三种 相位等待均为负结果；反相需 $\alpha=-1$，不得复用清空型 F-B。</li></ol>
+<ol><li><strong>建模</strong>：一阶对象 $+$ 低通重复通道（内模）$+$ 灰箱 ESO $+$ 双通道自适应；三条回路共用驱动 $e_f=\tau\dot v$，故必须整体处理。</li><li><strong>自适应律与实现逐条对应</strong>（§<a class="xref" href="#sec:law">3</a>）：驱动取<em>零均值实参</em> $w=\phi\big((e_f^{2}-E_o)/(E_o+\varepsilon),c\big)$ 的<em>快慢两路带通</em> $D=w_f-w_l$（$\tau_f^w=5T$、$\tau_l^w=50T$）；$Q$ 取<em>单向死区</em> $\max(0,D)$。</li><li><strong>一致有界性（UUB）</strong>（§<a class="xref" href="#sec:uub">4.2</a>、注 <a class="xref" href="#rem:robust">11</a>）：$v$ 通道自持 UUB（界 $\beta_3/(1-Q_0)$，与 $e_1$ 无关）；ESO 误差界 $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^2+(H/\omega_o)^2}$；跟踪误差界 $\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$。<strong>调度不放大界</strong>：$g\in[0,1)$ 且 $\kappa\ge0$ $\Rightarrow$ 增益只增不减 $\Rightarrow$ 名义界即调度闭环的界；<strong>仍开放</strong>的是随机噪声下的界（不在确定性框架内）与界的收紧。</li><li><strong>归一化与零均值实参的作用</strong>（注 <a class="xref" href="#rem:zero-mean">10</a>）：零均值实参使 $\overline{D}\to0$，$Q$ 的平衡点回到 $1$ 附近、具备调节能力；恒正实参会把 $Q$ 单向压到底。</li><li><strong>如实报告的边界</strong>：见 §<a class="xref" href="#sec:limit">7</a>（参数口径不可互引、$D_m$ 的噪声界、 F-A 的立即复位不是上界、UUB 与检测器无关、台架待测）。</li><li><strong>真实逆变器对象上的验证</strong>（§<a class="xref" href="#sec:pmsm">6</a>）：对象为三相 $10$\,kHz PWM、死区、 反电动势、编码器量化与 $\pm0.2$\,A dq 采样。重整定 $\tau_0=20$\,ms、$\beta_3=4000$、 $f_{ci}=500$\,Hz 后：(a) 律 D 只剩回声收益——回声 $40.05\to36.11$（$-9.8\%$）， 跌落反而略差（$-360.90\to-362.81$）；(b) F-B 用记忆失配 $D_m+g$： 首周期 $10$\,Hz $40.05\to7.91$（$-80.2\%$），与律 D 组合 $7.24$（$-81.9\%$）， 跌落 $-349.80/-343.59$，加载段 $0$ 误触发；(c) 旧包络比值与旧一阶对象数字 （$66.80\to48.36$、F-B $51.7$）已删除，不得再引用。</li><li><strong>律 F 的检测量与相位</strong>（§<a class="xref" href="#sec:fb-dilemma">7.1</a>）：$D_m&gt;0.2$ 且 $g&lt;0.05$， 首触发 $6.011$–$6.02$\,s；F-A 立即复位不是上界（$19.14$ 对延时 $20$\,ms 的 $2.73$）， F-B 的 $11$–$20$\,ms 滞后恰好接近最优；固定延时、裸 $v$ 阈值、$20$\,ms 正交相位三种 相位等待均为负结果；反相需 $\alpha=-1$，不得复用清空型 F-B。</li></ol>
 
 <h2 id="sec:handoff">接手说明（给下一个 agent）</h2>
 <p><strong>现状</strong>：本文档 v4.0 的<strong>数值口径严格为真实逆变器对象</strong></p>
@@ -538,7 +530,7 @@ window.MathJax = {
 
 <p><strong>标准工作流</strong>：</p>
 
-<ol><li><strong>定口径</strong>：真实对象参数（$f_{sw}=10$\,kHz、死区 $2\,\mu$s、$f_{ci}=2$\,kHz、 $\beta_3=4000$、$\tau_0=20$\,ms、$D_m=0.2$、$g_{\max}=0.05$）； 旧对象参数不得混入。</li><li><strong>跑仿真</strong>：正式数据一律用 <code>sim_inv</code>（<code>pmsm_inv_sim</code>）； <code>adrc_sim</code>/<code>sim_mr3</code> 只作理论/回归对照。</li><li><strong>存轨迹</strong>：<code>np.savez</code> 保存 $t/y/i_q/i_d/i_a$，文件名带配置与日期。</li><li><strong>出图</strong>：脚本只读数据、不重新仿真；图注写清口径（步长、窗长、种子、噪声）。</li><li><strong>改文本</strong>：先改 <code>tex</code>；被替换的旧口径必须删除（文首版本纪律）。</li><li><strong>重编</strong>：本文档与附注 <code>xelatex</code> 两遍；HTML 用 <code>_mkhtml.py</code> 生成并跑自检。</li></ol>
+<ol><li><strong>定口径</strong>：真实对象参数（$f_{sw}=10$\,kHz、死区 $2\,\mu$s、$f_{ci}=500$\,Hz、 $\beta_3=4000$、$\tau_0=20$\,ms、$D_m=0.2$、$g_{\max}=0.05$）； 旧对象参数不得混入。</li><li><strong>跑仿真</strong>：正式数据一律用 <code>sim_inv</code>（<code>pmsm_inv_sim</code>）； <code>adrc_sim</code>/<code>sim_mr3</code> 只作理论/回归对照。</li><li><strong>存轨迹</strong>：<code>np.savez</code> 保存 $t/y/i_q/i_d/i_a$，文件名带配置与日期。</li><li><strong>出图</strong>：脚本只读数据、不重新仿真；图注写清口径（步长、窗长、种子、噪声）。</li><li><strong>改文本</strong>：先改 <code>tex</code>；被替换的旧口径必须删除（文首版本纪律）。</li><li><strong>重编</strong>：本文档与附注 <code>xelatex</code> 两遍；HTML 用 <code>_mkhtml.py</code> 生成并跑自检。</li></ol>
 
 <p><strong>噪声口径（真实对象）</strong>：三档工况（实验室/标准/恶劣）见 §<a class="xref" href="#sec:pmsm">6</a>；</p>
 <p>默认标准档：dq 采样噪声 <code>i_noise_peak</code>$=0.2$\,A（均匀 $\pm0.2$）、</p>

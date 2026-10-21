@@ -42,6 +42,8 @@ def inline(t):
     t = t.replace("\\pv", "\\textsf").replace("\\Geff", "\\Gamma_{\\mathrm{eff}}")
     t = t.replace("\\taub", "\\tau_B").replace("\\tauf", "\\tau_f").replace("\\taul", "\\tau_l")
     t = t.replace("\\ef", "e_f")
+    # URL：\url{...} → 纯文本
+    t = re.sub(r"\\url\{([^}]*)\}", r"\1", t)
     # 参考文献类
     t = re.sub(r"\\(eq)?ref\{([^}]+)\}", _ref_html, t)
     # 文本样式

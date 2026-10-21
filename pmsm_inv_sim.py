@@ -81,7 +81,7 @@ def sim_inv(t, TL, cfg=None):
     flush_alpha = cfg.get("flush_alpha", 0.0)  # 0=清空；-1=反相
 
     # ---- 电流环 ----
-    fci = cfg.get("fci", 1000.0); wci = TWO_PI * fci
+    fci = cfg.get("fci", 500.0); wci = TWO_PI * fci
     kpi = L_S * wci; kii = R_S * wci
 
     # ---- 采样与噪声 ----
@@ -319,3 +319,4 @@ def sim_inv(t, TL, cfg=None):
                 vd=vd_o[:m], vq=vq_o[:m], u=u_o[:m], vqc=vqc_o[:m],
                 iqr=iqr_o[:m], fl=fl_o[:m], dm=dm_o[:m],
                 trig=trig_log, oracle=oracle_log)
+

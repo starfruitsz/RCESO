@@ -56,7 +56,7 @@ def main():
     seeds = SEEDS_ALL[:nseed]
     t, TL = build_case()
     base_kw = dict(i_noise_peak=NC.NOISE["i_noise_peak"],
-                   fci=2000.0, beta3=4000.0, tau0=20e-3)
+                   fci=500.0, beta3=4000.0, tau0=20e-3)
     out = {name: [] for name, _ in CFG}
     for sd in seeds:
         for name, kw in CFG:
@@ -85,3 +85,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
