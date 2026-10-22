@@ -1,0 +1,11 @@
+{
+ "n_ref": 600.0,
+ "amp_ang": 0.1,
+ "fci": 500.0,
+ "beta3": 0.0,
+ "steady_rms": 74.13,
+ "load_rms": 74.48,
+ "iq_std": 0.899,
+ "iq_max": 5.28,
+ "iqr_max": 4.61
+}

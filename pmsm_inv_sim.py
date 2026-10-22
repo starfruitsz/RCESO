@@ -82,6 +82,15 @@ def sim_inv(t, TL, cfg=None):
     # 2026-10-22：检测器触发的复位算子 R_alpha。0=清空（默认，v4.0 行为）；
     #   -1 = 反相复位（v->-v，缓冲同时取反），用于"反相突变"事件——此时清空是错的动作。
     ff_alpha = float(cfg.get("ff_alpha", 0.0))
+    # 2026-10-22：角度锁相周期负载 T(φ)=T(φ+2π)，dφ/dt=ω（φ 为机械角）。
+    #   tl_ang       : 单位幅值的周期表（长度 N，均匀铺满 0..2π），None=关闭
+    #   tl_ang_amp   : 该分量的幅值（N·m）
+    #   tl_ang_start : 该分量开始作用的时刻（s）
+    _tla = cfg.get("tl_ang", None)
+    _TLA = np.asarray(_tla, dtype=float) if _tla is not None else None
+    _TLAA = float(cfg.get("tl_ang_amp", 0.0))
+    _TLAK = (len(_TLA) / TWO_PI) if _TLA is not None else 0.0
+    _nang0 = int(round(float(cfg.get("tl_ang_start", 0.0)) / dt))
     ff_wait = cfg.get("ff_wait", 0.0)          # 检测后再等待的相位延迟（s），0=立即复位
     ff_confirm = cfg.get("ff_confirm", 0.0)    # 连续确认窗（ms），0=首拍触发
     ff_imin = cfg.get("ff_imin", 0.0)          # 带载门控：|iq| 低于该值不复位（A）
@@ -160,6 +169,7 @@ def sim_inv(t, TL, cfg=None):
     u_o = np.zeros(no); vqc_o = np.zeros(no); iqr_o = np.zeros(no)
     fl_o = np.zeros(no)
     dm_o = np.zeros(no)
+    tl_o = np.zeros(no)          # 实际施加的负载转矩（含角度锁相分量），供出图/核对
 
     def leg(g, cur):
         s = 1.0 if cur > 0.0 else (-1.0 if cur < 0.0 else 0.0)
@@ -190,7 +200,11 @@ def sim_inv(t, TL, cfg=None):
         diq = (vq - R_S * idq[1] - we * L_S * idq[0] - we * PSI_F) / L_S
         idq[0] += dt * did; idq[1] += dt * diq
         Te = 1.5 * P_POL * PSI_F * idq[1]
-        w += dt * (Te - (TL[k] + TLn[min(k // nTstep, nT - 1)])) / J_M
+        _tl = TL[k]
+        if _TLA is not None and k >= _nang0:          # 角度锁相分量：按当前机械角查表
+            _phim = (th / P_POL) % TWO_PI
+            _tl += _TLAA * _TLA[int(_phim * _TLAK) % len(_TLA)]
+        w += dt * (Te - (_tl + TLn[min(k // nTstep, nT - 1)])) / J_M
 
         # ---- 电流环：每个 PWM 周期一次 ----
         if k % npwm == 0:
@@ -331,10 +345,11 @@ def sim_inv(t, TL, cfg=None):
             y_o[j] = w / w_ref; id_o[j] = idq[0]; iq_o[j] = idq[1]
             ia_o[j] = ia; vd_o[j] = vd; vq_o[j] = vq
             u_o[j] = u; vqc_o[j] = vq_cmd; iqr_o[j] = u * I_BASE
+            tl_o[j] = _tl
     tt = t[::dec]
     m = min(len(tt), no)
     return dict(t=tt[:m], y=y_o[:m], id=id_o[:m], iq=iq_o[:m], ia=ia_o[:m],
                 vd=vd_o[:m], vq=vq_o[:m], u=u_o[:m], vqc=vqc_o[:m],
-                iqr=iqr_o[:m], fl=fl_o[:m], dm=dm_o[:m],
+                iqr=iqr_o[:m], fl=fl_o[:m], dm=dm_o[:m], tl=tl_o[:m],
                 trig=trig_log, oracle=oracle_log)
 
