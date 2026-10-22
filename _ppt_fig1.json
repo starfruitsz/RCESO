@@ -2,10 +2,22 @@
  "n_ref": 600.0,
  "amp_ang": 0.1,
  "fci": 500.0,
- "beta3": 0.0,
- "steady_rms": 74.13,
- "load_rms": 74.48,
- "iq_std": 0.899,
- "iq_max": 5.28,
- "iqr_max": 4.61
+ "cases": {
+  "eso": {
+   "label": "纯 ESO",
+   "steady_rms": 74.28,
+   "iq_std": 0.896,
+   "iq_max": 5.2,
+   "iqr_max": 4.57,
+   "beta3": 0.0
+  },
+  "rceso": {
+   "label": "无自适应 RCESO",
+   "steady_rms": 32.57,
+   "iq_std": 0.959,
+   "iq_max": 6.17,
+   "iqr_max": 5.42,
+   "beta3": 4000.0
+  }
+ }
 }
