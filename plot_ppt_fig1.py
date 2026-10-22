@@ -43,9 +43,9 @@ y = D["y"] * N
 ax[1].plot(t[::step], y[::step], color=C_N, lw=0.9)
 ax[1].axhline(N, color="#888", ls=":", lw=1.0)
 ax[1].set_ylabel("转速 / rpm")
-ax[1].set_ylim(0.55 * N, 1.22 * N)
+ax[1].set_ylim(0, 1.25 * N)
 ax[1].axvline(2.0, color="#999", ls="--", lw=1.0)
-ax[1].text(2.18, 0.985 * 1.22 * N - 0.02 * N,
+ax[1].text(2.18, 1.25 * N * 0.955,
            "稳态转速脉动 %.0f rpm RMS（≈%.1f%% 额定）" % (J["steady_rms"], 100 * J["steady_rms"] / N),
            fontsize=13, color=C_N,
            bbox=dict(facecolor="white", edgecolor="none", alpha=0.85, pad=2.5))
