@@ -49,9 +49,6 @@ ax[1].yaxis.set_major_locator(MultipleLocator(100))
 ax[1].yaxis.set_minor_locator(MultipleLocator(50))
 ax[1].axvline(2.0, color="#999", ls="--", lw=1.0)
 # 纵轴跨度与峰峰标注（让观众一眼知道这个波动在什么刻度下）
-ax[1].text(0.012, 0.965, "纵轴 0–850 rpm（满刻度 850）", transform=ax[1].transAxes,
-           fontsize=11.5, color="#555", va="top",
-           bbox=dict(facecolor="white", edgecolor="none", alpha=0.8, pad=2))
 _ys = (t >= 5.0) & (t < 6.0)
 _y0, _y1 = y[_ys].min(), y[_ys].max()
 ax[1].annotate("", xy=(7.62, _y0), xytext=(7.62, _y1),
