@@ -7,10 +7,13 @@
 import math
 import numpy as np
 
+from eso_gain import make_gains
+
 
 def sim_mr(t, r, d, b, b0, wo, kp, Tper, zeta, beta3, tau0, mu, s2, dt_ci, NI=None, DN=None,
            law="none", kp_boost=0.0, wo_sched=0.0, det_eps=0.01, t_ctrl=0.0, Q0=0.98,
-           e0_win=None, phi_c=0.1):
+           e0_win=None, phi_c=0.1,
+           eso_law="fal", eso_a=0.75, eso_a1=1.0, eso_delta=0.10, eso_lam=10.0):
     """law: 'none'(ESO) | 'rc'(RCESO) | 'adapt'（RC + Q/B/D 三调度）
     t_ctrl: 控制器周期（0=与对象同步）"""
     n = len(t); dt = float(t[1] - t[0])
@@ -29,6 +32,8 @@ def sim_mr(t, r, d, b, b0, wo, kp, Tper, zeta, beta3, tau0, mu, s2, dt_ci, NI=No
     ys = np.zeros(n); ias = np.zeros(n); Qs = np.zeros(n)
     b3 = 0.0 if law == "none" else beta3
     bs1, bs2 = 2.0 * wo, wo * wo
+    ESO_G1, ESO_G2 = make_gains(dict(eso_law=eso_law, eso_a=eso_a, eso_a1=eso_a1,
+                                     eso_delta=eso_delta, eso_lam=eso_lam))
     for k in range(1, n):
         rk = r[k]; dk = d[k]
         # ---- 对象：每步积分（用保持的 u）----
@@ -65,8 +70,9 @@ def sim_mr(t, r, d, b, b0, wo, kp, Tper, zeta, beta3, tau0, mu, s2, dt_ci, NI=No
         kpe = kp * (1.0 + kp_boost * g)
         b1e = bs1 * (1.0 + wo_sched * g); b2e = bs2 * (1.0 + wo_sched * g)
         # ESO（控制器步长 dtc）
-        z1n = z1 + dtc * (z2 + b0 * u + v + b1e * eo)
-        z2n = z2 + dtc * (b2e * eo)
+        _g1 = ESO_G1(eo); _g2 = ESO_G2(eo)
+        z1n = z1 + dtc * (z2 + b0 * u + v + b1e * _g1)
+        z2n = z2 + dtc * (b2e * _g2)
         # 重复通道：tau*v_dot + v = chi，chi = Q*v(t-T) + b3*tanh(e1/zeta)
         chi = (Q * vd + b3 * math.tanh(e1 / zeta)) if b3 > 0.0 else 0.0
         vn = chi + (v - chi) * math.exp(-dtc / tau0)
@@ -131,7 +137,8 @@ if __name__ == "__main__":
 def sim_mr3(t, r, d, b, b0, wo, kp, Tper, zeta, beta3, tau0,
             law="rc", kp_boost=0.0, wo_sched=0.0, det_eps=0.01,
             dt_ci=50e-6, t_ctrl=1e-3, Q0=0.98, tau_ci=None,
-            NI=None, DN=None, phi_c=0.1):
+            NI=None, DN=None, phi_c=0.1,
+            eso_law="fal", eso_a=0.75, eso_a1=1.0, eso_delta=0.10, eso_lam=10.0):
     """三速率仿真：对象 dt、电流环 dt_ci、转速环 t_ctrl（零阶保持）。
 
     law: 'none'(ESO) | 'rc'(RCESO) | 'adapt'(RC + 律D/律B)
@@ -155,6 +162,8 @@ def sim_mr3(t, r, d, b, b0, wo, kp, Tper, zeta, beta3, tau0,
     ys = np.zeros(n); ias = np.zeros(n); Qs = np.zeros(n)
     b3 = 0.0 if law == "none" else beta3
     bs1, bs2 = 2.0 * wo, wo * wo
+    ESO_G1, ESO_G2 = make_gains(dict(eso_law=eso_law, eso_a=eso_a, eso_a1=eso_a1,
+                                     eso_delta=eso_delta, eso_lam=eso_lam))
     for k in range(1, n):
         # 1) 对象：机械方程按 dt 积分（ia 为电流环保持值）
         y += dt * (b * ia + d[k] + (DN[k] if DN is not None else 0.0))
@@ -184,8 +193,9 @@ def sim_mr3(t, r, d, b, b0, wo, kp, Tper, zeta, beta3, tau0,
             g = e1m * e1m / (e1m * e1m + det_eps ** 2)
         kpe = kp * (1.0 + kp_boost * g)
         b1e = bs1 * (1.0 + wo_sched * g); b2e = bs2 * (1.0 + wo_sched * g)
-        z1n = z1 + dtc * (z2 + b0 * u + v + b1e * eo)
-        z2n = z2 + dtc * (b2e * eo)
+        _g1 = ESO_G1(eo); _g2 = ESO_G2(eo)
+        z1n = z1 + dtc * (z2 + b0 * u + v + b1e * _g1)
+        z2n = z2 + dtc * (b2e * _g2)
         chi = (Q * vd + b3 * math.tanh(e1 / zeta)) if b3 > 0.0 else 0.0
         vn = chi + (v - chi) * math.exp(-dtc / tau0)
         ef = chi - vn

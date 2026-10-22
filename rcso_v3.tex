@@ -96,6 +96,40 @@ $A[\sin\frac{2\pi t}{T}+0.4\sin\frac{6\pi t}{T}+0.2\sin\frac{10\pi t}{T}]$，$T=
   u = \frac{u_0-z_2-v}{b_0},\qquad u_0 = k_p(r-y),\qquad e_1 = y-z_1 .
 \end{equation}
 与标准 ADRC 的唯一差别：$z_1$ 方程多出 $v$——周期分量已被\emph{预先补偿}，观测器只估计残余总扰动。
+
+\begin{remark}[校正通道的增益形状：类 fal 为默认档]\label{rem:fal-gain}
+式 (3) 中乘在两个校正项上的 $e_1$ 就是\textbf{增益形状}本身。$G_i(e)\equiv e$ 为线性档——\textbf{v4.0 的既有表格全部是此档口径}；类 fal 形状自 \textbf{2026-10-22 起为默认档}（$a=0.75,\delta=0.10,\lambda=10$，\texttt{eso\_law="fal"}；\texttt{"linear"} 保留为对照并逐位复现旧数据）。类 fal 形状为
+$G(e;a,\delta,\lambda)=\bigl(|e|+\delta\lambda^{-1/a}\bigr)^{a}\tanh\!\big(\lambda e/\delta\big)$，
+$z_1$ 通道取指数 $1$（与给定原式一致：第一行括号上无指数）、$z_2$ 通道取指数 $a<1$，即
+$\dot z_1=z_2+b_0u+v+\beta_1G(e_1;1,\delta,\lambda)$、$\dot z_2=\beta_2G(e_1;a,\delta,\lambda)$；
+三条性质决定它只宜作“默认 + 对照”两档，而不是任意替换：
+(i) 小信号斜率 $\partial_eG(0)=\delta^{a-1}$（与 $\lambda$ 无关），故等效观测带宽 $\omega_o^{\rm eff}=\omega_o\delta^{(a-1)/2}$，噪声本底随之变化；
+(ii) 大信号 $G\to(|e|+\delta\lambda^{-1/a})^{a}\operatorname{sgn}e$：$a<1$ 次线性，$a=1$ 与线性同阶、只多一个宽 $\delta/\lambda$ 的偏移带；
+(iii) $G$ 连续可导且 $\mathrm dG/\mathrm de>0$，但 \S\ref{sec:uub} 的 UUB 建立在 $\beta_1=2\omega_o,\beta_2=\omega_o^2$ 的\emph{线性}校正上（引理 2 的 $A_0$ 是常矩阵），换成 $G$ 后 $A_0$ 变成 $e_1$ 相关的扇区矩阵，\textbf{该界需重做，本文未做}。
+\textbf{默认档改换的后果（如实披露）}：无检测器的档（Base、律 D）全面受益；律 F-B 则必须先重标定——类 fal 改变了 $e_1$ 与 $E_v$ 的轨迹，
+使对称判据 $|E_v(t)-E_v(t-T)|$ 的越阈时刻由 12--21\,ms 抖到 12--68\,ms，且事件前误复位把冷却吃掉（3/8 种子拖到 240\,ms）。
+重标定为 \textbf{方向限定判据} $D_m^{\downarrow}=\max\!\big(0,E_v(t-T)-E_v(t)\big)/\big(E_v(t-T)+\varepsilon_v\big)$（只认“旧记忆强于当前”的方向，与撤除事件的物理一致）
+并把阈值取 $0.30$、冷却 $0.30$\,s 后：8 种子首触发达 $6.012$--$6.068$\,s、加载段误触发 $0.2$ 次/run，回声由 $15.13$ 收回 $12.57$（D$+$F-B：$16.09\to10.31$）。
+但\textbf{仍不及线性档的 $7.92$/$7.24$}：oracle 扫描给出类 fal 档在 $\tau=30$\,ms 可到 $6.08$（线性档最优 $3.42$ @ $20$\,ms），
+说明剩余差距来自触发抖动（$\pm20$\,ms 扫过 $A_0(\tau)$ 的陡峭段）而非能力上限；据此\textbf{带 F-B 的两档暂推荐显式回退\texttt{eso\_law="linear"}}。
+真实对象 8 种子实测（口径同 \S\ref{sec:pmsm}，F-B 行为重标定后的方向限定版）：
+\end{remark}
+\begin{center}\small
+\begin{tabular}{@{}llccc@{}}
+\toprule
+算法 & ESO 增益 & 首周期 $10$\,Hz / rpm & 加载跌落 / rpm & 稳态 $7$--$8$\,s / rpm\\
+\midrule
+Base & 线性（v4.0） & $40.04\pm0.76$ & $-360.90\pm17.72$ & $28.17\pm0.38$\\
+Base & \textbf{类 fal（默认）} & $\mathbf{27.08\pm1.43}$ & $\mathbf{-344.2\pm8.9}$ & $\mathbf{27.59\pm0.42}$\\
+律 D & 线性（v4.0） & $36.11\pm0.47$ & $-362.8\pm15.6$ & $27.67\pm0.53$\\
+律 D & \textbf{类 fal（默认）} & $\mathbf{25.59\pm0.63}$ & $\mathbf{-328.4\pm5.8}$ & $27.55\pm0.63$\\
+F-B & 线性（v4.0） & $\mathbf{7.92\pm3.44}$ & $-349.8\pm15.6$ & $27.79\pm0.60$\\
+F-B & 类 fal（默认）+ 方向限定 & $12.57\pm3.38$ & $\mathbf{-349.4\pm20.6}$ & $\mathbf{27.06\pm0.52}$\\
+D$+$F-B & 线性（v4.0） & $\mathbf{7.24\pm1.57}$ & $-343.6\pm11.9$ & $27.85\pm0.41$\\
+D$+$F-B & 类 fal（默认）+ 方向限定 & $10.31\pm2.11$ & $-330.9\pm11.0$ & $27.20\pm0.62$\\
+\bottomrule
+\end{tabular}
+\end{center}
 % =====================================================================
 \section{自适应 RCESO 结构与耦合}\label{sec:arch}
 \begin{center}
@@ -480,6 +514,26 @@ $Q$ 改写记忆则需 $10^{2}\sim10^{6}T$。\textbf{参数级遗忘在因果上
 (c) 三种泵浦刚度下式 \eqref{eq:mism} 相对 $e_f$ 的回声比（$0.78\sim0.87$）。}
 \label{fig:mism}
 \end{figure}
+
+\begin{remark}[回声工况换型：从“零交越撤除”到“零交越反相”（2026-10-22）]\label{rem:echo-case}
+\textbf{为什么换}：在 $f_{ci}=500$\,Hz、类 fal 默认档下，“撤除”工况的事件前稳态 $10$\,Hz 残余已有 $61.5$\,rpm，
+而撤除后的首周期回声仅 $37.2$（线性）/$25.8$（类 fal）——回声/稳态 $=0.61/0.44<1$，
+\textbf{回声比事件前的残余还小，图上不可辨}。根因是 $\kappa=\beta_3T/\tau_0=2\times10^{4}$，旧记忆在 $1$\,ms 内被泵浦改写，回声只活一拍。
+
+\textbf{换成什么}：把事件改为\textbf{零交越处整体反相}（值连续、斜率翻转，物理上对应不对中相位翻转/负载换向）。
+同口径下事件前 $61.5$\,rpm、首拍 $94.6$（线性）/$74.4$（类 fal），比值 $1.54/1.26$，且事件后 $10$\,Hz 摆动\textbf{持续可见}
+（扰动仍在、只是符号反了，不象撤除那样一拍即灭）。
+
+\textbf{怎么抑制}：反相事件的正确动作是\textbf{零延迟反相复位} $\mathcal R_{-1}$（$\alpha=-1$，$v\leftarrow-v$ 且延迟缓冲同步取反）。
+oracle 扫描（$600$\,rpm）给出 $\tau=0/10/20/30/40$\,ms 对应首拍 $27.8/57.5/60.3/63.7/67.9$\,rpm——\textbf{$\tau=0$ 最优}，
+任何滞后都让旧记忆继续以错号注入。用能量型检测器 $D_m$ 触发 $\alpha=-1$ 时，三转速（600/900/1200）首拍为
+$60.4/57.7/68.0$（$-19\%/-24\%/-15\%$），与 oracle（$27.7/35.6/57.0$，$-63\%/-53\%/-29\%$）的差距\textbf{全部来自检测延迟}：
+$E_v=\int v^2$ 对 $v\to-v$ 不敏感，这从机理上解释了本文“清空型 F-B 在反相下 $8/8$ 不触发”
+（\S\ref{sec:fb-dilemma}），也说明若要部署必须加\textbf{方向判别}（MMAE，本文未做）。
+
+\textbf{结论（两条口径不可混用）}：讲“回声可见”用反相工况；讲“回声可抑制”仍用撤除工况（律 F-B，$-80\%$）。
+反相工况的实测图与复现脚本见 \texttt{eso\_fal.md} \S4.3--4.4、\texttt{fig\_echo\_case.png}、\texttt{fig\_rev2\_speed\_*.png}。
+\end{remark}
 
 % =====================================================================
 \subsection{律 F：状态复位及其事件触发子类（ETSR）}\label{sec:etsr}

@@ -7,6 +7,8 @@
 import math
 import numpy as np
 
+from eso_gain import make_gains
+
 R_S   = 0.175
 L_D   = 0.57e-3
 L_Q   = 0.57e-3
@@ -31,6 +33,7 @@ def sim_dq(t, TL, cfg=None):
     dt = float(t[1]-t[0]); n = len(t)
     T  = cfg.get("T", 0.1)
     KP = cfg.get("kp", 75.36); WO = cfg.get("wo", 500.0)
+    ESO_G1, ESO_G2 = make_gains(cfg)          # 2026-10-22：默认 fal，cfg["eso_law"]="linear" 回退线性
     B_GAIN = 0.101*I_BASE/(J_M*W_REF); B0 = 1.2*B_GAIN
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 5e-3)
     Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
@@ -125,8 +128,9 @@ def sim_dq(t, TL, cfg=None):
             else:
                 g = 0.0
             kpe = KP*(1.0 + kp_boost*g)
-            z1n = z1 + T_SP*(z2 + B0*u + v + 2*WO*e1)
-            z2n = z2 + T_SP*(WO*WO*e1)
+            _g1 = ESO_G1(e1); _g2 = ESO_G2(e1)
+            z1n = z1 + T_SP*(z2 + B0*u + v + 2*WO*_g1)
+            z2n = z2 + T_SP*(WO*WO*_g2)
             e1p_ = (e1 - rc_phi*math.tanh(e1/rc_phi)) if rc_phi > 0.0 else e1
             chi = Q0*vd_delay + BETA3*math.tanh(e1p_/ZETA)
             vn = chi + (v - chi)*math.exp(-T_SP/TAU0)

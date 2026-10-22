@@ -53,6 +53,8 @@ import warnings
 from datetime import datetime
 import numpy as np
 
+from eso_gain import make_gains
+
 try:                                   # 控制台若是 GBK，打印 θ? / ? / ? 这类字符会直接抛
     sys.stdout.reconfigure(errors="replace")   # UnicodeEncodeError 把整个脚本搞崩（已踩过一次）
 except Exception:
@@ -168,7 +170,8 @@ def adrc_sim(t, r, d, b, b0, wo, kp, T, zeta, beta3, tau0, kappa, Q0,
              cur_tau=0.0, cur_noise=None, d_noise=None, spd_noise=None, aj_gate=0.0, eso_sched=0.0,
              pr_gain=0.0, pr_tau=0.5, p_boost=0.0, det_eps=0.05, det_phi=0.0, theta_dz=0.0, pi_ki=0.0, q_src="ef", q_mism=0.0, q_mism_eps=1e-9, q_mism_c=0.0, q_mism_mode="energy", q_mism_latch=0.0, q_mism_dur=2.0,
              ff_flush=0.0, ff_tau_f=0.01, ff_tau_s=0.5, ff_cool=0.3, ff_q=0.0, ff_b3=0.0, ff_b3_dur=1.0, ff_scale=0.0, ff_rel=0.0, ff_tau_rs=2.0, ff_period=0.0, ff_phase=0.0, mm_det=0.0, mm_tau=2e-4, mm_win=20, mm_ratio=0.6, mm2=0.0, mm2_win=50, mm2_ratio=2.0,
-             ff_src="e1", ff_amin=0.0, ff_gmax=-1.0, ff_vmax=-1.0):
+             ff_src="e1", ff_amin=0.0, ff_gmax=-1.0, ff_vmax=-1.0,
+             eso_law="fal", eso_a=0.75, eso_a1=1.0, eso_delta=0.10, eso_lam=10.0):
     # 【PI 对照档 2026-10-17】pi_ki>0 时在比例项上叠加积分项（u0 = kp(r-y) + ki*int(r-y)dt），
     #   配合 beta1=beta2=0（无 ESO）、beta3=0（无重复通道）即得纯 PI 控制器。pi_ki=0 时逐位退化。
     # 【检测器前置 phi 压缩 2026-10-17】e1bar = (1/T)*int_{t-T}^{t} phi(e1,c) dtau，
@@ -270,6 +273,10 @@ def adrc_sim(t, r, d, b, b0, wo, kp, T, zeta, beta3, tau0, kappa, Q0,
     _ndh = max(1, int(round(hpma_win * T / dt)))   # 【hpma 分母窗口】= hpma_win 个周期 T
     hpbuf = np.zeros(_ndh); acch = 0.0      # 【theta_drive=hpma】窗内元素 = |高通输出|*dt
     b1, b2 = 2.0 * wo, wo * wo
+    # 【类 fal 增益 2026-10-22】默认 linear：G(e)=e，逐位保持旧行为；
+    #   eso_law="fal" 时 z1 通道用 beta1*G(e;a1,delta,lam)、z2 通道用 beta2*G(e;a,delta,lam)。
+    _G1, _G2 = make_gains(dict(eso_law=eso_law, eso_a=eso_a, eso_a1=eso_a1,
+                               eso_delta=eso_delta, eso_lam=eso_lam))
     nwarm = int(round(warm * T / dt))
     nvst = int(round(vstart / dt))
     dbz = float(drv_dbz)            # 自适应驱动死区（0=关闭；见循环内注释）
@@ -470,8 +477,9 @@ def adrc_sim(t, r, d, b, b0, wo, kp, T, zeta, beta3, tau0, kappa, Q0,
         Dval = max(accD, 0.0)
         _dfac = Dval if rest_d else 1.0        # 回复力倍率：--rest-d 关闭时恒为 1（逐位不变）      # E0^2 = 一个周期内 e_f^2 的均值
         eo = ymk - z1k                                   # 观测误差
-        z1n = z1k + dt * (z2k + b0 * uk + vnew + _b1e * eo)
-        z2n = z2k + dt * (_b2e * eo)
+        _g1 = _G1(eo); _g2 = _G2(eo)                     # 类 fal 增益（linear 档为恒等）
+        z1n = z1k + dt * (z2k + b0 * uk + vnew + _b1e * _g1)
+        z2n = z2k + dt * (_b2e * _g2)
         if pi_ki > 0.0:                                  # 【PI 档】比例 + 积分
             _pi_int += (rk - ymk) * dt
             u0 = kp * (rk - ymk) + pi_ki * _pi_int

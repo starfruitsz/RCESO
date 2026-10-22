@@ -1,0 +1,2438 @@
+{
+ "600 rpm": {
+  "Base·lin": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261018,
+    "echo": 37.66,
+    "dip": -519.2,
+    "steady": 14.94,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261019,
+    "echo": 37.38,
+    "dip": -484.7,
+    "steady": 14.87,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261021,
+    "echo": 36.83,
+    "dip": -479.4,
+    "steady": 14.5,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261022,
+    "echo": 36.92,
+    "dip": -472.1,
+    "steady": 14.82,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261023,
+    "echo": 37.45,
+    "dip": -489.8,
+    "steady": 14.9,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261024,
+    "echo": 37.49,
+    "dip": -450.8,
+    "steady": 14.59,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261025,
+    "echo": 37.22,
+    "dip": -455.1,
+    "steady": 14.72,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·lin",
+    "seed": 20261026,
+    "echo": 37.04,
+    "dip": -492.3,
+    "steady": 15.22,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "Base·fal": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261018,
+    "echo": 26.48,
+    "dip": -444.3,
+    "steady": 17.59,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261019,
+    "echo": 25.69,
+    "dip": -433.5,
+    "steady": 17.59,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261021,
+    "echo": 25.99,
+    "dip": -431.2,
+    "steady": 17.61,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261022,
+    "echo": 25.18,
+    "dip": -467.8,
+    "steady": 18.24,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261023,
+    "echo": 24.79,
+    "dip": -450.2,
+    "steady": 17.16,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261024,
+    "echo": 25.37,
+    "dip": -494.8,
+    "steady": 17.54,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261025,
+    "echo": 26.94,
+    "dip": -457.5,
+    "steady": 17.21,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "Base·fal",
+    "seed": 20261026,
+    "echo": 26.05,
+    "dip": -451.0,
+    "steady": 18.11,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "律D·lin": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261018,
+    "echo": 34.75,
+    "dip": -450.0,
+    "steady": 14.69,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261019,
+    "echo": 34.84,
+    "dip": -452.6,
+    "steady": 15.24,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261021,
+    "echo": 34.66,
+    "dip": -467.2,
+    "steady": 14.86,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261022,
+    "echo": 34.84,
+    "dip": -488.0,
+    "steady": 14.98,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261023,
+    "echo": 35.07,
+    "dip": -489.3,
+    "steady": 15.13,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261024,
+    "echo": 35.17,
+    "dip": -448.4,
+    "steady": 15.15,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261025,
+    "echo": 34.68,
+    "dip": -512.4,
+    "steady": 14.75,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·lin",
+    "seed": 20261026,
+    "echo": 34.78,
+    "dip": -473.1,
+    "steady": 15.2,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "律D·fal": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261018,
+    "echo": 25.08,
+    "dip": -409.0,
+    "steady": 17.25,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261019,
+    "echo": 24.89,
+    "dip": -445.7,
+    "steady": 17.51,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261021,
+    "echo": 26.01,
+    "dip": -426.6,
+    "steady": 18.14,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261022,
+    "echo": 24.88,
+    "dip": -464.5,
+    "steady": 17.4,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261023,
+    "echo": 24.89,
+    "dip": -425.0,
+    "steady": 17.89,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261024,
+    "echo": 23.9,
+    "dip": -449.0,
+    "steady": 17.34,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261025,
+    "echo": 26.05,
+    "dip": -461.4,
+    "steady": 18.59,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "律D·fal",
+    "seed": 20261026,
+    "echo": 25.87,
+    "dip": -465.6,
+    "steady": 17.53,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "F-B·lin": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261018,
+    "echo": 7.16,
+    "dip": -442.2,
+    "steady": 14.0,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261019,
+    "echo": 6.14,
+    "dip": -469.6,
+    "steady": 14.55,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261021,
+    "echo": 5.52,
+    "dip": -510.1,
+    "steady": 14.59,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261022,
+    "echo": 5.84,
+    "dip": -467.8,
+    "steady": 14.97,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261023,
+    "echo": 6.7,
+    "dip": -475.4,
+    "steady": 14.75,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261024,
+    "echo": 6.21,
+    "dip": -448.9,
+    "steady": 14.49,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261025,
+    "echo": 6.4,
+    "dip": -499.5,
+    "steady": 14.65,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·lin",
+    "seed": 20261026,
+    "echo": 5.58,
+    "dip": -488.5,
+    "steady": 14.94,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "F-B·fal": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261018,
+    "echo": 8.43,
+    "dip": -442.8,
+    "steady": 18.38,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261019,
+    "echo": 14.93,
+    "dip": -440.2,
+    "steady": 17.93,
+    "f78": 3,
+    "ntrig": 0
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261021,
+    "echo": 14.41,
+    "dip": -466.1,
+    "steady": 17.46,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261022,
+    "echo": 10.68,
+    "dip": -453.0,
+    "steady": 17.71,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261023,
+    "echo": 9.22,
+    "dip": -432.3,
+    "steady": 18.16,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261024,
+    "echo": 7.92,
+    "dip": -477.6,
+    "steady": 17.48,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261025,
+    "echo": 6.82,
+    "dip": -448.0,
+    "steady": 18.21,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal",
+    "seed": 20261026,
+    "echo": 8.81,
+    "dip": -467.5,
+    "steady": 17.73,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "F-B·fal方向": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261018,
+    "echo": 8.17,
+    "dip": -482.4,
+    "steady": 17.57,
+    "f78": 0,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261019,
+    "echo": 8.4,
+    "dip": -448.1,
+    "steady": 18.0,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261021,
+    "echo": 8.86,
+    "dip": -454.4,
+    "steady": 17.02,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261022,
+    "echo": 7.59,
+    "dip": -454.8,
+    "steady": 17.81,
+    "f78": 1,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261023,
+    "echo": 6.43,
+    "dip": -482.9,
+    "steady": 17.98,
+    "f78": 1,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261024,
+    "echo": 8.89,
+    "dip": -431.9,
+    "steady": 17.48,
+    "f78": 1,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261025,
+    "echo": 7.13,
+    "dip": -472.9,
+    "steady": 18.64,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "F-B·fal方向",
+    "seed": 20261026,
+    "echo": 9.15,
+    "dip": -480.4,
+    "steady": 18.1,
+    "f78": 2,
+    "ntrig": 1
+   }
+  ],
+  "D+F-B·lin": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261018,
+    "echo": 5.57,
+    "dip": -480.3,
+    "steady": 14.54,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261019,
+    "echo": 5.77,
+    "dip": -485.7,
+    "steady": 14.42,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261021,
+    "echo": 5.08,
+    "dip": -505.0,
+    "steady": 14.6,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261022,
+    "echo": 5.6,
+    "dip": -493.0,
+    "steady": 14.93,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261023,
+    "echo": 5.42,
+    "dip": -447.3,
+    "steady": 14.96,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261024,
+    "echo": 4.91,
+    "dip": -447.7,
+    "steady": 14.89,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261025,
+    "echo": 5.37,
+    "dip": -480.8,
+    "steady": 14.63,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·lin",
+    "seed": 20261026,
+    "echo": 4.8,
+    "dip": -482.7,
+    "steady": 14.48,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "D+F-B·fal方向": [
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261018,
+    "echo": 9.18,
+    "dip": -483.6,
+    "steady": 17.13,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261019,
+    "echo": 7.08,
+    "dip": -478.2,
+    "steady": 18.04,
+    "f78": 1,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261021,
+    "echo": 7.85,
+    "dip": -473.0,
+    "steady": 18.02,
+    "f78": 0,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261022,
+    "echo": 8.42,
+    "dip": -451.9,
+    "steady": 17.76,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261023,
+    "echo": 9.9,
+    "dip": -459.9,
+    "steady": 17.92,
+    "f78": 1,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261024,
+    "echo": 6.07,
+    "dip": -446.1,
+    "steady": 17.64,
+    "f78": 1,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261025,
+    "echo": 8.8,
+    "dip": -475.9,
+    "steady": 18.08,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 600.0,
+    "flo": 10.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261026,
+    "echo": 7.41,
+    "dip": -446.4,
+    "steady": 18.37,
+    "f78": 1,
+    "ntrig": 1
+   }
+  ]
+ },
+ "900 rpm": {
+  "Base·lin": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261018,
+    "echo": 32.92,
+    "dip": -447.6,
+    "steady": 12.61,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261019,
+    "echo": 33.52,
+    "dip": -439.3,
+    "steady": 13.14,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261021,
+    "echo": 31.63,
+    "dip": -463.5,
+    "steady": 12.52,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261022,
+    "echo": 33.13,
+    "dip": -449.5,
+    "steady": 11.98,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261023,
+    "echo": 33.42,
+    "dip": -446.4,
+    "steady": 12.39,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261024,
+    "echo": 33.21,
+    "dip": -456.2,
+    "steady": 12.23,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261025,
+    "echo": 32.2,
+    "dip": -440.6,
+    "steady": 12.88,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·lin",
+    "seed": 20261026,
+    "echo": 32.45,
+    "dip": -463.3,
+    "steady": 12.56,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "Base·fal": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261018,
+    "echo": 23.37,
+    "dip": -448.0,
+    "steady": 11.51,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261019,
+    "echo": 23.36,
+    "dip": -418.5,
+    "steady": 11.7,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261021,
+    "echo": 23.53,
+    "dip": -439.3,
+    "steady": 11.45,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261022,
+    "echo": 23.86,
+    "dip": -417.4,
+    "steady": 11.17,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261023,
+    "echo": 26.29,
+    "dip": -425.5,
+    "steady": 11.26,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261024,
+    "echo": 23.87,
+    "dip": -421.3,
+    "steady": 11.52,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261025,
+    "echo": 23.95,
+    "dip": -421.6,
+    "steady": 11.83,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "Base·fal",
+    "seed": 20261026,
+    "echo": 25.29,
+    "dip": -436.4,
+    "steady": 11.61,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "律D·lin": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261018,
+    "echo": 31.55,
+    "dip": -419.4,
+    "steady": 12.92,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261019,
+    "echo": 31.17,
+    "dip": -437.4,
+    "steady": 13.19,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261021,
+    "echo": 31.45,
+    "dip": -436.4,
+    "steady": 12.71,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261022,
+    "echo": 31.82,
+    "dip": -416.7,
+    "steady": 13.06,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261023,
+    "echo": 31.9,
+    "dip": -460.7,
+    "steady": 13.26,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261024,
+    "echo": 31.64,
+    "dip": -435.0,
+    "steady": 12.07,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261025,
+    "echo": 31.22,
+    "dip": -432.3,
+    "steady": 11.83,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·lin",
+    "seed": 20261026,
+    "echo": 31.36,
+    "dip": -456.8,
+    "steady": 12.77,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "律D·fal": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261018,
+    "echo": 24.32,
+    "dip": -398.6,
+    "steady": 11.87,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261019,
+    "echo": 23.95,
+    "dip": -438.3,
+    "steady": 11.01,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261021,
+    "echo": 22.87,
+    "dip": -406.9,
+    "steady": 11.59,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261022,
+    "echo": 24.83,
+    "dip": -406.4,
+    "steady": 11.12,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261023,
+    "echo": 24.76,
+    "dip": -416.5,
+    "steady": 10.9,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261024,
+    "echo": 23.67,
+    "dip": -419.0,
+    "steady": 11.95,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261025,
+    "echo": 25.04,
+    "dip": -416.0,
+    "steady": 11.3,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "律D·fal",
+    "seed": 20261026,
+    "echo": 25.74,
+    "dip": -429.1,
+    "steady": 10.99,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "F-B·lin": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261018,
+    "echo": 6.54,
+    "dip": -457.3,
+    "steady": 12.89,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261019,
+    "echo": 6.22,
+    "dip": -455.8,
+    "steady": 12.77,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261021,
+    "echo": 5.54,
+    "dip": -468.8,
+    "steady": 13.14,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261022,
+    "echo": 6.99,
+    "dip": -455.7,
+    "steady": 12.86,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261023,
+    "echo": 7.89,
+    "dip": -466.8,
+    "steady": 13.14,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261024,
+    "echo": 7.43,
+    "dip": -466.4,
+    "steady": 12.29,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261025,
+    "echo": 7.67,
+    "dip": -473.2,
+    "steady": 11.99,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·lin",
+    "seed": 20261026,
+    "echo": 6.3,
+    "dip": -481.3,
+    "steady": 12.39,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "F-B·fal": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261018,
+    "echo": 12.84,
+    "dip": -438.5,
+    "steady": 11.14,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261019,
+    "echo": 12.41,
+    "dip": -433.6,
+    "steady": 11.43,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261021,
+    "echo": 14.31,
+    "dip": -424.0,
+    "steady": 11.41,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261022,
+    "echo": 9.82,
+    "dip": -412.8,
+    "steady": 11.15,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261023,
+    "echo": 12.98,
+    "dip": -412.3,
+    "steady": 11.34,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261024,
+    "echo": 12.29,
+    "dip": -444.6,
+    "steady": 11.74,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261025,
+    "echo": 13.71,
+    "dip": -427.8,
+    "steady": 11.37,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal",
+    "seed": 20261026,
+    "echo": 20.47,
+    "dip": -448.8,
+    "steady": 11.82,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "F-B·fal方向": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261018,
+    "echo": 15.56,
+    "dip": -411.8,
+    "steady": 11.52,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261019,
+    "echo": 14.94,
+    "dip": -410.4,
+    "steady": 11.63,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261021,
+    "echo": 12.37,
+    "dip": -436.4,
+    "steady": 10.78,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261022,
+    "echo": 14.89,
+    "dip": -433.5,
+    "steady": 11.23,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261023,
+    "echo": 14.77,
+    "dip": -438.8,
+    "steady": 11.79,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261024,
+    "echo": 13.0,
+    "dip": -433.4,
+    "steady": 11.47,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261025,
+    "echo": 13.15,
+    "dip": -444.0,
+    "steady": 11.74,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "F-B·fal方向",
+    "seed": 20261026,
+    "echo": 14.43,
+    "dip": -411.1,
+    "steady": 10.96,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "D+F-B·lin": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261018,
+    "echo": 7.32,
+    "dip": -447.5,
+    "steady": 12.25,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261019,
+    "echo": 6.84,
+    "dip": -439.0,
+    "steady": 12.65,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261021,
+    "echo": 6.48,
+    "dip": -451.3,
+    "steady": 12.78,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261022,
+    "echo": 6.88,
+    "dip": -440.5,
+    "steady": 12.67,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261023,
+    "echo": 5.82,
+    "dip": -449.4,
+    "steady": 13.1,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261024,
+    "echo": 5.51,
+    "dip": -441.1,
+    "steady": 12.62,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261025,
+    "echo": 5.83,
+    "dip": -417.0,
+    "steady": 13.16,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·lin",
+    "seed": 20261026,
+    "echo": 6.58,
+    "dip": -450.4,
+    "steady": 12.42,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "D+F-B·fal方向": [
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261018,
+    "echo": 15.81,
+    "dip": -405.4,
+    "steady": 11.11,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261019,
+    "echo": 13.68,
+    "dip": -432.2,
+    "steady": 11.35,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261021,
+    "echo": 16.77,
+    "dip": -418.1,
+    "steady": 11.29,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261022,
+    "echo": 15.69,
+    "dip": -404.1,
+    "steady": 11.22,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261023,
+    "echo": 14.47,
+    "dip": -433.8,
+    "steady": 11.28,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261024,
+    "echo": 12.19,
+    "dip": -424.5,
+    "steady": 11.21,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261025,
+    "echo": 17.73,
+    "dip": -402.5,
+    "steady": 11.59,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 900.0,
+    "flo": 15.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261026,
+    "echo": 13.96,
+    "dip": -426.9,
+    "steady": 11.35,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ]
+ },
+ "1200 rpm": {
+  "Base·lin": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261018,
+    "echo": 28.55,
+    "dip": -465.2,
+    "steady": 13.47,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261019,
+    "echo": 28.34,
+    "dip": -466.9,
+    "steady": 14.49,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261021,
+    "echo": 28.13,
+    "dip": -465.3,
+    "steady": 14.76,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261022,
+    "echo": 30.11,
+    "dip": -450.0,
+    "steady": 14.26,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261023,
+    "echo": 31.15,
+    "dip": -465.9,
+    "steady": 14.0,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261024,
+    "echo": 30.06,
+    "dip": -463.8,
+    "steady": 14.31,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261025,
+    "echo": 30.33,
+    "dip": -464.4,
+    "steady": 14.8,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·lin",
+    "seed": 20261026,
+    "echo": 30.82,
+    "dip": -466.2,
+    "steady": 13.69,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "Base·fal": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261018,
+    "echo": 23.37,
+    "dip": -429.4,
+    "steady": 11.98,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261019,
+    "echo": 23.54,
+    "dip": -430.3,
+    "steady": 12.75,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261021,
+    "echo": 22.48,
+    "dip": -434.5,
+    "steady": 11.82,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261022,
+    "echo": 24.67,
+    "dip": -427.4,
+    "steady": 11.73,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261023,
+    "echo": 23.18,
+    "dip": -442.8,
+    "steady": 12.55,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261024,
+    "echo": 23.17,
+    "dip": -428.5,
+    "steady": 12.29,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261025,
+    "echo": 23.33,
+    "dip": -433.1,
+    "steady": 12.12,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "Base·fal",
+    "seed": 20261026,
+    "echo": 21.17,
+    "dip": -432.2,
+    "steady": 12.63,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "律D·lin": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261018,
+    "echo": 28.63,
+    "dip": -443.3,
+    "steady": 13.53,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261019,
+    "echo": 28.43,
+    "dip": -443.5,
+    "steady": 14.0,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261021,
+    "echo": 29.69,
+    "dip": -440.1,
+    "steady": 13.36,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261022,
+    "echo": 28.94,
+    "dip": -457.4,
+    "steady": 12.99,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261023,
+    "echo": 28.96,
+    "dip": -438.5,
+    "steady": 13.51,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261024,
+    "echo": 29.65,
+    "dip": -451.9,
+    "steady": 15.31,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261025,
+    "echo": 28.84,
+    "dip": -446.0,
+    "steady": 13.64,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·lin",
+    "seed": 20261026,
+    "echo": 30.76,
+    "dip": -456.4,
+    "steady": 12.89,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "律D·fal": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261018,
+    "echo": 22.78,
+    "dip": -424.0,
+    "steady": 11.88,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261019,
+    "echo": 20.68,
+    "dip": -419.6,
+    "steady": 12.07,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261021,
+    "echo": 19.92,
+    "dip": -415.4,
+    "steady": 12.56,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261022,
+    "echo": 25.34,
+    "dip": -418.3,
+    "steady": 12.87,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261023,
+    "echo": 23.0,
+    "dip": -423.8,
+    "steady": 12.64,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261024,
+    "echo": 22.33,
+    "dip": -425.6,
+    "steady": 12.54,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261025,
+    "echo": 23.12,
+    "dip": -418.7,
+    "steady": 12.02,
+    "f78": 0,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "律D·fal",
+    "seed": 20261026,
+    "echo": 20.67,
+    "dip": -411.8,
+    "steady": 12.4,
+    "f78": 0,
+    "ntrig": 0
+   }
+  ],
+  "F-B·lin": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261018,
+    "echo": 8.18,
+    "dip": -465.8,
+    "steady": 13.55,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261019,
+    "echo": 14.41,
+    "dip": -459.0,
+    "steady": 14.06,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261021,
+    "echo": 11.4,
+    "dip": -478.9,
+    "steady": 13.76,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261022,
+    "echo": 7.01,
+    "dip": -474.8,
+    "steady": 13.41,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261023,
+    "echo": 12.19,
+    "dip": -470.3,
+    "steady": 13.44,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261024,
+    "echo": 6.48,
+    "dip": -468.5,
+    "steady": 13.88,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261025,
+    "echo": 7.82,
+    "dip": -460.9,
+    "steady": 14.91,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·lin",
+    "seed": 20261026,
+    "echo": 10.91,
+    "dip": -462.9,
+    "steady": 14.48,
+    "f78": 4,
+    "ntrig": 1
+   }
+  ],
+  "F-B·fal": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261018,
+    "echo": 15.01,
+    "dip": -440.0,
+    "steady": 12.56,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261019,
+    "echo": 11.95,
+    "dip": -438.0,
+    "steady": 12.53,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261021,
+    "echo": 14.22,
+    "dip": -438.4,
+    "steady": 12.43,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261022,
+    "echo": 12.93,
+    "dip": -441.7,
+    "steady": 12.26,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261023,
+    "echo": 20.24,
+    "dip": -446.3,
+    "steady": 12.68,
+    "f78": 3,
+    "ntrig": 0
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261024,
+    "echo": 14.74,
+    "dip": -432.2,
+    "steady": 12.48,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261025,
+    "echo": 14.84,
+    "dip": -434.0,
+    "steady": 12.4,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal",
+    "seed": 20261026,
+    "echo": 11.22,
+    "dip": -417.3,
+    "steady": 12.59,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "F-B·fal方向": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261018,
+    "echo": 11.98,
+    "dip": -437.7,
+    "steady": 11.78,
+    "f78": 1,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261019,
+    "echo": 21.38,
+    "dip": -444.7,
+    "steady": 12.75,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261021,
+    "echo": 13.83,
+    "dip": -439.9,
+    "steady": 12.2,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261022,
+    "echo": 13.68,
+    "dip": -429.6,
+    "steady": 12.57,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261023,
+    "echo": 10.71,
+    "dip": -425.1,
+    "steady": 12.14,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261024,
+    "echo": 13.14,
+    "dip": -444.6,
+    "steady": 12.37,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261025,
+    "echo": 14.86,
+    "dip": -422.9,
+    "steady": 12.17,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "F-B·fal方向",
+    "seed": 20261026,
+    "echo": 11.55,
+    "dip": -430.3,
+    "steady": 12.37,
+    "f78": 2,
+    "ntrig": 1
+   }
+  ],
+  "D+F-B·lin": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261018,
+    "echo": 6.85,
+    "dip": -451.5,
+    "steady": 14.67,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261019,
+    "echo": 7.75,
+    "dip": -445.7,
+    "steady": 14.31,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261021,
+    "echo": 10.24,
+    "dip": -440.3,
+    "steady": 14.8,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261022,
+    "echo": 7.87,
+    "dip": -440.6,
+    "steady": 14.43,
+    "f78": 4,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261023,
+    "echo": 8.58,
+    "dip": -471.1,
+    "steady": 14.75,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261024,
+    "echo": 10.09,
+    "dip": -448.9,
+    "steady": 14.17,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261025,
+    "echo": 7.61,
+    "dip": -464.7,
+    "steady": 14.12,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·lin",
+    "seed": 20261026,
+    "echo": 6.87,
+    "dip": -451.8,
+    "steady": 14.34,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ],
+  "D+F-B·fal方向": [
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261018,
+    "echo": 14.59,
+    "dip": -418.7,
+    "steady": 11.73,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261019,
+    "echo": 13.59,
+    "dip": -424.1,
+    "steady": 12.45,
+    "f78": 0,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261021,
+    "echo": 17.93,
+    "dip": -420.1,
+    "steady": 11.85,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261022,
+    "echo": 14.38,
+    "dip": -432.1,
+    "steady": 12.2,
+    "f78": 2,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261023,
+    "echo": 14.5,
+    "dip": -418.5,
+    "steady": 12.8,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261024,
+    "echo": 15.04,
+    "dip": -417.5,
+    "steady": 12.97,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261025,
+    "echo": 11.22,
+    "dip": -418.2,
+    "steady": 12.4,
+    "f78": 3,
+    "ntrig": 1
+   },
+   {
+    "nref": 1200.0,
+    "flo": 20.0,
+    "name": "D+F-B·fal方向",
+    "seed": 20261026,
+    "echo": 14.62,
+    "dip": -434.0,
+    "steady": 12.22,
+    "f78": 3,
+    "ntrig": 1
+   }
+  ]
+ }
+}

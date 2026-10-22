@@ -32,7 +32,8 @@ chk("figures", len(srcs) == 13 and not miss_img, "n=%d missing=%s" % (len(srcs),
 chk("h2", len(re.findall(r"<h2 ", b)) == 10, str(len(re.findall(r"<h2 ", b))))
 chk("h3", len(re.findall(r"<h3 ", b)) == 22, str(len(re.findall(r"<h3 ", b))))
 chk("h4", len(re.findall(r"<h4>", b)) == 2, str(len(re.findall(r"<h4>", b))))
-chk("tables", len(re.findall(r"<table>", b)) == 16, str(len(re.findall(r"<table>", b))))
+# 2026-10-22：16 -> 17（§1.3 注「校正通道的增益形状：类 fal 可选档」新增一张 ESO 增益形状对照表）
+chk("tables", len(re.findall(r"<table>", b)) == 17, str(len(re.findall(r"<table>", b))))
 chk("tabcap", len(re.findall(r'class="tabcap"', b)) == 1, str(len(re.findall(r'class="tabcap"', b))))
 chk("notice", len(re.findall(r"box notice", b)) == 2, str(len(re.findall(r"box notice", b))))
 chk("figcaption", len(re.findall(r"<figcaption>", b)) == 13, str(len(re.findall(r"<figcaption>", b))))
@@ -73,4 +74,6 @@ print("TOTAL %d  PASS %d  FAIL %d" % (len(res), len(res) - len(fails), len(fails
 for n, ok, d in res:
     if not ok:
         print("  FAIL  %-24s %s" % (n, d))
+# 2026-10-22：自检失败必须让进程非零退出（此前即使 FAIL>0 也返回 0，等于自检形同虚设）
+raise SystemExit(1 if fails else 0)
 

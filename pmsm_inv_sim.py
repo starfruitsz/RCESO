@@ -18,6 +18,8 @@
 import math
 import numpy as np
 
+from eso_gain import make_gains
+
 R_S = 0.175
 L_S = 0.57e-3
 PSI_F = 0.101 / (1.5 * 4.0)      # 0.016833 Wb
@@ -57,6 +59,11 @@ def sim_inv(t, TL, cfg=None):
 
     # ---- 速度环（与 pmsm_dq_sim 同口径）----
     KP = cfg.get("kp", 75.36); WO = cfg.get("wo", 500.0)
+    # ---- ESO 校正通道增益（2026-10-22）----
+    # 默认 fal（2026-10-22 定）：类 fal 增益（见 eso_gain.py / eso_fal.md）；
+    # cfg["eso_law"]="linear" 逐位回到 v4.0 的线性 ESO（_inv_*.json 可复现）：
+    #   z1: beta1*G(e; a1, delta, lam)，z2: beta2*G(e; a, delta, lam)
+    ESO_G1, ESO_G2 = make_gains(cfg)
     B_GAIN = 0.101 * I_BASE / (J_M * w_ref); B0 = 1.2 * B_GAIN
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 20e-3)
     Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
@@ -68,6 +75,13 @@ def sim_inv(t, TL, cfg=None):
     ff_vmax = cfg.get("ff_vmax", -1.0)
     ff_mism = cfg.get("ff_mism", 0.0)          # 记忆失配阈值（0=关）；>0 时与包络比值 OR
     ff_mism_eps = cfg.get("ff_mism_eps", 1e-6)
+    # 2026-10-22：记忆失配的方向限定。0=对称 |E_v(t)-E_v(t-T)|（v4.0）；
+    #   1=只认"旧记忆比当前强"的方向 max(0, E_v(t-T)-E_v(t))——撤除事件该量为正，
+    #   而稳态周期波动时正负对称、事件前误报显著减少。
+    ff_mism_dir = int(cfg.get("ff_mism_dir", 0))
+    # 2026-10-22：检测器触发的复位算子 R_alpha。0=清空（默认，v4.0 行为）；
+    #   -1 = 反相复位（v->-v，缓冲同时取反），用于"反相突变"事件——此时清空是错的动作。
+    ff_alpha = float(cfg.get("ff_alpha", 0.0))
     ff_wait = cfg.get("ff_wait", 0.0)          # 检测后再等待的相位延迟（s），0=立即复位
     ff_confirm = cfg.get("ff_confirm", 0.0)    # 连续确认窗（ms），0=首拍触发
     ff_imin = cfg.get("ff_imin", 0.0)          # 带载门控：|iq| 低于该值不复位（A）
@@ -220,8 +234,9 @@ def sim_inv(t, TL, cfg=None):
             eps_g = det_eps if det_eps > 0.0 else 0.01
             g = (e1m * e1m) / (e1m * e1m + eps_g * eps_g)
             kpe = KP * (1.0 + kp_boost * g)
-            z1n = z1 + 1e-3 * (z2 + B0 * u + v + 2.0 * WO * e1)
-            z2n = z2 + 1e-3 * (WO * WO * e1)
+            _g1 = ESO_G1(e1); _g2 = ESO_G2(e1)       # 线性档 G(e)=e（逐位不变）
+            z1n = z1 + 1e-3 * (z2 + B0 * u + v + 2.0 * WO * _g1)
+            z2n = z2 + 1e-3 * (WO * WO * _g2)
             e1p = (e1 - ff_phi * math.tanh(e1 / ff_phi)) if ff_phi > 0.0 else e1
             vd_delay = vd_buf[ip]
             chi = Q0 * vd_delay + BETA3 * math.tanh(e1p / ZETA)
@@ -267,7 +282,10 @@ def sim_inv(t, TL, cfg=None):
                     vm_prev += leave - drop
                     vm_buf[mip] = v2d; vm_old[mip] = leave
                     mip = (mip + 1) % nd
-                    Dm = abs(vm_now - vm_prev) / (vm_prev + ff_mism_eps)
+                    if ff_mism_dir:
+                        Dm = max(0.0, vm_prev - vm_now) / (vm_prev + ff_mism_eps)
+                    else:
+                        Dm = abs(vm_now - vm_prev) / (vm_prev + ff_mism_eps)
                     dm_o[k // dec] = Dm
                 raw = raw_env or ((ff_mism > 0.0) and (Dm > ff_mism) and okg and okv and oki)
                 if raw and (fft <= 0.0) and (k * dt > 0.05):
@@ -287,13 +305,13 @@ def sim_inv(t, TL, cfg=None):
                         pending_t = k * dt + ff_wait
                         pending_phase = None
                     else:
-                        vn = 0.0; vd_buf[:] = 0.0; fft = ff_cool
+                        vn = ff_alpha * vn; vd_buf[:] = ff_alpha * vd_buf; fft = ff_cool
                         fl_o[k // dec] = 1.0
                         trig_log.append((k * dt, v, efs, Dm))
                 if phase_pending:
                     _dphi = (v10_ph - ff_phase + math.pi) % TWO_PI - math.pi
                     if (abs(_dphi) < ff_phase_tol) or (k * dt >= phase_deadline):
-                        vn = 0.0; vd_buf[:] = 0.0; fft = ff_cool
+                        vn = ff_alpha * vn; vd_buf[:] = ff_alpha * vd_buf; fft = ff_cool
                         phase_pending = False
                         fl_o[k // dec] = 1.0
                         trig_log.append((k * dt, v, efs, Dm))
@@ -301,7 +319,7 @@ def sim_inv(t, TL, cfg=None):
                     _go = ((pending_phase is not None and v < pending_phase)
                            or (k * dt >= pending_t))
                     if _go:
-                        vn = 0.0; vd_buf[:] = 0.0; fft = ff_cool
+                        vn = ff_alpha * vn; vd_buf[:] = ff_alpha * vd_buf; fft = ff_cool
                         pending_t = None; pending_phase = None
                         fl_o[k // dec] = 1.0
                         trig_log.append((k * dt, v, efs, Dm))
