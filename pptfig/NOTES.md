@@ -3,9 +3,16 @@
 > 口径：600 rpm、实验室档（3 rpm / 0.1 A / 0.01 N·m）、fci = 500 Hz、类 fal ESO（a=0.75, δ=0.10, λ=10）。
 > 所有数字可由根目录脚本复算，见每行"复现"。
 
-## ppt_01_eso_fal_fault.png —— 同一故障工况：纯 ESO vs 无自适应 RCESO（均类 fal）
+## PPT 图 1（三张，同一故障工况）
 
-- **一句话**：±0.1 N·m 的角度锁相周期负载下，纯 ESO 打出 **74 rpm RMS（12.4% 额定）**；加上重复通道（无自适应 RCESO，β₃=4000、Q₀=0.98、τ₀=20 ms 固定）后降到 **33 rpm RMS（−56%）**，10 Hz 幅值 82 → 31 rpm，代价是 iq 峰值 5.20 → **6.17 A**（额定 6.5 A）。
+| 文件 | 内容 |
+| --- | --- |
+| `ppt_01a_pure_eso_fault.png` | 纯 ESO（β₃=0）单曲线 |
+| `ppt_01b_rceso_fault.png` | 无自适应 RCESO（β₃=4000、Q₀=0.98、τ₀=20 ms 固定）单曲线 |
+| `ppt_01c_eso_vs_rceso.png` | 两者合并对照 |
+
+- **一句话**：±0.1 N·m 的角度锁相周期负载下，纯 ESO 打出 **74 rpm RMS（12.4% 额定）**；加上重复通道后降到 **33 rpm RMS（5.4%，−56%）**，10 Hz 幅值 82 → 31 rpm，代价是 iq 峰值 5.20 → **6.17 A**（额定 6.5 A）。
+- **复现**：`python run_ppt_fig1.py`（两档一次跑完）→ `python plot_ppt_fig1.py eso|rceso|both`
 - **图怎么读**：0–2 s 空载；2 s 故障投入（0.50 额定台阶 + `T(φ)=A[sinφ+0.4sin3φ+0.2sin5φ]`，`T(φ)=T(φ+2π)`，`dφ/dt=ω`，A=0.1 N·m）；第三行看 `i_q*` 与 `i_q` 的跟随（实测电流含采样噪声）。
 - **参数**：β₃ = 0（重复通道关）、无律 D、无 F-B；ESO 增益类 fal。
 - **复现**：`python run_ppt_fig1.py` → `python plot_ppt_fig1.py`
