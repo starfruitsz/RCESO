@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
 D = np.load("_ppt_fig1.npz")
 J = json.load(open("_ppt_fig1.json", encoding="utf-8"))
@@ -43,9 +44,23 @@ y = D["y"] * N
 ax[1].plot(t[::step], y[::step], color=C_N, lw=0.9)
 ax[1].axhline(N, color="#888", ls=":", lw=1.0)
 ax[1].set_ylabel("转速 / rpm")
-ax[1].set_ylim(0, 1.25 * N)
+ax[1].set_ylim(0, 1.42 * N)          # 0-850：峰值实测到 805，留 5% 余量不裁切
+ax[1].yaxis.set_major_locator(MultipleLocator(100))
+ax[1].yaxis.set_minor_locator(MultipleLocator(50))
 ax[1].axvline(2.0, color="#999", ls="--", lw=1.0)
-ax[1].text(2.18, 1.25 * N * 0.955,
+# 纵轴跨度与峰峰标注（让观众一眼知道这个波动在什么刻度下）
+ax[1].text(0.012, 0.965, "纵轴 0–850 rpm（满刻度 850）", transform=ax[1].transAxes,
+           fontsize=11.5, color="#555", va="top",
+           bbox=dict(facecolor="white", edgecolor="none", alpha=0.8, pad=2))
+_ys = (t >= 5.0) & (t < 6.0)
+_y0, _y1 = y[_ys].min(), y[_ys].max()
+ax[1].annotate("", xy=(7.62, _y0), xytext=(7.62, _y1),
+               arrowprops=dict(arrowstyle="<->", color="#c0392b", lw=1.8))
+ax[1].text(7.50, (_y0 + _y1) / 2, "峰峰 %.0f\nRMS %.0f rpm" % (_y1 - _y0, J["steady_rms"]),
+           fontsize=10, color="#c0392b", ha="right", va="center",
+           bbox=dict(facecolor="white", edgecolor="#c0392b", lw=0.7, alpha=0.92, pad=2.5))
+
+ax[1].text(2.18, 1.42 * N * 0.90,
            "稳态转速脉动 %.0f rpm RMS（≈%.1f%% 额定）" % (J["steady_rms"], 100 * J["steady_rms"] / N),
            fontsize=13, color=C_N,
            bbox=dict(facecolor="white", edgecolor="none", alpha=0.85, pad=2.5))
