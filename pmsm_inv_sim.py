@@ -204,7 +204,8 @@ def sim_inv(t, TL, cfg=None):
         if _TLA is not None and k >= _nang0:          # 角度锁相分量：按当前机械角查表
             _phim = (th / P_POL) % TWO_PI
             _tl += _TLAA * _TLA[int(_phim * _TLAK) % len(_TLA)]
-        w += dt * (Te - (_tl + TLn[min(k // nTstep, nT - 1)])) / J_M
+        _tl_tot = _tl + TLn[min(k // nTstep, nT - 1)]      # 实际施加的总负载（含负载噪声）
+        w += dt * (Te - _tl_tot) / J_M
 
         # ---- 电流环：每个 PWM 周期一次 ----
         if k % npwm == 0:
@@ -345,7 +346,7 @@ def sim_inv(t, TL, cfg=None):
             y_o[j] = w / w_ref; id_o[j] = idq[0]; iq_o[j] = idq[1]
             ia_o[j] = ia; vd_o[j] = vd; vq_o[j] = vq
             u_o[j] = u; vqc_o[j] = vq_cmd; iqr_o[j] = u * I_BASE
-            tl_o[j] = _tl
+            tl_o[j] = _tl_tot                                 # 出图用：含负载噪声的总负载
     tt = t[::dec]
     m = min(len(tt), no)
     return dict(t=tt[:m], y=y_o[:m], id=id_o[:m], iq=iq_o[:m], ia=ia_o[:m],

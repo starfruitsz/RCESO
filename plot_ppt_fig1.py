@@ -32,9 +32,9 @@ step = 6      # 10 kHz -> ~1.7 kHz 抽点，够看清 10 Hz 波形
 # (1) 负载
 ax[0].plot(t[::step], D["TL"][::step], color=C_TL, lw=1.0)
 ax[0].set_ylabel("$T_L$ / N·m")
-ax[0].set_ylim(-0.02, 0.55)
+ax[0].set_ylim(-0.04, 0.55)
 ax[0].text(0.15, 0.46, "空载", fontsize=13, color="#555")
-ax[0].text(2.15, 0.46, "故障投入：角度锁相周期负载 ±0.1 N·m（$T(\\varphi)=T(\\varphi+2\\pi)$）",
+ax[0].text(2.15, 0.485, "故障投入：角度锁相周期负载 ±0.1 N·m（$T(\\varphi)=T(\\varphi+2\\pi)$）",
            fontsize=13, color="#7d3c98")
 ax[0].axvline(2.0, color="#999", ls="--", lw=1.0)
 
@@ -67,20 +67,6 @@ fig.suptitle("纯 ESO（无重复通道）+ 类 fal 增益：600 rpm、实验室
              "实验室噪声：转速 3 rpm、dq 电流 ±0.1 A、负载 0.01 N·m",
              fontsize=15, y=0.985)
 
-# 第三行加一个噪声放大窗：1.00–1.06 s，看清 ±0.1 A 的采样噪声
-ins = ax[2].inset_axes([0.63, 0.56, 0.32, 0.40])
-ins.set_facecolor("white"); ins.patch.set_alpha(1.0)
-for sp in ins.spines.values():
-    sp.set_visible(True); sp.set_linewidth(0.8)
-m = (t >= 1.000) & (t < 1.002)     # 2 ms：能看清逐个采样点的噪声
-ins.plot(t[m] * 1e3, D["iq"][m], color=C_IQ, lw=1.2, label="$i_q$")
-ins.plot(t[m] * 1e3, D["iqr"][m], color=C_IQR, lw=1.6, ls="--", label="$i_q^*$")
-ins.set_xlabel("t / ms", fontsize=8.5)
-ins.set_xlim(1000.0, 1002.0)
-ins.tick_params(labelsize=9)
-ins.set_title("空载放大 2 ms：$i_q$ 采样噪声 ±0.1 A", fontsize=9.5)
-ins.legend(fontsize=7.5, loc="lower left", ncol=2, framealpha=0.9)
-ins.grid(alpha=0.2)
 fig.align_ylabels(ax)
 fig.savefig("pptfig/ppt_01_eso_fal_fault.png")
 print("ok: pptfig/ppt_01_eso_fal_fault.png")
