@@ -1,0 +1,28 @@
+% pptfig/equations.tex —— 可直接粘进 MathType / Word 公式编辑器的 LaTeX 片段（PPT 用）
+% 用法：MathType 里 Edit > Preferences > Workspace Preferences 勾选
+%       "Allow TeX language input"，然后粘贴下面任意一段，回车即转为公式。
+% 每段都是独立完整的 LaTeX 表达式（不含 \begin{equation}），方便逐条粘贴。
+
+% (1) 灰箱 ESO：类 fal 校正（默认档 a=0.75, δ=0.10, λ=10）
+\dot z_1 = z_2 + b_0 u + v + \beta_1 G(e_1;1,\delta,\lambda),\quad
+\dot z_2 = \beta_2 G(e_1;a,\delta,\lambda),\quad
+\beta_1 = 2\omega_o,\ \beta_2 = \omega_o^2
+
+% (2) 类 fal 增益定义（z1 通道指数 1，z2 通道指数 a）
+G(e;a,\delta,\lambda)=\left(|e|+\delta\lambda^{-1/a}\right)^{a}\tanh\left(\frac{\lambda e}{\delta}\right)
+
+% (3) 控制律
+u=\frac{u_0-z_2-v}{b_0},\quad u_0=k_p(r-y),\quad e_1=y-z_1
+
+% (4) 低通重复通道（内模）
+\tau\dot v+v=Q\,v(t-T)+\beta_3\tanh\left(\frac{e_1}{\zeta}\right)=:\chi,\quad e_f:=\chi-v=\tau\dot v
+
+% (5) 记忆失配检测量（方向限定，用于反相/撤除事件）
+D_m^{\downarrow}=\frac{\max\left(0,\,E_v(t-T)-E_v(t)\right)}{E_v(t-T)+\varepsilon_v},\quad
+E_v(t)=\frac{1}{T}\int_{t-T}^{t}v^2(\tau)\,\mathrm{d}\tau
+
+% (6) 角度锁相周期负载（机械角 φ，dφ/dt=ω）
+T(\varphi)=T(\varphi+2\pi),\quad T_L=T_0+A\left[\sin\varphi+0.4\sin 3\varphi+0.2\sin 5\varphi\right],\quad \frac{\mathrm{d}\varphi}{\mathrm{d}t}=\omega
+
+% (7) 小信号斜率与等效观测带宽
+G'(0)=\delta^{a-1},\qquad \omega_o^{\mathrm{eff}}=\omega_o\,\delta^{(a-1)/2}
