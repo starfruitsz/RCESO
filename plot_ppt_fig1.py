@@ -48,7 +48,7 @@ ax[0].plot(t[::step], D["TL"][::step], color=C_TL, lw=1.0)
 ax[0].set_ylabel("$T_L$ / N·m")
 ax[0].set_ylim(-0.04, 0.55)
 ax[0].text(0.15, 0.46, "空载", fontsize=13, color="#555")
-ax[0].text(2.15, 0.485, "故障投入：角度锁相周期负载 ±0.1 N·m（$T(\\varphi)=T(\\varphi+2\\pi)$）",
+ax[0].text(2.15, 0.485, "故障投入：圆盘质量不对中模式 ±0.1 N·m（1–6 次谐波，THD 77.5%）",
            fontsize=13, color="#7d3c98")
 ax[0].axvline(2.0, color="#999", ls="--", lw=1.0)
 
@@ -68,11 +68,22 @@ def rms_of(k):
     m = (t >= 5.0) & (t < 6.0)
     return float(np.sqrt(np.mean(e[m] ** 2)))
 
+def amp10(k):
+    e = (D["y_" + k] - 1.0) * N
+    m = (t >= 5.0) & (t < 6.0)
+    tt, yy = t[m], e[m]
+    w = 2.0 * np.pi * 10.0
+    c = 2.0 * np.mean(yy * np.cos(w * tt))
+    s = 2.0 * np.mean(yy * np.sin(w * tt))
+    return float(np.hypot(c, s))
+
 if MODE == "both":
-    txt = ("5–6 s：10 Hz 幅值 82 → 31 rpm；转速 RMS %.0f → %.0f rpm（−%.0f%%）"
-           % (rms_of("eso"), rms_of("rceso"), 100 * (1 - rms_of("rceso") / rms_of("eso"))))
+    txt = ("5–6 s：10 Hz 幅值 %.0f → %.0f rpm；转速 RMS %.0f → %.0f rpm（−%.0f%%）"
+           % (amp10("eso"), amp10("rceso"), rms_of("eso"), rms_of("rceso"),
+              100 * (1 - rms_of("rceso") / rms_of("eso"))))
 else:
-    txt = "5–6 s：转速 RMS %.0f rpm（%.1f%% 额定）" % (rms_of(MODE), 100 * rms_of(MODE) / N)
+    txt = "5–6 s：10 Hz 幅值 %.0f rpm；转速 RMS %.0f rpm（%.1f%% 额定）" % (
+        amp10(MODE), rms_of(MODE), 100 * rms_of(MODE) / N)
 ax[1].text(0.012, 0.955, txt, transform=ax[1].transAxes, fontsize=12.5, color="#333", va="top",
            bbox=dict(facecolor="white", edgecolor="none", alpha=0.85, pad=2.5))
 if MODE == "both":
@@ -95,9 +106,9 @@ else:
 for a in ax:
     a.tick_params(labelsize=12)
 
-title = {"eso": "纯 ESO（无重复通道）+ 类 fal 增益：角度锁相周期负载 ±0.1 N·m",
-         "rceso": "无自适应 RCESO（重复通道 $\\beta_3$=4000、$Q_0$=0.98、$\\tau_0$=20 ms 固定）+ 类 fal 增益：同一故障工况",
-         "both": "同一故障工况：纯 ESO vs 无自适应 RCESO（ESO 增益均为类 fal）"}[MODE]
+title = {"eso": "纯 ESO（无重复通道）+ 类 fal 增益：圆盘质量不对中模式 ±0.1 N·m",
+         "rceso": "无自适应 RCESO（重复通道 $\\beta_3$=4000、$Q_0$=0.98、$\\tau_0$=20 ms 固定）+ 类 fal 增益：同一圆盘质量不对中模式",
+         "both": "同一圆盘质量不对中模式：纯 ESO vs 无自适应 RCESO（ESO 增益均为类 fal）"}[MODE]
 fig.suptitle(title + "\n" + "600 rpm、实验室工况、±0.1 N·m；实验室噪声：转速 3 rpm、dq 电流 ±0.1 A、负载 0.01 N·m",
              fontsize=15, y=0.985)
 fig.align_ylabels(ax)

@@ -83,6 +83,8 @@ def sim_inv(t, TL, cfg=None):
     #   -1 = 反相复位（v->-v，缓冲同时取反），用于"反相突变"事件——此时清空是错的动作。
     ff_alpha = float(cfg.get("ff_alpha", 0.0))
     # 2026-10-22：角度锁相周期负载 T(φ)=T(φ+2π)，dφ/dt=ω（φ 为机械角）。
+    #   推荐型线：tl_profile.disc_unbalance_profile()，即「圆盘质量不对中模式」
+    #   （1–6 次谐波，基波为主，THD=77.46%；旧 30% 约束不再满足）。
     #   tl_ang       : 单位幅值的周期表（长度 N，均匀铺满 0..2π），None=关闭
     #   tl_ang_amp   : 该分量的幅值（N·m）
     #   tl_ang_start : 该分量开始作用的时刻（s）

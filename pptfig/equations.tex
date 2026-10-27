@@ -21,8 +21,14 @@ u=\frac{u_0-z_2-v}{b_0},\quad u_0=k_p(r-y),\quad e_1=y-z_1
 D_m^{\downarrow}=\frac{\max\left(0,\,E_v(t-T)-E_v(t)\right)}{E_v(t-T)+\varepsilon_v},\quad
 E_v(t)=\frac{1}{T}\int_{t-T}^{t}v^2(\tau)\,\mathrm{d}\tau
 
-% (6) 角度锁相周期负载（机械角 φ，dφ/dt=ω）
-T(\varphi)=T(\varphi+2\pi),\quad T_L=T_0+A\left[\sin\varphi+0.4\sin 3\varphi+0.2\sin 5\varphi\right],\quad \frac{\mathrm{d}\varphi}{\mathrm{d}t}=\omega
+% (6) 圆盘质量不对中模式：角度锁相周期负载（机械角 φ，dφ/dt=ω）
+% 1–6 次谐波，按给定顺序（3 次 0.10、4 次 0.45，非单调）；THD=77.46%（超过旧 30% 约束）
+T(\varphi)=T(\varphi+2\pi),\quad
+T_L=T_0+A\,\tilde T(\varphi),\quad
+\tilde T(\varphi)=\frac{\sum_{n=1}^{6}a_n\sin n\varphi}{\max\left|\sum_{n=1}^{6}a_n\sin n\varphi\right|},\quad
+(a_1,\ldots,a_6)=(1,\,0.55,\,0.10,\,0.45,\,0.25,\,0.15),\quad
+\mathrm{THD}=\frac{\sqrt{\sum_{n=2}^{6}a_n^2}}{a_1}=77.46\%,\quad
+\frac{\mathrm{d}\varphi}{\mathrm{d}t}=\omega
 
 % (7) 小信号斜率与等效观测带宽
 G'(0)=\delta^{a-1},\qquad \omega_o^{\mathrm{eff}}=\omega_o\,\delta^{(a-1)/2}

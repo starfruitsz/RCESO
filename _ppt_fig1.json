@@ -1,22 +1,33 @@
 {
+ "mode": "圆盘质量不对中模式",
+ "mode_id": "disc_mass_misalignment",
+ "harmonics": [
+  1.0,
+  0.55,
+  0.1,
+  0.45,
+  0.25,
+  0.15
+ ],
+ "thd": 0.774597,
  "n_ref": 600.0,
  "amp_ang": 0.1,
  "fci": 500.0,
  "cases": {
   "eso": {
    "label": "纯 ESO",
-   "steady_rms": 74.28,
-   "iq_std": 0.896,
-   "iq_max": 5.2,
-   "iqr_max": 4.57,
+   "steady_rms": 58.61,
+   "iq_std": 0.68,
+   "iq_max": 5.19,
+   "iqr_max": 4.59,
    "beta3": 0.0
   },
   "rceso": {
    "label": "无自适应 RCESO",
-   "steady_rms": 32.57,
-   "iq_std": 0.959,
-   "iq_max": 6.17,
-   "iqr_max": 5.42,
+   "steady_rms": 27.49,
+   "iq_std": 0.768,
+   "iq_max": 5.64,
+   "iqr_max": 5.16,
    "beta3": 4000.0
   }
  }

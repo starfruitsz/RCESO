@@ -1,24 +1,16 @@
 # -*- coding: utf-8 -*-
 """空载段差异的多噪声种子复核：纯 ESO vs 无自适应 RCESO（同一负载噪声实现，成对比较）"""
-import math
-import os
 from multiprocessing import Pool
 
 import numpy as np
 import noise_cfg as NC
 from pmsm_inv_sim import sim_inv
+from tl_profile import disc_unbalance_profile
 
 DT, TEND, TL0 = 2e-6, 8.0, 2.0
 N_REF = 600.0
 AMP = 0.1
-NPROF = 4096
 SEEDS = [20261017, 20261019, 20261023, 20261027]
-
-
-def profile_unit():
-    ph = np.linspace(0.0, 2 * math.pi, NPROF, endpoint=False)
-    f = np.sin(ph) + 0.4 * np.sin(3 * ph) + 0.2 * np.sin(5 * ph)
-    return f / np.max(np.abs(f))
 
 
 def one(job):
@@ -31,7 +23,7 @@ def one(job):
                sig_n=NC.NOISE_LAB["sig_n_rpm"],
                sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
                seed_i=20261018, seed_T=seedT, seed_n=20261018,
-               tl_ang=profile_unit(), tl_ang_amp=AMP, tl_ang_start=TL0,
+               tl_ang=disc_unbalance_profile(), tl_ang_amp=AMP, tl_ang_start=TL0,
                eso_law="fal", eso_a=0.75, eso_delta=0.10, eso_lam=10.0)
     Y = sim_inv(t, TL, cfg)
     tt = Y["t"]; e = (Y["y"] - 1.0) * N_REF
