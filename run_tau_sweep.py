@@ -28,7 +28,7 @@ def one(tau):
                sig_n=NC.NOISE_LAB["sig_n_rpm"],
                sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
                tl_ang=disc_unbalance_profile(), tl_ang_amp=AMP,
-               tl_ang_start=ANG_START, tl_ang_rev=TW,
+               tl_ang_start=ANG_START, tl_ang_rev=29.9,
                eso_law="fal", eso_a=0.75, eso_delta=0.10, eso_lam=10.0,
                T_es=True, es_d0=d0, es_step=0.0, es_dith=0.0)
     Y = sim_inv(t, TL, cfg)

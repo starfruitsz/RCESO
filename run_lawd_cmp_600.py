@@ -38,13 +38,15 @@ if __name__ == "__main__":
     t, TL = build_loads()
     out = {}
     for key, kw in CASES:
-        cfg = dict(n_ref=N_REF, T=0.1, fci=500.0, beta3=4000.0, Q0=0.98, tau0=20e-3,
+        cfg = dict(n_ref=N_REF, T=0.1, T_adapt=True, T_filt=50e-3,
+                   rc_bp=5.0, b3_min=4000.0, b3_max=4000.0, a_ref=1.0,
+                   fci=500.0, beta3=4000.0, Q0=0.98, tau0=20e-3,
                    seed_i=20261018,
                    i_noise_peak=NC.NOISE_LAB["i_noise_peak"],
                    sig_n=NC.NOISE_LAB["sig_n_rpm"],
                    sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
                    tl_ang=disc_unbalance_profile(), tl_ang_amp=AMP,
-                   tl_ang_start=ANG_START, tl_ang_rev=TW,
+                   tl_ang_start=ANG_START, tl_ang_rev=29.9,
                    eso_law="fal", eso_a=0.75, eso_delta=0.10, eso_lam=10.0)
         cfg.update(kw)
         Y = sim_inv(t, TL, cfg)
