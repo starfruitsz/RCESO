@@ -67,6 +67,7 @@ def sim_inv(t, TL, cfg=None):
     B_GAIN = 0.101 * I_BASE / (J_M * w_ref); B0 = 1.2 * B_GAIN
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 20e-3)
     Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
+    rc_inj = str(cfg.get("rc_inj", "tanh"))   # 重复通道注入非线性：tanh（默认）或 fal
     kp_boost = cfg.get("kp_boost", 0.0); det_eps = cfg.get("det_eps", 0.01)
     kp_gpow = float(cfg.get("kp_gpow", 1.0))      # 门控形状：g^p，p>1 更只在冲击瞬间发力
     # 律D 增益自适应（2026-11-11）：瞬态时同时抬高 ESO 带宽与重复通道注入增益
@@ -402,7 +403,11 @@ def sim_inv(t, TL, cfg=None):
                 _b3e = _b3_now
             else:
                 _b3e = BETA3 * (1.0 + kb_b3 * g) if kb_b3 > 0.0 else BETA3
-            chi = Q0 * vd_delay + _b3e * math.tanh(e1p / ZETA)
+            if rc_inj == "fal":
+                _inj = ESO_G2(e1p)            # 类 fal：次线性、无界
+            else:
+                _inj = math.tanh(e1p / ZETA)  # 饱和、有界
+            chi = Q0 * vd_delay + _b3e * _inj
             if TAU0 <= 1e-9:
                 vn = chi          # tau=0：无低通（一阶低通极限）
             else:
