@@ -139,6 +139,12 @@ window.MathJax = {
 <p>（脚本 <code>run_tau_fft.py</code>）。这与 <code>inv_model.md</code> 记录的"$\tau_0$ 不能再压到 $10$\,ms（撤除后失稳）"、</p>
 <p>以及 $2$\,kHz 口径下的 $220$\,Hz 极限环互相印证。</p>
 
+<p>agraph{$\tau=0$ 的显式实现与等价性。}</p>
+<p>把 $\tau$ 直接设为 $0$（实现上取 $v\leftarrow\chi$）重跑上述三个工况，与 $\tau=2\,\mu$s 的结果<strong>逐位相同</strong></p>
+<p>（$\max|\Delta y|=0$、$\max|\Delta i_q|=0$）：在 $1$\,ms 的控制周期下更新式为</p>
+<p>$v_{k+1}=\chi+(\chi-v_k)e^{-T_s/\tau}$，$\tau\le20\,\mu$s 时 $e^{-T_s/\tau}$ 已在双精度下溢为 $0$。</p>
+<p>因此"无低通"档就是 $\tau=0$ 本身，不是近似；脚本 <code>run_tau0.py</code>。</p>
+
 <p>agraph{一个容易误判的陷阱。}</p>
 <p>表中 $\tau=10$\,ms 的<em>$10$\,Hz 残余</em>（$6.0$\,rpm）反而小于定稿（$14.1$\,rpm）——只看基波会得出"去掉低通更好"的错误结论；</p>
 <p>但总 RMS 是 $3.7$ 倍、电流峰值 $1.5$ 倍，能量已转移到 $190$\,Hz。判据必须以<strong>宽带 RMS 与电流峰值</strong>为准，不能只看谐波幅值。</p>

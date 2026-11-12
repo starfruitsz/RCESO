@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""plot_lpf_cmp.py —— 无自适应 RCESO：有低通 vs 无低通（三工况，1920×960）"""
+"""plot_lpf_cmp.py —— 无自适应 RCESO：有低通（tau=20 ms）vs 无低通（tau=0）（三工况，1920×960）"""
 import json
 
 import numpy as np
@@ -22,7 +22,8 @@ plt.rcParams.update({
 D = {}
 for case in ("load", "speed", "echo"):
     for cfg in ("lpf", "nolpf"):
-        d = np.load("_wave_lpf_%s_%s.npz" % (case, cfg))
+        fname = "_wave_lpf_%s_%s.npz" % (case, "lpf" if cfg == "lpf" else "tau0")
+        d = np.load(fname)
         t = np.asarray(d["t"])
         dec = max(1, int(round(1e-3 / (t[1] - t[0]))))
         D[(case, cfg)] = (t[::dec], np.asarray(d["y"])[::dec] * N_REF)
@@ -63,7 +64,7 @@ ax_zoom = [fig.add_subplot(gs[1, i]) for i in range(3)]
 titles = ["(a) 负载突变（2 s，0.50 额定）", "(b) 参考转速突变（5 s，600→900 rpm）", "(c) 回声重影（5.98 s 反相）"]
 for i, case in enumerate(("load", "speed", "echo")):
     ax = ax_full[i]
-    ax.plot(ts, spd(case, "nolpf"), color=C_NOL, lw=0.8, alpha=0.85, label="无低通（$\\tau=2\\,\\mu$s）")
+    ax.plot(ts, spd(case, "nolpf"), color=C_NOL, lw=0.8, alpha=0.85, label="无低通（$\\tau=0$）")
     ax.plot(ts, spd(case, "lpf"), color=C_LPF, lw=1.4, label="有低通（$\\tau=20$ ms）")
     ax.set_xlim(0, 8); ax.set_ylim(-6200, 6200)
     ax.set_xlabel("时间 / s"); ax.set_ylabel("转速 / rpm")
@@ -104,7 +105,7 @@ ax.set_title("(f) 回声窗 $|e|$（对数）：峰值 %.0f / %.0f rpm" % (M[("e
 ax.set_xlabel("时间 / s"); ax.set_ylabel("$|$转速误差$|$ / rpm")
 
 handles = [Line2D([0], [0], color=C_LPF, lw=1.6, label="有低通 $\\tau=20$ ms"),
-           Line2D([0], [0], color=C_NOL, lw=1.2, label="无低通 $\\tau=2\\,\\mu$s（等效取消）")]
+           Line2D([0], [0], color=C_NOL, lw=1.2, label="无低通 $\\tau=0$（一阶低通极限）")]
 fig.legend(handles=handles, loc="upper center", ncol=2, fontsize=8.4, bbox_to_anchor=(0.5, 0.925))
 fig.suptitle("无自适应 RCESO：保留低通 vs 去掉低通——负载突变 / 参考转速突变 / 回声重影（600 rpm，8 s）",
              fontsize=10.2, y=0.975)
