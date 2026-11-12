@@ -6,7 +6,7 @@
   t=15 s 参考转速 600 → 900 rpm
 30 s、实验室噪声、fci=500 Hz、β₃=4000、τ₀=20 ms、类 fal ESO、种子 20261018。
 T 自适应：δ0=-14.3%、Δ=0.5%、σ=1%、Pd=1.5 s、N=3、t0=3 s、es_ff 前馈重置（换速）；
-律 D：kp_boost=8、kb_eso=2（ω_o×3）、kb_b3=0、det_eps=0.01。
+律 D：kp_boost=6、kb_eso=3（ω_o×(1+3g)）、kb_b3=0、det_eps=0.01。
 输出：_wave_4cmp2_600_<key>.npz
 """
 import math

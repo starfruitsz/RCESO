@@ -61,7 +61,7 @@ ax_a.axvline(2.0, color="#7f8c8d", ls="--", lw=0.9)
 ax_a.plot(ts, 600 + eb, color=C_BASE, lw=2.4, alpha=0.55,
           label="无自适应（$k_p$、$\\omega_o$ 固定；跌落 %.0f rpm）" % mb["dip"])
 ax_a.plot(ts, 600 + el, color=C_LAWD, lw=1.2,
-          label="律 D（$k_p$×8 + $\\omega_o$×3 调度；跌落 %.0f rpm）" % ml["dip"])
+          label="律 D（$k_b=6$、$a=3$；跌落 %.0f rpm）" % ml["dip"])
 ax_a.set_xlim(0, 8); ax_a.set_ylim(150, 700)
 ax_a.set_xlabel("时间 / s"); ax_a.set_ylabel("转速 / rpm")
 ax_a.legend(fontsize=7.2, loc="lower right", ncol=1)
