@@ -27,16 +27,16 @@ chk("id_unique", len(ids) == len(set(ids)), "dup=%s" % [x for x in set(ids) if i
 
 srcs = re.findall(r'<img src="([^"]+)"', b)
 miss_img = [s for s in set(srcs) if not os.path.exists(s)]
-chk("figures", len(srcs) == 13 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
+chk("figures", len(srcs) == 7 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
 
-chk("h2", len(re.findall(r"<h2 ", b)) == 10, str(len(re.findall(r"<h2 ", b))))
-chk("h3", len(re.findall(r"<h3 ", b)) == 22, str(len(re.findall(r"<h3 ", b))))
+chk("h2", len(re.findall(r"<h2 ", b)) == 14, str(len(re.findall(r"<h2 ", b))))
+chk("h3", len(re.findall(r"<h3 ", b)) == 32, str(len(re.findall(r"<h3 ", b))))
 chk("h4", len(re.findall(r"<h4>", b)) == 2, str(len(re.findall(r"<h4>", b))))
-# 2026-10-22：16 -> 17（§1.3 注「校正通道的增益形状：类 fal 可选档」新增一张 ESO 增益形状对照表）
-chk("tables", len(re.findall(r"<table>", b)) == 17, str(len(re.findall(r"<table>", b))))
-chk("tabcap", len(re.findall(r'class="tabcap"', b)) == 1, str(len(re.findall(r'class="tabcap"', b))))
+# 2026-11-12：v5.0 结构（律 F 作废、新增律 D / T 自适应两章）——章节数变动时同步改这里
+chk("tables", len(re.findall(r"<table>", b)) == 19, str(len(re.findall(r"<table>", b))))
+chk("tabcap", len(re.findall(r'class="tabcap"', b)) == 0, str(len(re.findall(r'class="tabcap"', b))))
 chk("notice", len(re.findall(r"box notice", b)) == 2, str(len(re.findall(r"box notice", b))))
-chk("figcaption", len(re.findall(r"<figcaption>", b)) == 13, str(len(re.findall(r"<figcaption>", b))))
+chk("figcaption", len(re.findall(r"<figcaption>", b)) == 7, str(len(re.findall(r"<figcaption>", b))))
 
 # 浏览器可见的转换缺陷（51 项之外的三类：未转换的 \textbf、二次转义的表格、列格式残留）
 chk("no_visible_textbf", "\\textbf" not in b, "n=%d" % b.count("\\textbf"))
@@ -48,11 +48,11 @@ short = [re.sub(r"<[^>]+>", "", c)[:36] for c in caps if len(re.sub(r"<[^>]+>", 
 chk("caption_not_short", not short, str(short[:3]))
 
 sub = re.search(r'<div class="sub">([^<]*)</div>', h).group(1)
-chk("sub_v40", sub.startswith("v4.0"), sub[:40])
+chk("sub_v50", sub.startswith("v5.0"), sub[:40])
 chk("sub_clean", ("\\" not in sub) and ("{" not in sub) and ("$" not in sub), sub)
 
-must = ["7.91", "40.05", "7.24", "80.2", "37.24", "5.32", "32.80", "8.23", "3142", "pmsm_inv_sim", "记忆失配"]
-gone = ["v3.1", "71.9", "36.5", "648.62", "折中最优", "突变优先选", "-50.8", "23.30"]
+must = ["-376.7", "-349.8", "38.4", "27.72", "30.54", "6.31", "pmsm_inv_sim", "锁相", "圆盘", "58.79"]
+gone = ["66.80", "48.36", "51.7", "127.7", "88.9", "7.91", "40.05", "v3.1", "71.9", "36.5"]
 for m in must:
     chk("has:" + m, m in b, "" if m in b else "MISSING")
 for m in gone:

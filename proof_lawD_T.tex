@@ -1,0 +1,363 @@
+% =====================================================================
+%  律 D 与 T 自适应的证明（技术附注，独立文档）
+%  编译：xelatex 两遍（ctex + article）
+%  版本：v5.0 · 2026-11-12（复位型律 F 已作废，本附注不再含该部分）
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[UTF8,fontset=windows]{ctex}
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Consolas}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}
+\geometry{margin=2.4cm}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+\allowdisplaybreaks
+
+\newtheorem{definition}{定义}
+\newtheorem{lemma}{引理}
+\newtheorem{theorem}{定理}
+\newtheorem{proposition}{命题}
+\newtheorem{corollary}{推论}
+\newtheorem{assumption}{假设}
+\theoremstyle{remark}
+\newtheorem{remark}{注}
+
+\newcommand{\ef}{e_f}
+\newcommand{\st}{\operatorname{tanh}}
+\newcommand{\Tg}{T_{\mathrm{gross}}}
+
+\title{\textbf{律 D 与 T 自适应的证明}\\[2mm]
+\large 技术附注：增益调度的界单调性与周期自整定的小增益条件}
+\author{}
+\date{2026 年 11 月 12 日}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent 本文给出两部分证明。第一部分针对\textbf{律 D}（以跟踪误差 $T$ 窗均值为指标的"比例增益 $+$ 观测带宽"联合调度）：
+证明检测量的取值范围与 Lipschitz 性、对 $k f_0$ 分量的结构性盲性、调度增益的下界，以及关键结论——\textbf{联合调度不放大闭环的一致最终界}（逐分量的单调性）。
+第二部分针对 \textbf{T 自适应}（标称周期 $2\pi/\omega$ 上的锁相极值搜索 ESC）：证明相位对齐条件的唯一性
+$\delta^{*}(\omega)=-\arctan(\omega\tau)/2\pi$、时变延迟算子的 $L_2$ 增益、内模的输入--状态稳定性（小增益条件 $\gamma=Q/\sqrt{1-\mu}<1$），
+以及周期修正速率与带宽调度的充分条件（后者归结为平均驻留时间）。未证明的部分（随机噪声、抖动非线性、$A$ 观测器的增益、量化延迟、台架）单列一节如实说明。
+\end{abstract}
+
+\section{记号与假设}
+对象、观测器与重复通道与正文一致：
+\begin{align}
+\dot y &= b\,i_a+d,\qquad i_a=\frac{\omega_{ci}}{s+\omega_{ci}}\,(u-n_i), \label{eq:plant}\\
+\dot z_1 &= z_2+b_0u+v+\beta_1^{\rm eff}\,G(e_1),\qquad \dot z_2=\beta_2^{\rm eff}\,G(e_1),\qquad
+\beta_1^{\rm eff}=2\omega_o^{\rm eff},\ \beta_2^{\rm eff}=(\omega_o^{\rm eff})^{2}, \label{eq:eso}\\
+u&=\frac{1}{b_0}\Bigl[k_p^{\rm eff}(r-y)-z_2-v\Bigr],\qquad e_1=y-z_1, \label{eq:law}\\
+\tau_0\dot v+v&=Q_0\,v(t-T)+\beta_3\st\!\Bigl(\frac{e_1}{\zeta}\Bigr)=:\chi,\qquad \ef:=\chi-v=\tau_0\dot v, \label{eq:rc}
+\end{align}
+其中 $Q_0$ 为\textbf{固定}遗忘因子（本报告不设遗忘因子自适应于推荐配置，故 $Q_0$ 与 $v$ 的界均不随调度变化）。
+
+\begin{assumption}[对象的扩张状态]\label{as:h}
+记 $x_2$ 为含输入失配的扩张状态，$\dot x_2=:h$，且 $|h(t)|\le H$。
+\end{assumption}
+\begin{assumption}[参数]\label{as:param}
+$b,b_0,k_p,\omega_o,\tau_0,\zeta>0$，$Q_0\in(0,1)$，$\beta_3\ge0$；$r$ 为常数、$d$ 有界。
+\end{assumption}
+\begin{assumption}[律 D 的调度]\label{as:lawd}
+$g(t)=\bar e_1^{2}/(\bar e_1^{2}+\varepsilon_g^{2})$，$\bar e_1$ 为 $e_1$ 的 $T$ 窗均值；$\varepsilon_g>0$、$k_b\ge0$、$a\ge0$。
+于是 $g\in[0,1)$，且 $k_p^{\rm eff}(t)=k_p\,(1+k_b\,g)$、$\omega_o^{\rm eff}(t)=\omega_o\,(1+a\,g)$ 分段连续、有界。
+\end{assumption}
+\begin{assumption}[ESC 的周期]\label{as:esc}
+$T(t)=\Tg(t)\bigl(1+\delta(t)\bigr)$，其中 $\Tg=2\pi/\omega_f$、$\omega_f$ 为一阶滤波后的转速，$\delta$ 由 ESC 产生：
+$|\delta|\le\delta_{\max}$、$|\dot\delta|\le\Delta\,\omega_d$；记 $|\dot T(t)|\le\mu$。
+\end{assumption}
+
+\section{复用的两条基本结论}
+\begin{lemma}[重复通道自持]\label{lem:v}
+在假设~\ref{as:param} 下，对任意初值，
+\begin{equation}
+\limsup_{t\to\infty}|v(t)|\le \bar v:=\frac{\beta_3}{1-Q_0},
+\label{eq:vbar}
+\end{equation}
+且该界与 $e_1$ 的大小无关。
+\end{lemma}
+\begin{proof}
+由 $|\st|\le1$，式 \eqref{eq:rc} 的输入满足 $|Q_0v(t-T)+\beta_3\st(e_1/\zeta)|\le Q_0\bar V+\beta_3$，$\bar V:=\sup_{[t-T,t]}|v|$。
+一阶低通在输入界 $W$ 下满足 $|v(t)|\le W+(|v(0)|-W)e^{-t/\tau_0}$。逐周期迭代，
+$\bar V\le \max\{|v(0)|,\,Q_0\bar V+\beta_3\}$；若 $\bar V>|v(0)|$ 则 $(1-Q_0)\bar V\le\beta_3$，即
+$\bar V\le\max\{|v(0)|,\beta_3/(1-Q_0)\}$；对上极限即得 \eqref{eq:vbar}。
+\end{proof}
+
+\begin{lemma}[一阶比较引理]\label{lem:cmp}
+设 $\sigma(t)$ 满足 $\dot\sigma=-a(t)\sigma+w(t)$，其中 $a(t)\ge a_{\min}>0$ 且 $|w(t)|\le W$。则
+\begin{equation}
+\limsup_{t\to\infty}|\sigma(t)|\le\frac{W}{a_{\min}}.
+\label{eq:cmp}
+\end{equation}
+\end{lemma}
+\begin{proof}
+取 $V=\tfrac12\sigma^2$，则 $\dot V\le -a_{\min}\sigma^2+|w||\sigma|\le-\tfrac12 a_{\min}\sigma^2+W^2/(2a_{\min})$，
+其中用了 $|w||\sigma|\le\tfrac12 a_{\min}\sigma^2+W^2/(2a_{\min})$。于是 $V(t)\le V(0)e^{-a_{\min}t}+W^2/(2a_{\min}^2)$，取上极限并开方即得。
+\end{proof}
+
+\section{律 D 的证明}\label{sec:lawd}
+律 D 的检测量与联合调度律为
+\begin{equation}
+\bar e_1(t)=\frac1T\int_{t-T}^{t}e_1(\sigma)\,\mathrm d\sigma,\qquad
+g(t)=\frac{\bar e_1^2}{\bar e_1^2+\varepsilon_g^2},\qquad
+k_p^{\rm eff}=k_p\bigl[1+k_b\,g\bigr],\quad
+\omega_o^{\rm eff}=\omega_o\bigl[1+a\,g\bigr],\quad k_b,a\ge0 .
+\label{eq:lawd}
+\end{equation}
+
+\begin{lemma}[检测量的基本性质]\label{lem:det}
+对任意 $\bar e_1\in\mathbb R$：
+(i) $g\in[0,1)$，且 $g=0\iff\bar e_1=0$；
+(ii) $g$ 关于 $\bar e_1$ Lipschitz 连续，$\sup|g'|=\dfrac{3\sqrt3}{8\,\varepsilon_g}$；
+(iii) 若 $e_1=p+q$，其中 $p$ 为 $T$ 周期且在一个周期上零均值，则 $\bar e_1(t)\equiv \bar q(t)$，即检测量\textbf{与 $p$ 无关}。
+\end{lemma}
+\begin{proof}
+(i) 令 $x=\bar e_1$，$g=x^2/(x^2+\varepsilon_g^2)\in[0,1)$，等号仅在 $x=0$ 取到 $0$。\\
+(ii) $g'(x)=\dfrac{2x\varepsilon_g^2}{(x^2+\varepsilon_g^2)^2}$，令 $x=\varepsilon_g y$ 得 $g'=\dfrac{2y}{\varepsilon_g(1+y^2)^2}$，
+其在 $y=1/\sqrt3$ 处取最大值 $\dfrac{3\sqrt3}{8\varepsilon_g}$。\\
+(iii) $p$ 为 $T$ 周期时，对任意 $t$，$\int_{t-T}^{t}p(\sigma)\mathrm d\sigma=\int_{0}^{T}p(\sigma)\mathrm d\sigma=0$（谐波 $A\sin(2\pi k t/T+\phi)$ 在一周期上积分为零），故 $\bar e_1=\frac1T\int_{t-T}^{t}q\,\mathrm d\sigma$。
+\end{proof}
+\begin{remark}
+(iii) 是律 D 的全部设计依据：任何 $k f_0$ 分量（$k\in\mathbb N$）在一周期上均值为零，故它们\textbf{不进}检测量；
+而对不在 $1/T$ 栅格上的分量（如本对象的 $5.9$\,Hz 振动与 $0.7$\,Hz 非周期负载），$T$ 窗均值不为零、$g$ 会响应。
+这不是缺陷，而是定义所决定的——它检测的是"非 $1/T$ 周期"的部分，而不是狭义的"阶跃"。
+\end{remark}
+
+\begin{lemma}[调度增益有界]\label{lem:kpgain}
+若 $g\in[0,1)$、$k_b,a\ge0$，则
+\begin{equation}
+k_p\le k_p^{\rm eff}(t)<k_p(1+k_b),\qquad
+\omega_o\le \omega_o^{\rm eff}(t)<\omega_o(1+a),
+\label{eq:kpgain}
+\end{equation}
+从而 $\dfrac{b}{b_0}k_p^{\rm eff}(t)\ge a_{\min}:=\dfrac{b}{b_0}k_p>0$，且
+$\beta_1^{\rm eff}\ge 2\omega_o$、$\beta_2^{\rm eff}\ge\omega_o^{2}$。
+\end{lemma}
+\begin{proof}
+由 $g\in[0,1)$ 直接代入 \eqref{eq:lawd}；$\beta_1^{\rm eff},\beta_2^{\rm eff}$ 对 $\omega_o^{\rm eff}$ 单调。
+\end{proof}
+
+\begin{lemma}[跟踪误差的比较]\label{lem:track-cmp}
+在假设~\ref{as:h}--\ref{as:lawd} 下，记 $\sigma=r-y$，则
+\begin{equation}
+\dot\sigma=-\frac{b}{b_0}k_p^{\rm eff}(t)\,\sigma+w(t),\qquad
+|w(t)|\le W:=\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr).
+\label{eq:sig}
+\end{equation}
+\end{lemma}
+\begin{proof}
+由 \eqref{eq:law}--\eqref{eq:eso}，$\dot y=\frac{b}{b_0}(k_p^{\rm eff}\sigma-z_2-v)+d$，而 $z_2=x_2-e_2$，
+$r$ 为常数；代入 $\sigma=r-y$ 并整理即得 \eqref{eq:sig}，其中 $|z_2|\le|x_2|+|e_2|$ 已被吸收进 $W$（$e_2$ 由引理~\ref{lem:v} 与观测器界控制）。
+\end{proof}
+
+\begin{theorem}[联合调度不放大一致最终界]\label{thm:lawd}
+在假设~\ref{as:h}--\ref{as:lawd} 下，律 D 闭环一致最终有界，且跟踪误差的上极限\textbf{逐分量不大于}名义闭环（$g\equiv0$）的值：
+\begin{equation}
+\limsup_{t\to\infty}|\sigma(t)|\le \frac{b_0}{b k_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr),
+\label{eq:thmD}
+\end{equation}
+其中 $\bar v$ 由 \eqref{eq:vbar} 给出、\textbf{与 $g$ 无关}。
+\end{theorem}
+\begin{proof}
+由引理~\ref{lem:track-cmp}，$\sigma$ 满足 \eqref{eq:sig}；由引理~\ref{lem:kpgain}，$a(t)\ge a_{\min}=\frac{b}{b_0}k_p$。
+应用引理~\ref{lem:cmp} 得 \eqref{eq:thmD}。关键是：由于本文不设遗忘因子自适应（$Q_0$ 固定），$\bar v=\beta_3/(1-Q_0)$ 与调度无关，
+故 $W$ 也不随 $g$ 变化，不等式逐分量成立。
+\end{proof}
+
+\begin{corollary}[观测带宽调度同样不放大]\label{cor:kd}
+若观测带宽也按 $\omega_o^{\rm eff}(t)=\omega_o(1+a\,g(t))\ge\omega_o$ 调度，则观测器误差界
+\begin{equation}
+\limsup_{t\to\infty}\|\xi(t)\|\le\frac{2\sqrt3}{\omega_o^{\rm eff}}\sqrt{\bar v^{2}+\bigl(H/\omega_o^{\rm eff}\bigr)^{2}}
+\le\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}}
+\label{eq:wo}
+\end{equation}
+亦不放大，其中 $\xi=[e_1,\ e_2/\omega_o]^{\top}$ 为尺度化观测误差。证明同上：把 $\omega_o$ 换成时变下界代入 Lyapunov 不等式即可。
+\end{corollary}
+\begin{corollary}[退化性]\label{cor:off}
+当 $g\equiv0$（即关闭律 D）时 $k_p^{\rm eff}\equiv k_p$、$\omega_o^{\rm eff}\equiv\omega_o$，闭环与名义闭环逐位相同。
+\end{corollary}
+\begin{remark}[界是结构性的，不是定量预测]\label{rem:conservative}
+\eqref{eq:thmD} 与 \eqref{eq:wo} 保守二到五个数量级（实测 $|v|\approx4.5\times10^{2}$、$|e_1|\approx0.05$）。
+定理~\ref{thm:lawd} 的用途是证明\textbf{调度不引入新的放大机制}，而不是预测具体 rpm；具体数值由仿真给出。
+\end{remark}
+
+\section{T 自适应的证明}\label{sec:tes}
+\subsection{相位对齐条件}
+\begin{proposition}[唯一极小点]\label{prop:phase}
+对任意 $Q\in(0,1)$、$\tau>0$，内模分母
+\begin{equation}
+D(j\omega)=1+j\omega\tau-Qe^{-j\theta},\qquad \theta=\omega T,
+\qquad
+|D|^{2}=1+(\omega\tau)^{2}+Q^{2}-2Q\bigl[\cos\theta-\omega\tau\sin\theta\bigr]
+\label{eq:D2}
+\end{equation}
+关于 $\theta$ 的唯一极小点为 $\omega T=2\pi k-\arctan(\omega\tau)$；当 $T=\Tg(1+\delta)$、$\Tg=2\pi/\omega$、$k=1$ 时，
+最优周期修正为
+\begin{equation}
+\delta^{*}(\omega)=-\frac{\arctan(\omega\tau)}{2\pi}.
+\label{eq:dstar}
+\end{equation}
+\end{proposition}
+\begin{proof}
+$Q$ 与 $\omega\tau$ 固定时最小化 $|D|^{2}$ 等价于最大化 $f(\theta)=\cos\theta-\omega\tau\sin\theta$。
+令 $\varphi=\arctan(\omega\tau)$，则 $f=\sqrt{1+(\omega\tau)^{2}}\cos(\theta+\varphi)$，唯一最大值在 $\theta+\varphi=2\pi k$。
+代入 $2\pi(1+\delta)=2\pi k-\arctan(\omega\tau)$ 即得 \eqref{eq:dstar}。
+极小值 $|D|_{\min}=\sqrt{1+(\omega\tau)^{2}}-Q>0$：内模不是理想无穷增益。
+\end{proof}
+\begin{remark}[转速依赖]
+$\delta^{*}$ 随 $\omega$ 单调漂移：$\omega\to0$ 时趋于 $0$，$\omega\to\infty$ 时趋于 $-25\%$。
+$\tau=20$\,ms 时 600 rpm 为 $-14.3\%$、300 rpm 为 $-8.9\%$；换速后必然重新失配。
+\end{remark}
+
+\subsection{时变延迟算子的 $L_2$ 增益}
+\begin{lemma}\label{lem:delay}
+设 $T(\cdot)$ 分段连续可微且 $|\dot T(t)|\le\mu<1$，算子 $(\mathcal D_T v)(t)=v\bigl(t-T(t)\bigr)$ 满足
+\begin{equation}
+\|\mathcal D_T v\|_2^{2}\le\frac{1}{1-\mu}\,\|v\|_2^{2}.
+\label{eq:dgain}
+\end{equation}
+\end{lemma}
+\begin{proof}
+令 $s=t-T(t)$，则 $\mathrm ds/\mathrm dt=1-\dot T(t)\ge1-\mu>0$，映射严格单增可逆。于是
+$\int_0^\infty|v(t-T(t))|^2\mathrm dt=\int_{-T(0)}^{\infty}|v(s)|^{2}(\mathrm ds/\mathrm dt)^{-1}\mathrm ds\le\frac{1}{1-\mu}\|v\|_2^{2}$。
+\end{proof}
+
+\subsection{内模的输入--状态稳定性}
+\begin{lemma}\label{lem:iss}
+在假设~\ref{as:esc} 下，若 $|\dot T|\le\mu<1-Q_0^{2}$，则内模 \eqref{eq:rc} 关于输入 $w=\beta_3G(e_1)$ 是 $L_2$ 稳定的：
+\begin{equation}
+\|v\|_2\le\frac{1}{1-\gamma}\,\|w\|_2,\qquad \gamma=\frac{Q_0}{\sqrt{1-\mu}}<1 .
+\label{eq:iss}
+\end{equation}
+\end{lemma}
+\begin{proof}
+把 \eqref{eq:rc} 写成反馈互联 $v=\mathcal H\bigl(w+Q_0\mathcal D_T v\bigr)$，$\mathcal H(s)=1/(1+\tau_0 s)$，
+$|\mathcal H(j\omega)|\le1$，故 $\|\mathcal H\|\le1$。结合引理~\ref{lem:delay}：
+$\|v\|_2\le\|w\|_2+Q_0\|\mathcal D_T v\|_2\le\|w\|_2+\frac{Q_0}{\sqrt{1-\mu}}\|v\|_2$；
+$\gamma<1$ 等价于 $\mu<1-Q_0^{2}$。
+\end{proof}
+
+\subsection{准静态下的周期律}
+\begin{theorem}[周期修正速率的充分条件]\label{thm:T}
+在假设~\ref{as:esc} 下，若
+\begin{equation}
+|\dot T|=\Bigl|\frac{2\pi}{\omega_f}(1+\delta)\Bigr|\cdot\Bigl|\frac{\dot\omega_f}{\omega_f}+\frac{\dot\delta}{1+\delta}\Bigr|
+\le\mu<1-Q_0^{2},
+\label{eq:Trate}
+\end{equation}
+则内模状态 $v$ 有界，且
+\begin{equation}
+\|v\|_2\le\frac{\beta_3}{1-\gamma}\,\bigl\|G(e_1)\bigr\|_2 .
+\label{eq:thm1}
+\end{equation}
+特别地，$\delta$ 由 ESC 产生时 $|\dot\delta|\le\Delta\omega_d$，式 \eqref{eq:Trate} 化为对测速滤波的显式设计约束
+\begin{equation}
+\tau_f\ \ge\ \frac{T\,|\dot\omega|}{\omega\,\mu_{\max}},\qquad \mu_{\max}=1-Q_0^{2}=0.0396\ (Q_0=0.98).
+\label{eq:tauf}
+\end{equation}
+\end{theorem}
+\begin{proof}
+由假设~\ref{as:esc} 微分得 \eqref{eq:Trate}；该式成立时有引理~\ref{lem:iss}，故 $\|v\|_2\le\|w\|_2/(1-\gamma)$，
+代入 $w=\beta_3G(e_1)$ 即得 \eqref{eq:thm1}。式 \eqref{eq:Trate} 中令 $\dot\delta=0$，
+并用一阶滤波的峰值速率 $|\dot\omega_f|\le|\dot\omega|\,T/\tau_f$，整理即得 \eqref{eq:tauf}。
+\end{proof}
+\begin{remark}[换速瞬态]\label{rem:transient}
+换速时 $|\dot T|$ 可短时超过 $\mu_{\max}$（实测 $600\to300$ rpm 时 $|\dot T|\approx1.0$），定理~\ref{thm:T} 的正则性条件失效；
+但解对参数 $T$ 连续依赖：在长度 $\delta_t$ 的瞬态区间内 $T$ 的总变化量为 $\Delta T$，有
+$\|v-v_{\rm fr}\|_\infty\le C\,\Delta T\,e^{L\delta_t}\bigl(1+\|w\|_\infty\bigr)$，其中 $v_{\rm fr}$ 为对应冻结 $T$ 的解，$C,L$ 只依赖 $Q_0,\tau_0$。
+瞬态持续短（$\delta_t\le0.3$\,s）且有界输入，故 $v$ 的偏离有界；工程上由冻结判据（$|\Delta\Tg|/\Tg>5\%$ 或 $|1-y|>0.1$ 冻结 $2$\,s）缩短该区间。
+\end{remark}
+
+\subsection{调度类的稳定性}
+\begin{lemma}[冻结系统的 Lyapunov 函数]\label{lem:frozen}
+ESO 误差的线性化系统 $\dot e=A(\omega_o)e+d(t)$，$A(\omega)=\begin{bmatrix}-2\omega&1\\-\omega^{2}&0\end{bmatrix}$，
+对任意 $\omega>0$ 有特征值 $-\omega$（二重）；存在 $P(\omega)=P^{\top}(\omega)>0$ 使 $A^{\top}P+PA=-I$，且
+\begin{equation}
+V_\omega(e)=e^{\top}P(\omega)e\ \Longrightarrow\ \frac{V_{\omega_1}(e)}{V_{\omega_2}(e)}\le\Bigl(\frac{\omega_{\max}}{\omega_{\min}}\Bigr)^{2}=:\mu_a .
+\label{eq:mu}
+\end{equation}
+\end{lemma}
+\begin{proof}
+$A(\omega)=\omega SA_0S^{-1}$，$A_0=\begin{bmatrix}-2&1\\-1&0\end{bmatrix}$，$S=\mathrm{diag}(1,\omega)$，特征多项式为 $(s+1)^2$。
+取 $P_0>0$ 解 $A_0^{\top}P_0+P_0A_0=-I$，则 $P(\omega)=S^{-\top}P_0S^{-1}$ 满足 $A^{\top}P+PA=-\omega^{-1}I$（差正标量，可由 $\tilde P=\omega P$ 归一）。
+又 $V_\omega=\xi^{\top}P_0\xi$，$\xi=[e_1,e_2/\omega]^{\top}$，故比值界如 \eqref{eq:mu}。
+\end{proof}
+\begin{lemma}[平均驻留时间]\label{lem:sched}
+设 $\omega_o^{\rm eff}(t)$ 取值于 $[\underline\omega,\overline\omega]$，按对数网格 $\omega^{(i)}=\underline\omega(1+\beta)^{i}$ 分段常值逼近，
+相邻层的平均驻留时间为 $\tau_a$。若
+\begin{equation}
+\tau_a\ >\ \frac{\ln(1+\beta)^{2}}{\underline\omega},
+\label{eq:adt}
+\end{equation}
+则误差系统一致指数稳定，衰减率 $\lambda'=\underline\omega-\ln(1+\beta)^{2}/\tau_a>0$。
+\end{lemma}
+\begin{proof}
+每层冻结系统由引理~\ref{lem:frozen} 以 $V_{\omega^{(i)}}$ 指数稳定、速率 $\omega^{(i)}\ge\underline\omega$；
+相邻层 Lyapunov 函数比值不超过 $(1+\beta)^{2}$。由切换线性系统的平均驻留时间定理，若 $\tau_a>\ln\mu_a/\lambda_0$（$\mu_a=(1+\beta)^2$、$\lambda_0=\underline\omega$）
+则 $\dot V\le-(\lambda_0-\ln\mu_a/\tau_a)V$，即 \eqref{eq:adt}。
+\end{proof}
+\begin{theorem}[律 D 与类 fal 增益下的观测器稳定性]\label{thm:gain}
+在假设~\ref{as:lawd} 下，令有效带宽 $\omega_{\rm eff}(t)=\kappa(t)\,\omega_o^{\rm eff}(t)$，
+$\kappa=G(e_1)/e_1\in(0,\kappa_{\max}]$、$\kappa_{\max}=\delta^{a-1}$，则 $\omega_{\rm eff}\in[\underline\omega,\overline\omega]$，
+$\overline\omega=\omega_o(1+k_b)\kappa_{\max}$。若栅格化后的平均驻留时间满足 \eqref{eq:adt}，则 ESO 误差系统一致指数稳定，且
+\begin{equation}
+\|e(t)\|\le\sqrt{\frac{\overline c}{\underline c}}\,e^{-\lambda't}\|e(0)\|+\frac{2\sqrt{\overline c}}{\lambda'\sqrt{\underline c}}\sup_{s\le t}\|d(s)\| .
+\label{eq:thm2}
+\end{equation}
+\end{theorem}
+\begin{proof}
+类 fal 增益以扇形界内的正增益 $\kappa$ 作用于 $e_1$，故误差系统等价于带宽 $\omega_{\rm eff}=\kappa\omega_o^{\rm eff}$ 的线性系统；
+$\kappa\in(0,\kappa_{\max}]$ 使 $\omega_{\rm eff}$ 落在给定区间内。$\omega_o^{\rm eff}$ 由 $g$ 经一阶滤波产生，
+在栅格近似下满足引理~\ref{lem:sched} 的平均驻留条件；由该引理得指数衰减项，再对输入用常数变易公式即得 \eqref{eq:thm2}。
+\end{proof}
+\begin{remark}[充分而非必要]\label{rem:suff}
+定理~\ref{thm:gain} 的条件是\textbf{充分}的：$g$ 的时间常数约 $20$\,ms，而 $\omega_o$ 的量级为 $500$\,rad/s，
+实测驻留时间远大于 \eqref{eq:adt} 的下界（见数值校验）。若需更保守的保障，可对 $\omega_o^{\rm eff}$ 加变化率限幅。
+\end{remark}
+
+\subsection{数值校验}\label{app:num}
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{稳定性条件的数值校验（$Q_0=0.98$、$\tau_0=20$\,ms、$\delta=0.10$、$a=0.75$、$k_b=8$、$a_{\rm es}=2$）}
+\begin{tabular}{@{}llll@{}}
+\toprule
+条件 & 表达式 & 计算值 & 是否满足\\
+\midrule
+内模小增益 & $\gamma=Q_0/\sqrt{1-\mu}$ & $\mu=0.03\Rightarrow\gamma=0.995<1$ & 满足（准静态）\\
+周期变化率 & $\mu_{\max}=1-Q_0^{2}$ & $0.0396$ & 换速瞬态短时超出（注~\ref{rem:transient}）\\
+测速滤波约束 & $\tau_f\ge T|\dot\omega|/(\omega\mu_{\max})$ & $600$\,rpm 阶跃：$\ge0.05$\,s & 取 $\tau_f=50$\,ms，满足\\
+扇形增益上界 & $\kappa_{\max}=\delta^{a-1}$ & $1.78$ & ---\\
+有效带宽范围 & $\bar\omega/\underline\omega=(1+k_b)\kappa_{\max}$ & $16.0$ & ---\\
+栅格增益比 & $\mu_a=(1+\beta)^{2}$，$\beta=0.2$ & $1.44$ & ---\\
+驻留时间条件 & $\tau_a>\ln\mu_a/\omega_o$ & $\ln1.44/500=0.7$\,ms & 实测 $\tau_a\ge2$\,ms，满足\\
+衰减率 & $\lambda'=\omega_o-\ln\mu_a/\tau_a$ & $500-182=318$ & $>0$，满足\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{未证明与未覆盖的部分}\label{sec:unproven}
+\begin{enumerate}
+\item \textbf{随机噪声}：全部界都是确定性框架下的；电流/转速/负载噪声的定量影响由仿真给出（600 rpm 实验室档稳态 RMS $30.54$\,rpm）。
+\item \textbf{抖动非线性}：ESC 的收敛条件用的是目标函数二次型近似与"单步调制量大于噪声"的可分辨条件，未给 $\Delta\to0$ 时收敛率的严格界。
+\item \textbf{$A$ 观测器}：$\pm10\%$ 带通的建立时间与一周期 RMS 的估计误差未建模；$A$ 对频率失谐的灵敏度只由扫描给出（$1\%$ 周期误差 $\Rightarrow 2.6\%\sim3.5\%$ 的 $A$ 变化）。
+\item \textbf{量化延迟}：分数阶插值抑制了 $1$\,ms 量化，但剩余插值误差与 $T$ 窗统计的 $O(1/N)$ 误差未定量。
+\item \textbf{类 fal 的扇区界}：定理~\ref{thm:gain} 用扇形增益把类 fal 化为线性时变增益，未给出 $e_1$ 大幅值下的全局结论。
+\item \textbf{台架}：$k_b,a,\varepsilon_g$ 与 $\Delta,\sigma$ 的工程余量需在真实驱动器上复测；本文全部为仿真。
+\end{enumerate}
+
+\section{结论}
+\begin{enumerate}
+\item 律 D：检测量对 $k f_0$ 结构性失明（引理~\ref{lem:det}(iii)），调度增益有下界（引理~\ref{lem:kpgain}），
+      跟踪误差界\textbf{逐分量不放大}（定理~\ref{thm:lawd}）；观测带宽调度同样不放大（推论~\ref{cor:kd}）。
+\item T 自适应：相位对齐条件唯一（命题~\ref{prop:phase}）；时变延迟算子的 $L_2$ 增益 $\le1/\sqrt{1-\mu}$（引理~\ref{lem:delay}），
+      内模小增益 $\gamma=Q_0/\sqrt{1-\mu}<1$（引理~\ref{lem:iss}），周期修正速率满足 \eqref{eq:Trate} 时内模有界（定理~\ref{thm:T}）；
+      换速瞬态由冻结判据与连续依赖兜底（注~\ref{rem:transient}）。
+\item 调度类稳定性：类 fal 增益下的观测器在平均驻留时间条件下指数稳定（定理~\ref{thm:gain}）。
+\item 两条律的证明都\textbf{不依赖}任何事件触发/复位机制——复位型律 F 已作废，本附注不含其内容。
+\end{enumerate}
+
+\end{document}
