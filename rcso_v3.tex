@@ -427,6 +427,72 @@ ESC 的更新周期 $NP_d=4.5$\,s，律 D 的门控时间常数约 $20$\,ms，�
 故两者在频域上互不干扰，§\ref{sec:tes-res} 的实测即两者同时开启。
 \end{remark}
 
+% =====================================================================
+\subsection{附：T 自适应的直观推导}\label{sec:tes-intuition}
+% =====================================================================
+本小节把 §\ref{sec:tes-phase}--§\ref{sec:tes-impl} 的结论按“先机理、后证明”重讲一遍，目标是让第一次读的人能回答三个问题：
+标称周期差在哪里、最优周期为什么恰好是那个数、ESC 为什么能找到它。形式化证明见附件 \texttt{proof\_lawD\_T} 第 4 节。
+
+\paragraph{(1) 标称周期差在哪里。}
+内模用 $v(t-T)$ 取出的记忆，必须与当前扰动\textbf{同相}才能相消；而记忆是经时间常数 $\tau$ 的低通写入的，
+在频率 $\omega$ 处的相位滞后为
+\begin{equation}
+\varphi=\arctan(\omega\tau).
+\label{eq:intuition-phi}
+\end{equation}
+600 rpm（$10$ Hz）、$\tau=20$\,ms 时为 $51.5^{\circ}$，折合 $14.3$\,ms。与此同时内模的陷波极窄：$1\%$ 周期误差（相位 $3.6^{\circ}$）
+使有效增益衰减 $3.3$ 倍、$5\%$ 衰减 $15$ 倍，半宽仅 $\pm0.3\%$。两者叠加的后果是\textbf{标称周期下陷波没有对准扰动}，
+这是 §\ref{sec:tes-res} 中不整定时稳态残余 $30.54$\,rpm 的主要来源。
+
+\paragraph{(2) 最优周期为什么是 $-\arctan(\omega\tau)/2\pi$。}
+把内模写成传递函数 $V/W=1/(1+\tau s-Qe^{-sT})$，抑制能力由分母在 $s=j\omega$ 处的模长决定。记 $\theta=\omega T$，有
+\begin{equation}
+|D(j\omega)|^{2}=1+(\omega\tau)^{2}+Q^{2}-2Q\bigl[\cos\theta-\omega\tau\sin\theta\bigr]
+=1+(\omega\tau)^{2}+Q^{2}-2Q\sqrt{1+(\omega\tau)^{2}}\cos(\theta+\varphi),
+\label{eq:intuition-D2}
+\end{equation}
+其中 $\varphi=\arctan(\omega\tau)$。$\cos$ 的唯一极大点在 $\theta+\varphi=2\pi k$，即 $\omega T=2\pi k-\arctan(\omega\tau)$；
+代入 $T=T_g(1+\delta)$、$\omega T_g=2\pi$ 并取 $k=1$，即得命题~\ref{prop:tes-phase} 的 $\delta^{*}=-\arctan(\omega\tau)/2\pi$。
+\textbf{物理读法}：把周期缩短 $\arctan(\omega\tau)/\omega$ 这么长的时间，正好抵消低通的相位滞后——600 rpm 是 $14.3$\,ms/$100$\,ms，
+故 $\delta^{*}=-14.3\%$；300 rpm（$5$ Hz）是 $17.9$\,ms/$200$\,ms，故 $-8.9\%$。
+极小值 $|D|_{\min}=\sqrt{1+(\omega\tau)^{2}}-Q>0$：\textbf{相位对齐只把残余压到最小，不会压到零}，因为 $Q<1$。
+
+\paragraph{(3) ESC 为什么能找到它。}
+最优附近 $A(\delta)\approx A^{*}\bigl[1+\kappa(\delta-\delta^{*})^{2}\bigr]$ 是一个“碗”。加正弦抖动 $\delta=\hat\delta+\Delta\sin(\omega_d t)$ 代入，
+乘 $\sin(\omega_d t)$ 后对整数个抖动周期平均，常数项与 $\sin^{2}$ 项都被平均掉，只剩
+\begin{equation}
+I_k\approx2\kappa A^{*}\,(\hat\delta_k-\delta^{*})\,\Delta ,
+\label{eq:intuition-I}
+\end{equation}
+\textbf{其符号直接指示现在站在碗的哪一侧}；于是 $\hat\delta_{k+1}=\hat\delta_k-\sigma\,\mathrm{sgn}(I_k)$ 就是“往低处走一步”。
+三个参数各管一件事：$\Delta$ 管信噪比与稳态抖动（代价正比于 $\kappa A^{*}\Delta^{2}$）、$\sigma$ 管步长与收敛速度、$N$ 管解调积分长度。
+可分辨条件是 $2\kappa A^{*}\sigma|\hat\delta-\delta^{*}|\gtrsim\eta_A$：偏离最优点 $1\%$ 以上才可靠定向，$1\%$ 以内靠死区停住。
+
+\paragraph{(4) 稳定性为什么归结为 $\mu<1-Q^{2}$。}
+证明只有三步，每步一句话：
+\begin{enumerate}
+  \item \textbf{时变延迟的能量增益}：$(\mathcal D_T v)(t)=v\bigl(t-T(t)\bigr)$ 在 $|\dot T|\le\mu$ 下满足
+        $\|\mathcal D_T v\|_2^{2}\le\|v\|_2^{2}/(1-\mu)$——变量替换 $s=t-T(t)$，时间轴被拉伸的倍率有界；
+  \item \textbf{内模回路增益}：内模是 $v=\mathcal H\bigl(w+Q\mathcal D_T v\bigr)$，一阶低通满足 $\|\mathcal H\|\le1$，故
+        $\|v\|\le\|w\|+Q\|v\|/\sqrt{1-\mu}$，环路增益即 $\gamma=Q/\sqrt{1-\mu}$；
+  \item \textbf{小增益}：$\gamma<1$ 等价于 $\mu<1-Q^{2}$。$Q=0.98$ 时 $\mu_{\max}=0.0396$——\textbf{周期每秒最多允许变化约 $4\%$}。
+\end{enumerate}
+这条条件把“遗忘因子”与“周期变化率”绑在一起：$Q\to1$ 时内模趋于临界稳定、$\mu_{\max}\to0$，周期稍有变化就失稳。
+数字体检：ESC 准静态每 $4.5$\,s 走 $1\%$（约 $0.22\%/$s），离 $3.96\%/$s 很远，定理适用；
+换速 $600\to300$ 时 $|\dot T|\approx1$，明确越界，只能靠\textbf{冻结判据}（标称周期突变 $>5\%$ 即冻结 $2$\,s）与“解对 $T$ 连续依赖”兜底——
+这也是 §\ref{sec:limit} (P5) 如实披露的边界。测速滤波的设计约束 $\tau_f\ge T|\dot\omega|/(\omega\mu_{\max})$ 在 600 rpm 阶跃下给出 $\ge0.05$\,s，
+定稿取 $\tau_f=50$\,ms。
+
+\paragraph{(5) 四个容易读错的地方。}
+\begin{enumerate}
+  \item \textbf{“公式说 $-14.3\%$，实测为何 $-12\%$”}：公式只含记忆低通那 $20$\,ms；控制拍离散化、电流环与测速滤波还叠加 $2$--$3$ 个百分点的附加相位，
+        故实测谷在 $-12\%$（300 rpm 实测 $-8\%$、理论 $-8.9\%$）：趋势一致、绝对值有偏。
+  \item \textbf{“$A$ 最优在 $-12\%$、RMS 最优为何在 $-15\%$”}：$A$ 只含基波，RMS 还含 $5.9$\,Hz 振动与噪声；整定看 $A$、验收看 RMS，两者不可混读。
+  \item \textbf{“为什么不直接减小 $\tau$ 或提高 $Q$”}：$\tau$ 是陷波宽度与噪声抑制的折中，而 $Q\to1$ 会使 $\mu_{\max}=1-Q^{2}\to0$；
+        本文的做法是\textbf{在给定 $(\tau,Q)$ 下补偿相位}，而不是取消低通。
+  \item \textbf{“换速时定理还成立吗”}：不成立。准静态有定理，换速瞬态只有“有界、可重复”的实验证据与冻结判据，未给出瞬态期间的定量界。
+\end{enumerate}
+
 \section{可证结论：驱动有界性与名义闭环 UUB}\label{sec:stab}
 \subsection{结构前提：驱动有界性}\label{sec:newpremise}
 本版驱动 $D=w_f-w_l$（\eqref{eq:bpw}）是\emph{带通}，其"非负 / 周期零均值"均不成立，故不能沿用旧放缩。下面两条引理给出对本版驱动直接成立的前提，\textbf{证明只用到 $\phi$ 的 $1$-Lipschitz 性与滤波核为凸组合}，与驱动的符号结构无关。

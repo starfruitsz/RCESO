@@ -30,7 +30,7 @@ miss_img = [s for s in set(srcs) if not os.path.exists(s)]
 chk("figures", len(srcs) == 7 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
 
 chk("h2", len(re.findall(r"<h2 ", b)) == 14, str(len(re.findall(r"<h2 ", b))))
-chk("h3", len(re.findall(r"<h3 ", b)) == 32, str(len(re.findall(r"<h3 ", b))))
+chk("h3", len(re.findall(r"<h3 ", b)) == 33, str(len(re.findall(r"<h3 ", b))))
 chk("h4", len(re.findall(r"<h4>", b)) == 2, str(len(re.findall(r"<h4>", b))))
 # 2026-11-12：v5.0 结构（律 F 作废、新增律 D / T 自适应两章）——章节数变动时同步改这里
 chk("tables", len(re.findall(r"<table>", b)) == 19, str(len(re.findall(r"<table>", b))))

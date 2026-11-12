@@ -76,7 +76,7 @@ window.MathJax = {
 <div class="layout">
 <nav>
   <h1>目录</h1>
-  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l2" href="#sec:lawd">律 D：比例增益与观测带宽的联合调度</a><a class="l3" href="#sec:lawd-design">设计与实现</a><a class="l3" href="#sec:lawd-why">为什么用 $e_1$ 的 $T$ 窗均值</a><a class="l2" href="#sec:tes">T 自适应：标称周期 + 锁相极值搜索</a><a class="l3" href="#sec:tes-phase">失配机理与相位对齐条件</a><a class="l3" href="#sec:tes-obs">基波幅值观测器</a><a class="l3" href="#sec:tes-esc">锁相极值搜索</a><a class="l3" href="#sec:tes-impl">离散实现</a><a class="l2" href="#sec:stab">可证结论：驱动有界性与名义闭环 UUB</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-12 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">参数与 500\,Hz 低带宽代价</a><a class="l3" href="#sec:base">基准：无自适应 RCESO（单种子）</a><a class="l2" href="#sec:lawd-res">律 D 实测：$k_p$ + ESO 联合调度</a><a class="l3" href="#sec:lawd-1d">一维扫描：只提 $k_p$ 会把电流顶过额定</a><a class="l3" href="#sec:lawd-2d">二维细扫：$a\times k_b$（电流约束下）</a><a class="l3" href="#sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</a><a class="l3" href="#sec:lawd-b3">$\beta_3$ 不参与调度</a><a class="l3" href="#sec:lawd-mech">机理</a><a class="l2" href="#sec:tes-res">T 自适应实测</a><a class="l3" href="#sec:tes-res-opt">目标函数与真实最优：$-12\%$，不是 $0$</a><a class="l3" href="#sec:tes-res-esc">ESC 收敛与收益</a><a class="l3" href="#sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</a><a class="l3" href="#sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:no-lawf">复位型律 F 已作废（2026-11-12）</a><a class="l3" href="#sec:limit-param">参数口径不可互引</a><a class="l3" href="#h6">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a>
+  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l2" href="#sec:lawd">律 D：比例增益与观测带宽的联合调度</a><a class="l3" href="#sec:lawd-design">设计与实现</a><a class="l3" href="#sec:lawd-why">为什么用 $e_1$ 的 $T$ 窗均值</a><a class="l2" href="#sec:tes">T 自适应：标称周期 + 锁相极值搜索</a><a class="l3" href="#sec:tes-phase">失配机理与相位对齐条件</a><a class="l3" href="#sec:tes-obs">基波幅值观测器</a><a class="l3" href="#sec:tes-esc">锁相极值搜索</a><a class="l3" href="#sec:tes-impl">离散实现</a><a class="l3" href="#sec:tes-intuition">附：T 自适应的直观推导</a><a class="l2" href="#sec:stab">可证结论：驱动有界性与名义闭环 UUB</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-12 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">参数与 500\,Hz 低带宽代价</a><a class="l3" href="#sec:base">基准：无自适应 RCESO（单种子）</a><a class="l2" href="#sec:lawd-res">律 D 实测：$k_p$ + ESO 联合调度</a><a class="l3" href="#sec:lawd-1d">一维扫描：只提 $k_p$ 会把电流顶过额定</a><a class="l3" href="#sec:lawd-2d">二维细扫：$a\times k_b$（电流约束下）</a><a class="l3" href="#sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</a><a class="l3" href="#sec:lawd-b3">$\beta_3$ 不参与调度</a><a class="l3" href="#sec:lawd-mech">机理</a><a class="l2" href="#sec:tes-res">T 自适应实测</a><a class="l3" href="#sec:tes-res-opt">目标函数与真实最优：$-12\%$，不是 $0$</a><a class="l3" href="#sec:tes-res-esc">ESC 收敛与收益</a><a class="l3" href="#sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</a><a class="l3" href="#sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:no-lawf">复位型律 F 已作废（2026-11-12）</a><a class="l3" href="#sec:limit-param">参数口径不可互引</a><a class="l3" href="#h6">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a>
 </nav>
 <main>
 <header class="doc-h">
@@ -252,6 +252,52 @@ window.MathJax = {
 <ul><li><strong>分数阶延迟</strong>：$n_d=T/\Delta t_s$ 取小数，$v[k-n_d]\approx(1-\lambda)v[k-i_0]+\lambda v[k-i_0-1]$，$i_0=\lfloor n_d\rfloor$。 不插值时 $1$\,ms 量化对应约 $1\%$ 的 $T$，会吞掉 $1\%$ 的搜索步长。</li><li><strong>冻结与保护</strong>：标称周期突变 $&gt;5\%$ 或 $|1-y|&gt;0.1$ 时冻结 ESC，保持 $\hat\delta$ 共 $2$\,s。</li><li><strong>前馈重置</strong>：冻结期间每毫秒按实测转速重设 $\hat\delta\leftarrow\mathrm{clip}\bigl(-\arctan(\omega_f\tau)/2\pi,\ \pm\delta_{\max}\bigr)$，解冻后 ESC 只做 $\pm3\%$ 的细调。</li><li><strong>终版参数</strong>：$\delta_{\max}=\pm20\%$、$\sigma=1\%$、$\Delta=0.5\%$、$P_d=1.5$\,s、$N=3$、 $\hat\delta_0=-14.3\%$（理论初值）、死区 $I_{\rm dead}=10^{-5}$。</li></ul>
 <div class="box remark" id="rem:tes-lawd"><div class="box-h">注 15（与律 D 的时间尺度分离）</div><div class="box-b">ESC 的更新周期 $NP_d=4.5$\,s，律 D 的门控时间常数约 $20$\,ms，二者相差两个数量级以上： 律 D 在 ESC 的一个更新周期内已完成多次动作，ESC 看到的 $A$ 是"律 D 稳定后"的残余。 故两者在频域上互不干扰，§<a class="xref" href="#sec:tes-res">10</a> 的实测即两者同时开启。</div></div>
 
+<h3 id="sec:tes-intuition">附：T 自适应的直观推导</h3>
+<p>本小节把 §<a class="xref" href="#sec:tes-phase">5.1</a>–§<a class="xref" href="#sec:tes-impl">5.4</a> 的结论按“先机理、后证明”重讲一遍，目标是让第一次读的人能回答三个问题：</p>
+<p>标称周期差在哪里、最优周期为什么恰好是那个数、ESC 为什么能找到它。形式化证明见附件 <code>proof_lawD_T</code> 第 4 节。</p>
+
+<p>agraph{(1) 标称周期差在哪里。}</p>
+<p>内模用 $v(t-T)$ 取出的记忆，必须与当前扰动<strong>同相</strong>才能相消；而记忆是经时间常数 $\tau$ 的低通写入的，</p>
+<p>在频率 $\omega$ 处的相位滞后为</p>
+
+<div class="eqwrap" id="eq:intuition-phi"><div class="eq">\[\varphi=\arctan(\omega\tau). \]</div><div class="eqno">(18)</div></div>
+<p>600 rpm（$10$ Hz）、$\tau=20$\,ms 时为 $51.5^{\circ}$，折合 $14.3$\,ms。与此同时内模的陷波极窄：$1\%$ 周期误差（相位 $3.6^{\circ}$）</p>
+<p>使有效增益衰减 $3.3$ 倍、$5\%$ 衰减 $15$ 倍，半宽仅 $\pm0.3\%$。两者叠加的后果是<strong>标称周期下陷波没有对准扰动</strong>，</p>
+<p>这是 §<a class="xref" href="#sec:tes-res">10</a> 中不整定时稳态残余 $30.54$\,rpm 的主要来源。</p>
+
+<p>agraph{(2) 最优周期为什么是 $-\arctan(\omega\tau)/2\pi$。}</p>
+<p>把内模写成传递函数 $V/W=1/(1+\tau s-Qe^{-sT})$，抑制能力由分母在 $s=j\omega$ 处的模长决定。记 $\theta=\omega T$，有</p>
+
+<div class="eqwrap" id="eq:intuition-D2"><div class="eq">\[|D(j\omega)|^{2}=1+(\omega\tau)^{2}+Q^{2}-2Q\bigl[\cos\theta-\omega\tau\sin\theta\bigr] =1+(\omega\tau)^{2}+Q^{2}-2Q\sqrt{1+(\omega\tau)^{2}}\cos(\theta+\varphi), \]</div><div class="eqno">(19)</div></div>
+<p>其中 $\varphi=\arctan(\omega\tau)$。$\cos$ 的唯一极大点在 $\theta+\varphi=2\pi k$，即 $\omega T=2\pi k-\arctan(\omega\tau)$；</p>
+<p>代入 $T=T_g(1+\delta)$、$\omega T_g=2\pi$ 并取 $k=1$，即得命题~<a class="xref" href="#prop:tes-phase">1</a> 的 $\delta^{*}=-\arctan(\omega\tau)/2\pi$。</p>
+<p><strong>物理读法</strong>：把周期缩短 $\arctan(\omega\tau)/\omega$ 这么长的时间，正好抵消低通的相位滞后——600 rpm 是 $14.3$\,ms/$100$\,ms，</p>
+<p>故 $\delta^{*}=-14.3\%$；300 rpm（$5$ Hz）是 $17.9$\,ms/$200$\,ms，故 $-8.9\%$。</p>
+<p>极小值 $|D|_{\min}=\sqrt{1+(\omega\tau)^{2}}-Q&gt;0$：<strong>相位对齐只把残余压到最小，不会压到零</strong>，因为 $Q&lt;1$。</p>
+
+<p>agraph{(3) ESC 为什么能找到它。}</p>
+<p>最优附近 $A(\delta)\approx A^{*}\bigl[1+\kappa(\delta-\delta^{*})^{2}\bigr]$ 是一个“碗”。加正弦抖动 $\delta=\hat\delta+\Delta\sin(\omega_d t)$ 代入，</p>
+<p>乘 $\sin(\omega_d t)$ 后对整数个抖动周期平均，常数项与 $\sin^{2}$ 项都被平均掉，只剩</p>
+
+<div class="eqwrap" id="eq:intuition-I"><div class="eq">\[I_k\approx2\kappa A^{*}\,(\hat\delta_k-\delta^{*})\,\Delta , \]</div><div class="eqno">(20)</div></div>
+<p><strong>其符号直接指示现在站在碗的哪一侧</strong>；于是 $\hat\delta_{k+1}=\hat\delta_k-\sigma\,\mathrm{sgn}(I_k)$ 就是“往低处走一步”。</p>
+<p>三个参数各管一件事：$\Delta$ 管信噪比与稳态抖动（代价正比于 $\kappa A^{*}\Delta^{2}$）、$\sigma$ 管步长与收敛速度、$N$ 管解调积分长度。</p>
+<p>可分辨条件是 $2\kappa A^{*}\sigma|\hat\delta-\delta^{*}|\gtrsim\eta_A$：偏离最优点 $1\%$ 以上才可靠定向，$1\%$ 以内靠死区停住。</p>
+
+<p>agraph{(4) 稳定性为什么归结为 $\mu&lt;1-Q^{2}$。}</p>
+<p>证明只有三步，每步一句话：</p>
+
+<ol><li><strong>时变延迟的能量增益</strong>：$(\mathcal D_T v)(t)=v\bigl(t-T(t)\bigr)$ 在 $|\dot T|\le\mu$ 下满足 $\|\mathcal D_T v\|_2^{2}\le\|v\|_2^{2}/(1-\mu)$——变量替换 $s=t-T(t)$，时间轴被拉伸的倍率有界；</li><li><strong>内模回路增益</strong>：内模是 $v=\mathcal H\bigl(w+Q\mathcal D_T v\bigr)$，一阶低通满足 $\|\mathcal H\|\le1$，故 $\|v\|\le\|w\|+Q\|v\|/\sqrt{1-\mu}$，环路增益即 $\gamma=Q/\sqrt{1-\mu}$；</li><li><strong>小增益</strong>：$\gamma&lt;1$ 等价于 $\mu&lt;1-Q^{2}$。$Q=0.98$ 时 $\mu_{\max}=0.0396$——<strong>周期每秒最多允许变化约 $4\%$</strong>。</li></ol>
+<p>这条条件把“遗忘因子”与“周期变化率”绑在一起：$Q\to1$ 时内模趋于临界稳定、$\mu_{\max}\to0$，周期稍有变化就失稳。</p>
+<p>数字体检：ESC 准静态每 $4.5$\,s 走 $1\%$（约 $0.22\%/$s），离 $3.96\%/$s 很远，定理适用；</p>
+<p>换速 $600\to300$ 时 $|\dot T|\approx1$，明确越界，只能靠<strong>冻结判据</strong>（标称周期突变 $&gt;5\%$ 即冻结 $2$\,s）与“解对 $T$ 连续依赖”兜底——</p>
+<p>这也是 §<a class="xref" href="#sec:limit">11</a> (P5) 如实披露的边界。测速滤波的设计约束 $\tau_f\ge T|\dot\omega|/(\omega\mu_{\max})$ 在 600 rpm 阶跃下给出 $\ge0.05$\,s，</p>
+<p>定稿取 $\tau_f=50$\,ms。</p>
+
+<p>agraph{(5) 四个容易读错的地方。}</p>
+
+<ol><li><strong>“公式说 $-14.3\%$，实测为何 $-12\%$”</strong>：公式只含记忆低通那 $20$\,ms；控制拍离散化、电流环与测速滤波还叠加 $2$–$3$ 个百分点的附加相位， 故实测谷在 $-12\%$（300 rpm 实测 $-8\%$、理论 $-8.9\%$）：趋势一致、绝对值有偏。</li><li><strong>“$A$ 最优在 $-12\%$、RMS 最优为何在 $-15\%$”</strong>：$A$ 只含基波，RMS 还含 $5.9$\,Hz 振动与噪声；整定看 $A$、验收看 RMS，两者不可混读。</li><li><strong>“为什么不直接减小 $\tau$ 或提高 $Q$”</strong>：$\tau$ 是陷波宽度与噪声抑制的折中，而 $Q\to1$ 会使 $\mu_{\max}=1-Q^{2}\to0$； 本文的做法是<strong>在给定 $(\tau,Q)$ 下补偿相位</strong>，而不是取消低通。</li><li><strong>“换速时定理还成立吗”</strong>：不成立。准静态有定理，换速瞬态只有“有界、可重复”的实验证据与冻结判据，未给出瞬态期间的定量界。</li></ol>
+
 <h2 id="sec:stab">可证结论：驱动有界性与名义闭环 UUB</h2>
 <h3 id="sec:newpremise">结构前提：驱动有界性</h3>
 <p>本版驱动 $D=w_f-w_l$（<a class="xref" href="#eq:bpw">(6)</a>）是<em>带通</em>，其"非负 / 周期零均值"均不成立，故不能沿用旧放缩。下面两条引理给出对本版驱动直接成立的前提，<strong>证明只用到 $\phi$ 的 $1$-Lipschitz 性与滤波核为凸组合</strong>，与驱动的符号结构无关。</p>
@@ -267,7 +313,7 @@ window.MathJax = {
 <p>$|Q_0v(t-T)+\beta_3\tanh(e_1/\zeta)|\le Q_0\bar V+\beta_3$（$\bar V:=\sup_{[t-T,t]}|v|$）；</p>
 <p>一阶低通在 $|w|\le W$ 下满足 $|v(t)|\le W+(|v(0)|-W)e^{-t/\tau_0}$，逐周期迭代得</p>
 
-<div class="eqwrap" id="eq:uub-v"><div class="eq">\[\limsup_{t\to\infty}|v(t)|\le\bar v:=\frac{\beta_3}{1-Q_0}. \]</div><div class="eqno">(18)</div></div>
+<div class="eqwrap" id="eq:uub-v"><div class="eq">\[\limsup_{t\to\infty}|v(t)|\le\bar v:=\frac{\beta_3}{1-Q_0}. \]</div><div class="eqno">(21)</div></div>
 <p><em>关键</em>：该界<strong>与 $e_1$ 的大小无关</strong>（因 $\tanh$ 有界），故 $v$ 通道"自持"，不构成代数环。</p>
 
 <p><strong>引理 2（ESO 误差 UUB）</strong>：ESO 误差动态为 $\dot e_1=-2\omega_o e_1+e_2-v$、$\dot e_2=-\omega_o^{2}e_1+h$。</p>
@@ -276,14 +322,14 @@ window.MathJax = {
 <p>解 $A_0^{\!\top}P_0+P_0A_0=-I$ 得 $P_0=\left[\begin{smallmatrix}0.5&-0.5\\-0.5&1.5\end{smallmatrix}\right]\succ0$（特征值 $0.191/1.809$），$\|P_0B_0\|_F=\sqrt3$。</p>
 <p>取 $V=\xi^{\!\top}P_0\xi$ 得 $\dot V\le-\omega_o\|\xi\|^{2}+2\sqrt3\,\|\xi\|\,\|w_d\|$，故</p>
 
-<div class="eqwrap" id="eq:uub-eso"><div class="eq">\[\limsup_{t\to\infty}\|\xi(t)\|\le\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} . \]</div><div class="eqno">(19)</div></div>
+<div class="eqwrap" id="eq:uub-eso"><div class="eq">\[\limsup_{t\to\infty}\|\xi(t)\|\le\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} . \]</div><div class="eqno">(22)</div></div>
 
 <p><strong>引理 3（跟踪误差 UUB）</strong>：令 $\sigma=r-y$，由 $\dot y=\frac{b}{b_0}(k_p\sigma-z_2-v)+d$ 得</p>
 <p>$\sigma\dot\sigma\le-\frac{bk_p}{b_0}\sigma^{2}+|\sigma|\bigl(|d|+\frac{b}{b_0}(|z_2|+\bar v)\bigr)$，而 $z_2=x_2-e_2$ 有界，故</p>
 
-<div class="eqwrap" id="eq:uub-track"><div class="eq">\[\limsup_{t\to\infty}|\sigma(t)|\le\frac{b_0}{bk_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr). \]</div><div class="eqno">(20)</div></div>
+<div class="eqwrap" id="eq:uub-track"><div class="eq">\[\limsup_{t\to\infty}|\sigma(t)|\le\frac{b_0}{bk_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr). \]</div><div class="eqno">(23)</div></div>
 
-<p><strong>定理（名义闭环 UUB）</strong>：在 (A1)–(A3) 下，式 <a class="xref" href="#eq:uub-v">(18)</a>–<a class="xref" href="#eq:uub-track">(20)</a> 同时成立，</p>
+<p><strong>定理（名义闭环 UUB）</strong>：在 (A1)–(A3) 下，式 <a class="xref" href="#eq:uub-v">(21)</a>–<a class="xref" href="#eq:uub-track">(23)</a> 同时成立，</p>
 <p>闭环全部信号一致最终有界，界<strong>显式</strong>依赖 $(\beta_3,Q_0,\omega_o,k_p,b,b_0,H)$。</p>
 <p><em>注</em>：(a) 本例回代：$\beta_3=4000$、$Q_0=0.98\Rightarrow\bar v=2\times10^{5}$、$\omega_o=500$；三个界都是<strong>保守上界</strong></p>
 <p>（仿真实测 $|v|\approx4.5\times10^{2}$、$|e_1|\approx0.05$，相差 $10^{2}\sim10^{5}$ 倍），定量行为以仿真为准；</p>
@@ -291,7 +337,7 @@ window.MathJax = {
 
 <p><strong>推论（含 $Q$ 与律 D 调度）</strong>：$g=\bar e_1^{2}/(\bar e_1^{2}+\varepsilon_g^{2})\in[0,1)$ 由构造保证，$k_b,a\ge0$，</p>
 <p>故 $k_p^{\rm eff}=k_p(1+k_b g)\ge k_p$、$\omega_o^{\rm eff}=\omega_o(1+a g)\ge\omega_o$；</p>
-<p>式 <a class="xref" href="#eq:uub-eso">(19)</a><a class="xref" href="#eq:uub-track">(20)</a> 的界对 $(\omega_o,k_p)$ <strong>单调不增</strong>，故<em>名义界即调度闭环的界</em>：</p>
+<p>式 <a class="xref" href="#eq:uub-eso">(22)</a><a class="xref" href="#eq:uub-track">(23)</a> 的界对 $(\omega_o,k_p)$ <strong>单调不增</strong>，故<em>名义界即调度闭环的界</em>：</p>
 <p><strong>调度可证地不放大一致最终界</strong>。这与"调度放大噪声本底"的仿真事实不矛盾——噪声不在本确定性框架内，由敏感性一节单独量化。</p>
 <h2 id="sec:verify">数值验证（沿真实轨迹逐条核对）</h2>
 <p>轨迹来源：<code>nk_trace.npz</code>（本版带通律，$\gamma=3$、$\sigma_1^{\mathrm{code}}=10^{5}$、$\sigma_2=5$、$\mu=0.03$、$q'_{\max}=1.0$、$\tau'\in[0.2,5]$，$c_1=c_2=0$（<em>本档未启用 $\phi$ 压缩与驱动死区</em>）、$\varepsilon=6.5$、$\Delta t=2\times10^{-5}$ s，$5\times10^{5}$ 步）。</p>
