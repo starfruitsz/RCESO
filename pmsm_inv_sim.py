@@ -68,6 +68,7 @@ def sim_inv(t, TL, cfg=None):
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 20e-3)
     Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
     rc_inj = str(cfg.get("rc_inj", "tanh"))   # 重复通道注入非线性：tanh（默认）或 fal
+    u_z1 = bool(cfg.get("u_z1", True))      # 控制律比例项：默认用 z1（2026-11-12 统一）；False 可复现旧法规 r-y
     kp_boost = cfg.get("kp_boost", 0.0); det_eps = cfg.get("det_eps", 0.01)
     kp_gpow = float(cfg.get("kp_gpow", 1.0))      # 门控形状：g^p，p>1 更只在冲击瞬间发力
     # 律D 增益自适应（2026-11-11）：瞬态时同时抬高 ESO 带宽与重复通道注入增益
@@ -442,7 +443,8 @@ def sim_inv(t, TL, cfg=None):
                 _yref = _yref2
             else:
                 _yref = 1.0
-            u = (kpe * (_yref - y_m) - z2n - vn) / B0
+            _fb = (_yref - z1n) if u_z1 else (_yref - y_m)
+            u = (kpe * _fb - z2n - vn) / B0
             # F-B 检测：包络比值（ff_flush）和/或记忆失配（ff_mism），默认关
             if ff_flush > 0.0 or ff_mism > 0.0:
                 fft = max(0.0, fft - 1e-3); fft2 = max(0.0, fft2 - 1e-3)

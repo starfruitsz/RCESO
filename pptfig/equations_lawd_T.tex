@@ -53,10 +53,10 @@ k_p^{\mathrm{eff}}(t)=k_p\left[1+k_b\,g(t)\right]
 G(e;a,\delta,\lambda)=\left(\left|e\right|+\delta\,\lambda^{-1/a}\right)^{a}\tanh\left(\frac{\lambda e}{\delta}\right)
 
 % B8 控制律
-u=\frac{1}{b_0}\left[k_p^{\mathrm{eff}}\,(r-y)-z_2-v\right]
+u=\frac{1}{b_0}\left[k_p^{\mathrm{eff}}\,(r-z_1)-z_2-v\right]
 
 % B9 控制律全写（把 B3 代入 B8）
-u=\frac{1}{b_0}\left[k_p\left(1+k_b\,g\right)(r-y)-z_2-v\right]
+u=\frac{1}{b_0}\left[k_p\left(1+k_b\,g\right)(r-z_1)-z_2-v\right]
 
 % B10 定稿参数（文字，供核对，不必粘贴）
 %     k_b=8,  a=2,  epsilon_g=0.01,  beta_3 不调度（b=0）
@@ -135,10 +135,13 @@ e_1=p+q,\quad p(t+T)=p(t),\quad \int_0^{T}p(\tau)\,\mathrm{d}\tau=0\ \Rightarrow
 k_p\le k_p^{\mathrm{eff}}<k_p\left(1+k_b\right),\quad \omega_o\le\omega_o^{\mathrm{eff}}<\omega_o\left(1+a\right)
 
 % D5 跟踪误差动态
-\dot{\sigma}=-\frac{b}{b_0}\,k_p^{\mathrm{eff}}\,\sigma+w(t),\quad \sigma=r-y
+\dot{\sigma}=-\frac{b}{b_0}\,k_p^{\mathrm{eff}}\,\sigma+\frac{b}{b_0}\,k_p^{\mathrm{eff}}\,e_1+w(t),\quad \sigma=r-y
 
 % D6 跟踪误差的 UUB 界
-\limsup_{t\to\infty}\left|\sigma(t)\right|\le\frac{b_0}{b\,k_p}\left(\sup\left|d\right|+\frac{b}{b_0}\left(\sup\left|x_2\right|+\bar{v}\right)\right)
+\limsup_{t\to\infty}\left|\sigma(t)\right|\le\bar{e}_1+\frac{b_0}{b\,k_p}\left(\sup\left|d\right|+\frac{b}{b_0}\left(\sup\left|x_2\right|+\bar{v}\right)\right)
+
+% D6b 观测误差地板（跟踪界的第一项）
+\bar{e}_1=\frac{2\sqrt{3}}{\omega_o}\sqrt{\bar{v}^2+\left(\frac{H}{\omega_o}\right)^2}
 
 % D7 重复通道自持界（与 e1 无关）
 \limsup_{t\to\infty}\left|v(t)\right|\le\bar{v}=\frac{\beta_3}{1-Q_0}

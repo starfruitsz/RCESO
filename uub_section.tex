@@ -23,10 +23,13 @@ $A_0=\left[\begin{smallmatrix}-2&1\\-1&0\end{smallmatrix}\right]$（特征值 $-
 \label{eq:uub-eso}
 \end{equation}
 
-\noindent\textbf{引理 3（跟踪误差 UUB）}：令 $\sigma=r-y$，由 $\dot y=\frac{b}{b_0}(k_p\sigma-z_2-v)+d$ 得
-$\sigma\dot\sigma\le-\frac{bk_p}{b_0}\sigma^{2}+|\sigma|\bigl(|d|+\frac{b}{b_0}(|z_2|+\bar v)\bigr)$，而 $z_2=x_2-e_2$ 有界，故
+\noindent\textbf{引理 3（跟踪误差 UUB）}：控制律比例项取 $z_1$（$u=\frac{1}{b_0}[k_p^{\rm eff}(r-z_1)-z_2-v]$），
+记 $\sigma=r-y$、$e_1=y-z_1$，则 $\dot\sigma=-\frac{b}{b_0}k_p^{\rm eff}\sigma+\frac{b}{b_0}k_p^{\rm eff}e_1+w(t)$，$|w|\le W$；
+由变分公式得
 \begin{equation}
-\limsup_{t\to\infty}|\sigma(t)|\le\frac{b_0}{bk_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr).
+\limsup_{t\to\infty}|\sigma(t)|\le\bar e_1+\frac{b_0}{bk_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr),
+\qquad
+\bar e_1=\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^2+(H/\omega_o)^2}.
 \label{eq:uub-track}
 \end{equation}
 

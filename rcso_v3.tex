@@ -173,7 +173,7 @@ $G(e;a,\delta,\lambda)=\bigl(|e|+\delta\lambda^{-1/a}\bigr)^{a}\tanh\!\big(\lamb
 $z_1$ 通道指数取 $1$、$z_2$ 通道指数取 $a<1$（默认 $a=0.75,\ \delta=0.10,\ \lambda=10$）；
 取 $G(e)\equiv e$ 即退化为经典线性 ESO——\textbf{本文全部数值取类 fal 默认档（$a=0.75,\ \delta=0.10,\ \lambda=10$）}；线性档只作回归对照。
 \begin{equation}
-  u = \frac{u_0-z_2-v}{b_0},\qquad u_0 = k_p(r-y),\qquad e_1 = y-z_1 .
+  u = \frac{u_0-z_2-v}{b_0},\qquad u_0 = k_p(r-z_1),\qquad e_1 = y-z_1 .
 \end{equation}
 与标准 ADRC 的唯一差别：$z_1$ 方程多出 $v$——周期分量已被\emph{预先补偿}，观测器只估计残余总扰动。
 
@@ -299,7 +299,7 @@ $1$ & $5.95$ s & $0.7376$ & --- & 回不去 \\
   \label{eq:z2dc}
 \end{equation}
 代入 $(b,b_0,u,d)=(1,\,1.2,\,-0.9049,\,0.9021)$ 得 $z_2\to1.0831$，与实测 $1.0401$ 吻合（残差来自有限观测带宽 $\omega_o$）。
-\textbf{该直流是跟踪所必需的}：控制律 $u=\dfrac{k_p(r-y)-z_2-v}{b_0}$ 要求 $z_2$ 恰好抵消 $d$ 的直流分量，否则 $y$ 必含稳态误差；实测 $|1-y|=10^{-6}$ 证明其工作正常。
+\textbf{该直流是跟踪所必需的}：控制律 $u=\dfrac{k_p(r-z_1)-z_2-v}{b_0}$ 要求 $z_2$ 恰好抵消 $d$ 的直流分量，否则 $y$ 必含稳态误差；实测 $|1-y|=10^{-6}$ 证明其工作正常。
 \textbf{来源可逐项核对}：(i) 阶跃扰动自身的直流；(ii) 模型失配项 $(b-b_0)u$。把任一项人为置零，$z_2$ 的直流随之消失，但 $y$ 会出现稳态偏差。
 \end{remark}
 
@@ -385,7 +385,7 @@ k_p^{\rm eff}=k_p\bigl(1+k_b\,g_{\rm fire}\bigr),\qquad
 \end{equation}
 闭环实现为
 \begin{equation}
-u=\frac{1}{b_0}\Bigl[k_p^{\rm eff}(r-y)-z_2-v\Bigr],\qquad
+u=\frac{1}{b_0}\Bigl[k_p^{\rm eff}(r-z_1)-z_2-v\Bigr],\qquad
 \dot z_1=z_2+b_0u+v+\beta_1'\,G(e_1),\qquad
 \dot z_2=\beta_2'\,G(e_1),
 \label{eq:lawd-law}
@@ -612,17 +612,31 @@ $A_0=\left[\begin{smallmatrix}-2&1\\-1&0\end{smallmatrix}\right]$（特征值 $-
 \label{eq:uub-eso}
 \end{equation}
 
-\noindent\textbf{引理 3（跟踪误差 UUB）}：令 $\sigma=r-y$，由 $\dot y=\frac{b}{b_0}(k_p\sigma-z_2-v)+d$ 得
-$\sigma\dot\sigma\le-\frac{bk_p}{b_0}\sigma^{2}+|\sigma|\bigl(|d|+\frac{b}{b_0}(|z_2|+\bar v)\bigr)$，而 $z_2=x_2-e_2$ 有界，故
+\noindent\textbf{引理 3（跟踪误差 UUB）}：控制律的比例项取观测状态 $z_1$，
+$u=\frac{1}{b_0}\bigl[k_p^{\rm eff}(r-z_1)-z_2-v\bigr]$，并记 $e_1=y-z_1$。
+由 $r-z_1=(r-y)+(y-z_1)=\sigma+e_1$ 得
 \begin{equation}
-\limsup_{t\to\infty}|\sigma(t)|\le\frac{b_0}{bk_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr).
+\dot\sigma=-\frac{b}{b_0}k_p^{\rm eff}\,\sigma+\frac{b}{b_0}k_p^{\rm eff}\,e_1+w(t),
+\qquad
+|w(t)|\le W:=\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr).
+\label{eq:sig}
+\end{equation}
+由变分公式，$e_1$ 那一项的贡献不超过 $\sup|e_1|$（因 $\int a\,e^{-\int a}\le1$），$w$ 那一项由 $a\ge a_{\min}=\frac{b}{b_0}k_p$ 控制，故
+\begin{equation}
+\limsup_{t\to\infty}|\sigma(t)|
+\le \bar e_1+\frac{b_0}{bk_p}\,W,
+\qquad
+\bar e_1:=\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} .
 \label{eq:uub-track}
 \end{equation}
+\textbf{注意}：与“比例项用 $r-y$”的写法相比，式 \eqref{eq:uub-track} 多了一项\textbf{观测误差地板} $\bar e_1$——
+这正是用估计状态做反馈的代价；由于 $\bar e_1$ 与 $k_p$ 无关，调度仍然不放大该界（见推论）。
 
 \noindent\textbf{定理（名义闭环 UUB）}：在 (A1)--(A3) 下，式 \eqref{eq:uub-v}--\eqref{eq:uub-track} 同时成立，
 闭环全部信号一致最终有界，界\textbf{显式}依赖 $(\beta_3,Q_0,\omega_o,k_p,b,b_0,H)$。
 \emph{注}：(a) 本例回代：$\beta_3=4000$、$Q_0=0.98\Rightarrow\bar v=2\times10^{5}$、$\omega_o=500$；三个界都是\textbf{保守上界}
 （仿真实测 $|v|\approx4.5\times10^{2}$、$|e_1|\approx0.05$，相差 $10^{2}\sim10^{5}$ 倍），定量行为以仿真为准；
+跟踪界的第二项随 $k_p$ 减小、第一项 $\bar e_1$ 随 $\omega_o$ 减小，因此“调度只增不减”仍然不放大该界，但界本身被观测误差抬高了一个地板；
 (b) (A1) 的 $h$ 含 $\dot u$ 项，而 $u$ 由有界的 $z_2,v$ 构成，故 $h$ 的有界性由前述界隐式给出（有限）。
 
 \noindent\textbf{推论（含 $Q$ 与律 D 调度）}：$g=\bar e_1^{2}/(\bar e_1^{2}+\varepsilon_g^{2})\in[0,1)$ 由构造保证，$k_b,a\ge0$，
@@ -1010,8 +1024,10 @@ T 自适应 & 修正范围 / 步长 / 抖动 & $\delta_{\max}$ / $\sigma$ / $\De
         锁相 ESC 把稳态 RMS 由 $30.54$ 降到 $27.72$\,rpm（$-9.2\%$），与离线最优只差 $0.16$\,rpm；
         换速时前馈重置把 $25.32$ 降到 $19.83$，往返试验完全可逆。
   \item \textbf{一致有界性}：$v$ 通道自持 UUB（界 $\beta_3/(1-Q_0)$，与 $e_1$ 无关）；ESO 误差界
-        $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+(H/\omega_o)^{2}}$；跟踪误差界 $\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$。
-        因 $g\in[0,1)$ 且调度只增不减增益，\textbf{名义界即调度闭环的界}——律 D 不放大 UUB 界。
+        $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+(H/\omega_o)^{2}}$；跟踪误差界
+        $\bar e_1+\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$——
+        比例项改用观测状态 $z_1$ 后多出观测误差地板 $\bar e_1$，这是估计状态反馈的固有代价。
+        因 $g\in[0,1)$ 且 $\bar e_1$ 与 $k_p$ 无关、调度只增不减增益，\textbf{名义界即调度闭环的界}——律 D 不放大 UUB 界。
         T 自适应在准静态下满足小增益 $\gamma=Q/\sqrt{1-\mu}<1$；换速瞬态由冻结判据兜底。
   \item \textbf{律 F 作废}：复位型律 F（含 F-A/F-B、$D_m$ 检测器、反相复位）已整体撤除；原因是回声只活一拍（一周期改写 $99.3\%$），
         而检测至少需要一个周期，oracle 上界也只有 $1.82$ 倍。其脚本与数据只作历史证据保留。

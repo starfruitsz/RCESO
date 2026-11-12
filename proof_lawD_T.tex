@@ -50,7 +50,7 @@ $\delta^{*}(\omega)=-\arctan(\omega\tau)/2\pi$、时变延迟算子的 $L_2$ 增
 \dot y &= b\,i_a+d,\qquad i_a=\frac{\omega_{ci}}{s+\omega_{ci}}\,(u-n_i), \label{eq:plant}\\
 \dot z_1 &= z_2+b_0u+v+\beta_1^{\rm eff}\,G(e_1),\qquad \dot z_2=\beta_2^{\rm eff}\,G(e_1),\qquad
 \beta_1^{\rm eff}=2\omega_o^{\rm eff},\ \beta_2^{\rm eff}=(\omega_o^{\rm eff})^{2}, \label{eq:eso}\\
-u&=\frac{1}{b_0}\Bigl[k_p^{\rm eff}(r-y)-z_2-v\Bigr],\qquad e_1=y-z_1, \label{eq:law}\\
+u&=\frac{1}{b_0}\Bigl[k_p^{\rm eff}(r-z_1)-z_2-v\Bigr],\qquad e_1=y-z_1, \label{eq:law}\\
 \tau_0\dot v+v&=Q_0\,v(t-T)+\beta_3\st\!\Bigl(\frac{e_1}{\zeta}\Bigr)=:\chi,\qquad \ef:=\chi-v=\tau_0\dot v, \label{eq:rc}
 \end{align}
 其中 $Q_0$ 为\textbf{固定}遗忘因子（本报告不设遗忘因子自适应于推荐配置，故 $Q_0$ 与 $v$ 的界均不随调度变化）。
@@ -141,30 +141,39 @@ $\beta_1^{\rm eff}\ge 2\omega_o$、$\beta_2^{\rm eff}\ge\omega_o^{2}$。
 \end{proof}
 
 \begin{lemma}[跟踪误差的比较]\label{lem:track-cmp}
-在假设~\ref{as:h}--\ref{as:lawd} 下，记 $\sigma=r-y$，则
+在假设~\ref{as:h}--\ref{as:lawd} 下，记 $\sigma=r-y$、$e_1=y-z_1$，则
 \begin{equation}
-\dot\sigma=-\frac{b}{b_0}k_p^{\rm eff}(t)\,\sigma+w(t),\qquad
+\dot\sigma=-\frac{b}{b_0}k_p^{\rm eff}(t)\,\sigma+\frac{b}{b_0}k_p^{\rm eff}(t)\,e_1+w(t),\qquad
 |w(t)|\le W:=\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr).
 \label{eq:sig}
 \end{equation}
 \end{lemma}
 \begin{proof}
-由 \eqref{eq:law}--\eqref{eq:eso}，$\dot y=\frac{b}{b_0}(k_p^{\rm eff}\sigma-z_2-v)+d$，而 $z_2=x_2-e_2$，
-$r$ 为常数；代入 $\sigma=r-y$ 并整理即得 \eqref{eq:sig}，其中 $|z_2|\le|x_2|+|e_2|$ 已被吸收进 $W$（$e_2$ 由引理~\ref{lem:v} 与观测器界控制）。
+控制律的比例项用观测状态：$r-z_1=(r-y)+(y-z_1)=\sigma+e_1$。代入
+$\dot y=\frac{b}{b_0}\bigl(k_p^{\rm eff}(r-z_1)-z_2-v\bigr)+d$，
+用 $z_2=x_2-e_2$、$r$ 为常数整理即得 \eqref{eq:sig}，其中 $|z_2|\le|x_2|+|e_2|$ 已并入 $W$
+（$e_2$ 由引理~\ref{lem:v} 与观测器界控制）。
 \end{proof}
 
 \begin{theorem}[联合调度不放大一致最终界]\label{thm:lawd}
-在假设~\ref{as:h}--\ref{as:lawd} 下，律 D 闭环一致最终有界，且跟踪误差的上极限\textbf{逐分量不大于}名义闭环（$g\equiv0$）的值：
+在假设~\ref{as:h}--\ref{as:lawd} 下，律 D 闭环一致最终有界，且
 \begin{equation}
-\limsup_{t\to\infty}|\sigma(t)|\le \frac{b_0}{b k_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr),
+\limsup_{t\to\infty}|\sigma(t)|\le \bar e_1+\frac{b_0}{b k_p}\Bigl(\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr)\Bigr),
+\qquad
+\bar e_1:=\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}},
 \label{eq:thmD}
 \end{equation}
-其中 $\bar v$ 由 \eqref{eq:vbar} 给出、\textbf{与 $g$ 无关}。
+其中 $\bar v$ 与 $\bar e_1$ 由 \eqref{eq:vbar} 与观测器界给出，\textbf{均与 $g$ 无关}；
+与名义闭环（$g\equiv0$）相比，调度只影响第二项、且使其更小。
 \end{theorem}
 \begin{proof}
-由引理~\ref{lem:track-cmp}，$\sigma$ 满足 \eqref{eq:sig}；由引理~\ref{lem:kpgain}，$a(t)\ge a_{\min}=\frac{b}{b_0}k_p$。
-应用引理~\ref{lem:cmp} 得 \eqref{eq:thmD}。关键是：由于本文不设遗忘因子自适应（$Q_0$ 固定），$\bar v=\beta_3/(1-Q_0)$ 与调度无关，
-故 $W$ 也不随 $g$ 变化，不等式逐分量成立。
+记 $a(s)=\frac{b}{b_0}k_p^{\rm eff}(s)\in[a_{\min},a_{\max}]$、$A(t)=\int_0^t a$。由变分公式，
+\[
+\sigma(t)=e^{-A(t)}\sigma(0)+\int_0^t e^{-(A(t)-A(s))}\bigl[a(s)e_1(s)+w(s)\bigr]\,\mathrm ds .
+\]
+两项分别估计：因 $\int_0^t a(s)e^{-(A(t)-A(s))}\mathrm ds=1-e^{-A(t)}\le1$，第一项不超过 $\sup|e_1|$（由观测器 UUB 界控制，记 $\bar e_1$）；
+第二项由 $a\ge a_{\min}$ 得 $\le W/a_{\min}$。取上极限即得 \eqref{eq:thmD}。
+关键是 $\bar e_1$ 只依赖 $(\omega_o,\bar v,H)$、\emph{不依赖} $k_b$，故增益调度不引入新的放大机制。
 \end{proof}
 
 \begin{corollary}[观测带宽调度同样不放大]\label{cor:kd}
