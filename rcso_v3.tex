@@ -1060,6 +1060,7 @@ T 自适应 & 修正范围 / 步长 / 抖动 & $\delta_{\max}$ / $\sigma$ / $\De
   \item \textbf{版本纪律}：新旧口径不得并存；换口径必须同步删旧数。
   \item \textbf{律 D 定稿}：$k_b=8$、$a=2$、$\varepsilon_g=0.01$；$\beta_3$ 不调度（$b=0$）。
   \item \textbf{T 自适应定稿}：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”。
+  \item \textbf{低通不可去除}：$\tau_0=20$\,ms 必须保留；$\tau\le10$\,ms 在本对象上进 $\sim190$\,Hz 极限环（§\ref{sec:tau-role}）。若要减小相位滞后，用超前--滞后或线性相位 FIR，而不是去掉滤波。
   \item \textbf{律 F 作废}：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。
   \item 出图只输出 PNG；\texttt{includegraphics} 指向 PNG。
 \end{itemize}

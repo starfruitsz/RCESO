@@ -554,7 +554,7 @@ window.MathJax = {
 
 <p><strong>硬约束（违反即返工）</strong>：</p>
 
-<ul><li><strong>对象铁律</strong>：新数值只能来自 <code>pmsm_inv_sim</code>；旧一阶/降阶对象的结果不得引用。</li><li><strong>版本纪律</strong>：新旧口径不得并存；换口径必须同步删旧数。</li><li><strong>律 D 定稿</strong>：$k_b=8$、$a=2$、$\varepsilon_g=0.01$；$\beta_3$ 不调度（$b=0$）。</li><li><strong>T 自适应定稿</strong>：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”。</li><li><strong>律 F 作废</strong>：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。</li><li>出图只输出 PNG；<code>includegraphics</code> 指向 PNG。</li></ul>
+<ul><li><strong>对象铁律</strong>：新数值只能来自 <code>pmsm_inv_sim</code>；旧一阶/降阶对象的结果不得引用。</li><li><strong>版本纪律</strong>：新旧口径不得并存；换口径必须同步删旧数。</li><li><strong>律 D 定稿</strong>：$k_b=8$、$a=2$、$\varepsilon_g=0.01$；$\beta_3$ 不调度（$b=0$）。</li><li><strong>T 自适应定稿</strong>：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”。</li><li><strong>低通不可去除</strong>：$\tau_0=20$\,ms 必须保留；$\tau\le10$\,ms 在本对象上进 $\sim190$\,Hz 极限环（§<a class="xref" href="#sec:tau-role">1.3</a>）。若要减小相位滞后，用超前–滞后或线性相位 FIR，而不是去掉滤波。</li><li><strong>律 F 作废</strong>：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。</li><li>出图只输出 PNG；<code>includegraphics</code> 指向 PNG。</li></ul>
 
 <p><strong>当前未完成</strong>：(1) ESC 的 8 种子统计（现有为单种子 30–60 s 轨迹）；(2) 900 rpm 与 1200 rpm 的 $\delta^{*}$ 标定；</p>
 <p>(3) 律 D 与 ESC 联调的 8 种子验收；(4) 用 $A$ 做前馈预置记忆与故障诊断（$\delta$ 长期漂移 $\Rightarrow$ 参数/延时变化）；</p>
