@@ -13,6 +13,7 @@ from run_t_es import build as build30
 
 VIB_H = (1.0, 0.2654, 0.0408, 0.2245, 0.0612, 0.1837)
 BASE = dict(fci=500.0, beta3=4000.0, Q0=0.98, tau0=20e-3, seed_i=20261018,
+            rc_bp=5.0, b3_min=4000.0, b3_max=4000.0, a_ref=1.0,
             i_noise_peak=NC.NOISE_LAB["i_noise_peak"],
             sig_n=NC.NOISE_LAB["sig_n_rpm"],
             sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
