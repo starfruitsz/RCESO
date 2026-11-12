@@ -90,6 +90,72 @@ $A[\sin\frac{2\pi t}{T}+0.4\sin\frac{6\pi t}{T}+0.2\sin\frac{10\pi t}{T}]$，$T=
   \item 注入项有界（$|\st|\le1$），保证 $v$ 通道激励有界。
   \item $\ef=\tau\dot v$ 既是重复通道的内部失配量，也是\textbf{两个自适应通道唯一的驱动源}。
 \end{itemize}
+% =====================================================================
+\subsection{低通 $\tau$ 的作用：为什么不能去掉}\label{sec:tau-role}
+% =====================================================================
+内模的低通 $\tau$ 常被误当成"可选的抗噪附件"；实际上它是\emph{内模回路的环路滤波器}。
+把重复通道 \eqref{eq:rc} 写成算子形式：
+\begin{equation}
+v=\frac{1}{1+\tau s}\Bigl[Q\,v(t-T)+\beta_3\tanh\Bigl(\frac{e_1}{\zeta}\Bigr)\Bigr],
+\label{eq:tau-loop}
+\end{equation}
+可见 $\tau$ 作用在\emph{旧记忆 $+$ 新注入}的\emph{和}上，处于回路内部，而不是对 $e_1$ 做前置滤波。
+
+\paragraph{四个作用，均可量化。}
+\begin{enumerate}
+  \item \textbf{决定谐波处的泵浦增益}：$|G|_{\rm peak}=\beta_3/[\sqrt{1+(\omega\tau)^2}-Q]$。
+        $\tau=20$\,ms、$10$\,Hz、$Q=0.98$ 时约 $6.4\times10^{3}$；
+        而 $\tau\to0$ 时退化到 $\beta_3/(1-Q)=2\times10^{5}$，\textbf{高 $31$ 倍}。
+  \item \textbf{决定相位滞后}，也就是 §\ref{sec:tes} 要补偿的量：$\delta^{*}=-\arctan(\omega\tau)/2\pi$；
+        $\tau\to0$ 时 $\delta^{*}\to0$，T 自适应便失去补偿对象。
+  \item \textbf{压低高频噪声的再循环}：$1$\,kHz 处增益 $\tau=20$\,ms 为 $32$、$\tau\to0$ 为 $2000$，\textbf{高 $63$ 倍}。
+  \item \textbf{决定记忆的改写速率} $1/\tau$：一个周期改写 $99.3\%$、"回声只活一拍"都来自 $\tau=20$\,ms。
+\end{enumerate}
+此外 $\tau$ 把陷波由"深而窄"变为"浅而宽"：经典 RC（$\tau=0$）的陷波半宽约 $\pm0.3\%$，而 $\tau=20$\,ms 时谐振谷展宽——
+这正是 §\ref{sec:tes-res} 中 $A(\delta)$ 平台很平（$-8\%$ 与 $-15\%$ 只差 $0.2$\,rpm）的原因。
+
+\paragraph{"$e_1$ 已是带通，所以不需要低通"是误读。}
+$e_1=y-z_1$ 是 ESO 的新息，其频谱是"未补偿的周期残余 $+$ 宽带噪声"；ESO 是低通估计器，并不带通。
+真正呈带通/梳状特性的是\emph{回路}本身 $1/(1+\tau s-Qe^{-sT})$。因此"在 $e_1$ 上做带通"与"在回路里做低通"不是同一件事：
+输入侧滤波不能替代环路滤波——回路在谐波处的峰高由 $\beta_3$、$Q$ 与 $\tau$ 共同决定。
+
+\paragraph{去掉低通的实测后果。}
+在 600\,rpm、$8$\,s、$2$\,s 加载 $0.50$ 额定、圆盘型线 V2 $+$ $5.9$\,Hz、实验室噪声、$f_{ci}=500$\,Hz 的口径下，
+逐级减小 $\tau$、并按理论值重调周期 $\delta=-\arctan(\omega\tau)/2\pi$（单种子，脚本 \texttt{run\_tau\_sweep.py}）：
+
+\begin{center}\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+$\tau$ & 重调 $\delta^{*}$ & 跌落 / rpm & 突变窗 RMS / rpm & 稳态 $7$--$8$\,s / rpm & $10$\,Hz 残余 / rpm & $|i_q|$ 峰值 / A\\
+\midrule
+$\mathbf{20}$\,ms（定稿） & $-14.3\%$ & $-360.5$ & $48.3$ & $\mathbf{26.8}$ & $14.1$ & $\mathbf{6.26}$\\
+$10$\,ms & $-8.9\%$ & $-300.6$ & $103.5$ & $98.2$ & $6.0$ & $9.52$\\
+$5$\,ms & $-4.9\%$ & $-468$ & $223$ & $215$ & $25.7$ & $15.3$\\
+$2$\,ms & $-2.0\%$ & $-2814$ & $800$ & $801$ & $283$ & $40.3$\\
+$0.5$\,ms（近似无低通） & $-0.5\%$ & $-5618$ & $2587$ & $2507$ & $325$ & $93.2$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$\tau\le10$\,ms 起进入极限环：$\tau=20$\,ms 的稳态频谱无主峰（最大分量 $40$\,Hz、$6.8$\,rpm），
+而 $\tau=10$\,ms 的主峰在 $\mathbf{191.5}$\,Hz（$33.9$\,rpm），总 RMS 由 $26.8$ 升到 $98.2$\,rpm
+（脚本 \texttt{run\_tau\_fft.py}）。这与 \texttt{inv\_model.md} 记录的"$\tau_0$ 不能再压到 $10$\,ms（撤除后失稳）"、
+以及 $2$\,kHz 口径下的 $220$\,Hz 极限环互相印证。
+
+\paragraph{一个容易误判的陷阱。}
+表中 $\tau=10$\,ms 的\emph{$10$\,Hz 残余}（$6.0$\,rpm）反而小于定稿（$14.1$\,rpm）——只看基波会得出"去掉低通更好"的错误结论；
+但总 RMS 是 $3.7$ 倍、电流峰值 $1.5$ 倍，能量已转移到 $190$\,Hz。判据必须以\textbf{宽带 RMS 与电流峰值}为准，不能只看谐波幅值。
+
+\paragraph{结论。}
+\begin{enumerate}
+  \item 保留一阶低通 $\tau_0=20$\,ms：它是稳定裕度与泵浦增益的设计变量，不是可选的抗噪件。
+  \item 若目的是减小 $\delta^{*}$（少做周期修正），正确做法是采用\textbf{超前--滞后} $(1+\tau_z s)/(1+\tau_p s)$
+        或线性相位 FIR，在保留高频衰减的同时压低 $f_0$ 处相位滞后；\emph{不是}去掉滤波。
+  \item 若目的是更强的谐波抑制，应调整 $Q$ 与 $\beta_3$，并同时重算峰值增益与噪声增益——$\tau$、$Q$、$\beta_3$ 三者耦合。
+  \item 边界：本表为单种子、$8$\,s 口径；换速与 $30$\,s 口径的结论见 §\ref{sec:limit}。
+\end{enumerate}
+
 \subsection{灰箱 ESO 与控制律}
 \begin{equation}
   \dot z_1 = z_2+b_0u+v+\beta_1\,G(e_1;1,\delta,\lambda),\qquad
