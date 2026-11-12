@@ -68,5 +68,8 @@ if __name__ == "__main__":
               % (key, rms, amp10, float(np.mean(A[mA])), float(np.mean(dl[tt >= 20.0])),
                  100 * float(np.ptp(dl[tt >= 20.0]))), flush=True)
         out["y_" + key] = y; out["amp_" + key] = A; out["es_" + key] = dl
+        if "tl" not in out:
+            out["tl"] = np.asarray(Y["tl"])
     np.savez("_wave_t_cmp_600.npz", t=tt, **out)
+    print("tl 峰值 %.3f N·m，加载后均值 %.3f N·m" % (float(np.max(out["tl"])), float(np.mean(out["tl"][tt >= 5.0]))))
     print("saved _wave_t_cmp_600.npz")
