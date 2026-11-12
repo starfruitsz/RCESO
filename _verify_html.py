@@ -51,8 +51,8 @@ sub = re.search(r'<div class="sub">([^<]*)</div>', h).group(1)
 chk("sub_v50", sub.startswith("v5.0"), sub[:40])
 chk("sub_clean", ("\\" not in sub) and ("{" not in sub) and ("$" not in sub), sub)
 
-must = ["-376.7", "-349.8", "38.4", "27.72", "30.54", "6.31", "pmsm_inv_sim", "锁相", "圆盘", "58.79"]
-gone = ["66.80", "48.36", "51.7", "127.7", "88.9", "7.91", "40.05", "v3.1", "71.9", "36.5"]
+must = ["-371.9", "-343.7", "41.5", "18.2", "27.49", "30.20", "6.21", "pmsm_inv_sim", "锁相", "圆盘", "58.79"]
+gone = ["66.80", "48.36", "127.7", "88.9", "40.05", "v3.1", "36.5"]
 for m in must:
     chk("has:" + m, m in b, "" if m in b else "MISSING")
 for m in gone:

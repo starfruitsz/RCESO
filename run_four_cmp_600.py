@@ -24,7 +24,7 @@ VIB_H = (1.0, 0.2654, 0.0408, 0.2245, 0.0612, 0.1837)
 
 ESC = dict(T_es=True, es_d0=-0.143, es_step=0.01, es_dith=0.005, es_ff=True)
 NOESC = dict(T_es=True, es_d0=0.0, es_step=0.0, es_dith=0.0)
-LAWD = dict(kp_boost=8.0, kb_eso=2.0, kb_b3=0.0, det_eps=0.01)
+LAWD = dict(kp_boost=6.0, kb_eso=3.0, kb_b3=0.0, det_eps=0.01)
 CASES = [("base", dict(NOESC)),
          ("T", dict(ESC)),
          ("D", dict(NOESC, **LAWD)),

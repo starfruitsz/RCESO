@@ -3,7 +3,7 @@
 
 场景与 run_lawd_new.py 一致（TEND=8 s、2 s 加载 0.5 额定、圆盘型线 V2 + 5.9 Hz 振动、
 实验室噪声、fci=500 Hz、类 fal ESO、种子 20261018）。
-两档：Base（无自适应）与 律D 新（kp_boost=8、kb_eso=2、kb_b3=0、det_eps=0.01）。
+两档：Base（无自适应）与 律D 新（kp_boost=6、kb_eso=3、kb_b3=0、det_eps=0.01）。
 输出：_wave_lawd_cmp_600.npz（t、y_base、y_lawd、iq_base、iq_lawd、tl）
 指标：跌落、恢复到 ±20 rpm 的时间、突变窗 RMS [2.0,2.5)、max|iq|、稳态 [7,8) RMS
 """
@@ -15,7 +15,7 @@ from pmsm_inv_sim import sim_inv
 from tl_profile import disc_unbalance_profile
 
 CASES = [("base", dict(det_eps=0.0)),
-         ("lawd", dict(kp_boost=8.0, det_eps=0.01, kb_eso=2.0, kb_b3=0.0))]
+         ("lawd", dict(kp_boost=6.0, det_eps=0.01, kb_eso=3.0, kb_b3=0.0))]
 
 
 def metrics(tt, y, iq):
