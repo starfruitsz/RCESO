@@ -22,9 +22,10 @@ def one(job):
                tl_fault={"start": 0.0, "unbalance": dict(M=0.1, e=1e-4, kappa=581.0)},
                T_es=True)
     if o["j"]:
+        # 应力测试口径：隔离状态 4 校验（应用后校验/回退见 run_j_state4.py）
         cfg.update(j_id=True, j_id_f=100.0, j_id_amp_u=0.157, j_id_win=0.2,
                    j_id_lp=0.4, j_id_t0=1.0, j_id_tend=3.0, j_adapt_b0=True,
-                   j_id_snr_min=2.0, j_id_nmin=5, j_id_std_max=0.15)
+                   j_id_snr_min=2.0, j_id_nmin=5, j_id_std_max=0.15, j_val=False)
     Y = sim_inv(t, TL, cfg)
     tt = np.asarray(Y["t"]); y = np.asarray(Y["y"]); iq = np.asarray(Y["iq"])
     e = (y - 1.0) * 600.0

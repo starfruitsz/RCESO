@@ -76,13 +76,13 @@ window.MathJax = {
 <div class="layout">
 <nav>
   <h1>目录</h1>
-  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#sec:tau-role">低通 $\tau$ 的作用：为什么不能去掉</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l2" href="#sec:lawd">律 D：比例增益与观测带宽的联合调度</a><a class="l3" href="#sec:lawd-design">设计与实现</a><a class="l3" href="#sec:lawd-why">为什么用 $e_1$ 的 $T$ 窗均值</a><a class="l2" href="#sec:tes">T 自适应：标称周期 + 锁相极值搜索</a><a class="l3" href="#sec:tes-phase">失配机理与相位对齐条件</a><a class="l3" href="#sec:tes-obs">基波幅值观测器</a><a class="l3" href="#sec:tes-esc">锁相极值搜索</a><a class="l3" href="#sec:tes-impl">离散实现</a><a class="l3" href="#sec:tes-intuition">附：T 自适应的直观推导</a><a class="l3" href="#sec:jadapt">J 自适应：第三环（惯量辨识与 $b_0$ 更新）</a><a class="l2" href="#sec:stab">可证结论：驱动有界性与名义闭环 UUB</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-12 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">参数与 500\,Hz 低带宽代价</a><a class="l3" href="#sec:base">基准：无自适应 RCESO（单种子）</a><a class="l2" href="#sec:lawd-res">律 D 实测：$k_p$ + ESO 联合调度</a><a class="l3" href="#sec:lawd-1d">一维扫描：只提 $k_p$ 会把电流顶过额定</a><a class="l3" href="#sec:lawd-2d">二维细扫：$a\times k_b$（电流约束下）</a><a class="l3" href="#sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</a><a class="l3" href="#sec:lawd-b3">$\beta_3$ 不参与调度</a><a class="l3" href="#sec:lawd-mech">机理</a><a class="l2" href="#sec:tes-res">T 自适应实测</a><a class="l3" href="#sec:tes-res-opt">目标函数与真实最优：$-12\%$，不是 $0$</a><a class="l3" href="#sec:tes-res-esc">ESC 收敛与收益</a><a class="l3" href="#sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</a><a class="l3" href="#sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:no-lawf">复位型律 F 已作废（2026-11-12）</a><a class="l3" href="#sec:limit-param">参数口径不可互引</a><a class="l3" href="#h6">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a><a class="l2" href="#app:misalign">附录 A：不对中故障的转矩与受力</a><a class="l3" href="#h7">A.1 坐标、姿态与符号</a><a class="l3" href="#h8">A.2 运动学</a><a class="l3" href="#h9">A.3 惯量与绕轴转动惯量</a><a class="l3" href="#h10">A.4 欧拉方程与横向力矩</a><a class="l3" href="#h11">A.5 离心力及其力矩</a><a class="l3" href="#h12">A.6 重力</a><a class="l3" href="#h13">A.7 轴承反力（力平衡 + 力矩平衡）</a><a class="l3" href="#h14">A.8 轴承摩擦转矩</a><a class="l3" href="#h15">A.9 绕轴转矩方程与转速纹波</a><a class="l3" href="#h16">A.10 谐波来源：$1\times$、$2\times$ 与高阶</a><a class="l3" href="#h17">A.11 与台架 $T(\theta)$ 的数值对应</a><a class="l3" href="#h18">A.12 常见错误与纠正</a><a class="l3" href="#h19">A.13 仿真实现</a><a class="l3" href="#h20">A.14 符号表</a><a class="l2" href="#app:unbalance">附录 B：圆盘质量不平衡引发的脉动转矩</a><a class="l3" href="#h21">B.1 模型与符号</a><a class="l3" href="#h22">B.2 重力矩：$1\times$ 脉动转矩</a><a class="l3" href="#h23">B.3 离心力：$1\times$ 径向力，不是转矩</a><a class="l3" href="#h24">B.4 绕轴转矩方程与转速纹波</a><a class="l3" href="#h25">B.5 轴承摩擦的 $1\times$ 调制（二阶小量）</a><a class="l3" href="#h26">B.6 动态不平衡（力偶）</a><a class="l3" href="#h27">B.7 与台架 $T(\theta)$ 型线的对应</a><a class="l3" href="#h28">B.8 常见错误与纠正</a><a class="l3" href="#h29">B.9 仿真实现</a><a class="l3" href="#h30">B.10 符号表</a><a class="l2" href="#app:jadapt">附录 C：真实传动链惯量与 $J$ 自适应</a><a class="l3" href="#h31">C.1 惯量的两个口径</a><a class="l3" href="#h32">C.2 指标</a><a class="l3" href="#h33">C.3 方案：调试期转矩注入 + 频域比值辨识</a><a class="l3" href="#h34">C.4 结果</a><a class="l3" href="#h35">C.5 与文献方法的对照</a><a class="l3" href="#h36">C.6 实施</a><a class="l3" href="#h37">C.7 上电状态机与回退</a>
+  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#sec:tau-role">低通 $\tau$ 的作用：为什么不能去掉</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l2" href="#sec:lawd">律 D：比例增益与观测带宽的联合调度</a><a class="l3" href="#sec:lawd-design">设计与实现</a><a class="l3" href="#sec:lawd-why">为什么用 $e_1$ 的 $T$ 窗均值</a><a class="l2" href="#sec:tes">T 自适应：标称周期 + 锁相极值搜索</a><a class="l3" href="#sec:tes-phase">失配机理与相位对齐条件</a><a class="l3" href="#sec:tes-obs">基波幅值观测器</a><a class="l3" href="#sec:tes-esc">锁相极值搜索</a><a class="l3" href="#sec:tes-impl">离散实现</a><a class="l3" href="#sec:tes-intuition">附：T 自适应的直观推导</a><a class="l3" href="#sec:jadapt">J 自适应：第三环（惯量辨识与 $b_0$ 更新）</a><a class="l2" href="#sec:stab">可证结论：驱动有界性与名义闭环 UUB</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-13 真实 $J$ 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">参数与 500\,Hz 低带宽代价</a><a class="l3" href="#sec:base">基准：无自适应 RCESO（单种子）</a><a class="l2" href="#sec:lawd-res">律 D 实测：$k_p$ + ESO 联合调度</a><a class="l3" href="#sec:lawd-1d">一维扫描：只提 $k_p$ 的收益有限</a><a class="l3" href="#sec:lawd-2d">二维细扫：$a\times k_b$（电流约束下）</a><a class="l3" href="#sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</a><a class="l3" href="#sec:lawd-b3">$\beta_3$ 不参与调度</a><a class="l3" href="#sec:lawd-mech">机理</a><a class="l2" href="#sec:tes-res">T 自适应实测</a><a class="l3" href="#sec:tes-res-opt">目标函数：$A$ 的 $-15\%$ 平台落在噪声底内，RMS 最优在 $-11\%$</a><a class="l3" href="#sec:tes-res-esc">ESC 收敛与收益</a><a class="l3" href="#sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</a><a class="l3" href="#sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:no-lawf">复位型律 F 已作废（2026-11-12）</a><a class="l3" href="#sec:limit-param">参数口径不可互引</a><a class="l3" href="#h6">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a><a class="l2" href="#app:misalign">附录 A：不对中故障的转矩与受力</a><a class="l3" href="#h7">A.1 坐标、姿态与符号</a><a class="l3" href="#h8">A.2 运动学</a><a class="l3" href="#h9">A.3 惯量与绕轴转动惯量</a><a class="l3" href="#h10">A.4 欧拉方程与横向力矩</a><a class="l3" href="#h11">A.5 离心力及其力矩</a><a class="l3" href="#h12">A.6 重力</a><a class="l3" href="#h13">A.7 轴承反力（力平衡 + 力矩平衡）</a><a class="l3" href="#h14">A.8 轴承摩擦转矩</a><a class="l3" href="#h15">A.9 绕轴转矩方程与转速纹波</a><a class="l3" href="#h16">A.10 谐波来源：$1\times$、$2\times$ 与高阶</a><a class="l3" href="#h17">A.11 与台架 $T(\theta)$ 的数值对应</a><a class="l3" href="#h18">A.12 常见错误与纠正</a><a class="l3" href="#h19">A.13 仿真实现</a><a class="l3" href="#h20">A.14 符号表</a><a class="l2" href="#app:unbalance">附录 B：圆盘质量不平衡引发的脉动转矩</a><a class="l3" href="#h21">B.1 模型与符号</a><a class="l3" href="#h22">B.2 重力矩：$1\times$ 脉动转矩</a><a class="l3" href="#h23">B.3 离心力：$1\times$ 径向力，不是转矩</a><a class="l3" href="#h24">B.4 绕轴转矩方程与转速纹波</a><a class="l3" href="#h25">B.5 轴承摩擦的 $1\times$ 调制（二阶小量）</a><a class="l3" href="#h26">B.6 动态不平衡（力偶）</a><a class="l3" href="#h27">B.7 与台架 $T(\theta)$ 型线的对应</a><a class="l3" href="#h28">B.8 常见错误与纠正</a><a class="l3" href="#h29">B.9 仿真实现</a><a class="l3" href="#h30">B.10 符号表</a><a class="l2" href="#app:jadapt">附录 C：真实传动链惯量与 $J$ 自适应</a><a class="l3" href="#h31">C.1 惯量的两个口径与两套圆盘</a><a class="l3" href="#h32">C.2 指标</a><a class="l3" href="#h33">C.3 方案：调试期转矩注入 + 频域比值辨识</a><a class="l3" href="#h34">C.4 结果</a><a class="l3" href="#h35">C.5 与文献方法的对照</a><a class="l3" href="#h36">C.6 实施</a><a class="l3" href="#h37">C.7 上电状态机：辨识、死区、校验与回退</a>
 </nav>
 <main>
 <header class="doc-h">
   <h1>自适应低通重复控制（RCESO）：建模、自适应律与一致稳定性证明</h1>
-  <div class="sub">v5.5 · 2026-11-13 · 对象：真实逆变器（pmsm_inv_sim）· 三相 PWM/死区/反电动势 · 600 rpm/圆盘型线 V2 · 律 D = Kp+ESO 联合调度 · T 自适应 = 锁相 ESC · J 自适应 = 调试期辨识 + b_0</div>
-  <div class="chain">逻辑链：1 建模 → 2 自适应 RCESO 结构与耦合 → 3 自适应律（与实现逐条对应） → 4 律 D：比例增益与观测带宽的联合调度 → 5 T 自适应：标称周期 + 锁相极值搜索 → 6 可证结论：驱动有界性与名义闭环 UUB → 7 数值验证（沿真实轨迹逐条核对） → 8 PMSM 转速环：真实逆变器对象（2026-11-12 定稿） → 9 律 D 实测：$k_p$ + ESO 联合调度 → 10 T 自适应实测 → 11 适用范围之外（如实披露） → 12 符号与参数表（答辩自查） → 13 结论 → 14 接手说明（给下一个 agent） → 15 附录 A：不对中故障的转矩与受力 → 16 附录 B：圆盘质量不平衡引发的脉动转矩 → 17 附录 C：真实传动链惯量与 $J$ 自适应</div>
+  <div class="sub">v5.6 · 2026-11-13 · 对象：真实逆变器（pmsm_inv_sim）· 三相 PWM/死区/反电动势 · 600 rpm/圆盘型线 V2 · 律 D = Kp+ESO 联合调度 · T 自适应 = 锁相 ESC · J 自适应 = 调试期辨识 + b_0 更新 + 应用后校验（状态 0--5）</div>
+  <div class="chain">逻辑链：1 建模 → 2 自适应 RCESO 结构与耦合 → 3 自适应律（与实现逐条对应） → 4 律 D：比例增益与观测带宽的联合调度 → 5 T 自适应：标称周期 + 锁相极值搜索 → 6 可证结论：驱动有界性与名义闭环 UUB → 7 数值验证（沿真实轨迹逐条核对） → 8 PMSM 转速环：真实逆变器对象（2026-11-13 真实 $J$ 定稿） → 9 律 D 实测：$k_p$ + ESO 联合调度 → 10 T 自适应实测 → 11 适用范围之外（如实披露） → 12 符号与参数表（答辩自查） → 13 结论 → 14 接手说明（给下一个 agent） → 15 附录 A：不对中故障的转矩与受力 → 16 附录 B：圆盘质量不平衡引发的脉动转矩 → 17 附录 C：真实传动链惯量与 $J$ 自适应</div>
 </header>
 <div class="doc">
 
@@ -307,7 +307,7 @@ window.MathJax = {
 <div class="eqwrap" id="eq:intuition-phi"><div class="eq">\[\varphi=\arctan(\omega\tau). \]</div><div class="eqno">(19)</div></div>
 <p>600 rpm（$10$ Hz）、$\tau=20$\,ms 时为 $51.5^{\circ}$，折合 $14.3$\,ms。与此同时内模的陷波极窄：$1\%$ 周期误差（相位 $3.6^{\circ}$）</p>
 <p>使有效增益衰减 $3.3$ 倍、$5\%$ 衰减 $15$ 倍，半宽仅 $\pm0.3\%$。两者叠加的后果是<strong>标称周期下陷波没有对准扰动</strong>，</p>
-<p>这是 §<a class="xref" href="#sec:tes-res">10</a> 中不整定时稳态残余 $30.20$\,rpm 的主要来源。</p>
+<p>这是 §<a class="xref" href="#sec:tes-res">10</a> 中不整定时稳态残余 $13.43$\,rpm 的主要来源。</p>
 
 <p>agraph{(2) 最优周期为什么是 $-\arctan(\omega\tau)/2\pi$。}</p>
 <p>把内模写成传递函数 $V/W=1/(1+\tau s-Qe^{-sT})$，抑制能力由分母在 $s=j\omega$ 处的模长决定。记 $\theta=\omega T$，有</p>
@@ -344,7 +344,7 @@ window.MathJax = {
 
 <h3 id="sec:jadapt">J 自适应：第三环（惯量辨识与 $b_0$ 更新）</h3>
 
-<p>律 D 作用在毫秒级的突变窗，T 自适应作用在秒级的周期修正；两者都不改变 ESO 的输入增益 $b_0$。真实传动链的惯量 $J_{\rm true}$（电机 $+$ 联轴器 $+$ 圆盘/齿轮箱折算）通常大于电机标称 $J_{\rm nom}$，若 $b_0$ 只按标称整定，环路增益随 $1/J_{\rm true}$ 下降：$J_{\rm true}=5.26J_{\rm nom}$ 时同一故障的 $10$\,Hz 纹波由 $26.2$ 涨到 $33.3$\,rpm（附录 C）。第三环因此辨识 $\hat J$ 并更新 $b_0$。</p>
+<p>律 D 作用在毫秒级的突变窗，T 自适应作用在秒级的周期修正；两者都不改变 ESO 的输入增益 $b_0$。真实传动链的惯量 $J_{\rm true}$（电机 $+$ 联轴器 $+$ 圆盘/齿轮箱折算）通常大于电机标称 $J_{\rm nom}$，若 $b_0$ 只按标称整定，环路增益随 $1/J_{\rm true}$ 下降：真实台架 $J_{\rm true}=2.545J_{\rm nom}$ 下，同一 $T_1=0.057$\,N$\cdot$m 故障的 $10$\,Hz 纹波由 $9.97$\,rpm（$b_0$ 已校正）涨到 $29.22$\,rpm（标称 $b_0$）、稳态 RMS 由 $10.02$ 涨到 $24.47$\,rpm（附录 B.9）。第三环因此辨识 $\hat J$ 并更新 $b_0$（附录 C.1 表 C.2 的定稿台架 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$）。</p>
 
 <p>方案（完整推导、状态机与验证见附录 C）：调试期在电流指令上叠加 $T_d=A\sin(2\pi f_d t)$（$f_d=100$\,Hz、$A=0.1$\,N$\cdot$m），用 $T_e$ 与 $\omega$ 的 DFT 比值</p>
 
@@ -352,7 +352,7 @@ window.MathJax = {
 <p>在 $0$–$2$\,s 内估计并冻结，然后一次性更新</p>
 
 <div class="eqwrap" id="eq:jupdate"><div class="eq">\[b_0\leftarrow b_0\,\frac{J_{\rm nom}}{\hat J},\qquad \hat J\in[0.5,\,50]J_{\rm nom}. \]</div><div class="eqno">(23)</div></div>
-<p>上电状态机为“空闲 $\to$ 辨识 $\to$ 应用 / 回退”：有效窗数 $\ge3$、窗间标准差 $\le15\%$、dither 转速幅值 $\ge2$\,rpm 才允许提前应用；超时无有效窗则保持标称 $b_0$。</p>
+<p>上电状态机为 $0$–$5$（空闲 $\to$ 辨识 $\to$ 已应用 / 超时回退 / 校验回退 / 死区保持）：有效窗数 $\ge3$、窗间标准差 $\le15\%$、dither 转速幅值 $\ge2$\,rpm 才允许提前应用；$|\hat J/J_{\rm nom}-1|\le0.20$ 进死区、不更新（状态 $5$）；应用后 $0.5$\,s 校验恶化 $&gt;20\%$ 则回退标称 $b_0$（状态 $4$）；超时无有效窗则保持标称 $b_0$（状态 $3$）。</p>
 
 <p><strong>三环正交性</strong>：</p>
 
@@ -360,13 +360,14 @@ window.MathJax = {
 
 <p>频率上分离：$10$\,Hz 故障带、$100$\,Hz 辨识 dither、ms 级门控；$T$ 窗均值把 $100$\,Hz 平均为零，D 的门控不受 dither 影响；T 的 $A$ 取 $10$\,Hz 带通，$100$\,Hz 被滤除。时间上也可串行：上电先做 J 辨识（$0$–$2$\,s），ESC 从 $t=3$\,s 起搜索，D 全程在线。</p>
 
-<p><strong>三环同时投运的实测</strong>（$J_{\rm true}=5.26J_{\rm nom}$、$T_1=0.057$\,N$\cdot$m、$12$\,s，600 rpm）：</p>
+<p><strong>三环同时投运的实测</strong>（定稿台架 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$、$T_1=0.15$\,N$\cdot$m、$12$\,s，600 rpm；指标取 $11$–$12$\,s）：</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>$10$\,Hz/rpm</th><th>稳态 RMS/rpm</th><th>$|i_q|$ 峰值/A</th><th>$\hat J$</th></tr></thead><tbody><tr><td>D $+$ T（J 关）</td><td>$20.2$</td><td>$16.4$</td><td>$5.00$</td><td>—</td></tr><tr><td><strong>D $+$ T $+$ J</strong></td><td>$\mathbf{3.25}$</td><td>$\mathbf{5.44}$</td><td>$5.85$</td><td>$1.06\times10^{-4}$（$+6.5\%$）</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>$10$\,Hz/rpm</th><th>稳态 RMS/rpm</th><th>$|i_q|$ 原始峰值/A</th><th>$\hat J$</th></tr></thead><tbody><tr><td>D $+$ T（J 关）</td><td>$39.95$</td><td>$32.64$</td><td>$2.94$</td><td>—</td></tr><tr><td><strong>D $+$ T $+$ J</strong></td><td>$\mathbf{14.72}$</td><td>$\mathbf{14.20}$</td><td>$4.46$</td><td>$5.04\times10^{-5}$（$+4.7\%$）</td></tr></tbody></table></div>
 
-<p>三环叠加后 $10$\,Hz 纹波再降 $84\%$，$i_q$ 峰值 $5.85$\,A 仍在额定 $6.31$\,A 内；ESC 的 $\delta$ 收敛到 $-16.0\%$（D$+$T 单独为 $-15.0\%$），说明 J 环更新 $b_0$ 后 T 环仍能正常工作。</p>
+<p>三环叠加后 $10$\,Hz 纹波由 $39.95$ 降到 $14.72$\,rpm（$-63\%$）、稳态 RMS 由 $32.64$ 降到 $14.20$\,rpm（$-57\%$）；</p>
+<p>$\hat J$ 与 $J_{\rm true}$ 只差 $+4.7\%$（状态 $2$，C.7）；代价是 $i_q$ 的 $10$\,$\mu$s 瞬时峰值由 $2.94$ 升到 $4.46$\,A——$J$ 环把 $b_0$ 改小、环路增益抬高，电流上升是预期代价，仍在额定 $6.31$\,A 内（额定约束按 $1$\,ms 包络，见 §<a class="xref" href="#sec:lawd-res">9</a>）。两档的 $\delta$ 终值都是 $-14.7\%$，说明 $J$ 环更新 $b_0$ 后 T 环仍能正常工作。</p>
 
-<p><strong>边界（如实披露）</strong>：无故障时 dither 的转速响应只有约 $4$\,rpm（接近编码器 $6$\,rpm 量化台阶），$\hat J$ 偏高约 $15\%$，应用后 $i_q$ 可升到 $6.4$\,A；生产版必须加“应用后 $0.5$\,s 校验、恶化 $&gt;20\%$ 回退”。$J_{\rm true}/J_{\rm nom}&gt;5$ 时，除 $b_0$ 外还应复核 $k_p$ 与 $\omega_o$ 的整定。</p>
+<p><strong>边界（如实披露）</strong>：应力测试配置下无故障时 dither 的转速响应只有约 $4$\,rpm（接近编码器 $6$\,rpm 量化台阶），$\hat J$ 偏高约 $15\%$，应用后 $i_q$ 的 $10$\,$\mu$s 瞬时峰值可升到 $6.40$\,A（额定 $6.31$\,A；额定约束的 $1$\,ms 包络口径见 §<a class="xref" href="#sec:lawd-res">9</a>）。v5.6 已把“应用后 $0.5$\,s 校验、恶化 $&gt;20\%$ 回退”做成上电状态机的状态 $4$（附录 C.7）：辨识后先用 $|\hat J/J_{\rm nom}-1|\le0.20$ 判死区（状态 $5$），否则以“dither 关、标称 $b_0$”采一段公平基线，更新后取 $0.5$\,s 窗比较 $i_q$ 的 AC 纹波 RMS 与 $10$\,Hz 转速幅值，任一恶化 $&gt;20\%$ 即回退标称 $b_0$。实测：无故障 $A=0.157$ 由 $6.40$\,A 回落到 $3.97$\,A，无故障 $A=0.30$ 由 $12.3$\,A 回落到 $4.88$\,A；代价是回到标称 $b_0$ 的稳态误差（$8.20$\,rpm RMS 对应用后的 $3.96$\,rpm），即用稳态精度换过流安全。$J_{\rm true}/J_{\rm nom}&gt;5$ 时，除 $b_0$ 外还应复核 $k_p$ 与 $\omega_o$ 的整定；本文定稿台架为小圆盘 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$，$5.26$ 倍大圆盘只作应力测试；定稿台架上同一辨识的偏差为 $+4.7\%$、状态 $2$（§<a class="xref" href="#sec:jadapt">5.6</a> 三环表），失配小、无需回退。</p>
 
 <h2 id="sec:stab">可证结论：驱动有界性与名义闭环 UUB</h2>
 <h3 id="sec:newpremise">结构前提：驱动有界性</h3>
@@ -423,16 +424,20 @@ window.MathJax = {
 
 <p><strong>说明</strong>：表中各项均取自同一次运行的真实轨迹；$z_2$ 的直流分量见注 <a class="xref" href="#rem:z2dc">6</a>，$Q$ 的取值与限幅见 §<a class="xref" href="#sec:qch">3.4</a>。</p>
 
-<h2 id="sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-12 定稿）</h2>
+<h2 id="sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-13 真实 $J$ 定稿）</h2>
 <p><strong>口径声明</strong>：本节对象严格为<strong>三相 PWM 逆变器 + PMSM</strong>，不再使用一阶/降阶电流环等效；</p>
 <p>旧对象（一阶电流环、$T_s=10\,\mu$s 单速率）的数值已从正文删除，不得再引用。</p>
 <p>§<a class="xref" href="#sec:model">1</a>–§<a class="xref" href="#sec:verify">7</a> 的证明仍在标幺一阶模型上给出，用于结构性质；</p>
 <p><strong>数值与工程结论以本节真实对象为准</strong>。</p>
 
+<p><strong>真实台架惯量</strong>：$J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$（小圆盘 $R_d=20$\,mm、$M_d=0.08$\,kg，附录 C.1 表 C.2）；</p>
+<p>$b_0$ 已由 J 自适应在上电调试期辨识并校正（仿真取 <code>j_oracle=True</code>，对应 $\hat J$ 偏差 $+4.7\%$，辨识与校验见附录 C）。</p>
+<p><strong>电流口径</strong>：额定约束按 $1$\,ms 块均值的 $|i_q|$ 基波包络（额定 $6.31$\,A）；$10$\,$\mu$s 原始瞬时峰值含 $10$\,kHz PWM/死区纹波（峰峰约 $3$\,A），放在括号内仅供参考。</p>
+
 <h3 id="h4">对象：三相 PWM 逆变器 + PMSM</h3>
 <p>模型为 <code>pmsm_inv_sim</code>：</p>
 
-<div class="tablewrap"><table><thead><tr><th>项目</th><th>取值</th><th>项目</th><th>取值</th></tr></thead><tbody><tr><td>母线 / 开关频率</td><td>$60$\,V / $10$\,kHz</td><td>死区 / 器件压降</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td>相电感 / 电阻</td><td>$L_d=L_q=0.57$\,mH / $0.175\,\Omega$</td><td>磁链 / 极对数</td><td>$\psi_f=0.01683$\,Wb / $4$</td></tr><tr><td>转动惯量</td><td>$J_{\rm nom}=1.89\times10^{-5}$（标定；真值见附录 B.9）</td><td>电流环带宽</td><td>$f_{ci}=500$\,Hz</td></tr><tr><td>重复通道</td><td>$\beta_3=4000$、$\tau_0=20$\,ms</td><td>速度环</td><td>$k_p=75.36$、$\omega_o=500$</td></tr><tr><td>dq 采样噪声</td><td>$\pm0.1$\,A（实验室档）</td><td>编码器</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>负载噪声 / 转速噪声</td><td>$0.01$\,N$\cdot$m / $3$\,rpm（实验室档）</td><td>积分步长</td><td>$2\,\mu$s</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>项目</th><th>取值</th><th>项目</th><th>取值</th></tr></thead><tbody><tr><td>母线 / 开关频率</td><td>$60$\,V / $10$\,kHz</td><td>死区 / 器件压降</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td>相电感 / 电阻</td><td>$L_d=L_q=0.57$\,mH / $0.175\,\Omega$</td><td>磁链 / 极对数</td><td>$\psi_f=0.01683$\,Wb / $4$</td></tr><tr><td>转动惯量</td><td>\shortstack[l]{$J_{\rm nom}=1.89\times10^{-5}$（$b_0$ 标定）\\ $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$（表 C.2）}</td><td>电流环带宽</td><td>$f_{ci}=500$\,Hz</td></tr><tr><td>重复通道</td><td>$\beta_3=4000$、$\tau_0=20$\,ms</td><td>速度环</td><td>$k_p=75.36$、$\omega_o=500$</td></tr><tr><td>dq 采样噪声</td><td>$\pm0.1$\,A（实验室档）</td><td>编码器</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>负载噪声 / 转速噪声</td><td>$0.01$\,N$\cdot$m / $3$\,rpm（实验室档）</td><td>积分步长</td><td>$2\,\mu$s</td></tr></tbody></table></div>
 
 <p>逆变器按中心对齐 PWM 比较、死区平均电压误差 $\mp V_{dc}T_d/T_{pwm}$、器件压降与导通电阻建模；</p>
 <p>电机侧 $L_d,L_q$ 与反电动势 $\omega_e\psi_f$ 显式进入 dq ODE；相电流由 dq 反变换得到，</p>
@@ -447,116 +452,140 @@ window.MathJax = {
 
 <h3 id="h5">参数与 500\,Hz 低带宽代价</h3>
 <p>电流环取 $f_{ci}=500$\,Hz（$2\pi\cdot500\approx3142$\,rad/s），沿用 $\tau_0=20$\,ms、$\beta_3=4000$；$2$\,kHz 口径下扫出的 $220$\,Hz 极限环边界不再适用，$500$\,Hz 下未重做该扫描。</p>
-<p>低带宽的代价体现在加载跌落与噪声底：$2$\,kHz 口径同类工况的基准跌落约 $-337$\,rpm，$500$\,Hz 口径（§<a class="xref" href="#sec:base">8.3</a>）为 $-371.9$\,rpm；两种口径的负载幅值不同，此二数只作带宽代价的量级说明，不构成逐位对照。</p>
-<p>这是真实电流环带宽不足的物理结果，不是参数写错。</p>
+<p>低带宽的代价体现在加载跌落与噪声底：真实 $J$ 下基准跌落为 $-127.4$\,rpm、稳态 RMS 为 $12.99$\,rpm（§<a class="xref" href="#sec:base">8.3</a>）。</p>
+<p>这是真实电流环带宽不足的物理结果，不是参数写错；$2$\,kHz 旧口径的数字已从正文删除，不得引用。</p>
 
 <h3 id="sec:base">基准：无自适应 RCESO（单种子）</h3>
 <p><strong>口径</strong>：圆盘质量不对中型线 V2（$a_{1..6}=1.00,0.39,0.06,0.33,0.09,0.27$，THD $58.79\%$，峰值 $0.095$\,N$\cdot$m）；</p>
 <p>$t=2$\,s 加载 $0.50$ 额定（$0.3185$\,N$\cdot$m）；叠加 $5.9$\,Hz 振动（基波 $0.03$\,N$\cdot$m，THD $40\%$）；</p>
 <p>实验室噪声（转速 $3$\,rpm、dq 电流 $\pm0.1$\,A、负载 $0.01$\,N$\cdot$m）；$f_{ci}=500$\,Hz、$\beta_3=4000$、$\tau_0=20$\,ms；</p>
-<p>类 fal ESO（$a=0.75,\ \delta=0.10,\ \lambda=10$）；单种子（20261018）。评价窗：突变窗 $[2.0,2.5)$\,s、稳态 $[7.0,8.0)$\,s。</p>
+<p>类 fal ESO（$a=0.75,\ \delta=0.10,\ \lambda=10$）；$J_{\rm true}=4.81\times10^{-5}$、<code>j_oracle=True</code>；单种子（20261018）。</p>
+<p>评价窗：突变窗 $[2.0,2.5)$\,s、稳态 $[7.0,8.0)$\,s。</p>
 <p>该型线的物理来源（角不对中/平行不对中/离心与重力/质量不平衡）与完整推导见附录~A、附录~B。</p>
 
-<div class="tablewrap"><table><thead><tr><th>转速</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 峰值 / A</th></tr></thead><tbody><tr><td>600 rpm（10 Hz）</td><td>$-371.9$</td><td>$53.9$</td><td>$51.5$</td><td>$30.20$</td><td>$6.16$</td></tr><tr><td>900 rpm（15 Hz）</td><td>$-350.2$</td><td>$45.4$</td><td>$47.4$</td><td>$30.72$</td><td>$6.34$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>转速</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 包络 / A（原始）</th></tr></thead><tbody><tr><td>600 rpm（10 Hz）</td><td>$-127.4$</td><td>$29.8$</td><td>$18.60$</td><td>$12.99$</td><td>$5.98$（$6.72$）</td></tr><tr><td>900 rpm（15 Hz）</td><td>$-121.9$</td><td>$40.2$</td><td>$18.41$</td><td>$13.02$</td><td>$5.85$（$7.13$）</td></tr></tbody></table></div>
 
 <p>读数：转速越高、$10$\,Hz 分量被惯量衰减越多，基准的突变窗 RMS 与跌落都随之下降；</p>
-<p>额定电流 $6.31$\,A，基准在 600 rpm 用 $6.16$\,A——留给律 D 的电流余量仅约 $2.4\%$。</p>
+<p>额定电流 $6.31$\,A（$1$\,ms 包络口径），基准在 600 rpm 用 $5.98$\,A——留给律 D 的电流余量约 $5.2\%$；$10$\,$\mu$s 原始瞬时峰值为 $6.72$\,A。</p>
 
 <h2 id="sec:lawd-res">律 D 实测：$k_p$ + ESO 联合调度</h2>
-<p>口径同 §<a class="xref" href="#sec:base">8.3</a>，单种子（20261018）；表中各数为该种子的整段指标。约束：$|i_q|$ 峰值不得超过额定 $6.31$\,A。</p>
+<p>口径同 §<a class="xref" href="#sec:base">8.3</a>（真实 $J$、<code>j_oracle</code>、单种子 20261018）；表中各数为该种子的整段指标。</p>
+<p>$|i_q|$ 一律给 $1$\,ms 块均值包络（括号内为 $10$\,$\mu$s 原始瞬时峰值）；额定约束 $6.31$\,A 按包络核对，原始峰值含 PWM 纹波、不作判据。</p>
+<p><strong>恢复时间口径</strong>：定义为跌落后回到 $\pm20$\,rpm 带（自 $t\ge2$\,s 起）的时间。该带宽是真实 $J$ 跌落（$-127.4$\,rpm）的 $15.7\%$，而在名义 $J$ 时只占 $5.4\%$，</p>
+<p>故真实 $J$ 的“恢复”系统性偏乐观，<strong>不可与名义 $J$ 的恢复时间横向比较</strong>。</p>
 
-<h3 id="sec:lawd-1d">一维扫描：只提 $k_p$ 会把电流顶过额定</h3>
+<h3 id="sec:lawd-1d">一维扫描：只提 $k_p$ 的收益有限</h3>
 
-<div class="tablewrap"><table><thead><tr><th>参数组</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变窗 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 峰值 / A</th></tr></thead><tbody><tr><td>无自适应</td><td>$-371.9$</td><td>$53.9$</td><td>$51.5$</td><td>$30.20$</td><td>$6.16$</td></tr><tr><td>kb4/de.01（旧律 D）</td><td>$-375.4$</td><td>$18.3$</td><td>$43.2$</td><td>$29.81$</td><td>$6.34$</td></tr><tr><td>kb8/de.01</td><td>$-359.4$</td><td>$10.9$</td><td>$39.0$</td><td>$29.68$</td><td>$6.66$</td></tr><tr><td>kb16/de.005</td><td>$-352.7$</td><td>$4.6$</td><td>$37.8$</td><td>$28.69$</td><td>$8.16$</td></tr><tr><td>kb8/de.005</td><td>$-363.7$</td><td>$5.0$</td><td>$38.4$</td><td>$29.50$</td><td>$7.91$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>参数组</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变窗 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 包络 / A（原始）</th></tr></thead><tbody><tr><td>无自适应</td><td>$-127.4$</td><td>$29.8$</td><td>$18.60$</td><td>$12.99$</td><td>$5.98$（$6.72$）</td></tr><tr><td>kb4/de.01（旧律 D）</td><td>$-121.1$</td><td>$29.4$</td><td>$17.60$</td><td>$13.12$</td><td>$5.81$（$6.88$）</td></tr><tr><td>kb8/de.01</td><td>$-130.6$</td><td>$25.3$</td><td>$17.47$</td><td>$12.94$</td><td>$6.10$（$7.15$）</td></tr><tr><td>kb16/de.005</td><td>$-123.0$</td><td>$4.4$</td><td>$15.17$</td><td>$12.93$</td><td>$6.50$（$7.58$）</td></tr><tr><td>kb8/de.005</td><td>$-122.7$</td><td>$9.6$</td><td>$15.93$</td><td>$13.07$</td><td>$6.02$（$6.81$）</td></tr></tbody></table></div>
 
-<p>读数：增益越大瞬态越好，但<strong>除基准外四组全部把 $|i_q|$ 顶过额定</strong>（$6.34$–$8.16$\,A）；</p>
-<p>只提 $k_p$ 无法在额定内换到瞬态收益——这是下一节把 ESO 带宽一并纳入调度的直接动因。</p>
+<p>读数：增益越大瞬态越好（突变窗 $18.60\to15.17$），但<strong>只有 kb16 把 $1$\,ms 包络顶过额定</strong>（$6.50$\,A）；</p>
+<p>其余各行的包络都在额定内，突变窗收益只有 $-5.4\%\sim-14.4\%$。kb8/de.005 以 $6.02$\,A 拿到 $15.93$\,rpm，是 1D 里最好的一档，</p>
+<p>但它靠更灵敏的门控（$\varepsilon_g=0.005$）取得，单种子不足以说明多工况/噪声下仍成立（见 §<a class="xref" href="#sec:handoff">14</a> 的改进项）。</p>
+<p>只提 $k_p$ 的收益有限、且最大收益档已贴近额定，这是下一节把 ESO 带宽一并纳入调度的直接动因。</p>
 
 <h3 id="sec:lawd-2d">二维细扫：$a\times k_b$（电流约束下）</h3>
-<p>既然电流约束封死了“仅提 $k_p$”的收益，就把 ESO 带宽一并纳入调度，在 $|i_q|\le6.31$\,A 下细扫：</p>
+<p>仅提 $k_p$ 的最好档（kb8/de.005）已到 $6.02$\,A、余量只剩 $4.6\%$，且其收益依赖更灵敏的门控（$\varepsilon_g=0.005$）；</p>
+<p>要买回电流余量，就必须把 ESO 带宽一并纳入调度。在 $|i_q|\le6.31$\,A 的包络约束下细扫：</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变窗 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 峰值 / A</th></tr></thead><tbody><tr><td>a2.0_kb8</td><td>$-350.8$</td><td>$13.7$</td><td>$40.2$</td><td>$30.21$</td><td>$6.59$</td></tr><tr><td>a1.5_kb6</td><td>$-352.4$</td><td>$17.9$</td><td>$40.9$</td><td>$30.50$</td><td>$6.69$</td></tr><tr><td><strong>a3.0_kb6（定稿）</strong></td><td>$\mathbf{-343.7}$</td><td>$18.2$</td><td>$41.5$</td><td>$31.00$</td><td>$\mathbf{6.21}$</td></tr><tr><td>a2.5_kb4</td><td>$-359.0$</td><td>$18.1$</td><td>$42.6$</td><td>$31.22$</td><td>$6.70$</td></tr><tr><td>a3.0_kb10</td><td>$-345.5$</td><td>$13.0$</td><td>$38.0$</td><td>$30.51$</td><td>$6.54$（超额定）</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变窗 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 包络 / A（原始）</th></tr></thead><tbody><tr><td>a2.0_kb8</td><td>$\mathbf{-133.7}$</td><td>$\mathbf{10.0}$</td><td>$17.54$</td><td>$13.30$</td><td>$6.27$（$7.45$）</td></tr><tr><td>a1.5_kb6</td><td>$-130.1$</td><td>$9.6$</td><td>$17.78$</td><td>$13.08$</td><td>$5.94$（$7.15$）</td></tr><tr><td><strong>a3.0_kb6（定稿）</strong></td><td>$-121.8$</td><td>$25.7$</td><td>$\mathbf{17.24}$</td><td>$13.29$</td><td>$\mathbf{5.85}$（$6.92$）</td></tr><tr><td>a2.5_kb4</td><td>$-126.4$</td><td>$25.9$</td><td>$17.60$</td><td>$13.25$</td><td>$5.95$（$6.73$）</td></tr><tr><td>a3.0_kb10</td><td>$-127.7$</td><td>$25.0$</td><td>$17.19$</td><td>$13.25$</td><td>$6.22$（$7.36$）</td></tr></tbody></table></div>
 
-<p>定稿取 <strong>$k_b=6$、$a=3$</strong>：$|i_q|$ 峰值 $6.21$\,A 落在额定内，突变窗 $41.5$\,rpm；</p>
-<p>a2.0_kb8（$40.2$）与 a3.0_kb10（$38.0$）瞬态更快，但电流 $6.59/6.54$\,A 均超额定，故不取。</p>
+<p>定稿取 <strong>$k_b=6$、$a=3$</strong>：$1$\,ms 包络 $5.85$\,A 是五行中余量最大的（$7.3\%$），突变窗 $17.24$\,rpm 与最好的 a3.0_kb10（$17.19$）只差 $0.3\%$。</p>
+<p>a2.0_kb8 的跌落/恢复最好（$-133.7$\,rpm / $10.0$\,ms），但包络 $6.27$\,A 只剩 $0.6\%$ 余量；a3.0_kb10 的 $6.22$\,A 也只剩 $1.4\%$。</p>
+<p>在“瞬态基本并列”的前提下电流余量优先，故取 $(6,3)$；1D 中 $\varepsilon_g=0.005$ 的 kb8/de.005 更好（$15.93$\,rpm @ $6.02$\,A），但那是另一条门控档，留作改进项（§<a class="xref" href="#sec:handoff">14</a>）。</p>
 
-<figure id="fig:lawd-final"><img src="fig_lawd_cmp_600.png" alt="图 4"><figcaption><span class="fignum">图 4</span> <strong>无自适应与律 D（$k_b=6,a=3$）的对比</strong>（600 rpm、圆盘型线 V2、实验室噪声、单种子）。 律 D 在加载瞬间同时抬高比例增益与观测带宽，跌落 $-371.9\to-343.7$\,rpm、恢复 $53.9\to18.2$\,ms； $|i_q|$ 峰值 $6.21$\,A 仍在额定内，稳态 RMS 略升 $2.6\%$。</figcaption></figure>
+<figure id="fig:lawd-final"><img src="fig_lawd_cmp_600.png" alt="图 4"><figcaption><span class="fignum">图 4</span> <strong>无自适应与律 D（$k_b=6,a=3$）的对比</strong>（600 rpm、真实 $J=2.545J_{\rm nom}$、<code>j_oracle</code>、圆盘型线 V2、实验室噪声、单种子）。 律 D 在加载瞬间同时抬高比例增益与观测带宽：跌落 $-127.4\to-121.8$\,rpm、恢复 $29.8\to25.7$\,ms、突变窗 RMS $18.60\to17.24$\,rpm； $1$\,ms 包络 $5.98\to5.85$\,A（原始瞬时峰值 $6.72\to6.92$\,A）在额定内，稳态 RMS 略升 $2.3\%$。</figcaption></figure>
 
 <h3 id="sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</h3>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变窗 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 峰值 / A</th></tr></thead><tbody><tr><td>无自适应</td><td>$-350.2$</td><td>$45.4$</td><td>$47.4$</td><td>$30.72$</td><td>$6.34$</td></tr><tr><td><strong>律 D（$k_b=6,a=3$）</strong></td><td>$-344.4$</td><td>$\mathbf{25.3}$</td><td>$\mathbf{39.9}$</td><td>$30.71$</td><td>$7.07$（超额定）</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变窗 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 包络 / A（原始）</th></tr></thead><tbody><tr><td>无自适应</td><td>$-121.9$</td><td>$40.2$</td><td>$18.41$</td><td>$13.02$</td><td>$5.85$（$7.13$）</td></tr><tr><td><strong>律 D（$k_b=6,a=3$）</strong></td><td>$-123.0$</td><td>$\mathbf{29.6}$</td><td>$\mathbf{17.69}$</td><td>$13.16$</td><td>$5.97$（$7.12$）</td></tr></tbody></table></div>
 
-<p>600 rpm 的最终收益（$k_b=6,a=3$）：跌落 $-371.9\to-343.7$（$-7.6\%$）、恢复 $53.9\to18.2$\,ms（$-66\%$）、</p>
-<p>突变窗 RMS $51.5\to41.5$（$\mathbf{-19.4\%}$）、$|i_q|$ 峰值 $6.16\to6.21$\,A（额定内）；代价是稳态 RMS 略升 $2.6\%$（$30.20\to31.00$）。</p>
-<p>900 rpm 复核：跌落 $-350.2\to-344.4$（$-1.7\%$）、突变窗 $47.4\to39.9$（$-15.8\%$）、恢复 $45.4\to25.3$\,ms；</p>
-<p>但 $|i_q|$ 峰值 $6.34\to7.07$\,A，<strong>超额定 $12\%$</strong>——高转速下电流受限，这是该档的边界。</p>
+<p>600 rpm 的最终收益（$k_b=6,a=3$）：跌落 $-127.4\to-121.8$（$-4.4\%$）、恢复 $29.8\to25.7$\,ms（$-13.8\%$）、</p>
+<p>突变窗 RMS $18.60\to17.24$（$\mathbf{-7.3\%}$）、$|i_q|$ 包络 $5.98\to5.85$\,A（$-2.2\%$，额定内）；代价是稳态 RMS 略升 $2.3\%$（$12.99\to13.29$）。</p>
+<p>收益比名义 $J$ 口径时明显收缩：惯量增大后同一转矩误差产生的转速偏离 $\propto1/J$ 更小，而编码器噪声底不变，</p>
+<p>$e_1$ 的非周期成分相对噪声更弱，律 D 可检测的余量随之收缩。</p>
+<p>900 rpm 复核：<strong>只有恢复与突变窗改善</strong>——恢复 $40.2\to29.6$\,ms（$-26\%$）、突变窗 $18.41\to17.69$（$-3.9\%$）；跌落略差（$-121.9\to-123.0$，$-0.9\%$）、</p>
+<p>$1$\,ms 包络略升（$5.85\to5.97$\,A，$+2.1\%$，仍在额定内、余量 $5.4\%$）。原始瞬时峰值 $7.13/7.12$\,A 高于包络（含 PWM 纹波）。</p>
+<p>高转速下律 D 的收益主要体现在恢复，而不是跌落或电流；$900$\,rpm 的包络在额定内，$10$\,$\mu$s 原始峰值高于包络但含 PWM 纹波，不作判据。</p>
 
 <h3 id="sec:lawd-b3">$\beta_3$ 不参与调度</h3>
-<p>把 $\beta_3$ 也按同一门控调度（$b&gt;0$）：恢复时间由 $17.7$ 压到 $5.0$\,ms、突变窗 $39.3\to38.9$\,rpm，但</p>
-<p>$|i_q|$ 由 $6.57$\,A 升到 $7.93$\,A（$b=3$）乃至 $8.37$\,A（$a=1,b=3$），稳态基本不变（$29.4\to29.8$）。</p>
-<p>电流优先，故定稿 $b=0$。</p>
+
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>跌落 / rpm</th><th>恢复 / ms</th><th>突变窗 RMS / rpm</th><th>稳态 / rpm</th><th>$|i_q|$ 包络 / A（原始）</th></tr></thead><tbody><tr><td>$a{=}0.5,\ b{=}0$</td><td>$-142.0$</td><td>$9.5$</td><td>$17.65$</td><td>$13.19$</td><td>$6.40$（$7.60$）</td></tr><tr><td>$a{=}0.5,\ b{=}1$</td><td>$-137.6$</td><td>$4.8$</td><td>$17.49$</td><td>$13.12$</td><td>$6.47$（$8.00$）</td></tr><tr><td>$a{=}0.5,\ b{=}3$</td><td>$-130.7$</td><td>$5.0$</td><td>$17.12$</td><td>$13.01$</td><td>$6.25$（$7.37$）</td></tr><tr><td>$a{=}1,\ b{=}0$</td><td>$-129.7$</td><td>$25.1$</td><td>$17.19$</td><td>$12.96$</td><td>$5.92$（$7.19$）</td></tr><tr><td>$a{=}1,\ b{=}3$</td><td>$-133.5$</td><td>$4.7$</td><td>$16.94$</td><td>$12.95$</td><td>$6.47$（$7.81$）</td></tr></tbody></table></div>
+
+<p>$a{=}0.5$ 这个工作点整体已无电流余量：$b{=}0$ 就是 $6.40$\,A（<strong>超额定</strong>）、$b{=}1$ 为 $6.47$\,A（<strong>超额定</strong>）、$b{=}3$ 为 $6.25$\,A（贴额定），</p>
+<p>故不能用它判定 $b$。判定取 $a{=}1$：$b{=}0$ 是唯一在额定内且有余量的组合（$5.92$\,A，余量 $6.2\%$），$b{=}3$ 则 $6.47$\,A（<strong>超额定</strong>）。</p>
+<p>即只要打开 $\beta_3$ 调度，$1$\,ms 包络就会顶过额定（或已无余量）；$b{&gt;}0$ 用 $+9.3\%$ 电流换 $1.5\%$ 突变窗与 $20$\,ms 恢复，不划算。</p>
+<p><strong>电流优先，故定稿 $b=0$</strong>——在 $1$\,ms 口径下这个结论比名义 $J$ 时更强。</p>
 
 <h3 id="sec:lawd-mech">机理</h3>
-<p>抬高 ESO 带宽 $\Rightarrow$ 扰动估计更快 $\Rightarrow$ 更早出力。同一 $k_b=6$ 下把 $a$ 由 $1.5$ 提到 $3$：跌落 $-352.4\to-343.7$、</p>
-<p>$|i_q|$ 峰值 $6.69\to6.21$\,A；而仅提 $k_p$（kb8）的电流 $6.66$\,A 已超额定。</p>
-<p>即“$k_p$ 负责立即出力、$\omega_o$ 负责估计前移”，两者联合才能在额定电流内拿到瞬态收益——</p>
-<p>这正是“用信息（$T$ 窗均值 $+$ 更快估计）而不是用增益”的收益。</p>
+<p>抬高 ESO 带宽 $\Rightarrow$ 扰动估计更快 $\Rightarrow$ 更早出力。$k_b=6$ 下把 $a$ 由 $1.5$ 提到 $3$：突变窗 $17.78\to17.24$\,rpm、</p>
+<p>包络 $5.94\to5.85$\,A 略优，但跌落/恢复变差（$-130.1\to-121.8$、$9.6\to25.7$\,ms）——$a$ 的作用是“估计前移”，对突变窗与电流有利、对首个跌落不利。</p>
+<p>“$k_p$ 负责立即出力、$\omega_o$ 负责估计前移”的联合调度，在真实 $J$ 下主要体现为包络余量（$5.85$\,A，$7.3\%$）而不是大幅瞬态改善；</p>
+<p>这也解释了二维表内差异只有百分之几：惯量增大后归一化误差与噪声底把可调空间压窄了。</p>
 
 <h2 id="sec:tes-res">T 自适应实测</h2>
-<p>口径同 §<a class="xref" href="#sec:base">8.3</a>；$A$ 取 $5$–$8$\,s 均值，稳态 RMS 取 $7$–$8$\,s。</p>
+<p>口径同 §<a class="xref" href="#sec:base">8.3</a>（真实 $J=2.545J_{\rm nom}$、<code>j_oracle</code>、单种子 20261018）；$A$ 取 $5$–$8$\,s 均值，稳态 RMS 取 $7$–$8$\,s。</p>
+<p>$A$ 为空载段（$[0.5,1.9)$\,s）估出的噪声底约 $7.7\times10^{-4}$；$\delta$ 取负号表示相位超前修正。</p>
 
-<h3 id="sec:tes-res-opt">目标函数与真实最优：$-12\%$，不是 $0$</h3>
+<h3 id="sec:tes-res-opt">目标函数：$A$ 的 $-15\%$ 平台落在噪声底内，RMS 最优在 $-11\%$</h3>
 
-<div class="tablewrap"><table><thead><tr><th>$\delta$</th><th>$-20\%$</th><th>$-15\%$</th><th>$\mathbf{-12\%}$</th><th>$-10\%$</th><th>$-8\%$</th><th>$-6\%$</th><th>$-4\%$</th><th>$0$</th><th>$+2\%$</th></tr></thead><tbody><tr><td>$A$</td><td>0.00891</td><td>0.00722</td><td>$\mathbf{0.00706}$</td><td>0.00711</td><td>0.00773</td><td>0.00855</td><td>0.00927</td><td>0.01032</td><td>0.01138</td></tr><tr><td>稳态 RMS</td><td>29.61</td><td>27.46</td><td>27.28</td><td>27.56</td><td><strong>27.00</strong></td><td>27.03</td><td>28.15</td><td><strong>30.20</strong></td><td>30.91</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>$\delta$</th><th>$A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>$-20\%$</td><td>0.00331</td><td>12.75</td></tr><tr><td>$-15\%$</td><td>$\mathbf{0.00266}$</td><td>12.22</td></tr><tr><td>$-13\%$</td><td>0.00279</td><td>12.14</td></tr><tr><td>$-12\%$</td><td>0.00271</td><td>11.96</td></tr><tr><td>$-11\%$</td><td>0.00270</td><td>$\mathbf{11.70}$</td></tr><tr><td>$-10\%$</td><td>0.00281</td><td>11.79</td></tr><tr><td>$-8\%$</td><td>0.00303</td><td>12.23</td></tr><tr><td>$-6\%$</td><td>0.00317</td><td>12.02</td></tr><tr><td>$-4\%$</td><td>0.00344</td><td>12.50</td></tr><tr><td>$0$</td><td>0.00404</td><td>12.99</td></tr><tr><td>$+2\%$</td><td>0.00414</td><td>13.72</td></tr></tbody></table></div>
 
-<p>$A$ 的最小值仍在 $\delta\approx-12\%$，与命题~<a class="xref" href="#prop:tes-phase">1</a> 的 $-14.3\%$ 相差 $2.3$ 个百分点（延迟线量化、电流环与测速滤波的附加相位）。</p>
-<p>但<strong>宽带 RMS 的最优点移到了 $-8\%$</strong>（$27.00$\,rpm），与 $A$ 的最优点不再重合；不整定 $30.20$\,rpm。</p>
-<p>平台很平（$-8\%$ 与 $-15\%$ 只差 $0.46$\,rpm），整定容差宽——这正是把 $A$ 作为整定目标、把 RMS 作为验收指标的原因。</p>
+<p>$A$ 的最小点在 $\delta=-15\%$（$0.00266$），但 $-15\%$–$-10\%$ 五点的差异（$\le1.5\times10^{-4}$）<strong>远小于 $A$ 的噪声底 $7.7\times10^{-4}$</strong>，</p>
+<p>平台内不可分辨；命题~<a class="xref" href="#prop:tes-phase">1</a> 的理论值 $-14.3\%$ 正落在这个平台的左缘。</p>
+<p>宽带 RMS 的最小点在 $-11\%$（$11.70$\,rpm，对应 $-9.9\%$），接着是 $-10\%$（$11.79$）与 $-12\%$（$11.96$）。</p>
+<p>$A$ 在平台内无分辨力，验收指标取 RMS，最优点为 $-11\%$。</p>
 
 <h3 id="sec:tes-res-esc">ESC 收敛与收益</h3>
 <p>30\,s 仿真、$t=3$\,s 起搜索：</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>$\delta$ 终值</th><th>末段 $A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>无整定（$\delta=0$）</td><td>$0$</td><td>0.01032</td><td>$30.20$</td></tr><tr><td>固定 $\delta=-12\%$</td><td>$-12.0\%$</td><td>0.00711</td><td>$28.09$</td></tr><tr><td>固定 $\delta=-14.3\%$（理论值）</td><td>$-14.3\%$</td><td>0.00706</td><td>$28.15$</td></tr><tr><td>ESC（由理论值 $-14.3\%$ 出发）</td><td>$-14.07\%$</td><td>0.00709</td><td>$27.97$</td></tr><tr><td>ESC（由 $-5\%$ 出发）</td><td>$-5.77\%$</td><td>0.00857</td><td>$27.90$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>$\delta$ 终值</th><th>末段 $A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>无整定（$\delta=0$）</td><td>$0$</td><td>0.00387</td><td>$13.43$</td></tr><tr><td>固定 $\delta=-12\%$</td><td>$-12.0\%$</td><td>0.00273</td><td>$12.37$</td></tr><tr><td>固定 $\delta=-14.3\%$（理论值）</td><td>$-14.3\%$</td><td>0.00274</td><td>$12.44$</td></tr><tr><td>ESC（由理论值 $-14.3\%$ 出发）</td><td>$-11.57\%$</td><td>0.00270</td><td>$12.41$</td></tr><tr><td>ESC（由 $-5\%$ 出发）</td><td>$-10.27\%$</td><td>0.00281</td><td>$12.28$</td></tr></tbody></table></div>
 
-<p>ESC 由 $-5\%$ 出发收敛到 $-5.77\%$（$27.90$\,rpm），由理论初值出发收敛到 $-14.07\%$（$27.97$\,rpm），</p>
-<p>固定 $-12\%$ 为 $28.09$\,rpm；相对不整定的 $30.20$\,rpm，<strong>收益 $-7.6\%\sim-9.0\%$</strong>。</p>
-<p>三者都略逊于离线最优 $-8\%$（$27.00$\,rpm）：平台太平时，末位差异主要由抖动相位决定，而非收敛方向。</p>
+<p>ESC 由理论初值出发收敛到 $-11.57\%$（$12.41$\,rpm），由 $-5\%$ 出发收敛到 $-10.27\%$（$12.28$\,rpm）；</p>
+<p>固定 $-12\%$ 为 $12.37$\,rpm。相对不整定的 $13.43$\,rpm，<strong>收益 $-7.6\%\sim-8.6\%$</strong>。</p>
+<p>三者（$12.28$–$12.44$）相差 $\le1.3\%$，与单种子波动同量级：真实 $J$ 下 $A$ 已接近噪声底，ESC 的方向判别余量变小，</p>
+<p>收益主要来自“离开 $\delta=0$”，而不是精确收敛到某一点；离线最优 $-11\%$ 的 $11.70$\,rpm 也已接近该噪声下限。</p>
 
-<figure id="fig:tes-esc"><img src="fig_t_es3.png" alt="图 5"><figcaption><span class="fignum">图 5</span> <strong>锁相 ESC 的收敛</strong>（左：$\delta$ 轨迹；右：稳态 RMS 对比）。 由 $-5\%$ 出发单向走到平台，由理论初值出发 $1$–$2$ 步即稳定。</figcaption></figure>
+<figure id="fig:tes-esc"><img src="fig_t_es3.png" alt="图 5"><figcaption><span class="fignum">图 5</span> <strong>锁相 ESC 的收敛</strong>（真实 $J$；左：$\delta$ 轨迹；右：稳态 RMS 对比）。 由 $-5\%$ 出发收敛到 $-10.27\%$，由理论初值出发收敛到 $-11.57\%$；两档 RMS 为 $12.28/12.41$\,rpm，与固定 $-12\%$ 的 $12.37$ 并列。</figcaption></figure>
 
 <h3 id="sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</h3>
 <p>稳态窗口 $20$–$30$\,s：</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>$\delta$ 均值</th><th>$\delta$ 峰峰</th><th>末段 $A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>$\Delta=1\%,\ \sigma=1\%$（旧）</td><td>$-13.68\%$</td><td>$3.0\%$</td><td>0.00711</td><td>$27.97$</td></tr><tr><td>$\Delta=0.5\%,\ \sigma=0.5\%$</td><td>$-12.24\%$</td><td>$2.0\%$</td><td>0.00707</td><td>$27.85$</td></tr><tr><td>$\Delta=0.5\%,\ \sigma=0.5\%,\ N=6$</td><td>$-13.42\%$</td><td>$\mathbf{1.5\%}$</td><td>0.00707</td><td>$27.90$</td></tr><tr><td><strong>$\Delta=0.5\%,\ \sigma=1\%$</strong></td><td>$-10.87\%$</td><td>$2.0\%$</td><td>$\mathbf{0.00717}$</td><td>$\mathbf{27.49}$</td></tr><tr><td>固定 $\delta=-12\%$（无抖动）</td><td>$-12.00\%$</td><td>$0$</td><td>0.00707</td><td>$28.09$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>$\delta$ 均值</th><th>$\delta$ 峰峰</th><th>末段 $A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>$\Delta=1\%,\ \sigma=1\%$</td><td>$-11.89\%$</td><td>$3.00\%$</td><td>0.00271</td><td>$12.41$</td></tr><tr><td>$\Delta=0.5\%,\ \sigma=0.5\%$</td><td>$-16.04\%$</td><td>$1.93\%$</td><td>0.00281</td><td>$12.58$</td></tr><tr><td>$\Delta=0.5\%,\ \sigma=0.5\%,\ N=6$</td><td>$-14.37\%$</td><td>$\mathbf{1.50\%}$</td><td>0.00271</td><td>$12.53$</td></tr><tr><td><strong>$\Delta=0.5\%,\ \sigma=1\%$（终版）</strong></td><td>$-13.77\%$</td><td>$2.10\%$</td><td>0.00273</td><td>$12.42$</td></tr><tr><td>固定 $\delta=-12\%$（无抖动）</td><td>$-12.00\%$</td><td>$0$</td><td>0.00274</td><td>$12.37$</td></tr></tbody></table></div>
 
-<p>$\Delta$ 与 $\sigma$ 同降 $0.5\%$ 可把 $\delta$ 峰峰压到 $1.5\%\sim2.0\%$，RMS 为 $27.85$–$27.90$；</p>
-<p><strong>只降 $\Delta$、保留 $\sigma=1\%$</strong> 时 RMS 最低（$27.49$），中心 $-10.87\%$，甚至优于固定 $-12\%$ 的 $28.09$——</p>
-<p>抖动把工作点在上坡段来回平均，抵消了部分失配。终版取 $\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$。</p>
+<p>把 $\Delta$、$\sigma$ 同降 $0.5\%$ 可把 $\delta$ 峰峰压到 $1.50\%\sim1.93\%$，但 RMS 为 $12.53$–$12.58$；</p>
+<p>终版 $\Delta=0.5\%$、$\sigma=1\%$ 的 RMS 为 $12.42$，与固定 $-12\%$ 的 $12.37$、$\Delta=1\%$/$\sigma=1\%$ 的 $12.41$ <strong>统计上并列</strong>（差 $\le1.7\%$）。</p>
+<p>真实 $J$ 下 $A$ 对 $\delta$ 的灵敏度下降（平台内点间差异 $\le1.5\times10^{-4}$，已低于噪声底 $7.7\times10^{-4}$），抖动平均带来的额外收益被噪声淹没。</p>
+<p>终版仍取 $\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$：</p>
+<p>它在 RMS 并列的前提下把 $\delta$ 峰峰压到 $2.10\%$（$\Delta=1\%$ 时为 $3.00\%$），且与名义 $J$ 的整定一致——这是保守选择，不是显著收益。</p>
 
-<figure id="fig:tes-dither"><img src="fig_t_es4.png" alt="图 6"><figcaption><span class="fignum">图 6</span> <strong>抖动幅度与稳态的权衡</strong>。左：$\delta$ 峰峰由 $3.0\%$ 降到 $1.5\%$；右：稳态 RMS 与抖动幅度。</figcaption></figure>
+<figure id="fig:tes-dither"><img src="fig_t_es4.png" alt="图 6"><figcaption><span class="fignum">图 6</span> <strong>抖动幅度与稳态的权衡</strong>（真实 $J$）。左：$\delta$ 峰峰由 $3.00\%$ 降到 $1.50\%$；右：稳态 RMS 与抖动幅度—— RMS 全部落在 $12.37$–$12.58$\,rpm，差异 $\le1.7\%$，与固定 $-12\%$ 并列。</figcaption></figure>
 
 <h3 id="sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</h3>
 <p><strong>(1) 300\,rpm 的真实最优</strong>（20\,s 仿真，$14$–$20$\,s 统计）：</p>
 
-<div class="tablewrap"><table><thead><tr><th>$\delta$</th><th>$-12\%$</th><th>$-10\%$</th><th>$\mathbf{-8\%}$</th><th>$-6\%$</th><th>$-4\%$</th><th>$-2\%$</th><th>$0$</th><th>$+2\%$</th></tr></thead><tbody><tr><td>$A$</td><td>0.00906</td><td>0.00691</td><td>$\mathbf{0.00636}$</td><td>0.00662</td><td>0.00785</td><td>0.00969</td><td>0.01156</td><td>0.01309</td></tr><tr><td>稳态 RMS</td><td>22.70</td><td>21.27</td><td>20.71</td><td>$\mathbf{19.73}$</td><td>19.96</td><td>21.20</td><td>22.60</td><td>24.16</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>$\delta$</th><th>$-12\%$</th><th>$-10\%$</th><th>$\mathbf{-8\%}$</th><th>$-6\%$</th><th>$-4\%$</th><th>$-2\%$</th><th>$0$</th><th>$+2\%$</th></tr></thead><tbody><tr><td>$A$</td><td>0.00349</td><td>0.00276</td><td>$\mathbf{0.00249}$</td><td>0.00280</td><td>0.00334</td><td>0.00380</td><td>0.00426</td><td>0.00506</td></tr><tr><td>稳态 RMS</td><td>11.08</td><td>10.75</td><td>$\mathbf{10.15}$</td><td>10.32</td><td>10.38</td><td>10.79</td><td>11.07</td><td>11.68</td></tr></tbody></table></div>
 
-<p>$A$ 最小在 $-8\%$，与命题~<a class="xref" href="#prop:tes-phase">1</a> 的 $-8.9\%$ 差 $0.9$ 个百分点 $\Rightarrow$ <strong>前馈系数 $k\approx1$ 无需修正</strong>；</p>
-<p>宽带 RMS 最小在 $-6\%$（$19.73$\,rpm，$A$ 只含基波，RMS 含 $5.9$\,Hz 与噪声）。上一轮“理论过补偿”的说法作废，那是 ESC 沿 RMS 谷漂移造成的假象。</p>
+<p>$A$ 与 RMS 的最小点都在 $-8\%$（$0.00249$ / $10.15$\,rpm），与命题~<a class="xref" href="#prop:tes-phase">1</a> 的 $-8.9\%$ 差 $0.9$ 个百分点</p>
+<p>$\Rightarrow$ <strong>前馈系数 $k\approx1$ 无需修正</strong>；不整定的 $0$ 为 $11.07$\,rpm，整定收益 $-8.3\%$。</p>
+<p>真实 $J$ 下 $A$ 与 RMS 在 300 rpm 重合于 $-8\%$，说明低速端的相位失配仍是主因、噪声尚未主导。</p>
 
-<p><strong>(2) 前馈重置</strong>（$600\to300$\,rpm，$30$–$40$\,s）：</p>
+<p><strong>(2) 前馈重置</strong>（$600\to300$\,rpm，$40$\,s，$30$–$40$\,s 统计；真实 $J$）：</p>
 
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>$\delta$ 换速后</th><th>$A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>ESC（冻结、无前馈）</td><td>$-16.67\%$</td><td>0.00766</td><td>$26.29$</td></tr><tr><td>ESC（不冻结）</td><td>$-13.73\%$</td><td>0.00563</td><td>$24.06$</td></tr><tr><td>固定 $\delta=-12\%$</td><td>$-12.0\%$</td><td>0.00517</td><td>$22.45$</td></tr><tr><td><strong>ESC + 前馈重置</strong></td><td>$-8.33\%$</td><td>$\mathbf{0.00285}$</td><td>$\mathbf{20.41}$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>$\delta$ 换速后</th><th>$A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>ESC（冻结、无前馈）</td><td>$-15.80\%$</td><td>0.00271</td><td>$11.84$</td></tr><tr><td>ESC（不冻结）</td><td>$-11.83\%$</td><td>0.00162</td><td>$10.57$</td></tr><tr><td>固定 $\delta=-12\%$（真正施加）</td><td>$-12.00\%$</td><td>0.00170</td><td>$10.69$</td></tr><tr><td><strong>ESC + 前馈重置</strong></td><td>$-9.34\%$</td><td>$\mathbf{0.00129}$</td><td>$\mathbf{9.86}$</td></tr></tbody></table></div>
 
-<p>前馈重置把换速后的稳态 RMS 由 $26.29$ 降到 $20.41$（$-22.4\%$），比固定 $-12\%$ 的 $22.45$ 再低 $9.1\%$。</p>
+<p>前馈重置把换速后的稳态 RMS 由冻结时的 $11.84$ 降到 $9.86$（$-16.7\%$），比真正施加的固定 $-12\%$（$10.69$）再低 $7.8\%$；</p>
+<p>不冻结（$10.57$）能拿到约一半收益，说明收益来自“解冻后重新搜索 $+$ 理论值前馈定位”。换速后 $\delta$ 落在 $-9.34\%$，</p>
+<p>与 300 rpm 的离线最优 $-8\%$ 相差 $1.3$ 个百分点，前馈系数 $k\approx1$ 无需修正。</p>
+<p>（旧脚本的“固定 $-12\%$”档取 <code>T_es=False</code>，$\delta$ 只记录、未施加，其 $10.77$ 不作比较。）</p>
 
 <p><strong>(3) 往返 $600\to300\to600$</strong>（60\,s，15/35\,s 两次跳变）：</p>
 
-<div class="tablewrap"><table><thead><tr><th>区段</th><th>$\delta$ 均值</th><th>$A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>600 rpm（10–14.9 s）</td><td>$-15.85\%$</td><td>0.00753</td><td>$27.89$</td></tr><tr><td>300 rpm（25–34.9 s）</td><td>$-8.44\%$</td><td>0.00288</td><td>$20.18$</td></tr><tr><td>回 600 rpm（50–59.9 s）</td><td>$-12.79\%$</td><td>0.00706</td><td>$27.65$</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>区段</th><th>$\delta$ 均值</th><th>$A$</th><th>稳态 RMS / rpm</th></tr></thead><tbody><tr><td>600 rpm（10–14.9 s）</td><td>$-14.27\%$</td><td>0.00272</td><td>$12.33$</td></tr><tr><td>300 rpm（25–34.9 s）</td><td>$-7.45\%$</td><td>0.00126</td><td>$9.76$</td></tr><tr><td>回 600 rpm（50–59.9 s）</td><td>$-14.31\%$</td><td>0.00269</td><td>$12.20$</td></tr></tbody></table></div>
 
-<p>两段 600 rpm 的稳态 RMS 只差 $0.24$\,rpm（$0.9\%$），但 $\delta$ 相差 $3.1$ 个百分点（$-15.85\%$ 对 $-12.79\%$）——</p>
-<p>平台很平时 ESC 会落在不同点；可重复性应表述为<strong>“RMS 可重复、无累积漂移”</strong>，而不是“$\delta$ 完全可逆”。</p>
+<p>两段 600 rpm 的稳态 RMS 只差 $0.13$\,rpm（$1.0\%$），$\delta$ 只差 $0.04$ 个百分点（$-14.27\%$ 对 $-14.31\%$）——</p>
+<p><strong>真实 $J$ 下 $\delta$ 与 RMS 都可重复、无累积漂移</strong>；$\delta$ 的两次 600 rpm 均值只差 $0.04$ 个百分点，不再需要“RMS 可重复但 $\delta$ 不可逆”的保留表述。</p>
 
-<figure id="fig:tes-rt"><img src="fig_t_es_rt.png" alt="图 7"><figcaption><span class="fignum">图 7</span> <strong>变转速验证</strong>。左：300\,rpm 下 $A(\delta)$ 与稳态 RMS，最优点分别为 $-8\%$ 与 $-6\%$； 右：往返 $600\to300\to600$ 的 $\delta$ 轨迹，可逆且无漂移。</figcaption></figure>
+<figure id="fig:tes-rt"><img src="fig_t_es_rt.png" alt="图 7"><figcaption><span class="fignum">图 7</span> <strong>变转速验证</strong>（真实 $J$）。左：300\,rpm 下 $A(\delta)$ 与稳态 RMS，两者的最小点都在 $-8\%$； 右：往返 $600\to300\to600$ 的 $\delta$ 轨迹（$-14.27\%\to-7.45\%\to-14.31\%$），$\delta$ 与 RMS 都可重复、无累积漂移。</figcaption></figure>
 
 <h2 id="sec:limit">适用范围之外（如实披露）</h2>
 <h3 id="sec:no-lawf">复位型律 F 已作废（2026-11-12）</h3>
@@ -569,43 +598,50 @@ window.MathJax = {
 
 <h3 id="sec:limit-param">参数口径不可互引</h3>
 
-<ol><li>[(F1)] 本文全部数值取 2026-11-11 口径（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz、$\beta_3=4000$、$\tau_0=20$\,ms、类 fal ESO）； 报数必须同时写明这六项。</li><li>[(F2)] 旧一阶/降阶对象与 $2$\,kHz 电流环口径的<strong>全部</strong>数字（含早期的律 D 与 F-A/F-B 结果）已从正文删除，<strong>不得再引用</strong>。</li><li>[(F3)] 类 fal 的稳态代价依赖工作点与噪声档：600 rpm 实验室档稳态 RMS 比线性档高 $19\%$，900/1200 rpm 反而低 $8\%/14\%$， 报数必须带 $(a,\delta,\lambda)$ 与噪声档。</li></ol>
+<ol><li>[(F1)] 本文全部数值取 2026-11-11 口径（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz、$\beta_3=4000$、$\tau_0=20$\,ms、类 fal ESO）， 并统一在定稿台架 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$、$b_0$ 已由 J 自适应校正（<code>j_oracle</code>）下运行； $|i_q|$ 的额定约束按 $1$\,ms 包络核对。报数必须同时写明这几项。</li><li>[(F2)] 旧一阶/降阶对象与 $2$\,kHz 电流环口径的<strong>全部</strong>数字（含早期的律 D 与 F-A/F-B 结果）已从正文删除，<strong>不得再引用</strong>。</li><li>[(F3)] 类 fal 的稳态代价依赖工作点与噪声档：600 rpm 实验室档稳态 RMS 比线性档高 $19\%$，900/1200 rpm 反而低 $8\%/14\%$， 报数必须带 $(a,\delta,\lambda)$ 与噪声档。</li></ol>
 
 <h3 id="h6">其他边界</h3>
 
 <ol><li>[(P1)] 死区为平均电压误差模型，未建模二极管反向恢复、开关损耗、母线电容/LC、磁饱和与温升。</li><li>[(P2)] 离散化：$\Delta t=2\,\mu$s、$T_{si}=50\,\mu$s、$T_s=1$\,ms；$T$ 窗统计按 $1$\,ms 离散实现，积分误差 $O(1/N)$。</li><li>[(P3)] 未建模电流限幅：$|i_q|$ 为事后核对（额定 $6.31$\,A、驱动器峰值 $21$\,A）；$f_{ci}\le1$\,kHz 的失稳幅度只作定性参考。</li><li>[(P4)] 律 D 的 UUB 证明建立在类 fal 的线性化扇区上；随机噪声不在确定性框架内，其定量影响由仿真单独给出。</li><li>[(P5)] T 自适应的稳定性只在准静态（转速缓变）下成立：换速瞬态 $|\dot T|$ 可短时超过 $\mu_{\max}=1-Q^{2}=0.0396$， 靠冻结判据与“解对 $T$ 连续依赖”兜底，未给出瞬态期间的定量界。</li><li>[(P6)] 台架：$k_b,a,\varepsilon_g$ 与 $\Delta,\sigma$ 的工程余量需在真实驱动器上复测；本文全部为仿真。</li><li>[(P7)] $\varepsilon_g$ 的工作点落在检测器拐点上（不同取值的对比见实验记录 2026-11-11 §10.4–10.5），需按实际非周期误差水平标定。</li><li>[(P8)] <strong>种子数</strong>：§<a class="xref" href="#sec:lawd-res">9</a>–§<a class="xref" href="#sec:tes-res">10</a> 的全部数字为单种子（20261018）；8 种子均值$\pm$方差尚未出（见 §<a class="xref" href="#sec:handoff">14</a> 未完成清单）。</li></ol>
 
 <h2 id="sec:sym">符号与参数表（答辩自查）</h2>
-<p>本表只列<strong>真实逆变器对象</strong>（<code>pmsm_inv_sim</code>）2026-11-11 口径的定稿参数；</p>
-<p>旧一阶/降阶对象的参数与数字已从正文删除。加粗者为易被追问、正文中易标错的项。</p>
+<p>本表只列<strong>真实逆变器对象</strong>（<code>pmsm_inv_sim</code>）2026-11-11 口径的定稿参数，并在定稿台架</p>
+<p>$J_{\rm true}=2.545J_{\rm nom}$、$b_0$ 已由 J 自适应校正下运行；旧一阶/降阶对象的参数与数字已从正文删除。加粗者为易被追问、正文中易标错的项。</p>
 
-<div class="tablewrap"><table><thead><tr><th>类别</th><th>参数</th><th>符号</th><th>取值</th></tr></thead><tbody><tr><td>电机</td><td>相电阻 / 相电感</td><td>$R$ / $L_d=L_q$</td><td>$0.175\,\Omega$ / $0.57$\,mH</td></tr><tr><td></td><td>磁链 / 极对数</td><td>$\psi_f$ / $p$</td><td>$0.01683$\,Wb / $4$</td></tr><tr><td></td><td>转动惯量</td><td>$J$</td><td>$1.89\times10^{-5}$ kg$\cdot$m$^{2}$</td></tr><tr><td></td><td>额定转矩 / 电流</td><td>$T_{\rm rated}$ / $I_{\rm rated}$</td><td>$0.637$ N$\cdot$m / $6.5$\,A（驱动器峰值 $21$\,A）</td></tr><tr><td>逆变器</td><td>母线 / 开关频率</td><td>$V_{dc}$ / $f_{sw}$</td><td>$60$\,V / $10$\,kHz</td></tr><tr><td></td><td>死区 / 器件压降</td><td>$T_d$ / $V_d$</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td></td><td>导通电阻</td><td>$R_{on}$</td><td>$10$\,m$\Omega$</td></tr><tr><td>电流环</td><td><strong>闭环带宽</strong></td><td><strong>$f_{ci}$</strong></td><td><strong>$500$\,Hz</strong>（$2$\,kHz 旧口径的数字不得引用）</td></tr><tr><td>速度环</td><td>比例增益 / 观测带宽</td><td>$k_p$ / $\omega_o$</td><td>$75.36$ / $500$ rad/s</td></tr><tr><td>重复通道</td><td>周期 / 内模增益</td><td>$T$ / $\beta_3$</td><td>$0.1$\,s / $4000$</td></tr><tr><td></td><td>低通常数 / 遗忘因子</td><td>$\tau_0$ / $Q_0$</td><td>$20$\,ms / $0.98$</td></tr><tr><td></td><td>饱和系数</td><td>$\zeta$</td><td>$0.2$</td></tr><tr><td>类 fal ESO</td><td>指数 / 尺度 / 斜率</td><td>$a$ / $\delta$ / $\lambda$</td><td>$0.75$ / $0.10$ / $10$</td></tr><tr><td>律 D</td><td>门控尺度 / $k_p$ 调度 / 带宽调度</td><td>$\varepsilon_g$ / $k_b$ / $a_{\rm es}$</td><td>$0.01$ / $6$ / $3$</td></tr><tr><td>T 自适应</td><td>修正范围 / 步长 / 抖动</td><td>$\delta_{\max}$ / $\sigma$ / $\Delta$</td><td>正负 $20\%$ / $1\%$ / $0.5\%$</td></tr><tr><td></td><td>抖动周期 / 更新数 / 初值</td><td>$P_d$ / $N$ / $\hat\delta_0$</td><td>$1.5$\,s / $3$ / $-14.3\%$</td></tr><tr><td>噪声</td><td>转速 / dq 电流 / 负载</td><td>—</td><td>$3$\,rpm / 正负 $0.1$\,A / $0.01$ N$\cdot$m（实验室档）</td></tr><tr><td>时序</td><td>积分 / 电流环采样 / 转速环</td><td>$\Delta t$ / $T_{si}$ / $T_s$</td><td>$2\,\mu$s / $50\,\mu$s / $1$\,ms</td></tr><tr><td></td><td>编码器</td><td>—</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>工况</td><td>型线 / 阶跃</td><td>—</td><td>圆盘 V2（THD $58.79\%$）/ $0\to0.50$ 额定 @$2$\,s</td></tr><tr><td></td><td>振动</td><td>—</td><td>$5.9$\,Hz、$0.03$ N$\cdot$m（THD $40\%$）</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>类别</th><th>参数</th><th>符号</th><th>取值</th></tr></thead><tbody><tr><td>电机</td><td>相电阻 / 相电感</td><td>$R$ / $L_d=L_q$</td><td>$0.175\,\Omega$ / $0.57$\,mH</td></tr><tr><td></td><td>磁链 / 极对数</td><td>$\psi_f$ / $p$</td><td>$0.01683$\,Wb / $4$</td></tr><tr><td></td><td>转动惯量</td><td>$J_{\rm nom}$ / $J_{\rm true}$</td><td>$1.89\times10^{-5}$（$b_0$ 标定）/ $4.81\times10^{-5}$（台架）kg$\cdot$m$^{2}$</td></tr><tr><td></td><td>额定转矩 / 电流</td><td>$T_{\rm rated}$ / $I_{\rm rated}$</td><td>$0.637$ N$\cdot$m / $6.31$\,A（$1$\,ms 包络口径；驱动器峰值 $21$\,A）</td></tr><tr><td>逆变器</td><td>母线 / 开关频率</td><td>$V_{dc}$ / $f_{sw}$</td><td>$60$\,V / $10$\,kHz</td></tr><tr><td></td><td>死区 / 器件压降</td><td>$T_d$ / $V_d$</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td></td><td>导通电阻</td><td>$R_{on}$</td><td>$10$\,m$\Omega$</td></tr><tr><td>电流环</td><td><strong>闭环带宽</strong></td><td><strong>$f_{ci}$</strong></td><td><strong>$500$\,Hz</strong>（$2$\,kHz 旧口径的数字不得引用）</td></tr><tr><td>速度环</td><td>比例增益 / 观测带宽</td><td>$k_p$ / $\omega_o$</td><td>$75.36$ / $500$ rad/s</td></tr><tr><td>重复通道</td><td>周期 / 内模增益</td><td>$T$ / $\beta_3$</td><td>$0.1$\,s / $4000$</td></tr><tr><td></td><td>低通常数 / 遗忘因子</td><td>$\tau_0$ / $Q_0$</td><td>$20$\,ms / $0.98$</td></tr><tr><td></td><td>饱和系数</td><td>$\zeta$</td><td>$0.2$</td></tr><tr><td>类 fal ESO</td><td>指数 / 尺度 / 斜率</td><td>$a$ / $\delta$ / $\lambda$</td><td>$0.75$ / $0.10$ / $10$</td></tr><tr><td>律 D</td><td>门控尺度 / $k_p$ 调度 / 带宽调度</td><td>$\varepsilon_g$ / $k_b$ / $a_{\rm es}$</td><td>$0.01$ / $6$ / $3$</td></tr><tr><td>T 自适应</td><td>修正范围 / 步长 / 抖动</td><td>$\delta_{\max}$ / $\sigma$ / $\Delta$</td><td>正负 $20\%$ / $1\%$ / $0.5\%$</td></tr><tr><td></td><td>抖动周期 / 更新数 / 初值</td><td>$P_d$ / $N$ / $\hat\delta_0$</td><td>$1.5$\,s / $3$ / $-14.3\%$</td></tr><tr><td>噪声</td><td>转速 / dq 电流 / 负载</td><td>—</td><td>$3$\,rpm / 正负 $0.1$\,A / $0.01$ N$\cdot$m（实验室档）</td></tr><tr><td>时序</td><td>积分 / 电流环采样 / 转速环</td><td>$\Delta t$ / $T_{si}$ / $T_s$</td><td>$2\,\mu$s / $50\,\mu$s / $1$\,ms</td></tr><tr><td></td><td>编码器</td><td>—</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>工况</td><td>型线 / 阶跃</td><td>—</td><td>圆盘 V2（THD $58.79\%$）/ $0\to0.50$ 额定 @$2$\,s</td></tr><tr><td></td><td>振动</td><td>—</td><td>$5.9$\,Hz、$0.03$ N$\cdot$m（THD $40\%$）</td></tr></tbody></table></div>
 
 <p><strong>窗口定义</strong>：空载 $[0.5,2.0)$、突变窗 $[2.0,2.5)$、稳态 $[7.0,8.0)$ 秒；</p>
 <p>换速实验取第 15 秒与第 35 秒两次跳变后的 $10$\,s 区段。</p>
 
 <h2 id="sec:concl">结论</h2>
 
-<ol><li><strong>结构</strong>：真实对象上为“低通重复通道（内模）+ 灰箱 ESO + 律 D + T 自适应 + J 自适应”。 前三条回路共用 $e_f=\tau\dot v$ 或 $e_1$，不能分别证明，必须整体处理；J 环用调试期 dither 独立辨识， 在时间上（上电 0–2\,s）与频率上（100\,Hz vs 10\,Hz）与 D/T 分离（§<a class="xref" href="#sec:jadapt">5.6</a>）。</li><li><strong>律 D（改良版）</strong>：检测量取 $e_1$ 的 $T$ 窗均值，对任何 $k f_0$ 分量结构性失明，故只对非周期事件响应，且空载段逐位退回定稿。 在电流约束 $|i_q|\le6.31$\,A 下，$k_p$ 与 $\omega_o$ 联合调度取 $k_b=6,a=3$：600 rpm 给出 突变窗 RMS $-19.4\%$、恢复时间 $-66\%$、跌落 $-7.6\%$、$|i_q|$ 峰值 $6.21$\,A（额定内），代价是稳态 RMS 略升 $2.6\%$； 900 rpm 的高转速电流受限情形见 §<a class="xref" href="#sec:lawd-900">9.3</a>。</li><li><strong>T 自适应</strong>：标称周期 $2\pi/\omega$ 只对齐频率、不对齐相位；相位对齐条件给出 $\delta^{*}(\omega)=-\arctan(\omega\tau)/2\pi$（600 rpm 为 $-14.3\%$、300 rpm 为 $-8.9\%$），实测最优 $-12\%$ 与 $-8\%$。 锁相 ESC 把稳态 RMS 由 $30.20$ 降到 $27.49$\,rpm（$-9.0\%$）；离线最优在 $-8\%$（$27.00$\,rpm）， $A$ 最优在 $-12\%$——两者不再重合，平台很平。换速时前馈重置把 $26.29$ 降到 $20.41$； 往返试验的 <em>RMS</em> 可重复（差 $0.24$\,rpm），但 $\delta$ 会落在平台的不同点，不能表述为“δ 完全可逆”。</li><li><strong>一致有界性</strong>：$v$ 通道自持 UUB（界 $\beta_3/(1-Q_0)$，与 $e_1$ 无关）；ESO 误差界 $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+(H/\omega_o)^{2}}$；跟踪误差界 $\bar e_1+\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$—— 比例项改用观测状态 $z_1$ 后多出观测误差地板 $\bar e_1$，这是估计状态反馈的固有代价。 因 $g\in[0,1)$ 且 $\bar e_1$ 与 $k_p$ 无关、调度只增不减增益，<strong>名义界即调度闭环的界</strong>——律 D 不放大 UUB 界。 T 自适应在准静态下满足小增益 $\gamma=Q/\sqrt{1-\mu}&lt;1$；换速瞬态由冻结判据兜底。</li><li><strong>律 F 作废</strong>：复位型律 F（含 F-A/F-B、$D_m$ 检测器、反相复位）已整体撤除；原因是回声只活一拍（一周期改写 $99.3\%$）， 而检测至少需要一个周期，oracle 上界也只有 $1.82$ 倍。其脚本与数据只作历史证据保留。</li><li><strong>边界</strong>：见 §<a class="xref" href="#sec:limit">11</a>——参数口径不可互引、类 fal 的稳态代价依赖工作点、随机噪声不在确定性框架内、台架未测。</li></ol>
+<ol><li><strong>结构</strong>：真实对象上为“低通重复通道（内模）+ 灰箱 ESO + 律 D + T 自适应 + J 自适应”。 前三条回路共用 $e_f=\tau\dot v$ 或 $e_1$，不能分别证明，必须整体处理；J 环用调试期 dither 独立辨识， 在时间上（上电 0–2\,s）与频率上（100\,Hz vs 10\,Hz）与 D/T 分离（§<a class="xref" href="#sec:jadapt">5.6</a>）。</li><li><strong>律 D（改良版）</strong>：检测量取 $e_1$ 的 $T$ 窗均值，对任何 $k f_0$ 分量结构性失明，故只对非周期事件响应，且空载段逐位退回定稿。 在 $1$\,ms 包络约束 $|i_q|\le6.31$\,A 下，$k_p$ 与 $\omega_o$ 联合调度取 $k_b=6,a=3$：600 rpm 给出 突变窗 RMS $-7.3\%$、恢复时间 $-13.8\%$、跌落 $-4.4\%$、包络 $5.85$\,A（$-2.2\%$，额定内），代价是稳态 RMS 略升 $2.3\%$； 收益只有名义 $J$ 口径的约 $1/3$——惯量增大后同一转矩误差的转速偏离 $\propto1/J$ 更小，而编码器噪声底不变； 900 rpm 只改善恢复与突变窗（跌落略差、包络仍在额定内），见 §<a class="xref" href="#sec:lawd-900">9.3</a>。</li><li><strong>T 自适应</strong>：标称周期 $2\pi/\omega$ 只对齐频率、不对齐相位；相位对齐条件给出 $\delta^{*}(\omega)=-\arctan(\omega\tau)/2\pi$（600 rpm 为 $-14.3\%$、300 rpm 为 $-8.9\%$）。 真实 $J$ 下 $A$ 在 $\delta=-15\%$ 取最小，但 $-15\%$–$-10\%$ 的平台落在噪声底内、不可分辨； 验收指标 RMS 的最优点在 $-11\%$（$11.70$\,rpm），300 rpm 时 $A$ 与 RMS 同为 $-8\%$（$10.15$\,rpm），与理论值都只差约 $1$ 个百分点。 锁相 ESC 把稳态 RMS 从 $13.43$ 降到 $12.28$–$12.41$\,rpm（$-7.6\%$–$-8.6\%$）；终版 $\Delta=0.5\%$/\,$\sigma=1\%$ 与固定 $-12\%$、$\Delta=1\%$ 在 RMS 上统计并列（差 $\le1.7\%$）——真实 $J$ 下抖动权衡明显减弱，不能宣称旧版那样的显著收益。 换速时前馈重置把换速后的稳态 RMS 由冻结的 $11.84$ 降到 $9.86$\,rpm（$-16.7\%$），优于固定 $-12\%$ 的 $10.77$。</li><li><strong>一致有界性</strong>：$v$ 通道自持 UUB（界 $\beta_3/(1-Q_0)$，与 $e_1$ 无关）；ESO 误差界 $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+(H/\omega_o)^{2}}$；跟踪误差界 $\bar e_1+\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$—— 比例项改用观测状态 $z_1$ 后多出观测误差地板 $\bar e_1$，这是估计状态反馈的固有代价。 因 $g\in[0,1)$ 且 $\bar e_1$ 与 $k_p$ 无关、调度只增不减增益，<strong>名义界即调度闭环的界</strong>——律 D 不放大 UUB 界。 T 自适应在准静态下满足小增益 $\gamma=Q/\sqrt{1-\mu}&lt;1$；换速瞬态由冻结判据兜底。</li><li><strong>律 F 作废</strong>：复位型律 F（含 F-A/F-B、$D_m$ 检测器、反相复位）已整体撤除；原因是回声只活一拍（一周期改写 $99.3\%$）， 而检测至少需要一个周期，oracle 上界也只有 $1.82$ 倍。其脚本与数据只作历史证据保留。</li><li><strong>边界</strong>：见 §<a class="xref" href="#sec:limit">11</a>——参数口径不可互引、类 fal 的稳态代价依赖工作点、随机噪声不在确定性框架内、台架未测。</li></ol>
 
 <h2 id="sec:handoff">接手说明（给下一个 agent）</h2>
-<p><strong>现状</strong>：本文档 v5.5 的数值口径为 2026-11-11 工况（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz）；</p>
-<p>律 D 为 $k_p+\omega_o$ 联合调度（$k_b=6,a=3$）；T 自适应为锁相 ESC（$\Delta=0.5\%,\sigma=1\%$）；</p>
+<p><strong>现状</strong>：本文档 v5.6 的数值口径为 2026-11-11 工况（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz），</p>
+<p>并在<strong>定稿台架</strong> $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$、$b_0$ 已由 J 自适应校正（<code>j_oracle</code>）下重跑；</p>
+<p>律 D 为 $k_p+\omega_o$ 联合调度（$k_b=6,a=3$、$\varepsilon_g=0.01$）；T 自适应为锁相 ESC（$\Delta=0.5\%,\sigma=1\%$）；</p>
+<p>J 自适应为调试期辨识 + $b_0$ 更新，上电状态机为 $0$–$5$（应用后 $0.5$\,s 校验、状态 $4$ 回退、状态 $5$ 死区，C.7），</p>
+<p>状态机的辨识/校验实验在应力测试配置（$5.26J_{\rm nom}$）上给出，定稿台架的辨识偏差 $+4.7\%$；</p>
 <p>复位型律 F 已作废。理论/证明部分（§<a class="xref" href="#sec:model">1</a>–§<a class="xref" href="#sec:stab">6</a>）仍在标幺一阶模型上给出，只用于结构性质。</p>
 
-<div class="tablewrap"><table><thead><tr><th>文件</th><th>职责</th></tr></thead><tbody><tr><td><code>rcso_v3.tex / .pdf / .html</code></td><td>本文档。<strong>tex 是唯一源</strong>；html 由 <code>python _mkhtml.py rcso_v3.tex</code> 生成</td></tr><tr><td><code>proof_lawD_T.tex / .pdf</code></td><td>律 D 与 T 自适应的证明（含延迟算子 $L_2$ 增益、内模 ISS、驻留时间条件）</td></tr><tr><td><code>pmsm_inv_sim.py</code></td><td><strong>唯一正式对象</strong>：三相 PWM 逆变器 + PMSM + 采样 + 律 D + ESC（<code>T_es</code> 分支）</td></tr><tr><td><code>tl_profile.py</code></td><td>圆盘质量不对中型线 V2（<code>HARMONICS</code>）与 THD 自检</td></tr><tr><td><code>eso_gain.py</code></td><td>类 fal 增益入口（四个仿真器共用）</td></tr><tr><td><code>noise_cfg.py</code></td><td>三档噪声单一入口</td></tr><tr><td><code>run_lawd_new.py</code></td><td>改良律 D 的三档（无自适应 / 旧律 D / 新律 D）</td></tr><tr><td><code>run_t_es3.py / run_t_es4.py</code></td><td>ESC 收敛 / 抖动权衡</td></tr><tr><td><code>run_t_es_ff.py / run_t_es_roundtrip.py</code></td><td>前馈重置 / 往返换速</td></tr><tr><td><code>plot_lawd_final.py / plot_t_es*.py</code></td><td>出图（只读 JSON/npz）</td></tr><tr><td><code>adrc_eso_closed.py</code></td><td>一阶核参照（非正式对象；仅理论对照）</td></tr><tr><td><code>pmsm_dq_sim.py</code></td><td>旧 dq 降阶对象（历史，不得用于新结果）</td></tr><tr><td><code>fb_cfg.py</code>、<code>run_fb_*.py</code>、<code>plot_fb_*.py</code></td><td><strong>已作废</strong>（律 F），只作历史证据</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>文件</th><th>职责</th></tr></thead><tbody><tr><td><code>rcso_v3.tex / .pdf / .html</code></td><td>本文档。<strong>tex 是唯一源</strong>；html 由 <code>python _mkhtml.py rcso_v3.tex</code> 生成</td></tr><tr><td><code>proof_lawD_T.tex / .pdf</code></td><td>律 D 与 T 自适应的证明（含延迟算子 $L_2$ 增益、内模 ISS、驻留时间条件）</td></tr><tr><td><code>pmsm_inv_sim.py</code></td><td><strong>唯一正式对象</strong>：三相 PWM 逆变器 + PMSM + 采样 + 律 D + ESC（<code>T_es</code> 分支）</td></tr><tr><td><code>tl_profile.py</code></td><td>圆盘质量不对中型线 V2（<code>HARMONICS</code>）与 THD 自检</td></tr><tr><td><code>eso_gain.py</code></td><td>类 fal 增益入口（四个仿真器共用）</td></tr><tr><td><code>noise_cfg.py</code></td><td>三档噪声单一入口</td></tr><tr><td><code>run_lawd_new.py</code></td><td>改良律 D 的三档（无自适应 / 旧律 D / 新律 D）</td></tr><tr><td><code>run_t_es3.py / run_t_es4.py</code></td><td>ESC 收敛 / 抖动权衡</td></tr><tr><td><code>run_t_es_ff.py / run_t_es_roundtrip.py</code></td><td>前馈重置 / 往返换速</td></tr><tr><td><code>run_j_state4.py</code></td><td>J 自适应上电状态机 $0$–$5$（辨识 / 应用 / 超时 / 校验回退 / 死区）与 C.7 表</td></tr><tr><td><code>run_realj_*.py</code>（check/tables/rec/900/appA）</td><td>真实 $J$ 口径的 §<a class="xref" href="#sec:pmsm">8</a>–§<a class="xref" href="#sec:tes-res">10</a> 与附录 B 复跑（表源 JSON）</td></tr><tr><td><code>run_t_realj.py</code></td><td>§<a class="xref" href="#sec:tes-res">10</a> 全部表格的真实 $J$ 复跑（P1–P4）</td></tr><tr><td><code>run_fault_sweep.py</code></td><td>故障模型 $\kappa$ 扫描（<code>ORACLE=1</code> 为 J 校正口径，B.9 附图）</td></tr><tr><td><code>plot_lawd_final.py / plot_t_es*.py</code></td><td>出图（只读 JSON/npz）</td></tr><tr><td><code>adrc_eso_closed.py</code></td><td>一阶核参照（非正式对象；仅理论对照）</td></tr><tr><td><code>pmsm_dq_sim.py</code></td><td>旧 dq 降阶对象（历史，不得用于新结果）</td></tr><tr><td><code>fb_cfg.py</code>、<code>run_fb_*.py</code>、<code>plot_fb_*.py</code></td><td><strong>已作废</strong>（律 F），只作历史证据</td></tr></tbody></table></div>
 
 <p><strong>标准工作流</strong>：</p>
 
-<ol><li><strong>定口径</strong>：圆盘型线 V2（$1.00/0.39/0.06/0.33/0.09/0.27$，THD $58.79\%$）、 $f_{ci}=500$\,Hz、$\beta_3=4000$、$\tau_0=20$\,ms、类 fal $(a,\delta,\lambda)=(0.75,0.10,10)$、实验室噪声； 旧对象与 $2$\,kHz 口径的数字不得混入。</li><li><strong>跑仿真</strong>：正式数据一律用 <code>sim_inv</code>；<code>adrc_sim</code>/<code>sim_mr3</code> 只作理论/回归对照。</li><li><strong>存轨迹</strong>：<code>np.savez</code> 保存 $t/y/i_q/i_d/i_a$，文件名带配置与日期；<code>*.npz</code> 不入库。</li><li><strong>出图</strong>：脚本只读数据、不重新仿真；图注写清口径（步长、窗长、种子、噪声档、$f_{ci}$）。</li><li><strong>改文本</strong>：先改 <code>tex</code>；被替换的旧口径必须删除（文首版本纪律）。</li><li><strong>重编</strong>：本文档与证明附件 <code>xelatex</code> 两遍；HTML 用 <code>_mkhtml.py</code> 生成并跑自检。</li></ol>
+<ol><li><strong>定口径</strong>：圆盘型线 V2（$1.00/0.39/0.06/0.33/0.09/0.27$，THD $58.79\%$）、 $f_{ci}=500$\,Hz、$\beta_3=4000$、$\tau_0=20$\,ms、类 fal $(a,\delta,\lambda)=(0.75,0.10,10)$、实验室噪声； 真实台架惯量一律取 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$（定稿小圆盘，C.1 表 C.2）， $9.95\times10^{-5}=5.26J_{\rm nom}$ 的大圆盘只作应力测试；旧对象与 $2$\,kHz 口径的数字不得混入。 额定电流一律按 $1$\,ms 包络核对（原始 $10$\,$\mu$s 峰值只作参考）；恢复时间不可跨 $J$ 比较（±20 rpm 带占跌落的比例随 $J$ 变）。</li><li><strong>跑仿真</strong>：正式数据一律用 <code>sim_inv</code>；<code>adrc_sim</code>/<code>sim_mr3</code> 只作理论/回归对照。</li><li><strong>存轨迹</strong>：<code>np.savez</code> 保存 $t/y/i_q/i_d/i_a$，文件名带配置与日期；<code>*.npz</code> 不入库。</li><li><strong>出图</strong>：脚本只读数据、不重新仿真；图注写清口径（步长、窗长、种子、噪声档、$f_{ci}$）。</li><li><strong>改文本</strong>：先改 <code>tex</code>；被替换的旧口径必须删除（文首版本纪律）。</li><li><strong>重编</strong>：本文档与证明附件 <code>xelatex</code> 两遍；HTML 用 <code>_mkhtml.py</code> 生成并跑自检。</li></ol>
 
 <p><strong>硬约束（违反即返工）</strong>：</p>
 
-<ul><li><strong>对象铁律</strong>：新数值只能来自 <code>pmsm_inv_sim</code>；旧一阶/降阶对象的结果不得引用。</li><li><strong>版本纪律</strong>：新旧口径不得并存；换口径必须同步删旧数。</li><li><strong>律 D 定稿</strong>：$k_b=6$、$a=3$、$\varepsilon_g=0.01$（v5.3 由 8/2 调整，以守住额定电流）；$\beta_3$ 不调度（$b=0$）。</li><li><strong>T 自适应定稿</strong>：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”。</li><li><strong>J 自适应定稿</strong>：调试期 100\,Hz dither（$A=0.1$\,N$\cdot$m，0–2\,s）辨识 $\hat J$，按 $b_0\leftarrow b_0J_{\rm nom}/\hat J$ 更新并冻结；上电状态机含超时回退；生产版需加应用后校验。</li><li><strong>低通不可去除</strong>：$\tau_0=20$\,ms 必须保留；$\tau\le10$\,ms 在本对象上进 $\sim190$\,Hz 极限环（§<a class="xref" href="#sec:tau-role">1.3</a>）。若要减小相位滞后，用超前–滞后或线性相位 FIR，而不是去掉滤波。</li><li><strong>律 F 作废</strong>：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。</li><li>出图只输出 PNG；<code>includegraphics</code> 指向 PNG。</li></ul>
+<ul><li><strong>对象铁律</strong>：新数值只能来自 <code>pmsm_inv_sim</code>；旧一阶/降阶对象的结果不得引用。</li><li><strong>版本纪律</strong>：新旧口径不得并存；换口径必须同步删旧数。</li><li><strong>律 D 定稿</strong>：$k_b=6$、$a=3$、$\varepsilon_g=0.01$（真实 $J$ 下按 $1$\,ms 包络选：$(6,3)$ 电流余量最大，突变窗与最好档只差 $0.3\%$）；$\beta_3$ 不调度（$b=0$，打开即超额定）。</li><li><strong>T 自适应定稿</strong>：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”（真实 $J$ 下 RMS 与固定 $-12\%$ 并列，取它是为了 $\delta$ 峰峰更小、且与名义 $J$ 整定一致）。</li><li><strong>J 自适应定稿</strong>：调试期 100\,Hz dither（$A=0.1$\,N$\cdot$m，0–2\,s）辨识 $\hat J$，按 $b_0\leftarrow b_0J_{\rm nom}/\hat J$ 更新并冻结；上电状态机 $0$–$5$：超时回退（状态 $3$）、$|\hat J/J_{\rm nom}-1|\le0.20$ 死区不更新（状态 $5$）、应用后 $0.5$\,s 校验恶化 $&gt;20\%$ 回退（状态 $4$，C.7）。</li><li><strong>低通不可去除</strong>：$\tau_0=20$\,ms 必须保留；$\tau\le10$\,ms 在本对象上进 $\sim190$\,Hz 极限环（§<a class="xref" href="#sec:tau-role">1.3</a>）。若要减小相位滞后，用超前–滞后或线性相位 FIR，而不是去掉滤波。</li><li><strong>律 F 作废</strong>：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。</li><li>出图只输出 PNG；<code>includegraphics</code> 指向 PNG。</li></ul>
 
 <p><strong>当前未完成</strong>：(1) ESC 的 8 种子统计（现有为单种子 30–60 s 轨迹）；(2) 900 rpm 与 1200 rpm 的 $\delta^{*}$ 标定；</p>
 <p>(3) 律 D 与 ESC 联调的 8 种子验收；(4) 用 $A$ 做前馈预置记忆与故障诊断（$\delta$ 长期漂移 $\Rightarrow$ 参数/延时变化）；</p>
-<p>(5) 死区逐开关状态机、母线 LC；(6) 台架实测；(7) J 自适应的应用后校验 / 回退（状态 4）。</p>
+<p>(5) 死区逐开关状态机、母线 LC；(6) 台架实测；</p>
+<p>(7) PPT/论文与 v5.6 真实 $J$ 口径的同步；</p>
+<p>(8) $\varepsilon_g$ 下调的门控档（kb8/de.005：突变窗 $15.9$\,rpm @ $6.02$\,A，优于定稿的 $17.2$ @ $5.85$）需 8 种子验证后再决定是否改定稿。</p>
+<p><strong>已完成</strong>：§<a class="xref" href="#sec:lawd-res">9</a>–§<a class="xref" href="#sec:tes-res">10</a> 的真实 $J$（$2.545J_{\rm nom}$）复跑与 $k_p,\omega_o$ 复核（$12$ 点扫描无更优，保持 $75.36/500$）；</p>
+<p>J 自适应的应用后校验/回退（状态 $4$）与死区（状态 $5$，C.7）。</p>
 
 <p><strong>交付前自检</strong>：<code>xelatex</code> 0 error、无未定义引用；HTML 自检通过、内嵌图齐全；</p>
 <p>表内数字可由 JSON/npz 复算；正文不存在旧对象数字与律 F 结论；新增结果标注真实对象参数与噪声档。</p>
@@ -765,9 +801,10 @@ window.MathJax = {
 
 <p>接入方式：在 <code>pmsm_inv_sim.py</code> 主循环中 <code>_tl = TL[k]</code> 之后，用机械角 $\theta=th/P_{\mathrm{pol}}$ 与机械角速度 $w$ 计算并叠加。配置键 <code>cfg["tl_fault"]</code> 取字典 \texttt{\{"start":\ldots,\ "misalign":\{"M":\ldots,\ "beta":\ldots,\ "l":\ldots,\ "kappa":\ldots\}\}}；默认 <code>tl_fault=None</code>，原有结果逐位不变。</p>
 
-<p><strong>量级与验证</strong>（$M=0.1$\,kg、$\beta=1^\circ$、$l=50$\,mm、8\,s、600\,rpm、不加载型线）：</p>
-<p>$\kappa=1$ 时 $1\times$ 幅值 $Mgl\sin\beta=8.6\times10^{-4}$\,N$\cdot$m，10\,Hz 分量 $1.70$\,rpm、稳态 RMS $14.90$\,rpm（无故障基准 $1.25$ / $15.57$）；</p>
-<p>$\kappa=67$ 时幅值 $0.0573$\,N$\cdot$m，10\,Hz 分量 $26.52$\,rpm、RMS $25.01$\,rpm。</p>
+<p><strong>量级与验证</strong>（$M=0.1$\,kg、$\beta=1^\circ$、$l=50$\,mm、$8$\,s、$600$\,rpm、不加载型线；$J_{\rm true}=4.81\times10^{-5}$、<code>j_oracle</code>）：</p>
+<p>$\kappa=1$ 时 $1\times$ 幅值 $Mgl\sin\beta=8.6\times10^{-4}$\,N$\cdot$m，10\,Hz 分量 $0.41$\,rpm、稳态 RMS $6.48$\,rpm（同口径无故障基准 $0.38$ / $6.82$）；</p>
+<p>$\kappa=67$ 时幅值 $0.0573$\,N$\cdot$m，10\,Hz 分量 $9.92$\,rpm、RMS $10.02$\,rpm。</p>
+<p>若仍用标称 $b_0$（不投 J 自适应），同一 $\kappa=67$ 工况为 $29.42$ / $24.64$\,rpm——$J$ 失配把故障纹波放大约 $3$ 倍，这正是 J 自适应存在的理由。</p>
 <p>即使 $\beta=90^\circ$，该转子也只能给出 $0.049$\,N$\cdot$m，达不到台架 $1\times$ 分量的 $0.057$\,N$\cdot$m——要复现台架扰动必须用 $\kappa\approx67$ 的<strong>等效放大</strong>。</p>
 <p>横向弯矩 $|I_t'-I_p|\omega^2\sin\beta\cos\beta$ 由轴承承担、不进入 $T$；需要轴承通道时用 <code>misalign_moment</code>。</p>
 
@@ -888,17 +925,24 @@ window.MathJax = {
 <div class="eqwrap" id="eq:unb-impl"><div class="eq">\[T_u(\theta,\omega,e)=-M g\,e\sin\theta+\mu_b r_b\,M e\,\omega^2\cos\theta , \]</div><div class="eqno">(78)</div></div>
 <p>第二项默认关闭（$\mu_b=0$）。接入点与附录 A 相同（主循环 <code>_tl = TL[k]</code> 之后，$\theta=th/P_{\mathrm{pol}}$、$\omega=w$）。配置键 <code>cfg["tl_fault"]</code> 取字典 \texttt{\{"start":\ldots,\ "unbalance":\{"M":\ldots,\ "e":\ldots,\ "kappa":\ldots\}\}}；默认 <code>tl_fault=None</code> 时逐位不变。</p>
 
-<p><strong>量级与验证</strong>：$\kappa=1$ 时 $1\times$ 幅值 $Mge=9.8\times10^{-5}$\,N$\cdot$m，10\,Hz 分量 $1.09$\,rpm、稳态 RMS $15.13$\,rpm（基准 $1.25$ / $15.57$）；</p>
-<p>$\kappa=580$ 时幅值 $0.0569$\,N$\cdot$m，10\,Hz 分量 $26.01$\,rpm、RMS $24.65$\,rpm。</p>
+<p><strong>量级与验证</strong>（$M=0.1$\,kg、$e=0.1$\,mm、$8$\,s、$600$\,rpm、不加载型线；$J_{\rm true}=4.81\times10^{-5}$、<code>j_oracle</code>）：</p>
+<p>$\kappa=1$ 时 $1\times$ 幅值 $Mge=9.8\times10^{-5}$\,N$\cdot$m，10\,Hz 分量 $0.51$\,rpm、稳态 RMS $6.49$\,rpm（同口径无故障基准 $0.38$ / $6.82$）；</p>
+<p>$\kappa=580$ 时幅值 $0.0569$\,N$\cdot$m，10\,Hz 分量 $9.97$\,rpm、RMS $10.02$\,rpm。</p>
+<p>若仍用标称 $b_0$（不投 J 自适应），$10$\,Hz/RMS 在 $\kappa=1$ 为 $1.92$ / $12.04$、在 $\kappa=580$ 为 $29.22$ / $24.47$——</p>
+<p>失配越大、$J$ 环的收益越大；完整扫描见附图~<a class="xref" href="#fig:fault-sweep">8</a>。</p>
 <p>要复现台架 $0.057$\,N$\cdot$m 而用 $\kappa=1$，需要 $e\approx58$\,mm，物理上不可能；故台架型线必须按“等效注入”理解。</p>
 <p>离心力 $F_u=Me\omega^2$ 用 <code>unbalance_force</code> 单独读取（轴承/振动通道），不进入 $T$。</p>
 
 <p><strong>关于 $J_{\rm true}$ 与 $J_{\rm nom}$</strong>：附录中的 $T_u$、$T_m$ 注入的是<strong>电机轴</strong>上的等效力矩。仿真主循环必须用真实传动链惯量</p>
 
 <div class="eqwrap" id="eq:unb-Jtrue"><div class="eq">\[J_{\rm true}=J_{\rm motor}+J_{\rm cpl}+\frac{J_{\rm disc}}{n_g^{2}}+\frac{n_bJ_b}{n_g^{2}}, \]</div><div class="eqno">(79)</div></div>
-<p>而 ESO 的 $b_0$ 只用标定值 $J_{\rm nom}$（本报告 $1.89\times10^{-5}$\,kg$\cdot$m$^2$，通常为电机转子部分），二者之差 $1/J_{\rm true}-1/J_{\rm nom}$ 作为扰动由 ESO 估计。</p>
-<p>若故障在齿轮箱负载侧，注入电机轴的转矩应除以速比 $n_g$、角度换成 $\theta/n_g$。</p>
-<p>本报告的全部数值结果取 $J_{\rm true}=J_{\rm nom}$；若台架含圆盘/齿轮箱，必须按式~<a class="xref" href="#eq:unb-Jtrue">(79)</a> 重算 $J_{\rm true}$ 并复跑（$J$ 失配超过约 $5$ 倍时固定增益的速度环自身会失稳，需重新标定 $k_p,\omega_o$）。</p>
+<p>本报告取 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$（小圆盘 $R_d=20$\,mm、$M_d=0.08$\,kg，附录 C.1 表 C.2）；</p>
+<p>ESO 的 $b_0$ 标称值为 $J_{\rm nom}=1.89\times10^{-5}$\,kg$\cdot$m$^2$（电机转子部分），实际运行时由 J 自适应在上电调试期辨识 $\hat J$ 并按 $b_0\leftarrow b_0J_{\rm nom}/\hat J$ 校正。</p>
+<p>本文全部数值取校正后的 $b_0$（即 <code>j_oracle=True</code>，$\hat J$ 偏差 $+4.7\%$；辨识与校验见附录 C），</p>
+<p>失配 $1/J_{\rm true}-1/J_{\rm nom}$ 因此不进入 $z_2$，只剩辨识残差。未校正时的后果见上段“若仍用标称 $b_0$”的对比行。</p>
+<p>若故障在齿轮箱负载侧，注入电机轴的转矩应除以速比 $n_g$、角度换成 $\theta/n_g$；换圆盘时必须按式~<a class="xref" href="#eq:unb-Jtrue">(79)</a> 重算 $J_{\rm true}$ 并复跑。</p>
+
+<figure id="fig:fault-sweep"><img src="fig_fault_sweep.png" alt="图 8"><figcaption><span class="fignum">图 8</span> <strong>故障 $\to$ 转速纹波映射</strong>（$600$\,rpm、$8$\,s、RC 开、不加载型线；真实 $J=2.545J_{\rm nom}$、<code>j_oracle</code>）。 灰线为标称 $b_0$（不投 J 自适应），红线为校正后 $b_0$。(a) 不平衡 $10$\,Hz 纹波；(b) 不平衡稳态 RMS；(c) 不对中 $10$\,Hz 纹波； (d) 投运后的纹波抑制比（$0.26$–$0.39$，即 $2.5$–$3.8$ 倍）。同一 $\kappa$ 下 $J$ 环把纹波压到约 $1/3$，$\kappa$ 越大收益越大。</figcaption></figure>
 
 <h3 id="h30">B.10 符号表</h3>
 
@@ -906,18 +950,24 @@ window.MathJax = {
 
 <h2 id="app:jadapt">附录 C：真实传动链惯量与 $J$ 自适应</h2>
 
-<h3 id="h31">C.1 惯量的两个口径</h3>
+<h3 id="h31">C.1 惯量的两个口径与两套圆盘</h3>
 
 <p>ESO 与主循环必须用两个不同的惯量：$J_{\rm nom}$ 是标定值（只进 $b_0$），$J_{\rm true}$ 是传动链真实值（进主循环的机械方程）。二者之差</p>
 
 <div class="eqwrap"><div class="eq">\[\frac{1}{J_{\rm true}}-\frac{1}{J_{\rm nom}}\]</div><div class="eqno">(80)</div></div>
-<p>作为扰动由 ESO 的 $z_2$ 估计。$J_{\rm true}$ 按附录 B.9 的式~<a class="xref" href="#eq:unb-Jtrue">(79)</a> 折算。本文选一组自洽的台架参数（表 C.1），得到 $J_{\rm true}=9.95\times10^{-5}$，即 $5.26J_{\rm nom}$。</p>
+<p>作为扰动由 ESO 的 $z_2$ 估计。$J_{\rm true}$ 按附录 B.9 的式~<a class="xref" href="#eq:unb-Jtrue">(79)</a> 折算。台架有两套圆盘，口径不可混用。</p>
 
 <div class="tablewrap"><table><thead><tr><th>部件</th><th>参数</th><th>$J$ / kg$\cdot$m$^2$</th></tr></thead><tbody><tr><td>电机转子</td><td>已知</td><td>$1.89\times10^{-5}$</td></tr><tr><td>联轴器</td><td>小钢盘</td><td>$1.5\times10^{-6}$</td></tr><tr><td>圆盘</td><td>$M_d=0.15$\,kg、$R_d=30$\,mm</td><td>$6.75\times10^{-5}$</td></tr><tr><td>轴承（2 个）</td><td>$m_b=20$\,g、$r_i=10$\,mm、$r_o=22$\,mm</td><td>$1.16\times10^{-5}$</td></tr><tr><td>合计</td><td>$n_g=1$</td><td>$9.95\times10^{-5}$</td></tr></tbody></table></div>
 
+<p>表 C.1 是<strong>应力测试配置</strong>：把 $b_0$ 失配放大到 $5$ 倍以上，用于检验状态机与回退的鲁棒性；§<a class="xref" href="#sec:jadapt">5.6</a> 的三环叠加表与 C.4/C.7 中 $5.26J_{\rm nom}$（$=9.95\times10^{-5}$）的行都取这一配置。定稿台架改用小圆盘（表 C.2），$J_{\rm true}$ 只比 $J_{\rm nom}$ 大 $2.545$ 倍。</p>
+
+<div class="tablewrap"><table><thead><tr><th>部件</th><th>参数</th><th>$J$ / kg$\cdot$m$^2$</th></tr></thead><tbody><tr><td>电机转子</td><td>已知</td><td>$1.89\times10^{-5}$</td></tr><tr><td>联轴器</td><td>小钢盘</td><td>$1.5\times10^{-6}$</td></tr><tr><td>圆盘</td><td>$M_d=0.08$\,kg、$R_d=20$\,mm</td><td>$1.60\times10^{-5}$</td></tr><tr><td>轴承（2 个）</td><td>$m_b=20$\,g、$r_i=10$\,mm、$r_o=22$\,mm</td><td>$1.168\times10^{-5}$</td></tr><tr><td>合计</td><td>$n_g=1$</td><td>$4.81\times10^{-5}$</td></tr></tbody></table></div>
+
+<p>两套只换圆盘：$J_d=\frac12M_dR_d^2$ 由 $1.60\times10^{-5}$ 变到 $6.75\times10^{-5}$，电机与联轴器相同；轴承项同一模型，表 C.1 取 $1.16\times10^{-5}$、表 C.2 取 $1.168\times10^{-5}$（有效数字不同），故合计分别为 $9.95$ 与 $4.81\times10^{-5}$。表 C.2 的 $2.545$ 倍是<strong>定稿台架口径</strong>：C.7 的小圆盘行按它给出，§<a class="xref" href="#sec:lawd-res">9</a>–§<a class="xref" href="#sec:tes-res">10</a> 的真实 $J$ 复跑也按它执行（复跑见 §<a class="xref" href="#sec:lawd-res">9</a>–§<a class="xref" href="#sec:tes-res">10</a>；$k_p,\omega_o$ 复核结论见 §<a class="xref" href="#sec:lawd-1d">9.1</a>）。</p>
+
 <h3 id="h32">C.2 指标</h3>
 
-<ol><li><strong>辨识指标</strong>：稳态相对误差 $|\hat J-J_{\rm true}|/J_{\rm true}$；收敛时间（进入 $\pm10\%$ 并保持）；</li><li><strong>抑制指标</strong>：故障工况下 $10$\,Hz 转速分量（稳态 $9$–$10$\,s）；</li><li><strong>注入代价</strong>：$100$\,Hz 转速分量（仅辨识期）与 $|i_q|$ 峰值；</li><li><strong>稳定性</strong>：无故障时 $10$\,Hz 分量与稳态 RMS（判断是否出现极限环）。</li></ol>
+<ol><li><strong>辨识指标</strong>：稳态相对误差 $|\hat J-J_{\rm true}|/J_{\rm true}$；收敛时间（进入 $\pm10\%$ 并保持）；</li><li><strong>抑制指标</strong>：故障工况下 $10$\,Hz 转速分量（稳态 $9$–$10$\,s）；</li><li><strong>注入代价</strong>：$100$\,Hz 转速分量（仅辨识期）与 $|i_q|$ 峰值；</li><li><strong>稳定性</strong>：无故障时 $10$\,Hz 分量与稳态 RMS（判断是否出现极限环）；</li><li><strong>校验/回退指标（状态 $4$）</strong>：应用前后各取 $0.5$\,s 窗，比较 (i) $i_q$ 的 AC 纹波 RMS（$1$\,ms 采样、窗内去均值）与 (ii) $10$\,Hz 转速误差幅值；任一“应用后 / 基线 $&gt;1.20$”即回退标称 $b_0$。基线取“dither 关、标称 $b_0$”的应用前状态（先静置 $0.2$\,s 再取窗），故比较的是同一扰动量级；</li><li><strong>状态口径</strong>：状态 $2$ 应用（校验通过）、状态 $4$ 校验回退、状态 $5$ 死区（$|\hat J/J_{\rm nom}-1|\le0.20$，不更新、不做校验）、状态 $3$ 超时回退。</li></ol>
 
 <h3 id="h33">C.3 方案：调试期转矩注入 + 频域比值辨识</h3>
 
@@ -935,9 +985,11 @@ window.MathJax = {
 
 <h3 id="h34">C.4 结果</h3>
 
+<p>本小节的表与图取<strong>应力测试配置</strong>（表 C.1，$J_{\rm true}=5.26J_{\rm nom}$）：它把失配放大到 $5$ 倍以上，用来看辨识与 $b_0$ 更新的上界表现；定稿台架（$2.545$ 倍）的数值见 C.7。</p>
+
 <div class="tablewrap"><table><thead><tr><th>工况</th><th>$\hat J$ 误差</th><th>$10$\,Hz/rpm</th><th>辨识期 $100$\,Hz/rpm</th><th>运行段 $100$\,Hz/rpm</th><th>$i_q$/A</th></tr></thead><tbody><tr><td>标称 $J$（基准）</td><td>—</td><td>$26.2$</td><td>—</td><td>—</td><td>$1.89$</td></tr><tr><td>$J_{\rm true}=5.26J_{\rm nom}$，固定标称</td><td>—</td><td>$33.3$</td><td>—</td><td>—</td><td>$3.97$</td></tr><tr><td>oracle 重整定（$b_0$ 按 $J_{\rm true}$）</td><td>—</td><td>$4.6$</td><td>—</td><td>—</td><td>$7.03$</td></tr><tr><td><strong>辨识 + $b_0$ 自适应</strong></td><td>$+9.5\%$</td><td>$\mathbf{4.0}$</td><td>$18.2$</td><td>$\mathbf{0.16}$</td><td>$\mathbf{5.06}$</td></tr></tbody></table></div>
 
-<figure id="fig:appC-jadapt"><img src="fig_j_adapt.png" alt="图 8"><figcaption><span class="fignum">图 8</span> <strong>$J$ 辨识与 $b_0$ 自适应</strong>（$600$\,rpm、$T_1=0.057$\,N$\cdot$m、$J_{\rm true}=5.26J_{\rm nom}$）。 (a) $\hat J$ 在 $2$\,s 内收敛到 $+9.5\%$ 后冻结；(b) 故障抑制：固定标称 $33.3$\,rpm，oracle $4.6$，自适应 $4.0$； (c) dither 代价仅存在于辨识期（$18.2$\,rpm），运行段 $0.16$\,rpm；(d) 稳态时域对比。</figcaption></figure>
+<figure id="fig:appC-jadapt"><img src="fig_j_adapt.png" alt="图 9"><figcaption><span class="fignum">图 9</span> <strong>$J$ 辨识与 $b_0$ 自适应</strong>（应力测试配置：$600$\,rpm、$T_1=0.057$\,N$\cdot$m、$J_{\rm true}=5.26J_{\rm nom}$）。 (a) $\hat J$ 在 $2$\,s 内收敛到 $+9.5\%$ 后冻结；(b) 故障抑制：固定标称 $33.3$\,rpm，oracle $4.6$，自适应 $4.0$； (c) dither 代价仅存在于辨识期（$18.2$\,rpm），运行段 $0.16$\,rpm；(d) 稳态时域对比。</figcaption></figure>
 
 <h3 id="h35">C.5 与文献方法的对照</h3>
 
@@ -952,24 +1004,49 @@ window.MathJax = {
 <h3 id="h36">C.6 实施</h3>
 
 <p>配置键：<code>j_id</code>（开）、<code>j_id_f</code>=100、<code>j_id_amp_u</code>=0.157（$\approx0.1$\,N$\cdot$m）、<code>j_id_win</code>=0.2、<code>j_id_lp</code>=0.4、<code>j_id_tend</code>=2.0、<code>j_adapt_b0</code>=True；对比用 <code>j_oracle</code>=True。</p>
-<p>默认全部关闭，原有结果逐位不变。</p>
+<p><strong>应用后校验（v5.6）</strong>：<code>j_val</code>=True（在 <code>j_id</code> 与 <code>j_adapt_b0</code> 同时打开时默认）、<code>j_apply_thr</code>=0.20（死区门限）、<code>j_val_settle</code>=0.2\,s、<code>j_base_win</code>=0.5\,s、<code>j_val_delay</code>=0.5\,s、<code>j_val_win</code>=0.5\,s、<code>j_val_tol</code>=0.20（恶化门限）、<code>j_val_a10_floor</code>=2.0\,rpm（$10$\,Hz 判据允许生效的最小基线）。</p>
+<p>默认 <code>j_id</code>=False，原有结果逐位不变；<code>j_val</code>=False 时不做基线/应用后比较与回退，逐位复现 2026-11-13 之前（无校验）的行为。</p>
 
-<p><strong>对前文推荐工况的影响</strong>：$T_1=0.057$\,N$\cdot$m 在 $J_{\rm nom}$ 下给出 $26$\,rpm，但在 $J_{\rm true}=5.26J_{\rm nom}$ 且自适应后只有 $4$\,rpm。若要在真实 $J$ 下仍看到 $20$–$30$\,rpm 的 $10$\,Hz 纹波，需把 $T_1$ 提高到约 $0.3$\,N$\cdot$m（接近额定），或减小圆盘惯量（如 $R_d=20$\,mm、$M_d=0.08$\,kg，$J_{\rm true}\approx2.4J_{\rm nom}$；此时 $T_1=0.15$\,N$\cdot$m 给出 $22.5$\,rpm、$i_q$ 峰值 $4.35$\,A，见 C.7）。在确定台架圆盘参数后应重跑 §<a class="xref" href="#sec:tes-res">10</a> 与附录 B 的扫描。</p>
+<p><strong>对前文推荐工况的影响</strong>：定稿台架取小圆盘（$R_d=20$\,mm、$M_d=0.08$\,kg，$J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$，表 C.2），</p>
+<p>D$+$T$+$J 全投运（$12$\,s，指标取 $11$–$12$\,s）：$T_1=0.10$\,N$\cdot$m 给出 $10$\,Hz $10.93$\,rpm、稳态 RMS $11.41$\,rpm、$i_q$ 原始峰值 $3.65$\,A（$\hat J$ $+5.0\%$）；</p>
+<p>$T_1=0.15$ 为 $14.72$ / $14.20$ / $4.46$\,A（$+4.7\%$）；$T_1=0.20$ 为 $18.62$ / $16.92$ / $4.98$\,A（$+4.3\%$）。</p>
+<p>三点都在额定包络内，$T_1=0.15$ 兼顾可见纹波与电流裕量，作为推荐演示点（§5.6 的三环表即取此点，C.7 表末三行同源）。</p>
 
-<h3 id="h37">C.7 上电状态机与回退</h3>
+<h3 id="h37">C.7 上电状态机：辨识、死区、校验与回退</h3>
 
-<p>把 C.3 的辨识做成上电流程：状态 $0$ 空闲 $\to$ 状态 $1$ 辨识（$t_0=0.5$–$1.0$\,s 起，最长 $3$\,s）$\to$ 状态 $2$ 已应用 / 状态 $3$ 回退（超时无有效窗，保持标称 $b_0$）。判据：</p>
+<p>把 C.3 的辨识做成上电流程，状态 $0$–$5$：</p>
+<p>$0$ 空闲 $\to$ $1$ 辨识（$t_0=0.5$–$1.0$\,s 起，最长 $3$\,s）$\to$ 分岔到 $2$ 已应用（校验通过）/</p>
+<p>$3$ 超时回退（无有效窗，保持标称 $b_0$）/</p>
+<p>$4$ 校验回退（应用后恶化，撤销更新）/</p>
+<p>$5$ 死区保持（失配已在死区内，不更新）。</p>
+<p>辨识段判据：</p>
 
-<ul><li>每个 $0.2$\,s 窗计算 $\hat J$，要求转速 dither 幅值 $\ge2$\,rpm（编码器量化台阶约 $6$\,rpm，靠整周期平均分辨）；</li><li>有效窗数 $\ge3$–$5$，且窗间标准差 $\le15\%$，才允许提前应用；</li><li>$\hat J$ 限幅 $[0.5,50]J_{\rm nom}$；超时仍无有效窗则回退。</li></ul>
+<ul><li>每个 $0.2$\,s 窗计算 $\hat J$，要求转速 dither 幅值 $\ge2$\,rpm（编码器量化台阶约 $6$\,rpm，靠整周期平均分辨）；</li><li>有效窗数 $\ge3$–$5$，且窗间标准差 $\le15\%$，才允许提前决策；</li><li>$\hat J$ 限幅 $[0.5,50]J_{\rm nom}$；超时仍无有效窗 $\to$ 状态 $3$；</li><li>记 $\rho:=\hat J/J_{\rm nom}$，若 $|\rho-1|\le0.20$（<code>j_apply_thr</code>）$\to$ 状态 $5$：失配已在死区内，更新只会引入 dither 估计噪声，故不更新、也不做校验。</li></ul>
 
-<div class="tablewrap"><table><thead><tr><th>工况</th><th>状态</th><th>$\hat J$ 误差</th><th>$10$\,Hz/rpm</th><th>$i_q$/A</th><th>备注</th></tr></thead><tbody><tr><td>故障，$A=0.157$，$n_{\min}=3$</td><td>$2$</td><td>$+4.5\%$</td><td>$4.34$</td><td>$3.97$</td><td>正常</td></tr><tr><td>故障，$A=0.157$，$n_{\min}=5$，$t_0=1$</td><td>$2$</td><td>$+5.5\%$</td><td>$4.14$</td><td>$3.97$</td><td>正常</td></tr><tr><td>无故障，$A=0.157$，$n_{\min}=5$</td><td>$2$</td><td>$+15.6\%$</td><td>$0.30$</td><td>$6.40$</td><td>偏高，需校验</td></tr><tr><td>故障，$A=0.02$（弱激励）</td><td>$2$</td><td>$-5.9\%$</td><td>$4.76$</td><td>$3.97$</td><td>勉强可用</td></tr><tr><td>无故障，$A=0.30$</td><td>$2$</td><td>$+7.5\%$</td><td>$0.37$</td><td>$12.3$</td><td>电流不可接受</td></tr></tbody></table></div>
+<p><strong>应用后校验（状态 $1\to2/4$，<code>j_val</code>=True 时默认执行）</strong>：</p>
 
-<p><strong>局限与生产化建议</strong>：无故障时 dither 的转速响应只有约 $4$\,rpm，接近编码器量化台阶，$\hat J$ 偏高 $15\%$；应用后 $b_0$ 偏小、环路增益偏高，$i_q$ 升到 $6.40$\,A（额定 $6.31$\,A）。因此生产版应加“应用后 $0.5$\,s 校验”：比较应用前后 $i_q$ 的 RMS 与 $10$\,Hz 分量，若恶化超过 $20\%$ 则回退到标称 $b_0$（状态 $4$），并只在 $|\hat J/J_{\rm nom}-1|&gt;20\%$ 时才应用。另：调试期 dither 会在 $100$\,Hz 产生约 $18$\,rpm 的转速纹波与 $0.5$\,A 电流纹波，只持续 $1$–$2$\,s，正常后消失。</p>
+<ol><li><strong>公平基线</strong>：关 dither、把 $b_0$ 复位到标称，静置 $0.2$\,s（<code>j_val_settle</code>）后取 $0.5$\,s 窗（<code>j_base_win</code>），记 $i_q$ 的 AC 纹波 RMS（$1$\,ms 采样、窗内去均值）与 $10$\,Hz 转速误差幅值；</li><li><strong>应用</strong>：$b_0\leftarrow b_0J_{\rm nom}/\hat J$，等 $0.5$\,s（<code>j_val_delay</code>）后取同样 $0.5$\,s 的窗（<code>j_val_win</code>）；</li><li><strong>判据</strong>：$i_q$ 的 AC-RMS 比 $&gt;1.20$（<code>j_val_tol</code>），或（基线 $10$\,Hz $\ge2$\,rpm 时）$10$\,Hz 比 $&gt;1.20$，则撤销更新、恢复标称 $b_0$ $\to$ 状态 $4$；否则 $\to$ 状态 $2$。</li></ol>
 
-<p><strong>真实 $J$ 下的推荐工况</strong>（$J_{\rm true}=2.4J_{\rm nom}$，即 $R_d=20$\,mm、$M_d=0.08$\,kg）：</p>
-<p>$T_1=0.10$\,N$\cdot$m 时 $10$\,Hz 为 $15.7$\,rpm、$i_q$ 峰值 $3.54$\,A；</p>
-<p>$T_1=0.15$\,N$\cdot$m 时 $10$\,Hz 为 $\mathbf{22.5}$\,rpm、$i_q$ 峰值 $4.35$\,A——既有可见纹波又留足电流裕量，作为推荐演示点。</p>
-<p>若坚持 $J_{\rm true}=5.26J_{\rm nom}$ 的大圆盘，则 $T_1=0.30$\,N$\cdot$m 才到 $18.9$\,rpm，且 $i_q$ 已到 $6.68$\,A（超额定），不建议。</p>
+<div class="tablewrap"><table><thead><tr><th>工况</th><th>状态</th><th>$\hat J$ 误差</th><th>$10$\,Hz/rpm</th><th>\shortstack[c]{$|i_q|$ 瞬时峰值/A\\（$10$\,$\mu$s，含 PWM 纹波）}</th><th>$i_q$ AC-RMS 比</th><th>判定/备注</th></tr></thead><tbody><tr><td>故障 $A=0.157$、$n_{\min}=3$、$t_0=0.5$</td><td>$2$</td><td>$+4.9\%$</td><td>$4.26$</td><td>$3.97$</td><td>$1.04$</td><td>应用</td></tr><tr><td>故障 $A=0.157$、$n_{\min}=5$、$t_0=1$</td><td>$2$</td><td>$+6.2\%$</td><td>$4.12$</td><td>$3.97$</td><td>$1.07$</td><td>应用</td></tr><tr><td>无故障 $A=0.157$、$n_{\min}=5$</td><td>$4$</td><td>$+15.4\%$</td><td>$2.21$</td><td>$3.97$</td><td>$2.71$</td><td>回退（$i_q$）；<code>j_val</code>=False 时峰值 $6.40$\,A</td></tr><tr><td>故障 $A=0.02$（弱激励）</td><td>$2$</td><td>$-5.9\%$</td><td>$4.95$</td><td>$3.97$</td><td>$1.05$</td><td>应用</td></tr><tr><td>无故障 $A=0.30$</td><td>$4$</td><td>$+7.2\%$</td><td>$1.01$</td><td>$4.88$</td><td>$2.16$</td><td>回退（$i_q$）；<code>j_val</code>=False 时 $12.3$\,A</td></tr><tr><td>死区 $J=2.0\times10^{-5}$</td><td>$5$</td><td>$+10.0\%$</td><td>$1.46$</td><td>$3.49$</td><td>—</td><td>$\rho=1.16$，不更新，无校验窗</td></tr><tr><td>小圆盘 $J=4.81\times10^{-5}$、$T_1=0.10$</td><td>$2$</td><td>$+5.1\%$</td><td>$10.93$</td><td>$3.65$</td><td>—</td><td>应用（D$+$T$+$J，$12$\,s）</td></tr><tr><td>小圆盘 $J=4.81\times10^{-5}$、$T_1=0.15$</td><td>$2$</td><td>$+4.7\%$</td><td>$14.72$</td><td>$4.46$</td><td>—</td><td>应用（D$+$T$+$J，$12$\,s）</td></tr><tr><td>小圆盘 $J=4.81\times10^{-5}$、$T_1=0.20$</td><td>$2$</td><td>$+4.3\%$</td><td>$18.62$</td><td>$4.98$</td><td>—</td><td>应用（D$+$T$+$J，$12$\,s）</td></tr></tbody></table></div>
+
+<p>表中 $A$ 为 dither 力矩幅值（$A=0.157$ 对应 $\approx0.1$\,N$\cdot$m）。前六行是上电状态机的辨识/校验测试（$T_1=0.057$\,N$\cdot$m 或 $0$，$10$\,s 协议，指标取 $9$–$10$\,s）；</p>
+<p>末三行是定稿台架上 D$+$T$+$J 全投运的 $12$\,s 运行（指标取 $11$–$12$\,s）。$i_q$ 一列是 $10$\,$\mu$s 原始采样的<strong>瞬时峰值</strong>，含 $10$\,kHz PWM 纹波；</p>
+<p>§<a class="xref" href="#sec:lawd-res">9</a> 的额定约束按 $1$\,ms 块均值包络核对，不用原始瞬时峰值。</p>
+
+<p><strong>基线为什么“越校正越差”</strong>：校验基线取“dither 关、标称 $b_0$”的应用前状态。应力测试配置 $J_{\rm true}=5.26J_{\rm nom}$ 下，</p>
+<p>标称 $b_0$ 比实际值<strong>大约 $5$–$6$ 倍</strong>（$\rho\approx5.5$–$6.1$），环路增益偏低、响应迟钝，无故障基线的 $i_q$ AC 纹波只有 $0.11$\,A；</p>
+<p>把 $b_0$ 改小到正确值后环路增益升高，同一无故障工况的纹波升到 $0.31$\,A（$2.71$ 倍）——这不是“变差”，而是带宽恢复后的正常代价；</p>
+<p>校验判据只看比值，故回退到标称 $b_0$（状态 $4$）。故障行不会误回退：它们的基线 $i_q$ 被 $10$\,Hz 故障电流主导（$0.60$–$1.22$\,A），应用前后比值只有 $1.00$–$1.07$。</p>
+<p>$10$\,Hz 判据只在基线 $\ge2$\,rpm（<code>j_val_a10_floor</code>）时生效：无故障时 $10$\,Hz 分量只有 $1$–$3$\,rpm 量级，已接近编码器量化噪声，更弱的工况会掉到门限以下，比值没有判别力，强行使用会误回退。</p>
+<p>由此也能看出状态 $4$ 的语义：在标称 $b_0$ 严重失配时它“保住低增益、低纹波”，与 $b_0$ 校正的初衷相反；定稿台架（$2.545$ 倍）失配小，这一现象弱得多，见下一段。</p>
+
+<p><strong>回退的代价（如实披露）</strong>：回退把 $b_0$ 换回标称，稳态误差回到标称失配的水平——无故障 $A=0.157$ 时 $8.20$\,rpm RMS（应用后为 $3.96$\,rpm）；换来的是 $i_q$ 的 $10$\,$\mu$s 瞬时峰值由 $6.40$\,A 降到 $3.97$\,A（无故障 $A=0.30$ 由 $12.3$\,A 降到 $4.88$\,A）。即状态 $4$ 是用稳态精度换过流安全。定稿台架 $J_{\rm true}=2.545J_{\rm nom}$ 的标称失配只有 $2.5$ 倍（应力测试为 $5.26$ 倍），回退后的稳态代价相应更小。调试期 dither 的代价不变：$100$\,Hz 上约 $18$\,rpm 的转速纹波与 $0.5$\,A 电流纹波，只持续 $1$–$2$\,s，冻结后消失。</p>
+
+<p><strong>真实 $J$ 下的推荐工况</strong>（定稿台架 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$，$R_d=20$\,mm、$M_d=0.08$\,kg；D$+$T$+$J 全投运，$12$\,s，$11$–$12$\,s 窗口）：</p>
+<p>$T_1=0.10$\,N$\cdot$m 时 $10$\,Hz $10.93$\,rpm、稳态 RMS $11.41$\,rpm、$i_q$ 原始峰值 $3.65$\,A（$\hat J$ $+5.0\%$）；</p>
+<p>$T_1=0.15$\,N$\cdot$m 时 $10$\,Hz $\mathbf{14.72}$\,rpm、RMS $14.20$\,rpm、$i_q$ 原始峰值 $4.46$\,A（$+4.7\%$）——纹波可见、电流裕量充足，作为推荐演示点（§5.6 三环表取此点）；</p>
+<p>$T_1=0.20$\,N$\cdot$m 时 $10$\,Hz $18.62$\,rpm、RMS $16.92$\,rpm、$i_q$ $4.98$\,A（$+4.3\%$），仍在额定内。</p>
+<p>三点都来自 D$+$T$+$J 全投运，不是 J 环单独作用的结果；$10$\,Hz 随 $T_1$ 近似线性增长，可按演示需要选取。</p>
 
 </div>
 </main>

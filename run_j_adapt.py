@@ -35,7 +35,8 @@ def one(job):
     if o.get("fault"):
         cfg["tl_fault"] = {"start": 0.0, "unbalance": dict(M=0.1, e=1e-4, kappa=580.0)}
     if o.get("j_id"):
-        cfg.update(j_id=True, j_adapt_b0=True, j_adapt_kp=False, j_id_f=200.0, j_id_amp_u=0.0314, j_id_win=0.4, j_id_lp=0.3)
+        # C.4 只隔离“辨识 + 立即应用”环节；应用后校验/回退见 run_j_state4.py（状态 4）
+        cfg.update(j_id=True, j_adapt_b0=True, j_adapt_kp=False, j_id_f=200.0, j_id_amp_u=0.0314, j_id_win=0.4, j_id_lp=0.3, j_val=False)
     if o.get("j_oracle"):
         cfg.update(j_oracle=True)
     Y = sim_inv(t, TL, cfg)

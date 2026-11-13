@@ -27,16 +27,16 @@ chk("id_unique", len(ids) == len(set(ids)), "dup=%s" % [x for x in set(ids) if i
 
 srcs = re.findall(r'<img src="([^"]+)"', b)
 miss_img = [s for s in set(srcs) if not os.path.exists(s)]
-chk("figures", len(srcs) == 8 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
+chk("figures", len(srcs) == 9 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
 
 chk("h2", len(re.findall(r"<h2 ", b)) == 17, str(len(re.findall(r"<h2 ", b))))
 chk("h3", len(re.findall(r"<h3 ", b)) == 66, str(len(re.findall(r"<h3 ", b))))
 chk("h4", len(re.findall(r"<h4>", b)) == 2, str(len(re.findall(r"<h4>", b))))
 # 2026-11-13：附录 A/B 增加“仿真实现”小节——h2=16、h3=58、表=23
-chk("tables", len(re.findall(r"<table>", b)) == 28, str(len(re.findall(r"<table>", b))))
+chk("tables", len(re.findall(r"<table>", b)) == 30, str(len(re.findall(r"<table>", b))))
 chk("tabcap", len(re.findall(r'class="tabcap"', b)) == 0, str(len(re.findall(r'class="tabcap"', b))))
 chk("notice", len(re.findall(r"box notice", b)) == 2, str(len(re.findall(r"box notice", b))))
-chk("figcaption", len(re.findall(r"<figcaption>", b)) == 8, str(len(re.findall(r"<figcaption>", b))))
+chk("figcaption", len(re.findall(r"<figcaption>", b)) == 9, str(len(re.findall(r"<figcaption>", b))))
 
 # 浏览器可见的转换缺陷（51 项之外的三类：未转换的 \textbf、二次转义的表格、列格式残留）
 chk("no_visible_textbf", "\\textbf" not in b, "n=%d" % b.count("\\textbf"))
@@ -48,11 +48,11 @@ short = [re.sub(r"<[^>]+>", "", c)[:36] for c in caps if len(re.sub(r"<[^>]+>", 
 chk("caption_not_short", not short, str(short[:3]))
 
 sub = re.search(r'<div class="sub">([^<]*)</div>', h).group(1)
-chk("sub_v55", sub.startswith("v5.5"), sub[:40])
+chk("sub_v56", sub.startswith("v5.6"), sub[:40])
 chk("sub_clean", ("\\" not in sub) and ("{" not in sub) and ("$" not in sub), sub)
 
-must = ["-371.9", "-343.7", "41.5", "18.2", "27.49", "30.20", "6.21", "pmsm_inv_sim", "锁相", "圆盘", "58.79"]
-gone = ["66.80", "48.36", "127.7", "88.9", "40.05", "v3.1", "36.5"]
+must = ["-127.4", "-121.8", "17.24", "5.85", "14.72", "13.43", "12.28", "pmsm_inv_sim", "锁相", "圆盘", "58.79"]
+gone = ["66.80", "48.36", "27.49", "88.9", "40.05", "v3.1", "36.5"]
 for m in must:
     chk("has:" + m, m in b, "" if m in b else "MISSING")
 for m in gone:

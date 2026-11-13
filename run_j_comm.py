@@ -26,8 +26,9 @@ def one(job):
         cfg["tl_fault"] = {"start": 0.0, "unbalance": dict(M=0.1, e=1e-4, kappa=580.0)}
     if o.get("j_oracle"): cfg.update(j_oracle=True)
     if o.get("comm"):
+        # C.4 隔离“辨识 + 立即应用”；校验/回退见 run_j_state4.py（状态 4）
         cfg.update(j_id=True, j_id_f=100.0, j_id_amp_u=0.157, j_id_win=0.2,
-                   j_id_lp=0.4, j_id_tend=2.0, j_adapt_b0=True)
+                   j_id_lp=0.4, j_id_tend=2.0, j_adapt_b0=True, j_val=False)
     Y = sim_inv(t, TL, cfg)
     tt = np.asarray(Y["t"]); y = np.asarray(Y["y"]); iq = np.asarray(Y["iq"])
     e = (y - 1.0) * 600.0

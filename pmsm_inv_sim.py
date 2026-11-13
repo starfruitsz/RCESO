@@ -87,12 +87,61 @@ def sim_inv(t, TL, cfg=None):
     _j_adapt_b0 = bool(cfg.get("j_adapt_b0", True))
     _j_adapt_kp = bool(cfg.get("j_adapt_kp", False))
     _oracle = bool(cfg.get("j_oracle", False))
+    # 辨识是否一开始就打开（用于 j_val 的默认值：只有 j_id 开时才可能进入校验）
+    _jid_on0 = _jid
     _jhat = J_M
     _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
     _KPe = KP
+    # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
+    # 上电状态机扩展：0 空闲 / 1 辨识 / 2 已应用 / 3 超时回退 / 4 校验回退 / 5 死区保持标称。
+    # 辨识完成（提前置信或 _jid_tend 超时）后：
+    #   * 死区：|Jhat/J_M-1| <= j_apply_thr ⇒ 不更新 b0、冻结估计、dither 关、状态 5；
+    #   * j_val=True：先采"公平基线"（dither 已关、b0 仍标称）：
+    #       静默 j_val_settle（默认 0.2 s）→ 基线窗 j_base_win（0.5 s）
+    #       → 施加 B0e=B0*J_M/Jhat → 等 j_val_delay（0.5 s）→ 后窗 j_val_win（0.5 s）
+    #       → 比较 iq 纹波 AC-RMS 与 10 Hz 转速误差幅值，任一恶化 > j_val_tol（20%）
+    #         则 B0e=B0、状态 4（回退）；否则状态 2（已应用）。
+    #   * j_val=False：与旧版一致，辨识完成立即应用（状态 2，向后兼容）。
+    # iq 纹波口径：1 ms 控制拍上的 iq 采样，先减窗均值再取 RMS（AC-RMS）；
+    #   10 Hz 幅值：同一窗内对 (y-1)*600 rpm 做正交解调。
+    _j_val_on = bool(cfg.get("j_val", _j_adapt_b0)) and _jid_on0
+    _j_apply_thr = float(cfg.get("j_apply_thr", 0.20))     # 死区：|Jhat/J_M-1| 阈值
+    _j_val_settle = float(cfg.get("j_val_settle", 0.2))    # 辨识结束→基线窗的静默期（s）
+    _j_base_win = float(cfg.get("j_base_win", 0.5))        # 基线窗长（s）
+    _j_val_delay = float(cfg.get("j_val_delay", 0.5))      # 施加→后窗的等待（s）
+    _j_val_win = float(cfg.get("j_val_win", 0.5))          # 后窗长（s）
+    _j_val_tol = float(cfg.get("j_val_tol", 0.20))         # 恶化容限（0.20 = 20%）
+    # 10 Hz 比值只在基线幅值足够大时才有判别力（否则 0.3 rpm 级的噪声会让比值乱跳）；
+    # 低于该下限时只用 iq 纹波判据。这是测量口径，不是放宽判据。
+    _j_val_a10_floor = float(cfg.get("j_val_a10_floor", 2.0))
+    _jv_w10 = TWO_PI * 10.0
+    _jv_phase = 0          # 0 未启动 / 1 基线静默 / 2 基线窗 / 3 应用后等待 / 4 后窗 / 5 完成
+    _jv_iq1 = _jv_iq2 = _jv_c = _jv_s = 0.0
+    _jv_n = 0; _jv_pk = 0.0
+    _jv_s1 = _jv_s2 = _jv_sc = _jv_ss = 0.0; _jv_sn = 0; _jv_pks = 0.0
+    _jv_tdec = None; _jv_tfinal = None
+    _jv_tbase0 = _jv_tbase1 = _jv_tapply = 0.0
+    _jv_rho = float("nan"); _jv_B0e = _B0e
+    _jv_base = _jv_settle = _jv_post = _jv_merged = _jv_ratios = None
+    _jv_applied = False; _jv_rollback = False; _jv_decision = None
+    _jv_guard_pk = 0.0
+    _jfin_evt = False
     _te_c = _te_s = _w_c = _w_s = 0.0
     _nid = 0
     jhat_o = []
+    b0e_o = []
+
+    def _jv_stats(s1, s2, sc, ss, n, pk, t0, t1):
+        """窗统计：iq 均值/AC-RMS/峰值 + 10 Hz 转速误差幅值（rpm）。"""
+        if n <= 0:
+            return dict(n=0, iq_mean=0.0, iq_rms=0.0, a10=0.0, iq_pk=float(pk),
+                        t0=float(t0), t1=float(t1))
+        mu = s1 / n
+        rms = math.sqrt(max(s2 / n - mu * mu, 0.0))
+        a10 = 2.0 / n * math.hypot(sc, ss)
+        return dict(n=int(n), iq_mean=float(mu), iq_rms=float(rms), a10=float(a10),
+                    iq_pk=float(pk), t0=float(t0), t1=float(t1))
+
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 20e-3)
     Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
     rc_inj = str(cfg.get("rc_inj", "tanh"))   # 重复通道注入非线性：tanh（默认）或 fal
@@ -487,18 +536,17 @@ def sim_inv(t, TL, cfg=None):
                 _yref = _yref2
             else:
                 _yref = 1.0
+            _tk = k * dt
             _fb = (_yref - z1n) if u_z1 else (_yref - y_m)
             u = (kpe * _fb - z2n - vn) / _B0e
             if _jid:
-                _tk = k * dt
-                if _tk >= _jid_tend:                 # 超时：有有效窗则应用，否则回退
+                if _tk >= _jid_tend:                 # 超时：有有效窗则进入应用/校验，否则回退
                     _jid = False
                     if _jlist:
                         _jhat = sum(_jlist) / len(_jlist)
-                        _B0e = B0 * (J_M / _jhat)
-                        _jstate = 2
+                        _jfin_evt = True
                     else:
-                        _jstate = 3                  # 回退：保持标称 b0
+                        _jstate = 3                  # 超时无有效窗：保持标称 b0
                 elif _tk >= _jid_t0:
                     _ph = _jid_w * _tk
                     u += _jid_amp * math.sin(_ph)
@@ -516,14 +564,99 @@ def sim_inv(t, TL, cfg=None):
                             _jhat = sum(_jlist) / len(_jlist)
                             if len(_jlist) >= _jid_nmin:
                                 _sd = math.sqrt(sum((x - _jhat) ** 2 for x in _jlist) / len(_jlist))
-                                if _sd <= _jid_std_max * _jhat:   # 置信：提前应用
+                                if _sd <= _jid_std_max * _jhat:   # 置信：进入应用/校验
                                     _jid = False
-                                    _B0e = B0 * (J_M / _jhat)
-                                    _jstate = 2
+                                    _jfin_evt = True
                         _te_c = _te_s = _w_c = _w_s = 0.0
                         _nid = 0
+            if _jfin_evt:                             # 辨识完成：死区 / 立即应用 / 进入校验
+                _jfin_evt = False
+                _jv_rho = _jhat / J_M
+                _jv_tdec = _tk
+                if abs(_jv_rho - 1.0) <= _j_apply_thr:       # 死区：状态 5，保持标称 b0
+                    _jstate = 5
+                    _jv_decision = "deadband"
+                elif _j_val_on:                              # 状态 4 前置：先采基线，再应用、复测
+                    _jv_B0e = B0 * (J_M / _jhat)
+                    _jv_tbase0 = _tk + _j_val_settle
+                    _jv_tbase1 = _jv_tbase0 + _j_base_win
+                    _jv_phase = 1
+                else:                                        # 向后兼容：立即应用（旧行为）
+                    _B0e = B0 * (J_M / _jhat)
+                    _jstate = 2
+                    _jv_applied = True
+                    _jv_decision = "applied"
+            # ---- 状态 4：应用后校验（基线 → 应用 → 后窗 → 判定）----
+            if _jv_phase == 1:
+                if _tk >= _jv_tbase0:
+                    _jv_iq1 = _jv_iq2 = _jv_c = _jv_s = 0.0
+                    _jv_n = 0; _jv_pk = 0.0
+                    _jv_phase = 2
+            elif _jv_phase == 2:
+                _iqv = idq[1]
+                _jv_iq1 += _iqv; _jv_iq2 += _iqv * _iqv
+                if abs(_iqv) > _jv_pk: _jv_pk = abs(_iqv)
+                _jv_e = (y_m - 1.0) * 600.0
+                _jv_c += _jv_e * math.cos(_jv_w10 * _tk)
+                _jv_s += _jv_e * math.sin(_jv_w10 * _tk)
+                _jv_n += 1
+                if _tk >= _jv_tbase1:
+                    _jv_base = _jv_stats(_jv_iq1, _jv_iq2, _jv_c, _jv_s, _jv_n, _jv_pk, _jv_tbase0, _tk)
+                    _B0e = _jv_B0e
+                    _jv_applied = True
+                    _jv_tapply = _tk
+                    _jv_s1 = _jv_s2 = _jv_sc = _jv_ss = 0.0; _jv_sn = 0; _jv_pks = 0.0
+                    _jv_phase = 3
+            elif _jv_phase == 3:
+                _iqv = idq[1]
+                _jv_s1 += _iqv; _jv_s2 += _iqv * _iqv
+                if abs(_iqv) > _jv_pks: _jv_pks = abs(_iqv)
+                _jv_e = (y_m - 1.0) * 600.0
+                _jv_sc += _jv_e * math.cos(_jv_w10 * _tk)
+                _jv_ss += _jv_e * math.sin(_jv_w10 * _tk)
+                _jv_sn += 1
+                if _tk >= _jv_tapply + _j_val_delay:
+                    _jv_settle = _jv_stats(_jv_s1, _jv_s2, _jv_sc, _jv_ss, _jv_sn, _jv_pks, _jv_tapply, _tk)
+                    _jv_iq1 = _jv_iq2 = _jv_c = _jv_s = 0.0
+                    _jv_n = 0; _jv_pk = 0.0
+                    _jv_phase = 4
+            elif _jv_phase == 4:
+                _iqv = idq[1]
+                _jv_iq1 += _iqv; _jv_iq2 += _iqv * _iqv
+                if abs(_iqv) > _jv_pk: _jv_pk = abs(_iqv)
+                _jv_e = (y_m - 1.0) * 600.0
+                _jv_c += _jv_e * math.cos(_jv_w10 * _tk)
+                _jv_s += _jv_e * math.sin(_jv_w10 * _tk)
+                _jv_n += 1
+                if _tk >= _jv_tapply + _j_val_delay + _j_val_win:
+                    _jv_post = _jv_stats(_jv_iq1, _jv_iq2, _jv_c, _jv_s, _jv_n, _jv_pk,
+                                         _jv_tapply + _j_val_delay, _tk)
+                    # 并窗（含施加瞬态）：settle + post 的样本和直接相加
+                    _jv_merged = _jv_stats(_jv_s1 + _jv_iq1, _jv_s2 + _jv_iq2,
+                                           _jv_sc + _jv_c, _jv_ss + _jv_s,
+                                           _jv_sn + _jv_n, max(_jv_pks, _jv_pk),
+                                           _jv_tapply, _tk)
+                    _riq = _jv_post["iq_rms"] / max(_jv_base["iq_rms"], 1e-12)
+                    _ra10 = _jv_post["a10"] / max(_jv_base["a10"], 1e-12)
+                    _bad_iq = _riq > 1.0 + _j_val_tol
+                    _bad_a10 = ((_jv_base["a10"] >= _j_val_a10_floor)
+                                and (_ra10 > 1.0 + _j_val_tol))
+                    _jv_ratios = dict(iq=_riq, a10=_ra10)
+                    _jv_tfinal = _tk
+                    _jv_guard_pk = _jv_pks
+                    if _bad_iq or _bad_a10:
+                        _B0e = B0
+                        _jstate = 4
+                        _jv_rollback = True
+                        _jv_decision = ("rollback" + ("_iq" if _bad_iq else "")
+                                        + ("_a10" if _bad_a10 else ""))
+                    else:
+                        _jstate = 2
+                        _jv_decision = "applied"
+                    _jv_phase = 5
             jhat_o.append(_jhat)
             jstate_o.append(_jstate)
+            b0e_o.append(_B0e)
             # F-B 检测：包络比值（ff_flush）和/或记忆失配（ff_mism），默认关
             if ff_flush > 0.0 or ff_mism > 0.0:
                 fft = max(0.0, fft - 1e-3); fft2 = max(0.0, fft2 - 1e-3)
@@ -624,5 +757,21 @@ def sim_inv(t, TL, cfg=None):
                 b3=b3_o[:m], amp=a_o[:m], es=es_o[:m],
                 trig=trig_log, oracle=oracle_log,
                 jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3,
-                jstate=np.asarray(jstate_o))
+                jstate=np.asarray(jstate_o),
+                b0e=np.asarray(b0e_o),
+                # ---- J 应用后校验（状态 4）记录 ----
+                jval=dict(enable=bool(_j_val_on), rho=float(_jv_rho),
+                          t_decision=_jv_tdec, t_final=_jv_tfinal,
+                          decision=_jv_decision,
+                          applied=bool(_jv_applied), rollback=bool(_jv_rollback),
+                          state=int(_jstate),
+                          jhat=float(_jhat),
+                          thr=float(_j_apply_thr), tol=float(_j_val_tol),
+                          settle=float(_j_val_settle), base_win=float(_j_base_win),
+                          delay=float(_j_val_delay), win=float(_j_val_win),
+                          a10_floor=float(_j_val_a10_floor),
+                          iq_rated=float(I_BASE),
+                          base=_jv_base, settle_win=_jv_settle, post=_jv_post,
+                          merged=_jv_merged, ratios=_jv_ratios,
+                          guard_pk=float(_jv_guard_pk)))
 
