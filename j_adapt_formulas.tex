@@ -1,0 +1,261 @@
+% !TeX program = xelatex
+% =============================================================================
+%  自适应 J：惯量辨识与 b0 更新的公式汇总（RCESO v5.6，2026-11-13）
+%  独立文档；与 rcso_v3.tex 附录 C / §5.6 同口径。
+%  编译：xelatex 两次。
+% =============================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[UTF8,fontset=windows]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{url}
+\allowdisplaybreaks
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{0pt}
+\newcommand{\Jnom}{J_{\mathrm{nom}}}
+\newcommand{\Jtrue}{J_{\mathrm{true}}}
+\newcommand{\Jhat}{\hat J}
+\newcommand{\bzero}{b_0}
+\newcommand{\wref}{\omega_{\mathrm{ref}}}
+\newcommand{\Te}{T_e}
+\newcommand{\wenc}{\omega_{\mathrm{enc}}}
+\newcommand{\rpm}{\mathrm{rpm}}
+\title{\bfseries 自适应 $J$：惯量辨识与 $b_0$ 更新的公式汇总}
+\author{RCESO 技术文档（与 \texttt{rcso\_v3.tex} 附录 C 同口径）}
+\date{v5.6 \quad 2026-11-13}
+\begin{document}
+\maketitle
+\vspace{-4mm}
+\begin{center}
+\small 三相 PWM 逆变器 + PMSM 转速环 \quad $\Jnom=1.89\times10^{-5}$\,kg$\cdot$m$^2$ \quad 定稿台架 $\Jtrue=4.81\times10^{-5}=2.545\Jnom$
+\end{center}
+
+本文汇总“自适应 $J$”（第三环）从传动链折算、调试期 $100$\,Hz dither 注入、频域比值辨识、$b_0$ 更新与死区，到应用后校验/回退的全部公式与判据。符号与 \texttt{rcso\_v3.tex} 附录 C 一致。
+
+\section{两套惯量口径}
+
+ESO 与主循环必须用两个不同的惯量：
+\begin{itemize}
+  \item $\Jnom$：电机标定值，只进 $b_0$；
+  \item $\Jtrue$：传动链真实值（电机 $+$ 联轴器 $+$ 圆盘/齿轮箱折算），进主循环机械方程。
+\end{itemize}
+二者的倒数差作为扰动由 ESO 的 $z_2$ 估计：
+\begin{equation}
+\frac{1}{\Jtrue}-\frac{1}{\Jnom}.
+\label{eq:twoJ}
+\end{equation}
+若 $b_0$ 只按 $\Jnom$ 整定，环路增益随 $1/\Jtrue$ 下降；$\Jtrue=2.545\Jnom$ 时同一 $T_1=0.057$\,N$\cdot$m 故障的 $10$\,Hz 纹波由 $9.97$\,rpm（$b_0$ 已校正）涨到 $29.22$\,rpm（标称 $b_0$）。
+
+\section{传动链真实惯量}
+
+\begin{equation}
+\Jtrue=J_{\mathrm{motor}}+J_{\mathrm{cpl}}+\frac{J_{\mathrm{disc}}}{n_g^2}+\frac{n_b J_b}{n_g^2},
+\label{eq:Jtrue}
+\end{equation}
+其中 $n_g=\omega_{\mathrm{motor}}/\omega_{\mathrm{load}}$ 为齿轮比（本文台架 $n_g=1$），$n_b$ 为轴承数。均质圆盘与薄壁轴承：
+\begin{align}
+J_{\mathrm{disc}}&=\tfrac12 M_d R_d^2,\\
+J_b&\approx\tfrac12 m_b\left(r_i^2+r_o^2\right).
+\end{align}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+部件 & 参数 & 定稿台架 $J$/kg$\cdot$m$^2$ & 应力测试 $J$/kg$\cdot$m$^2$\\
+\midrule
+电机转子 & 已知 & $1.89\times10^{-5}$ & $1.89\times10^{-5}$\\
+联轴器 & 小钢盘 & $1.5\times10^{-6}$ & $1.5\times10^{-6}$\\
+圆盘 & $M_d,R_d$ & $0.08$\,kg, $20$\,mm：$1.60\times10^{-5}$ & $0.15$\,kg, $30$\,mm：$6.75\times10^{-5}$\\
+轴承（2 个） & $m_b=20$\,g, $r_i=10$\,mm, $r_o=22$\,mm & $1.168\times10^{-5}$ & $1.16\times10^{-5}$\\
+\midrule
+合计 & $n_g=1$ & $\mathbf{4.81\times10^{-5}}$（$2.545\Jnom$） & $9.95\times10^{-5}$（$5.26\Jnom$）\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{控制律与 $b_0$}
+
+速度环控制律（$e=r-z_1$，$z_1,z_2$ 为 ESO 状态，$v$ 为重复通道输出）：
+\begin{equation}
+u=\frac{1}{\bzero}\left[k_p^{\mathrm{eff}}\,e-z_2-v\right],\qquad
+k_p^{\mathrm{eff}}=k_p\left(1+k_{p,\mathrm{boost}}\,g\right),
+\label{eq:law}
+\end{equation}
+$g\in[0,1)$ 为律 D 的突变门控。标幺化被控对象在 $\wref$ 处的输入增益为
+\begin{equation}
+b=\frac{k_t I_{\mathrm{base}}}{\Jtrue\,\wref}=\frac{0.637}{\Jtrue\,\wref},
+\label{eq:bplant}
+\end{equation}
+其中 $k_tI_{\mathrm{base}}=1.5\,p\,\psi_f I_{\mathrm{base}}=0.637$\,N$\cdot$m（本文电机）。初始化取 $\bzero=1.2\,b(\Jnom)$，即留 $20\%$ 增益裕量：
+\begin{equation}
+\bzero(0)=1.2\,\frac{0.637}{\Jnom\,\wref}.
+\label{eq:b0init}
+\end{equation}
+环路增益正比于 $b/b_0$。把 $b_0$ 调到 $1.2\,b(\Jtrue)$ 即恢复设计增益；$b_0$ 同时是 ESO 的输入增益，故只改 $b_0$ 就同时修正了观测器模型。
+
+\section{调试期 dither 注入}
+
+在电流指令上叠加小转矩 dither：
+\begin{equation}
+T_d(t)=A\sin(2\pi f_d t),\qquad A=0.1\ \mathrm{N\cdot m},\quad f_d=100\ \mathrm{Hz}.
+\label{eq:dither}
+\end{equation}
+实现中 dither 加在标幺电流指令 $u$ 上：
+\begin{equation}
+u\;\leftarrow\;u+a_d\sin(2\pi f_d t),\qquad
+a_d=\frac{A}{k_tI_{\mathrm{base}}}=\frac{0.1}{0.637}\approx0.157.
+\label{eq:ad}
+\end{equation}
+辨识只在调试期（$t_0=0.5$--$1.0$\,s 起，最长到 $t_{\mathrm{end}}=3$\,s）进行；辨识结束后关闭 dither、冻结 $\Jhat$。
+
+\section{频域比值辨识}
+
+取窗长 $T_w=0.2$\,s，转速环采样 $T_s=1$\,ms，窗内点数 $N=T_w/T_s=200$，$t_k=kT_s$，$\omega_d=2\pi f_d$。对实测电磁转矩 $\Te(t_k)$ 与编码器转速 $\wenc(t_k)$ 做单频正交解调：
+\begin{align}
+\Te^{\,f_d}&=\frac{2}{N}\sum_{k=0}^{N-1}\Te(t_k)\,e^{-j\omega_d t_k},\label{eq:Tedft}\\
+\omega^{\,f_d}&=\frac{2}{N}\sum_{k=0}^{N-1}\wenc(t_k)\,e^{-j\omega_d t_k}.\label{eq:wdf}
+\end{align}
+惯量估计为
+\begin{equation}
+\boxed{\;\Jhat=\frac{\left|\Te^{\,f_d}\right|}{\omega_d\,\left|\omega^{\,f_d}\right|}\;}
+\label{eq:Jhat}
+\end{equation}
+
+\textbf{闭环保真性}：在 dither 频率处负载转矩无分量，被控对象满足 $\omega(s)=\Te(s)/(Js)$；取 $s=j\omega_d$ 得
+\begin{equation}
+\left|\omega^{\,f_d}\right|=\frac{\left|\Te^{\,f_d}\right|}{\Jtrue\,\omega_d}
+\;\Longrightarrow\;
+\Jhat=\frac{\left|\Te^{\,f_d}\right|}{\omega_d\left|\omega^{\,f_d}\right|}=\Jtrue.
+\label{eq:closedloop}
+\end{equation}
+控制器的反作用已包含在实测 $\Te$ 中，故闭环下无偏。$T_w=0.2$\,s 同时是 $20$ 个 $100$\,Hz 周期与 $2$ 个 $10$\,Hz 周期，故障基波与 dither 正交，减小泄漏。
+
+\section{$b_0$ 更新、限幅与死区}
+
+辨识完成后一次性更新，且 $k_p$ 不变：
+\begin{equation}
+\bzero\;\leftarrow\;\bzero\,\frac{\Jnom}{\Jhat},\qquad
+\Jhat\in\left[0.5,\,50\right]\Jnom.
+\label{eq:b0update}
+\end{equation}
+记
+\begin{equation}
+\rho:=\frac{\Jhat}{\Jnom},\qquad
+|\rho-1|\le0.20\;\Longrightarrow\;\text{状态 }5\ (\text{死区，不更新、不校验}).
+\label{eq:deadband}
+\end{equation}
+\textbf{为什么只改 $b_0$}：由 \eqref{eq:law}，环路增益 $\propto b\,k_p/b_0$。若同时放大 $k_p$，形成双重补偿；实测连续在线“$b_0+k_p$ 双补偿”会使 $i_q$ 冲到 $19$--$45$\,A，故已弃用。现在只在调试期辨识、冻结后一次性更新 $b_0$。
+
+\section{上电状态机 $0$--$5$}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}clp{9.2cm}@{}}
+\toprule
+状态 & 名称 & 进入/动作\\
+\midrule
+$0$ & 空闲 & 上电初始；\texttt{j\_id=False} 时停留于此\\
+$1$ & 辨识 & $t\ge t_0$ 起注入 dither，每 $0.2$\,s 窗算一个 $\Jhat$\\
+$2$ & 已应用 & 校验通过，$\bzero$ 已更新并冻结\\
+$3$ & 超时回退 & 到 $t_{\mathrm{end}}$ 仍无有效窗，保持标称 $\bzero$\\
+$4$ & 校验回退 & 应用后 $i_q$ 纹波或 $10$\,Hz 恶化 $>20\%$，撤销更新\\
+$5$ & 死区保持 & $|\rho-1|\le0.20$，不更新、不做校验\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+辨识段的有效窗判据：
+\begin{enumerate}
+  \item 每窗 dither 转速幅值 $\ge2$\,rpm（编码器 $2500$\,PPR、$4\times$ 在 $600$\,rpm/$1$\,ms 下量化台阶约 $6$\,rpm，靠整周期平均分辨）；
+  \item 有效窗数 $N_w\ge n_{\min}$（取 $3$--$5$），且窗间标准差
+  \begin{equation}
+  \sigma_{\Jhat}=\sqrt{\frac{1}{N_w}\sum_{i=1}^{N_w}\left(\Jhat_i-\bar{\Jhat}\right)^2}
+  \;\le\;0.15\,\bar{\Jhat};
+  \label{eq:std}
+  \end{equation}
+  \item 限幅 $\Jhat\in[0.5,50]\Jnom$；满足 1--3 即提前进入应用/校验，超时无有效窗则状态 $3$。
+\end{enumerate}
+
+\section{应用后校验与回退（状态 $4$）}
+
+为避免“$\Jhat$ 高估 $\to$ $b_0$ 偏小 $\to$ 环路增益偏高 $\to$ $i_q$ 过流”，应用后做一次短时校验。取 $1$\,ms 转速环采样，窗内 $N$ 点。
+
+\textbf{公平基线}：关 dither、$b_0$ 复位到标称，静置 $T_s=0.2$\,s 后取 $T_b=0.5$\,s 窗，记
+\begin{align}
+i_{q,\mathrm{AC}}^{\mathrm{base}}&=\sqrt{\frac{1}{N}\sum_{k=1}^{N}i_{q,k}^2-\left(\frac{1}{N}\sum_{k=1}^{N}i_{q,k}\right)^2},\label{eq:iqrms}\\
+A_{10}^{\mathrm{base}}&=\frac{2}{N}\left|\sum_{k=1}^{N}e_k\,e^{-j2\pi\cdot10\,t_k}\right|,
+\qquad e_k=n(t_k)-n_{\mathrm{ref}}\ (\mathrm{rpm}).\label{eq:a10}
+\end{align}
+
+\textbf{应用与后窗}：$\bzero\leftarrow\bzero\Jnom/\Jhat$，等 $T_d=0.5$\,s，再取同样 $T_v=0.5$\,s 窗，得 $i_{q,\mathrm{AC}}^{\mathrm{post}}$、$A_{10}^{\mathrm{post}}$。判据：
+\begin{equation}
+r_{iq}=\frac{i_{q,\mathrm{AC}}^{\mathrm{post}}}{i_{q,\mathrm{AC}}^{\mathrm{base}}}>1.20,
+\qquad\text{或}\qquad
+\left(A_{10}^{\mathrm{base}}\ge2\ \rpm\ \text{且}\ r_{A}=\frac{A_{10}^{\mathrm{post}}}{A_{10}^{\mathrm{base}}}>1.20\right)
+\;\Longrightarrow\;\text{回退，状态 }4;
+\label{eq:val}
+\end{equation}
+否则状态 $2$。$10$\,Hz 判据只在基线 $\ge2$\,rpm 时生效：无故障时 $10$\,Hz 分量只有 $1$--$3$\,rpm，已接近编码器量化噪声，比值没有判别力。
+
+\section*{实施顺序（伪代码）}
+\addcontentsline{toc}{section}{实施顺序（伪代码）}
+\begin{enumerate}
+  \item 上电，$t\ge t_0$ 起注入 \eqref{eq:dither}；每 $T_w=0.2$\,s 窗由 \eqref{eq:Tedft}--\eqref{eq:Jhat} 算 $\Jhat_i$。
+  \item 当有效窗数 $N_w\ge n_{\min}$ 且 \eqref{eq:std} 满足，停止 dither；取 $\bar{\Jhat}$ 并限幅，算 $\rho=\bar{\Jhat}/\Jnom$。
+  \item 若 $|\rho-1|\le0.20$：状态 $5$（死区），保持标称 $\bzero$，结束。
+  \item 否则按 \eqref{eq:iqrms}--\eqref{eq:a10} 采公平基线；按 \eqref{eq:b0update} 应用 $\bzero$；等 $T_d$ 后再采后窗，按 \eqref{eq:val} 判定状态 $2$（通过）或 $4$（回退）。
+  \item 到 $t_{\mathrm{end}}$ 仍无有效窗：状态 $3$，保持标称 $\bzero$，结束。
+\end{enumerate}
+
+\section{定稿参数}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+参数 & 符号 & 取值 & 说明\\
+\midrule
+标称/真实惯量 & $\Jnom$ / $\Jtrue$ & $1.89\times10^{-5}$ / $4.81\times10^{-5}$\,kg$\cdot$m$^2$ & 定稿台架 $2.545\Jnom$\\
+dither 频率/转矩 & $f_d$ / $A$ & $100$\,Hz / $0.1$\,N$\cdot$m & 归一化幅值 $a_d=0.157$\\
+辨识窗/起始/截止 & $T_w$ / $t_0$ / $t_{\mathrm{end}}$ & $0.2$\,s / $0.5$--$1.0$\,s / $3.0$\,s & $N=200$ 点\\
+有效窗数/标准差门限 & $n_{\min}$ / $\sigma_{\max}$ & $3$--$5$ / $0.15\bar{\Jhat}$ & 提前决策\\
+SNR 门限 & $\omega_{d,\min}$ & $2$\,rpm & 编码器量化约 $6$\,rpm\\
+限幅 & — & $[0.5,50]\Jnom$ & 防异常值\\
+死区 & \texttt{j\_apply\_thr} & $0.20$ & $|\rho-1|\le0.20$\\
+校验静置/基线窗 & $T_s$ / $T_b$ & $0.2$\,s / $0.5$\,s & dither 关、标称 $b_0$\\
+应用后等待/后窗 & $T_d$ / $T_v$ & $0.5$\,s / $0.5$\,s & 更新后\\
+恶化门限 & \texttt{j\_val\_tol} & $0.20$ & $i_q$ AC-RMS 或 $10$\,Hz\\
+$10$\,Hz 基线门限 & \texttt{j\_val\_a10\_floor} & $2.0$\,rpm & 低于此值只用 $i_q$ 判据\\
+额定电流 & $I_{\mathrm{rated}}$ & $6.31$\,A（$1$\,ms 包络） & $10$\,$\mu$s 原始峰值含 PWM 纹波\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{典型结果与边界}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+工况 & 状态 & $\Jhat$ 误差 & $10$\,Hz/rpm & $|i_q|$ 原始峰值/A & $i_q$ AC-RMS 比\\
+\midrule
+故障 $A=0.157$、$n_{\min}=3$ & $2$ & $+4.9\%$ & $4.26$ & $3.97$ & $1.04$\\
+故障 $A=0.157$、$n_{\min}=5$ & $2$ & $+6.2\%$ & $4.12$ & $3.97$ & $1.07$\\
+无故障 $A=0.157$ & $4$ & $+15.4\%$ & $2.21$ & $3.97$ & $2.71$\\
+无故障 $A=0.30$ & $4$ & $+7.2\%$ & $1.01$ & $4.88$ & $2.16$\\
+弱激励 $A=0.02$ & $2$ & $-5.9\%$ & $4.95$ & $3.97$ & $1.05$\\
+死区 $J=2.0\times10^{-5}$ & $5$ & $+10.0\%$ & $1.46$ & $3.49$ & ---\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{边界（如实披露）}：
+\begin{itemize}
+  \item 应力测试配置（$5.26\Jnom$）无故障时 dither 的转速响应只有约 $4$\,rpm，接近编码器 $6$\,rpm 量化台阶，$\Jhat$ 偏高约 $15\%$；无校验时 $i_q$ 的 $10$\,$\mu$s 峰值可到 $6.40$\,A（$1$\,ms 包络仍在额定内）。状态 $4$ 把它回退到 $3.97$\,A，代价是稳态误差回到标称 $b_0$ 的水平（$8.20$ vs 应用后 $3.96$\,rpm RMS）。
+  \item $\Jtrue/\Jnom>5$ 时，除 $b_0$ 外还应复核 $k_p$ 与 $\omega_o$ 的整定；定稿台架 $2.545\Jnom$ 下，律 D 的相对收益已从名义 $J$ 的 $-19.4\%$ 收缩到 $-7.3\%$（突变窗 RMS）。
+  \item 连续在线辨识会使 $\Jhat$ 抖动、增益抖动并导致 $i_q$ 发散（实测 $19$--$45$\,A），故只在调试期辨识一次、冻结；运行中低频复检仍是待办。
+  \item 全部数值来自 \texttt{pmsm\_inv\_sim.py}；$i_q$ 的额定判据按 $1$\,ms 块均值包络，$10$\,$\mu$s 原始峰值仅作参考。
+\end{itemize}
+
+\vspace{2mm}
+\noindent\footnotesize 对应实现：\texttt{pmsm\_inv\_sim.py}（dither/DFT/状态机/校验），\texttt{run\_j\_state4.py}（验证矩阵），\texttt{\_j\_state4.json}（数据）。报告正文见 \texttt{rcso\_v3.tex} §5.6、附录 C.1--C.7。
+
+\end{document}
