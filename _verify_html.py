@@ -27,16 +27,16 @@ chk("id_unique", len(ids) == len(set(ids)), "dup=%s" % [x for x in set(ids) if i
 
 srcs = re.findall(r'<img src="([^"]+)"', b)
 miss_img = [s for s in set(srcs) if not os.path.exists(s)]
-chk("figures", len(srcs) == 7 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
+chk("figures", len(srcs) == 8 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
 
-chk("h2", len(re.findall(r"<h2 ", b)) == 16, str(len(re.findall(r"<h2 ", b))))
-chk("h3", len(re.findall(r"<h3 ", b)) == 58, str(len(re.findall(r"<h3 ", b))))
+chk("h2", len(re.findall(r"<h2 ", b)) == 17, str(len(re.findall(r"<h2 ", b))))
+chk("h3", len(re.findall(r"<h3 ", b)) == 64, str(len(re.findall(r"<h3 ", b))))
 chk("h4", len(re.findall(r"<h4>", b)) == 2, str(len(re.findall(r"<h4>", b))))
 # 2026-11-13：附录 A/B 增加“仿真实现”小节——h2=16、h3=58、表=23
-chk("tables", len(re.findall(r"<table>", b)) == 23, str(len(re.findall(r"<table>", b))))
+chk("tables", len(re.findall(r"<table>", b)) == 25, str(len(re.findall(r"<table>", b))))
 chk("tabcap", len(re.findall(r'class="tabcap"', b)) == 0, str(len(re.findall(r'class="tabcap"', b))))
 chk("notice", len(re.findall(r"box notice", b)) == 2, str(len(re.findall(r"box notice", b))))
-chk("figcaption", len(re.findall(r"<figcaption>", b)) == 7, str(len(re.findall(r"<figcaption>", b))))
+chk("figcaption", len(re.findall(r"<figcaption>", b)) == 8, str(len(re.findall(r"<figcaption>", b))))
 
 # 浏览器可见的转换缺陷（51 项之外的三类：未转换的 \textbf、二次转义的表格、列格式残留）
 chk("no_visible_textbf", "\\textbf" not in b, "n=%d" % b.count("\\textbf"))

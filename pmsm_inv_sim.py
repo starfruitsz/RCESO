@@ -69,6 +69,23 @@ def sim_inv(t, TL, cfg=None):
     # 真实机械惯量（仿真主循环用；默认等于 J_M，向后兼容）
     # 物理折算：J_true = J_motor + J_coupling + J_disc/gear^2 + n_bearings*J_bearing
     J_TRUE = float(cfg.get("J_true", J_M))
+    # ---- J 辨识/自适应（2026-11-13）----
+    _jid = bool(cfg.get("j_id", False))
+    _jid_f = float(cfg.get("j_id_f", 100.0))
+    _jid_w = 2.0 * math.pi * _jid_f
+    _jid_amp = float(cfg.get("j_id_amp_u", 0.0785))      # 归一化电流 dither 幅值（×I_BASE）
+    _jid_n = max(int(round(float(cfg.get("j_id_win", 0.2)) / 1e-3)), 10)
+    _jid_lp = float(cfg.get("j_id_lp", 0.5))
+    _jid_tend = float(cfg.get("j_id_tend", 1e9))   # 调试期结束：冻结估计、关闭 dither
+    _j_adapt_b0 = bool(cfg.get("j_adapt_b0", True))
+    _j_adapt_kp = bool(cfg.get("j_adapt_kp", False))
+    _oracle = bool(cfg.get("j_oracle", False))
+    _jhat = J_M
+    _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
+    _KPe = KP
+    _te_c = _te_s = _w_c = _w_s = 0.0
+    _nid = 0
+    jhat_o = []
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 20e-3)
     Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
     rc_inj = str(cfg.get("rc_inj", "tanh"))   # 重复通道注入非线性：tanh（默认）或 fal
@@ -350,10 +367,10 @@ def sim_inv(t, TL, cfg=None):
             eps_g = det_eps if det_eps > 0.0 else 0.01
             g = (e1m * e1m) / (e1m * e1m + eps_g * eps_g)
             _gp = g ** kp_gpow if kp_gpow != 1.0 else g   # 律D 门控形状（2026-11-11）
-            kpe = KP * (1.0 + kp_boost * _gp)
+            kpe = _KPe * (1.0 + kp_boost * _gp)
             _g1 = ESO_G1(e1); _g2 = ESO_G2(e1)       # 线性档 G(e)=e（逐位不变）
             _woe = WO * (1.0 + kb_eso * g) if kb_eso > 0.0 else WO
-            z1n = z1 + 1e-3 * (z2 + B0 * u + v + 2.0 * _woe * _g1)
+            z1n = z1 + 1e-3 * (z2 + _B0e * u + v + 2.0 * _woe * _g1)
             z2n = z2 + 1e-3 * (_woe * _woe * _g2)
             e1p = (e1 - ff_phi * math.tanh(e1 / ff_phi)) if ff_phi > 0.0 else e1
             if _Tadapt:
@@ -464,7 +481,31 @@ def sim_inv(t, TL, cfg=None):
             else:
                 _yref = 1.0
             _fb = (_yref - z1n) if u_z1 else (_yref - y_m)
-            u = (kpe * _fb - z2n - vn) / B0
+            u = (kpe * _fb - z2n - vn) / _B0e
+            if _jid and k * dt >= _jid_tend:
+                _jid = False
+                _B0e = B0 * (J_M / _jhat)       # 冻结估计，应用一次
+                _KPe = KP
+            if _jid:
+                _ph = _jid_w * k * dt
+                u += _jid_amp * math.sin(_ph)          # 转矩 dither（叠加在电流指令上）
+                _te_c += Te * math.cos(_ph); _te_s += Te * math.sin(_ph)
+                _w_c += w_enc * math.cos(_ph); _w_s += w_enc * math.sin(_ph)
+                _nid += 1
+                if _nid >= _jid_n:
+                    _ate = 2.0 / _nid * math.hypot(_te_c, _te_s)
+                    _aw = 2.0 / _nid * math.hypot(_w_c, _w_s)
+                    if _aw > 1e-9:
+                        _jnew = _ate / (_jid_w * _aw)
+                        _jnew = min(max(_jnew, 0.5 * J_M), 50.0 * J_M)
+                        _jhat = (1.0 - _jid_lp) * _jhat + _jid_lp * _jnew
+                        if _j_adapt_b0:
+                            _B0e = B0 * (J_M / _jhat)
+                        if _j_adapt_kp:
+                            _KPe = KP * (_jhat / J_M)
+                    _te_c = _te_s = _w_c = _w_s = 0.0
+                    _nid = 0
+            jhat_o.append(_jhat)
             # F-B 检测：包络比值（ff_flush）和/或记忆失配（ff_mism），默认关
             if ff_flush > 0.0 or ff_mism > 0.0:
                 fft = max(0.0, fft - 1e-3); fft2 = max(0.0, fft2 - 1e-3)
@@ -563,5 +604,6 @@ def sim_inv(t, TL, cfg=None):
                 vd=vd_o[:m], vq=vq_o[:m], u=u_o[:m], vqc=vqc_o[:m],
                 iqr=iqr_o[:m], fl=fl_o[:m], dm=dm_o[:m], tl=tl_o[:m], sg=sg_o[:m],
                 b3=b3_o[:m], amp=a_o[:m], es=es_o[:m],
-                trig=trig_log, oracle=oracle_log)
+                trig=trig_log, oracle=oracle_log,
+                jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3)
 

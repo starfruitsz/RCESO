@@ -1612,4 +1612,107 @@ $S(s)$ & 速度环灵敏度\\
 \end{tabular}
 \end{center}
 
+
+% =====================================================================
+% 附录 C：真实传动链惯量与 J 自适应
+% =====================================================================
+\section*{附录 C：真实传动链惯量与 $J$ 自适应}\label{app:jadapt}
+
+\subsection*{C.1 惯量的两个口径}
+
+ESO 与主循环必须用两个不同的惯量：$J_{\rm nom}$ 是标定值（只进 $b_0$），$J_{\rm true}$ 是传动链真实值（进主循环的机械方程）。二者之差
+\begin{equation}
+\frac{1}{J_{\rm true}}-\frac{1}{J_{\rm nom}}
+\end{equation}
+作为扰动由 ESO 的 $z_2$ 估计。$J_{\rm true}$ 按附录 B.9 的式~\eqref{eq:unb-Jtrue} 折算。本文选一组自洽的台架参数（表 C.1），得到 $J_{\rm true}=9.95\times10^{-5}$，即 $5.26J_{\rm nom}$。
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+部件 & 参数 & $J$ / kg$\cdot$m$^2$\\
+\midrule
+电机转子 & 已知 & $1.89\times10^{-5}$\\
+联轴器 & 小钢盘 & $1.5\times10^{-6}$\\
+圆盘 & $M_d=0.15$\,kg、$R_d=30$\,mm & $6.75\times10^{-5}$\\
+轴承（2 个） & $m_b=20$\,g、$r_i=10$\,mm、$r_o=22$\,mm & $1.16\times10^{-5}$\\
+\midrule
+合计 & $n_g=1$ & $9.95\times10^{-5}$\\
+\bottomrule
+\end{tabular}
+\vspace{2pt}{\footnotesize 表 C.1\quad 台架传动链惯量折算（示例参数）}
+\end{center}
+
+\subsection*{C.2 指标}
+
+\begin{enumerate}
+  \item \textbf{辨识指标}：稳态相对误差 $|\hat J-J_{\rm true}|/J_{\rm true}$；收敛时间（进入 $\pm10\%$ 并保持）；
+  \item \textbf{抑制指标}：故障工况下 $10$\,Hz 转速分量（稳态 $9$--$10$\,s）；
+  \item \textbf{注入代价}：$100$\,Hz 转速分量（仅辨识期）与 $|i_q|$ 峰值；
+  \item \textbf{稳定性}：无故障时 $10$\,Hz 分量与稳态 RMS（判断是否出现极限环）。
+\end{enumerate}
+
+\subsection*{C.3 方案：调试期转矩注入 + 频域比值辨识}
+
+在电流指令上叠加一个小转矩 dither
+\begin{equation}
+T_d(t)=A\sin(2\pi f_d t),\qquad A=0.1\ \mathrm{N\cdot m},\ f_d=100\ \mathrm{Hz},
+\end{equation}
+取 $0.2$\,s 窗（$20$ 个整周期，且为 $10$\,Hz 的 $2$ 个整周期，与故障正交），用 $T_e$ 与 $\omega$ 的 DFT 比值估计
+\begin{equation}
+\hat J=\frac{|T_{e,f_d}|}{2\pi f_d\,|\omega_{f_d}|}.
+\label{eq:appC-jhat}
+\end{equation}
+该式在闭环下仍成立：被控对象满足 $\omega=T_e/(Js)$，负载在 $100$\,Hz 无分量；控制器的反作用已包含在实测 $T_e$ 中。辨识只做 $0$--$2$\,s（调试期），随后冻结 $\hat J$、关闭 dither，并一次性更新
+\begin{equation}
+b_0\leftarrow b_0\,\frac{J_{\rm nom}}{\hat J},\qquad k_p\ \text{不变},\qquad \hat J\in[0.5,\,50]J_{\rm nom}.
+\label{eq:appC-b0}
+\end{equation}
+
+\textbf{为什么只更新 $b_0$、且只在调试期做}：(i) 控制律 $u=(k_p e-z_2-v)/b_0$ 的环路增益为 $b\,k_p/b_0$，把 $b_0$ 调到真实 $b$ 即恢复增益，若同时放大 $k_p$ 会双重补偿（实测 $i_q$ 冲到 $19$\,A）；(ii) 编码器 $2500$\,PPR（$4$ 倍频）在 $600$\,rpm、$1$\,ms 采样下的量化台阶约 $6$\,rpm，$100$\,Hz dither 的转速幅值需 $\ge0.1$\,N$\cdot$m 才有足够信噪比，连续在线辨识会因 $\hat J$ 抖动导致增益抖动，实测出现 $i_q$ 发散；调试期辨识 + 冻结是工业伺服的标准做法。
+
+\subsection*{C.4 结果}
+
+\begin{center}\scriptsize
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+工况 & $\hat J$ 误差 & $10$\,Hz/rpm & 辨识期 $100$\,Hz/rpm & 运行段 $100$\,Hz/rpm & $i_q$/A\\
+\midrule
+标称 $J$（基准） & --- & $26.2$ & --- & --- & $1.89$\\
+$J_{\rm true}=5.26J_{\rm nom}$，固定标称 & --- & $33.3$ & --- & --- & $3.97$\\
+oracle 重整定（$b_0$ 按 $J_{\rm true}$） & --- & $4.6$ & --- & --- & $7.03$\\
+\textbf{辨识 + $b_0$ 自适应} & $+9.5\%$ & $\mathbf{4.0}$ & $18.2$ & $\mathbf{0.16}$ & $\mathbf{5.06}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=0.97\textwidth]{fig_j_adapt.png}
+\caption{\textbf{$J$ 辨识与 $b_0$ 自适应}（$600$\,rpm、$T_1=0.057$\,N$\cdot$m、$J_{\rm true}=5.26J_{\rm nom}$）。
+(a) $\hat J$ 在 $2$\,s 内收敛到 $+9.5\%$ 后冻结；(b) 故障抑制：固定标称 $33.3$\,rpm，oracle $4.6$，自适应 $4.0$；
+(c) dither 代价仅存在于辨识期（$18.2$\,rpm），运行段 $0.16$\,rpm；(d) 稳态时域对比。}
+\label{fig:appC-jadapt}
+\end{figure}
+
+\subsection*{C.5 与文献方法的对照}
+
+惯量辨识的常用路线及取舍：
+\begin{itemize}
+  \item \textbf{频域注入/比值法}（本文）：不需负载模型，闭环下无偏；代价是调试期需一次激励，受编码器分辨率限制。适合本台架（故障转矩未知、负载周期变化）。
+  \item \textbf{递推最小二乘（RLS/自适应 RLS）}：用 $T_e-J\dot\omega-T_L=0$ 回归；需速度微分或滤波，负载变化时依赖遗忘因子，故障转矩会被误吸收进 $\hat J$。
+  \item \textbf{MRAS/EKF}：以参考模型与实测速度的误差驱动 $\hat J$；收敛较慢，模型阶次敏感。
+  \item \textbf{ESO/扩张状态观测器 + 惯量辨识}：把 $J$ 误差并入总扰动再分离；实现简单，但与负载扰动耦合。
+\end{itemize}
+代表性工作：自适应 RLS 在线辨识（IEEE 8216502）、有限时间 ESO $+$ 惯量辨识（IEEE 9591643）、
+低增益扰动观测器 $+$ 惯量辨识（IEEE 10770227）、MRAS-EKO 在线辨识（中文期刊 2022）。
+链接：\url{https://xplorestaging.ieee.org/document/8216502}；\url{https://ieeexplore.ieee.org/abstract/document/9591643}；
+\url{https://ieeexplore.ieee.org/document/10770227}；\url{https://cnki.sris.com.tw/KCMS/detail/detail.aspx?filename=ZHJC202203014&dbcode=CJFQ&dbname=CJFD2022}。
+
+\subsection*{C.6 实施}
+
+配置键：\texttt{j\_id}（开）、\texttt{j\_id\_f}=100、\texttt{j\_id\_amp\_u}=0.157（$\approx0.1$\,N$\cdot$m）、\texttt{j\_id\_win}=0.2、\texttt{j\_id\_lp}=0.4、\texttt{j\_id\_tend}=2.0、\texttt{j\_adapt\_b0}=True；对比用 \texttt{j\_oracle}=True。
+默认全部关闭，原有结果逐位不变。
+
+\textbf{对前文推荐工况的影响}：$T_1=0.057$\,N$\cdot$m 在 $J_{\rm nom}$ 下给出 $26$\,rpm，但在 $J_{\rm true}=5.26J_{\rm nom}$ 且自适应后只有 $4$\,rpm。若要在真实 $J$ 下仍看到 $20$--$30$\,rpm 的 $10$\,Hz 纹波，需把 $T_1$ 提高到约 $0.3$\,N$\cdot$m（接近额定），或减小圆盘惯量（如 $R_d=20$\,mm、$M_d=0.08$\,kg，$J_{\rm true}\approx2.4J_{\rm nom}$）。在确定台架圆盘参数后应重跑 §\ref{sec:tes-res} 与附录 B 的扫描。
+
+
 \end{document}
