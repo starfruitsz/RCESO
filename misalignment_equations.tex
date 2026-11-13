@@ -191,3 +191,20 @@ M_{gZ}=mgd
 % K7 离心力量级
 F_c\approx 0.34\ \mathrm{N}
 
+% -----------------------------------------------------------------------------
+% L. 仿真实现（附录 A.13，接入 pmsm_inv_sim 的故障转矩模型）
+% -----------------------------------------------------------------------------
+% L1 不对中绕轴脉动转矩（物理项）
+T_m\left(\theta,\omega,\beta\right)=-M g\,l\sin\beta\,\sin\theta
+
+% L2 含 Hooke 联轴器 2× 调制
+T_m\left(\theta,\omega,\beta\right)=-M g\,l\sin\beta\,\sin\theta+\kappa T_0\left[\frac{1-\sin^2\beta\cos^2\theta}{\cos\beta}-1\right]
+
+% L3 等效放大形式
+T_m\left(\theta,\omega,\beta\right)=-\kappa M g\,l\sin\beta\,\sin\theta
+
+% L4 机械角
+\theta=\frac{th}{P_{\mathrm{pol}}}
+
+% L5 物理幅值（台架示例）
+T_m=M g\,l\sin\beta\approx8.6\times10^{-4}\ \mathrm{N\cdot m}

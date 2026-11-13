@@ -19,6 +19,7 @@ import math
 import numpy as np
 
 from eso_gain import make_gains
+from fault_torque import unbalance_torque, misalign_torque
 
 R_S = 0.175
 L_S = 0.57e-3
@@ -138,6 +139,12 @@ def sim_inv(t, TL, cfg=None):
     _tlae = cfg.get("tl_ang_end", None)       # 角度锁相分量的撤除时刻（None=不撤除）
     _nang1 = int(round(float(_tlae) / dt)) if _tlae is not None else None
     _tlar = cfg.get("tl_ang_rev", None)       # 角度锁相分量的反相时刻（None=不反相）
+    # 故障负载模型（2026-11-13，附录 A/B）：tl_fault=None 时关闭，逐位不变
+    #   cfg["tl_fault"] = {"start": 0.0,
+    #                      "unbalance": {"M":0.1,"e":1e-4,"kappa":1.0},
+    #                      "misalign":  {"M":0.1,"beta":0.01745,"l":0.05,"kappa":1.0}}
+    _tflt = cfg.get("tl_fault", None)
+    _tflt_n0 = int(round(float((_tflt or {}).get("start", 0.0)) / dt))
     _nangr = int(round(float(_tlar) / dt)) if _tlar is not None else None
     ff_wait = cfg.get("ff_wait", 0.0)          # 检测后再等待的相位延迟（s），0=立即复位
     ff_confirm = cfg.get("ff_confirm", 0.0)    # 连续确认窗（ms），0=首拍触发
@@ -277,6 +284,16 @@ def sim_inv(t, TL, cfg=None):
         idq[0] += dt * did; idq[1] += dt * diq
         Te = 1.5 * P_POL * PSI_F * idq[1]
         _tl = TL[k]
+        if _tflt is not None and k >= _tflt_n0:
+            _phimf = (th / P_POL) % TWO_PI
+            _tlf = 0.0
+            _u = _tflt.get("unbalance")
+            if _u:
+                _tlf += unbalance_torque(_phimf, w, **_u)
+            _m = _tflt.get("misalign")
+            if _m:
+                _tlf += misalign_torque(_phimf, w, **_m)
+            _tl += _tlf
         if _TLA is not None and k >= _nang0 and (_nang1 is None or k < _nang1):  # 角度锁相分量：按当前机械角查表
             _phim = (th / P_POL) % TWO_PI
             if (_phj_i is not None) and (k >= _phj_i):

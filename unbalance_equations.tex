@@ -113,3 +113,20 @@ T_g=0
 % U33 质心轴向偏置的附加力偶
 \pm\frac{z_C\hat{Z}\times\vec{F}_u}{L}
 
+% -----------------------------------------------------------------------------
+% U10 仿真实现（附录 B.9，接入 pmsm_inv_sim 的故障转矩模型）
+% -----------------------------------------------------------------------------
+% L1 不平衡绕轴脉动转矩（重力项 + 摩擦调制）
+T_u\left(\theta,\omega,e\right)=-M g\,e\sin\theta+\mu_b r_b\,M e\,\omega^2\cos\theta
+
+% L2 等效放大形式
+T_u\left(\theta,\omega,e\right)=-\kappa M g\,e\sin\theta
+
+% L3 机械角
+\theta=\omega t+\theta_0
+
+% L4 离心力（轴承/振动通道，不进入 T）
+F_u=M e\,\omega^2
+
+% L5 物理幅值（台架示例）
+T_u=M g\,e\approx9.8\times10^{-5}\ \mathrm{N\cdot m}

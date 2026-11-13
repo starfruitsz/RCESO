@@ -158,7 +158,21 @@ F_u=\frac{\omega^2}{g}T_g .
   \item “不平衡力对轴有力矩”——错。离心力与偏心矢量共线，对轴的力矩为零；只有轴向偏置才产生力偶。
 \end{enumerate}
 
-\subsection*{B.9 符号表}
+\subsection*{B.9 仿真实现}
+
+式~\eqref{eq:unb-taug2}（重力矩）与式~\eqref{eq:unb-DTf}（摩擦调制）已封装为 \texttt{fault\_torque} 中的 \texttt{unbalance\_torque}：
+\begin{equation}
+T_u(\theta,\omega,e)=-M g\,e\sin\theta+\mu_b r_b\,M e\,\omega^2\cos\theta ,
+\label{eq:unb-impl}
+\end{equation}
+第二项默认关闭（$\mu_b=0$）。接入点与附录 A 相同（主循环 \texttt{\_tl = TL[k]} 之后，$\theta=th/P_{\mathrm{pol}}$、$\omega=w$）。配置键 \texttt{cfg["tl\_fault"]} 取字典 \texttt{\{"start":\ldots,\ "unbalance":\{"M":\ldots,\ "e":\ldots,\ "kappa":\ldots\}\}}；默认 \texttt{tl\_fault=None} 时逐位不变。
+
+\textbf{量级与验证}：$\kappa=1$ 时 $1\times$ 幅值 $Mge=9.8\times10^{-5}$\,N$\cdot$m，10\,Hz 分量 $1.09$\,rpm、稳态 RMS $15.13$\,rpm（基准 $1.25$ / $15.57$）；
+$\kappa=580$ 时幅值 $0.0569$\,N$\cdot$m，10\,Hz 分量 $26.01$\,rpm、RMS $24.65$\,rpm。
+要复现台架 $0.057$\,N$\cdot$m 而用 $\kappa=1$，需要 $e\approx58$\,mm，物理上不可能；故台架型线必须按“等效注入”理解。
+离心力 $F_u=Me\omega^2$ 用 \texttt{unbalance\_force} 单独读取（轴承/振动通道），不进入 $T$。
+
+\subsection*{B.10 符号表}
 
 \begin{center}\footnotesize
 \begin{tabular}{@{}ll@{}}
