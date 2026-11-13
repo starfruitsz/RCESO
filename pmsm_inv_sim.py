@@ -99,6 +99,24 @@ def sim_inv(t, TL, cfg=None):
     _jdo_TL = 0.0
     _jdo_wprev = 0.0
     _jdo_wdotf = 0.0
+    # ---- Yang 2018 AKO-RLS 在线惯量辨识（实验，2026-11-14；默认关闭）----
+    _ako_on = bool(cfg.get("j_ako", False))
+    _ako_J = J_M
+    _ako_X = None
+    _ako_P = np.eye(3)
+    _ako_Q = np.diag([1e-3, 1e-2, 1e-1])
+    _ako_R = float(cfg.get("j_ako_R", 1e-3))
+    _ako_ethr = float(cfg.get("j_ako_ethr", 1e-4))
+    _ako_rho = float(cfg.get("j_ako_rho", 0.1))
+    _ako_lam = float(cfg.get("j_ako_lam", 0.99))
+    _ako_sigma = np.zeros(2)
+    _ako_psi = np.eye(2)
+    _ako_th_prev = None
+    _ako_th_unw = 0.0
+    _ako_w_prev = 0.0
+    _ako_TL_prev = 0.0
+    _ako_Te_prev = 0.0
+    _ako_first = True
     _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
     _KPe = KP
     # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
@@ -560,6 +578,53 @@ def sim_inv(t, TL, cfg=None):
                 _jhat = _jdo_J
                 _B0e += (1e-3 / _jdo_tau) * (B0 * (J_M / _jdo_J) - _B0e)
             _jdo_wprev = w_enc
+            # ---- Yang 2018 AKO-RLS：3 状态 KF（theta,w,TL）+ RLS（a1,b1）----
+            if _ako_on and _tk > 0.1:
+                _theta_m = (cnt % ENC_CPR) / ENC_CPR * TWO_PI
+                if _ako_first:
+                    _ako_th_unw = _theta_m; _ako_th_prev = _theta_m
+                    _ako_X = np.array([_theta_m, 0.0, 0.0]); _ako_first = False
+                _dth = _theta_m - _ako_th_prev
+                if _dth > math.pi: _dth -= TWO_PI
+                elif _dth < -math.pi: _dth += TWO_PI
+                _ako_th_unw += _dth; _ako_th_prev = _theta_m
+                _Jk = _ako_J
+                _A = np.array([[1.0, 1e-3, 0.0], [0.0, 1.0, -1e-3 / _Jk], [0.0, 0.0, 1.0]])
+                _Bv = np.array([0.0, 1e-3 / _Jk, 0.0])
+                _Xp = _A @ _ako_X + _Bv * Te
+                _Pp = _A @ _ako_P @ _A.T + _ako_Q
+                _S = _Pp[0, 0] + _ako_R
+                _K = _Pp[:, 0] / _S
+                _V = _ako_th_unw - _Xp[0]
+                _ako_X = _Xp + _K * _V
+                _ako_P = _Pp - np.outer(_K, _Pp[0, :])
+                if _V * _V >= _ako_ethr:
+                    _ako_Q = _ako_Q * (1.0 + _ako_rho)
+                else:
+                    _ako_Q = _ako_Q * (1.0 - _ako_rho)
+                _ako_Q = np.diag(np.clip(np.diag(_ako_Q), 1e-9, 1e2))
+                _tau_r = np.array([-_ako_w_prev, _ako_Te_prev - _ako_TL_prev])
+                _psi_tau = _ako_psi @ _tau_r
+                _eta = _psi_tau / (_ako_lam + _tau_r @ _psi_tau)
+                _er = _ako_X[1] - _ako_sigma @ _tau_r
+                _ako_sigma = _ako_sigma + _eta * _er
+                _ako_psi = (_ako_psi - np.outer(_eta, _psi_tau)) / _ako_lam
+                _a1, _b1 = _ako_sigma
+                _Jnew = J_M
+                if _b1 > 1e-12 and _a1 < 0.0:
+                    _Bh = (1.0 + _a1) / _b1
+                    if abs(_Bh) > 1e-9:
+                        _Jnew = -_Bh * 1e-3 / math.log(-_a1)
+                    else:
+                        _Jnew = 1e-3 / _b1
+                _Jnew = min(max(_Jnew, 0.5 * J_M), 50.0 * J_M)
+                if _V * _V <= _ako_ethr:
+                    _ako_J = 0.999 * _ako_J + 0.001 * _Jnew
+                    _ako_w_prev = _ako_X[1]
+                    _ako_TL_prev = _ako_X[2]
+                    _ako_Te_prev = Te
+                    _jhat = _ako_J
+                    _B0e += (1e-3 / 0.5) * (B0 * (J_M / _ako_J) - _B0e)
             if _jid:
                 if _tk >= _jid_tend:                 # 超时：有有效窗则进入应用/校验，否则回退
                     _jid = False
