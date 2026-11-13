@@ -269,6 +269,10 @@ $\kappa=67$ 时幅值 $0.0573$\,N$\cdot$m，10\,Hz 分量 $26.52$\,rpm、RMS $25
 即使 $\beta=90^\circ$，该转子也只能给出 $0.049$\,N$\cdot$m，达不到台架 $1\times$ 分量的 $0.057$\,N$\cdot$m——要复现台架扰动必须用 $\kappa\approx67$ 的\textbf{等效放大}。
 横向弯矩 $|I_t'-I_p|\omega^2\sin\beta\cos\beta$ 由轴承承担、不进入 $T$；需要轴承通道时用 \texttt{misalign\_moment}。
 
+
+
+\textbf{齿轮箱折算}：$T_m$ 是电机轴上的等效力矩；若角不对中发生在齿轮箱负载侧，注入电机轴时应除以速比 $n_g$，并把角度换成 $\theta/n_g$。
+
 \subsection*{A.14 符号表}
 
 \begin{center}\footnotesize

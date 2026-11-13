@@ -405,7 +405,7 @@ window.MathJax = {
 <h3 id="h4">对象：三相 PWM 逆变器 + PMSM</h3>
 <p>模型为 <code>pmsm_inv_sim</code>：</p>
 
-<div class="tablewrap"><table><thead><tr><th>项目</th><th>取值</th><th>项目</th><th>取值</th></tr></thead><tbody><tr><td>母线 / 开关频率</td><td>$60$\,V / $10$\,kHz</td><td>死区 / 器件压降</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td>相电感 / 电阻</td><td>$L_d=L_q=0.57$\,mH / $0.175\,\Omega$</td><td>磁链 / 极对数</td><td>$\psi_f=0.01683$\,Wb / $4$</td></tr><tr><td>转动惯量</td><td>$J=1.89\times10^{-5}$ kg$\cdot$m$^2$</td><td>电流环带宽</td><td>$f_{ci}=500$\,Hz</td></tr><tr><td>重复通道</td><td>$\beta_3=4000$、$\tau_0=20$\,ms</td><td>速度环</td><td>$k_p=75.36$、$\omega_o=500$</td></tr><tr><td>dq 采样噪声</td><td>$\pm0.1$\,A（实验室档）</td><td>编码器</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>负载噪声 / 转速噪声</td><td>$0.01$\,N$\cdot$m / $3$\,rpm（实验室档）</td><td>积分步长</td><td>$2\,\mu$s</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>项目</th><th>取值</th><th>项目</th><th>取值</th></tr></thead><tbody><tr><td>母线 / 开关频率</td><td>$60$\,V / $10$\,kHz</td><td>死区 / 器件压降</td><td>$2\,\mu$s / $0.9$\,V</td></tr><tr><td>相电感 / 电阻</td><td>$L_d=L_q=0.57$\,mH / $0.175\,\Omega$</td><td>磁链 / 极对数</td><td>$\psi_f=0.01683$\,Wb / $4$</td></tr><tr><td>转动惯量</td><td>$J_{\rm nom}=1.89\times10^{-5}$（标定；真值见附录 B.9）</td><td>电流环带宽</td><td>$f_{ci}=500$\,Hz</td></tr><tr><td>重复通道</td><td>$\beta_3=4000$、$\tau_0=20$\,ms</td><td>速度环</td><td>$k_p=75.36$、$\omega_o=500$</td></tr><tr><td>dq 采样噪声</td><td>$\pm0.1$\,A（实验室档）</td><td>编码器</td><td>$2500$ PPR（$4\times$）</td></tr><tr><td>负载噪声 / 转速噪声</td><td>$0.01$\,N$\cdot$m / $3$\,rpm（实验室档）</td><td>积分步长</td><td>$2\,\mu$s</td></tr></tbody></table></div>
 
 <p>逆变器按中心对齐 PWM 比较、死区平均电压误差 $\mp V_{dc}T_d/T_{pwm}$、器件压降与导通电阻建模；</p>
 <p>电机侧 $L_d,L_q$ 与反电动势 $\omega_e\psi_f$ 显式进入 dq ODE；相电流由 dq 反变换得到，</p>
@@ -744,6 +744,8 @@ window.MathJax = {
 <p>即使 $\beta=90^\circ$，该转子也只能给出 $0.049$\,N$\cdot$m，达不到台架 $1\times$ 分量的 $0.057$\,N$\cdot$m——要复现台架扰动必须用 $\kappa\approx67$ 的<strong>等效放大</strong>。</p>
 <p>横向弯矩 $|I_t'-I_p|\omega^2\sin\beta\cos\beta$ 由轴承承担、不进入 $T$；需要轴承通道时用 <code>misalign_moment</code>。</p>
 
+<p><strong>齿轮箱折算</strong>：$T_m$ 是电机轴上的等效力矩；若角不对中发生在齿轮箱负载侧，注入电机轴时应除以速比 $n_g$，并把角度换成 $\theta/n_g$。</p>
+
 <h3 id="h20">A.14 符号表</h3>
 
 <div class="tablewrap"><table><thead><tr><th>符号</th><th>含义</th></tr></thead><tbody><tr><td>$\beta$</td><td>角不对中（几何轴与实际轴夹角）</td></tr><tr><td>$l$</td><td>质心沿几何轴到交点 $O$ 的距离</td></tr><tr><td>$d=l\sin\beta$</td><td>质心到实际轴距离</td></tr><tr><td>$I_p,\;I_t$</td><td>极/横向转动惯量（绕质心）</td></tr><tr><td>$I_t'=I_t+ml^2$</td><td>绕 $O$ 的横向惯量</td></tr><tr><td>$I_n$</td><td>绕实际轴的等效转动惯量</td></tr><tr><td>$a,\;b,\;L$</td><td>两轴承到 $O$ 的距离与跨距</td></tr><tr><td>$S(s)$</td><td>速度环灵敏度函数</td></tr><tr><td>$T_k,\;\psi_k$</td><td>第 $k$ 次转矩谐波幅值与相位</td></tr></tbody></table></div>
@@ -863,6 +865,13 @@ window.MathJax = {
 <p>$\kappa=580$ 时幅值 $0.0569$\,N$\cdot$m，10\,Hz 分量 $26.01$\,rpm、RMS $24.65$\,rpm。</p>
 <p>要复现台架 $0.057$\,N$\cdot$m 而用 $\kappa=1$，需要 $e\approx58$\,mm，物理上不可能；故台架型线必须按“等效注入”理解。</p>
 <p>离心力 $F_u=Me\omega^2$ 用 <code>unbalance_force</code> 单独读取（轴承/振动通道），不进入 $T$。</p>
+
+<p><strong>关于 $J_{\rm true}$ 与 $J_{\rm nom}$</strong>：附录中的 $T_u$、$T_m$ 注入的是<strong>电机轴</strong>上的等效力矩。仿真主循环必须用真实传动链惯量</p>
+
+<div class="eqwrap" id="eq:unb-Jtrue"><div class="eq">\[J_{\rm true}=J_{\rm motor}+J_{\rm cpl}+\frac{J_{\rm disc}}{n_g^{2}}+\frac{n_bJ_b}{n_g^{2}}, \]</div><div class="eqno">(77)</div></div>
+<p>而 ESO 的 $b_0$ 只用标定值 $J_{\rm nom}$（本报告 $1.89\times10^{-5}$\,kg$\cdot$m$^2$，通常为电机转子部分），二者之差 $1/J_{\rm true}-1/J_{\rm nom}$ 作为扰动由 ESO 估计。</p>
+<p>若故障在齿轮箱负载侧，注入电机轴的转矩应除以速比 $n_g$、角度换成 $\theta/n_g$。</p>
+<p>本报告的全部数值结果取 $J_{\rm true}=J_{\rm nom}$；若台架含圆盘/齿轮箱，必须按式~<a class="xref" href="#eq:unb-Jtrue">(77)</a> 重算 $J_{\rm true}$ 并复跑（$J$ 失配超过约 $5$ 倍时固定增益的速度环自身会失稳，需重新标定 $k_p,\omega_o$）。</p>
 
 <h3 id="h30">B.10 符号表</h3>
 

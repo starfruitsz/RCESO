@@ -25,7 +25,7 @@ R_S = 0.175
 L_S = 0.57e-3
 PSI_F = 0.101 / (1.5 * 4.0)      # 0.016833 Wb
 P_POL = 4
-J_M = 1.89e-5
+J_M = 1.89e-5          # 电机转子惯量（=ESO 标称 J_nom 的来源）
 V_DC = 60.0
 N_REF = 600.0
 W_REF = N_REF * math.pi / 30.0
@@ -66,6 +66,9 @@ def sim_inv(t, TL, cfg=None):
     #   z1: beta1*G(e; a1, delta, lam)，z2: beta2*G(e; a, delta, lam)
     ESO_G1, ESO_G2 = make_gains(cfg)
     B_GAIN = 0.101 * I_BASE / (J_M * w_ref); B0 = 1.2 * B_GAIN
+    # 真实机械惯量（仿真主循环用；默认等于 J_M，向后兼容）
+    # 物理折算：J_true = J_motor + J_coupling + J_disc/gear^2 + n_bearings*J_bearing
+    J_TRUE = float(cfg.get("J_true", J_M))
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 20e-3)
     Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
     rc_inj = str(cfg.get("rc_inj", "tanh"))   # 重复通道注入非线性：tanh（默认）或 fal
@@ -303,7 +306,7 @@ def sim_inv(t, TL, cfg=None):
                 _tlv = -_tlv
             _tl += _tlv
         _tl_tot = _tl + TLn[min(k // nTstep, nT - 1)]      # 实际施加的总负载（含负载噪声）
-        w += dt * (Te - _tl_tot) / J_M
+        w += dt * (Te - _tl_tot) / J_TRUE  # 主循环用真实 J；B0 仍由 J_M 标称
 
         # ---- 电流环：每个 PWM 周期一次 ----
         if k % npwm == 0:

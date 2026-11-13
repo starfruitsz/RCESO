@@ -172,6 +172,15 @@ $\kappa=580$ 时幅值 $0.0569$\,N$\cdot$m，10\,Hz 分量 $26.01$\,rpm、RMS $2
 要复现台架 $0.057$\,N$\cdot$m 而用 $\kappa=1$，需要 $e\approx58$\,mm，物理上不可能；故台架型线必须按“等效注入”理解。
 离心力 $F_u=Me\omega^2$ 用 \texttt{unbalance\_force} 单独读取（轴承/振动通道），不进入 $T$。
 
+\textbf{关于 $J_{\rm true}$ 与 $J_{\rm nom}$}：附录中的 $T_u$、$T_m$ 注入的是\textbf{电机轴}上的等效力矩。仿真主循环必须用真实传动链惯量
+\begin{equation}
+J_{\rm true}=J_{\rm motor}+J_{\rm cpl}+\frac{J_{\rm disc}}{n_g^{2}}+\frac{n_bJ_b}{n_g^{2}},
+\label{eq:unb-Jtrue}
+\end{equation}
+而 ESO 的 $b_0$ 只用标定值 $J_{\rm nom}$（本报告 $1.89\times10^{-5}$\,kg$\cdot$m$^2$，通常为电机转子部分），二者之差 $1/J_{\rm true}-1/J_{\rm nom}$ 作为扰动由 ESO 估计。
+若故障在齿轮箱负载侧，注入电机轴的转矩应除以速比 $n_g$、角度换成 $\theta/n_g$。
+本报告的全部数值结果取 $J_{\rm true}=J_{\rm nom}$；若台架含圆盘/齿轮箱，必须按式~\eqref{eq:unb-Jtrue} 重算 $J_{\rm true}$ 并复跑（$J$ 失配超过约 $5$ 倍时固定增益的速度环自身会失稳，需重新标定 $k_p,\omega_o$）。
+
 \subsection*{B.10 符号表}
 
 \begin{center}\footnotesize
