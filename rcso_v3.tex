@@ -1,7 +1,7 @@
 
 % =============================================================================
 % =============================================================================
-%  RCESO 技术报告 v5.0 · 2026-11-12
+%  RCESO 技术报告 v5.5 · 2026-11-13
 %  建模 / 内模侧自适应（带通、Q）/ 律 D（Kp+ESO 联合调度）/ T 自适应（锁相 ESC）/ 一致有界性
 %  正式对象 : pmsm_inv_sim.py（三相 PWM 逆变器 + PMSM + 采样 + 律 D + ESC）
 %  证据 : run_lawd_new.py / run_t_es3.py / run_t_es4.py / run_t_es_ff.py / run_t_es_roundtrip.py
@@ -13,6 +13,8 @@
 %   (2) 律 D 升级为“比例增益 + 观测带宽”联合调度（k_b=6, a=3，v5.3 由 8/2 调整以守住额定电流）。
 %   (3) 新增 T 自适应（锁相极值搜索 ESC）：对标称周期 2*pi/omega 做相位对齐修正。
 %   (4) 数值口径统一为 2026-11-11 工况（圆盘型线 V2、实验室噪声、fci=500 Hz、类 fal ESO）。
+%   (5) v5.5（2026-11-13）：新增 J 自适应（调试期辨识 + b0 更新）作为第三环；
+%       新增附录 A（不对中）、B（质量不平衡）、C（真实 J 与 J 自适应）。
 % =============================================================================
 \documentclass[11pt,a4paper]{article}
 \usepackage[UTF8,fontset=windows]{ctex}
@@ -49,10 +51,10 @@
 \begin{center}
 {\Large\bfseries 自适应低通重复控制（RCESO）：建模、律 D 与周期自整定}\\[3pt]
 {\small\bfseries ——真实逆变器 PMSM 转速环上的联合增益调度与锁相极值搜索}\\[4pt]
-{\small v5.0 · 2026-11-12 · 对象：真实逆变器（\texttt{pmsm\_inv\_sim}）· 三相 PWM/死区/反电动势 · 600 rpm/圆盘型线 V2 · 律 D = Kp+ESO 联合调度 · T 自适应 = 锁相 ESC}
+{\small v5.5 · 2026-11-13 · 对象：真实逆变器（\texttt{pmsm\_inv\_sim}）· 三相 PWM/死区/反电动势 · 600 rpm/圆盘型线 V2 · 律 D = Kp+ESO 联合调度 · T 自适应 = 锁相 ESC · J 自适应 = 调试期辨识 + $b_0$}
 \end{center}
 \vspace{-1mm}\noindent\rule{\textwidth}{0.4pt}\vspace{-1mm}
-\noindent\textbf{逻辑链}：\S\ref{sec:model} 建模 → \S\ref{sec:arch} 结构耦合 → \S\ref{sec:law} 内模侧自适应律 → \S\ref{sec:lawd} 律 D → \S\ref{sec:tes} T 自适应 → \S\ref{sec:stab} 可证结论（UUB）→ \S\ref{sec:verify} 数值核对 → \S\ref{sec:pmsm} 真实对象与基准 → \S\ref{sec:lawd-res} 律 D 实测 → \S\ref{sec:tes-res} T 自适应实测 → \S\ref{sec:limit} 适用域之外 → \S\ref{sec:sym} 符号表 → \S\ref{sec:concl} 结论 → \S\ref{sec:handoff} 接手说明。
+\noindent\textbf{逻辑链}：\S\ref{sec:model} 建模 → \S\ref{sec:arch} 结构耦合 → \S\ref{sec:law} 内模侧自适应律 → \S\ref{sec:lawd} 律 D → \S\ref{sec:tes} T 自适应 → \S\ref{sec:jadapt} J 自适应 → \S\ref{sec:stab} 可证结论（UUB）→ \S\ref{sec:verify} 数值核对 → \S\ref{sec:pmsm} 真实对象与基准 → \S\ref{sec:lawd-res} 律 D 实测 → \S\ref{sec:tes-res} T 自适应实测 → \S\ref{sec:limit} 适用域之外 → \S\ref{sec:sym} 符号表 → \S\ref{sec:concl} 结论 → \S\ref{sec:handoff} 接手说明。
 \vspace{1mm}
 
 \noindent\textbf{仓库同步纪律（强制）}：本文档、PDF、HTML、代码、数据与图全部同步到
@@ -191,7 +193,7 @@ $z_1$ 通道指数取 $1$、$z_2$ 通道指数取 $a<1$（默认 $a=0.75,\ \delt
 % =====================================================================
 \section{自适应 RCESO 结构与耦合}\label{sec:arch}
 \begin{center}
-\small
+\footnotesize
 \begin{tabular}{@{}llll@{}}
 \toprule
 通道 & 驱动 & 自适应状态 & 作用\\
@@ -200,10 +202,12 @@ $z_1$ 通道指数取 $1$、$z_2$ 通道指数取 $a<1$（默认 $a=0.75,\ \delt
 辅助滤波 & $\ef^{2}$ & $E_o$（$\phi$ 尺度 $c$） & 归一化与幅值压缩\\
 律 D（突变侧） & $e_1$ 的 $T$ 窗均值（\S\ref{sec:lawd}） & $k_p^{\rm eff},\ \omega_o^{\rm eff}$ & 加载/阶跃期提前出力 \\
 T 自适应（周期侧） & 基波残余 $A$（\S\ref{sec:tes}） & $\delta$（周期修正） & 相位对齐、稳态抑制 \\
+J 自适应（惯量） & 调试期 dither 的 $T_e/\omega$（\S\ref{sec:jadapt}） & $\hat J$（$b_0$） & 匹配真实惯量 \\
 \bottomrule
 \end{tabular}
 \end{center}
 \noindent\textbf{驱动取带通形式}：快/慢两路低通（$w_f,w_l$）构成带通驱动 $D=w_f-w_l$；本版只有 $Q$ 通道由它驱动，且取单向死区 $D_Q=\max(0,D)$（\S\ref{sec:bpw}）。
+J 环不参与 $e_1$ 驱动：它在调试期用外加 dither 独立辨识，之后冻结（\S\ref{sec:jadapt}）。
 两条通道的驱动完全由式 \eqref{eq:shared-D} 给出。
 \noindent\textbf{回路划分}：内模侧（$\ef\to Q\to$ 内模）与观测器内环共用 $\ef$ 与 $e_1$，不能分别证明、必须构造整体 Lyapunov 函数（归并见 §\ref{sec:uub}）；律 D 作用在 $k_p$ 与 $\omega_o$ 上，T 自适应作用在内模周期 $T$ 上，两者时间尺度相差两个数量级。
 % =====================================================================
@@ -561,6 +565,51 @@ I_k\approx2\kappa A^{*}\,(\hat\delta_k-\delta^{*})\,\Delta ,
         本文的做法是\textbf{在给定 $(\tau,Q)$ 下补偿相位}，而不是取消低通。
   \item \textbf{“换速时定理还成立吗”}：不成立。准静态有定理，换速瞬态只有“有界、可重复”的实验证据与冻结判据，未给出瞬态期间的定量界。
 \end{enumerate}
+
+\subsection{J 自适应：第三环（惯量辨识与 $b_0$ 更新）}\label{sec:jadapt}
+
+律 D 作用在毫秒级的突变窗，T 自适应作用在秒级的周期修正；两者都不改变 ESO 的输入增益 $b_0$。真实传动链的惯量 $J_{\rm true}$（电机 $+$ 联轴器 $+$ 圆盘/齿轮箱折算）通常大于电机标称 $J_{\rm nom}$，若 $b_0$ 只按标称整定，环路增益随 $1/J_{\rm true}$ 下降：$J_{\rm true}=5.26J_{\rm nom}$ 时同一故障的 $10$\,Hz 纹波由 $26.2$ 涨到 $33.3$\,rpm（附录 C）。第三环因此辨识 $\hat J$ 并更新 $b_0$。
+
+方案（完整推导、状态机与验证见附录 C）：调试期在电流指令上叠加 $T_d=A\sin(2\pi f_d t)$（$f_d=100$\,Hz、$A=0.1$\,N$\cdot$m），用 $T_e$ 与 $\omega$ 的 DFT 比值
+\begin{equation}
+\hat J=\frac{|T_{e,f_d}|}{2\pi f_d\,|\omega_{f_d}|},
+\label{eq:jhat}
+\end{equation}
+在 $0$--$2$\,s 内估计并冻结，然后一次性更新
+\begin{equation}
+b_0\leftarrow b_0\,\frac{J_{\rm nom}}{\hat J},\qquad \hat J\in[0.5,\,50]J_{\rm nom}.
+\label{eq:jupdate}
+\end{equation}
+上电状态机为“空闲 $\to$ 辨识 $\to$ 应用 / 回退”：有效窗数 $\ge3$、窗间标准差 $\le15\%$、dither 转速幅值 $\ge2$\,rpm 才允许提前应用；超时无有效窗则保持标称 $b_0$。
+
+\textbf{三环正交性}：
+\begin{center}\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+环 & 时间尺度 & 驱动信号 & 作用对象\\
+\midrule
+律 D & ms（$T$ 窗） & $e_1$ 的 $T$ 窗均值 & $k_p,\ \omega_o$\\
+T 自适应 & s（$P_d=1.5$\,s） & 基波残余 $A$（10\,Hz 带通） & $\delta$（周期修正）\\
+J 自适应 & 上电一次（0--2\,s） & 100\,Hz dither 的 $T_e/\omega$ & $b_0$（或 $\hat J$）\\
+\bottomrule
+\end{tabular}
+\end{center}
+频率上分离：$10$\,Hz 故障带、$100$\,Hz 辨识 dither、ms 级门控；$T$ 窗均值把 $100$\,Hz 平均为零，D 的门控不受 dither 影响；T 的 $A$ 取 $10$\,Hz 带通，$100$\,Hz 被滤除。时间上也可串行：上电先做 J 辨识（$0$--$2$\,s），ESC 从 $t=3$\,s 起搜索，D 全程在线。
+
+\textbf{三环同时投运的实测}（$J_{\rm true}=5.26J_{\rm nom}$、$T_1=0.057$\,N$\cdot$m、$12$\,s，600 rpm）：
+\begin{center}\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+配置 & $10$\,Hz/rpm & 稳态 RMS/rpm & $|i_q|$ 峰值/A & $\hat J$\\
+\midrule
+D $+$ T（J 关） & $20.2$ & $16.4$ & $5.00$ & ---\\
+\textbf{D $+$ T $+$ J} & $\mathbf{3.25}$ & $\mathbf{5.44}$ & $5.85$ & $1.06\times10^{-4}$（$+6.5\%$）\\
+\bottomrule
+\end{tabular}
+\end{center}
+三环叠加后 $10$\,Hz 纹波再降 $84\%$，$i_q$ 峰值 $5.85$\,A 仍在额定 $6.31$\,A 内；ESC 的 $\delta$ 收敛到 $-16.0\%$（D$+$T 单独为 $-15.0\%$），说明 J 环更新 $b_0$ 后 T 环仍能正常工作。
+
+\textbf{边界（如实披露）}：无故障时 dither 的转速响应只有约 $4$\,rpm（接近编码器 $6$\,rpm 量化台阶），$\hat J$ 偏高约 $15\%$，应用后 $i_q$ 可升到 $6.4$\,A；生产版必须加“应用后 $0.5$\,s 校验、恶化 $>20\%$ 回退”。$J_{\rm true}/J_{\rm nom}>5$ 时，除 $b_0$ 外还应复核 $k_p$ 与 $\omega_o$ 的整定。
 
 \section{可证结论：驱动有界性与名义闭环 UUB}\label{sec:stab}
 \subsection{结构前提：驱动有界性}\label{sec:newpremise}
@@ -1022,8 +1071,9 @@ T 自适应 & 修正范围 / 步长 / 抖动 & $\delta_{\max}$ / $\sigma$ / $\De
 \section{结论}\label{sec:concl}
 % =====================================================================
 \begin{enumerate}
-  \item \textbf{结构}：真实对象上为“低通重复通道（内模）+ 灰箱 ESO + 律 D + T 自适应”。
-        三条回路共用 $e_f=\tau\dot v$ 或 $e_1$，不能分别证明，必须整体处理。
+  \item \textbf{结构}：真实对象上为“低通重复通道（内模）+ 灰箱 ESO + 律 D + T 自适应 + J 自适应”。
+        前三条回路共用 $e_f=\tau\dot v$ 或 $e_1$，不能分别证明，必须整体处理；J 环用调试期 dither 独立辨识，
+        在时间上（上电 0--2\,s）与频率上（100\,Hz vs 10\,Hz）与 D/T 分离（\S\ref{sec:jadapt}）。
   \item \textbf{律 D（改良版）}：检测量取 $e_1$ 的 $T$ 窗均值，对任何 $k f_0$ 分量结构性失明，故只对非周期事件响应，且空载段逐位退回定稿。
         在电流约束 $|i_q|\le6.31$\,A 下，$k_p$ 与 $\omega_o$ 联合调度取 $k_b=6,a=3$：600 rpm 给出
         突变窗 RMS $-19.4\%$、恢复时间 $-66\%$、跌落 $-7.6\%$、$|i_q|$ 峰值 $6.21$\,A（额定内），代价是稳态 RMS 略升 $2.6\%$；
@@ -1047,7 +1097,7 @@ T 自适应 & 修正范围 / 步长 / 抖动 & $\delta_{\max}$ / $\sigma$ / $\De
 % =====================================================================
 \section{接手说明（给下一个 agent）}\label{sec:handoff}
 % =====================================================================
-\noindent\textbf{现状}：本文档 v5.0 的数值口径为 2026-11-11 工况（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz）；
+\noindent\textbf{现状}：本文档 v5.5 的数值口径为 2026-11-11 工况（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz）；
 律 D 为 $k_p+\omega_o$ 联合调度（$k_b=6,a=3$）；T 自适应为锁相 ESC（$\Delta=0.5\%,\sigma=1\%$）；
 复位型律 F 已作废。理论/证明部分（§\ref{sec:model}--§\ref{sec:stab}）仍在标幺一阶模型上给出，只用于结构性质。
 
@@ -1092,6 +1142,7 @@ T 自适应 & 修正范围 / 步长 / 抖动 & $\delta_{\max}$ / $\sigma$ / $\De
   \item \textbf{版本纪律}：新旧口径不得并存；换口径必须同步删旧数。
   \item \textbf{律 D 定稿}：$k_b=6$、$a=3$、$\varepsilon_g=0.01$（v5.3 由 8/2 调整，以守住额定电流）；$\beta_3$ 不调度（$b=0$）。
   \item \textbf{T 自适应定稿}：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”。
+  \item \textbf{J 自适应定稿}：调试期 100\,Hz dither（$A=0.1$\,N$\cdot$m，0--2\,s）辨识 $\hat J$，按 $b_0\leftarrow b_0J_{\rm nom}/\hat J$ 更新并冻结；上电状态机含超时回退；生产版需加应用后校验。
   \item \textbf{低通不可去除}：$\tau_0=20$\,ms 必须保留；$\tau\le10$\,ms 在本对象上进 $\sim190$\,Hz 极限环（§\ref{sec:tau-role}）。若要减小相位滞后，用超前--滞后或线性相位 FIR，而不是去掉滤波。
   \item \textbf{律 F 作废}：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。
   \item 出图只输出 PNG；\texttt{includegraphics} 指向 PNG。
@@ -1099,7 +1150,7 @@ T 自适应 & 修正范围 / 步长 / 抖动 & $\delta_{\max}$ / $\sigma$ / $\De
 
 \noindent\textbf{当前未完成}：(1) ESC 的 8 种子统计（现有为单种子 30--60 s 轨迹）；(2) 900 rpm 与 1200 rpm 的 $\delta^{*}$ 标定；
 (3) 律 D 与 ESC 联调的 8 种子验收；(4) 用 $A$ 做前馈预置记忆与故障诊断（$\delta$ 长期漂移 $\Rightarrow$ 参数/延时变化）；
-(5) 死区逐开关状态机、母线 LC；(6) 台架实测。
+(5) 死区逐开关状态机、母线 LC；(6) 台架实测；(7) J 自适应的应用后校验 / 回退（状态 4）。
 
 \noindent\textbf{交付前自检}：\texttt{xelatex} 0 error、无未定义引用；HTML 自检通过、内嵌图齐全；
 表内数字可由 JSON/npz 复算；正文不存在旧对象数字与律 F 结论；新增结果标注真实对象参数与噪声档。

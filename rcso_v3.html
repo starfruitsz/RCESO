@@ -76,12 +76,12 @@ window.MathJax = {
 <div class="layout">
 <nav>
   <h1>目录</h1>
-  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#sec:tau-role">低通 $\tau$ 的作用：为什么不能去掉</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l2" href="#sec:lawd">律 D：比例增益与观测带宽的联合调度</a><a class="l3" href="#sec:lawd-design">设计与实现</a><a class="l3" href="#sec:lawd-why">为什么用 $e_1$ 的 $T$ 窗均值</a><a class="l2" href="#sec:tes">T 自适应：标称周期 + 锁相极值搜索</a><a class="l3" href="#sec:tes-phase">失配机理与相位对齐条件</a><a class="l3" href="#sec:tes-obs">基波幅值观测器</a><a class="l3" href="#sec:tes-esc">锁相极值搜索</a><a class="l3" href="#sec:tes-impl">离散实现</a><a class="l3" href="#sec:tes-intuition">附：T 自适应的直观推导</a><a class="l2" href="#sec:stab">可证结论：驱动有界性与名义闭环 UUB</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-12 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">参数与 500\,Hz 低带宽代价</a><a class="l3" href="#sec:base">基准：无自适应 RCESO（单种子）</a><a class="l2" href="#sec:lawd-res">律 D 实测：$k_p$ + ESO 联合调度</a><a class="l3" href="#sec:lawd-1d">一维扫描：只提 $k_p$ 会把电流顶过额定</a><a class="l3" href="#sec:lawd-2d">二维细扫：$a\times k_b$（电流约束下）</a><a class="l3" href="#sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</a><a class="l3" href="#sec:lawd-b3">$\beta_3$ 不参与调度</a><a class="l3" href="#sec:lawd-mech">机理</a><a class="l2" href="#sec:tes-res">T 自适应实测</a><a class="l3" href="#sec:tes-res-opt">目标函数与真实最优：$-12\%$，不是 $0$</a><a class="l3" href="#sec:tes-res-esc">ESC 收敛与收益</a><a class="l3" href="#sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</a><a class="l3" href="#sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:no-lawf">复位型律 F 已作废（2026-11-12）</a><a class="l3" href="#sec:limit-param">参数口径不可互引</a><a class="l3" href="#h6">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a><a class="l2" href="#app:misalign">附录 A：不对中故障的转矩与受力</a><a class="l3" href="#h7">A.1 坐标、姿态与符号</a><a class="l3" href="#h8">A.2 运动学</a><a class="l3" href="#h9">A.3 惯量与绕轴转动惯量</a><a class="l3" href="#h10">A.4 欧拉方程与横向力矩</a><a class="l3" href="#h11">A.5 离心力及其力矩</a><a class="l3" href="#h12">A.6 重力</a><a class="l3" href="#h13">A.7 轴承反力（力平衡 + 力矩平衡）</a><a class="l3" href="#h14">A.8 轴承摩擦转矩</a><a class="l3" href="#h15">A.9 绕轴转矩方程与转速纹波</a><a class="l3" href="#h16">A.10 谐波来源：$1\times$、$2\times$ 与高阶</a><a class="l3" href="#h17">A.11 与台架 $T(\theta)$ 的数值对应</a><a class="l3" href="#h18">A.12 常见错误与纠正</a><a class="l3" href="#h19">A.13 仿真实现</a><a class="l3" href="#h20">A.14 符号表</a><a class="l2" href="#app:unbalance">附录 B：圆盘质量不平衡引发的脉动转矩</a><a class="l3" href="#h21">B.1 模型与符号</a><a class="l3" href="#h22">B.2 重力矩：$1\times$ 脉动转矩</a><a class="l3" href="#h23">B.3 离心力：$1\times$ 径向力，不是转矩</a><a class="l3" href="#h24">B.4 绕轴转矩方程与转速纹波</a><a class="l3" href="#h25">B.5 轴承摩擦的 $1\times$ 调制（二阶小量）</a><a class="l3" href="#h26">B.6 动态不平衡（力偶）</a><a class="l3" href="#h27">B.7 与台架 $T(\theta)$ 型线的对应</a><a class="l3" href="#h28">B.8 常见错误与纠正</a><a class="l3" href="#h29">B.9 仿真实现</a><a class="l3" href="#h30">B.10 符号表</a><a class="l2" href="#app:jadapt">附录 C：真实传动链惯量与 $J$ 自适应</a><a class="l3" href="#h31">C.1 惯量的两个口径</a><a class="l3" href="#h32">C.2 指标</a><a class="l3" href="#h33">C.3 方案：调试期转矩注入 + 频域比值辨识</a><a class="l3" href="#h34">C.4 结果</a><a class="l3" href="#h35">C.5 与文献方法的对照</a><a class="l3" href="#h36">C.6 实施</a><a class="l3" href="#h37">C.7 上电状态机与回退</a>
+  <a class="l2" href="#sec:model">建模</a><a class="l3" href="#h1">被控对象与扰动分解</a><a class="l3" href="#h2">低通重复控制（内模）通道</a><a class="l3" href="#sec:tau-role">低通 $\tau$ 的作用：为什么不能去掉</a><a class="l3" href="#h3">灰箱 ESO 与控制律</a><a class="l2" href="#sec:arch">自适应 RCESO 结构与耦合</a><a class="l2" href="#sec:law">自适应律（与实现逐条对应）</a><a class="l3" href="#sec:aux">辅助滤波与归一化基准（新定义）</a><a class="l3" href="#sec:x">归一化与 $\phi$ 压缩</a><a class="l3" href="#sec:bpw">带通驱动（本版方案）</a><a class="l3" href="#sec:qch">$Q$ 通道（遗忘因子自适应）</a><a class="l3" href="#sec:proj-old">域投影（模型侧死区的默认取值）</a><a class="l3" href="#sec:bpw-result">最终方案的实测结果</a><a class="l2" href="#sec:lawd">律 D：比例增益与观测带宽的联合调度</a><a class="l3" href="#sec:lawd-design">设计与实现</a><a class="l3" href="#sec:lawd-why">为什么用 $e_1$ 的 $T$ 窗均值</a><a class="l2" href="#sec:tes">T 自适应：标称周期 + 锁相极值搜索</a><a class="l3" href="#sec:tes-phase">失配机理与相位对齐条件</a><a class="l3" href="#sec:tes-obs">基波幅值观测器</a><a class="l3" href="#sec:tes-esc">锁相极值搜索</a><a class="l3" href="#sec:tes-impl">离散实现</a><a class="l3" href="#sec:tes-intuition">附：T 自适应的直观推导</a><a class="l3" href="#sec:jadapt">J 自适应：第三环（惯量辨识与 $b_0$ 更新）</a><a class="l2" href="#sec:stab">可证结论：驱动有界性与名义闭环 UUB</a><a class="l3" href="#sec:newpremise">结构前提：驱动有界性</a><a class="l3" href="#sec:uub">名义闭环的一致有界性（UUB）：完整证明</a><a class="l2" href="#sec:verify">数值验证（沿真实轨迹逐条核对）</a><a class="l2" href="#sec:pmsm">PMSM 转速环：真实逆变器对象（2026-11-12 定稿）</a><a class="l3" href="#h4">对象：三相 PWM 逆变器 + PMSM</a><a class="l3" href="#h5">参数与 500\,Hz 低带宽代价</a><a class="l3" href="#sec:base">基准：无自适应 RCESO（单种子）</a><a class="l2" href="#sec:lawd-res">律 D 实测：$k_p$ + ESO 联合调度</a><a class="l3" href="#sec:lawd-1d">一维扫描：只提 $k_p$ 会把电流顶过额定</a><a class="l3" href="#sec:lawd-2d">二维细扫：$a\times k_b$（电流约束下）</a><a class="l3" href="#sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</a><a class="l3" href="#sec:lawd-b3">$\beta_3$ 不参与调度</a><a class="l3" href="#sec:lawd-mech">机理</a><a class="l2" href="#sec:tes-res">T 自适应实测</a><a class="l3" href="#sec:tes-res-opt">目标函数与真实最优：$-12\%$，不是 $0$</a><a class="l3" href="#sec:tes-res-esc">ESC 收敛与收益</a><a class="l3" href="#sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</a><a class="l3" href="#sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</a><a class="l2" href="#sec:limit">适用范围之外（如实披露）</a><a class="l3" href="#sec:no-lawf">复位型律 F 已作废（2026-11-12）</a><a class="l3" href="#sec:limit-param">参数口径不可互引</a><a class="l3" href="#h6">其他边界</a><a class="l2" href="#sec:sym">符号与参数表（答辩自查）</a><a class="l2" href="#sec:concl">结论</a><a class="l2" href="#sec:handoff">接手说明（给下一个 agent）</a><a class="l2" href="#app:misalign">附录 A：不对中故障的转矩与受力</a><a class="l3" href="#h7">A.1 坐标、姿态与符号</a><a class="l3" href="#h8">A.2 运动学</a><a class="l3" href="#h9">A.3 惯量与绕轴转动惯量</a><a class="l3" href="#h10">A.4 欧拉方程与横向力矩</a><a class="l3" href="#h11">A.5 离心力及其力矩</a><a class="l3" href="#h12">A.6 重力</a><a class="l3" href="#h13">A.7 轴承反力（力平衡 + 力矩平衡）</a><a class="l3" href="#h14">A.8 轴承摩擦转矩</a><a class="l3" href="#h15">A.9 绕轴转矩方程与转速纹波</a><a class="l3" href="#h16">A.10 谐波来源：$1\times$、$2\times$ 与高阶</a><a class="l3" href="#h17">A.11 与台架 $T(\theta)$ 的数值对应</a><a class="l3" href="#h18">A.12 常见错误与纠正</a><a class="l3" href="#h19">A.13 仿真实现</a><a class="l3" href="#h20">A.14 符号表</a><a class="l2" href="#app:unbalance">附录 B：圆盘质量不平衡引发的脉动转矩</a><a class="l3" href="#h21">B.1 模型与符号</a><a class="l3" href="#h22">B.2 重力矩：$1\times$ 脉动转矩</a><a class="l3" href="#h23">B.3 离心力：$1\times$ 径向力，不是转矩</a><a class="l3" href="#h24">B.4 绕轴转矩方程与转速纹波</a><a class="l3" href="#h25">B.5 轴承摩擦的 $1\times$ 调制（二阶小量）</a><a class="l3" href="#h26">B.6 动态不平衡（力偶）</a><a class="l3" href="#h27">B.7 与台架 $T(\theta)$ 型线的对应</a><a class="l3" href="#h28">B.8 常见错误与纠正</a><a class="l3" href="#h29">B.9 仿真实现</a><a class="l3" href="#h30">B.10 符号表</a><a class="l2" href="#app:jadapt">附录 C：真实传动链惯量与 $J$ 自适应</a><a class="l3" href="#h31">C.1 惯量的两个口径</a><a class="l3" href="#h32">C.2 指标</a><a class="l3" href="#h33">C.3 方案：调试期转矩注入 + 频域比值辨识</a><a class="l3" href="#h34">C.4 结果</a><a class="l3" href="#h35">C.5 与文献方法的对照</a><a class="l3" href="#h36">C.6 实施</a><a class="l3" href="#h37">C.7 上电状态机与回退</a>
 </nav>
 <main>
 <header class="doc-h">
   <h1>自适应低通重复控制（RCESO）：建模、自适应律与一致稳定性证明</h1>
-  <div class="sub">v5.0 · 2026-11-12 · 对象：真实逆变器（pmsm_inv_sim）· 三相 PWM/死区/反电动势 · 600 rpm/圆盘型线 V2 · 律 D = Kp+ESO 联合调度 · T 自适应 = 锁相 ESC</div>
+  <div class="sub">v5.5 · 2026-11-13 · 对象：真实逆变器（pmsm_inv_sim）· 三相 PWM/死区/反电动势 · 600 rpm/圆盘型线 V2 · 律 D = Kp+ESO 联合调度 · T 自适应 = 锁相 ESC · J 自适应 = 调试期辨识 + b_0</div>
   <div class="chain">逻辑链：1 建模 → 2 自适应 RCESO 结构与耦合 → 3 自适应律（与实现逐条对应） → 4 律 D：比例增益与观测带宽的联合调度 → 5 T 自适应：标称周期 + 锁相极值搜索 → 6 可证结论：驱动有界性与名义闭环 UUB → 7 数值验证（沿真实轨迹逐条核对） → 8 PMSM 转速环：真实逆变器对象（2026-11-12 定稿） → 9 律 D 实测：$k_p$ + ESO 联合调度 → 10 T 自适应实测 → 11 适用范围之外（如实披露） → 12 符号与参数表（答辩自查） → 13 结论 → 14 接手说明（给下一个 agent） → 15 附录 A：不对中故障的转矩与受力 → 16 附录 B：圆盘质量不平衡引发的脉动转矩 → 17 附录 C：真实传动链惯量与 $J$ 自适应</div>
 </header>
 <div class="doc">
@@ -167,9 +167,10 @@ window.MathJax = {
 <div class="box remark" id="rem:fal-gain"><div class="box-h">注 1（类 fal 增益的三条性质与两档口径）</div><div class="box-b">式 (3) 的 $G$ 取何值就是<strong>增益形状</strong>本身：默认档 $a=0.75,\ \delta=0.10,\ \lambda=10$ （<code>eso_law="fal"</code>，自 2026-10-22 起）；取 $G(e)\equiv e$ 为线性档 （<code>eso_law="linear"</code>，可逐位复现 v4.0 的全部历史数据）。 三条性质决定它只宜作“默认 $+$ 对照”两档，而不是任意替换： (i) 小信号斜率 $G'(0)=\delta^{a-1}$（与 $\lambda$ 无关），故等效观测带宽 $\omega_o^{\rm eff}=\omega_o\delta^{(a-1)/2}$，噪声本底随之变化； (ii) 大信号 $G\to(|e|+\delta\lambda^{-1/a})^{a}\operatorname{sgn}e$：$a&lt;1$ 次线性，$a=1$ 与线性同阶、只多一个宽 $\delta/\lambda$ 的偏移带； (iii) $G$ 连续可导且 $\mathrm dG/\mathrm de&gt;0$，但 §<a class="xref" href="#sec:uub">6.2</a> 的 UUB 建立在 $\beta_1=2\omega_o,\beta_2=\omega_o^2$ 的<em>线性</em>校正上（引理 2 的 $A_0$ 是常矩阵），换成 $G$ 后 $A_0$ 变成 $e_1$ 相关的扇区矩阵，<strong>该界需重做，本文未做</strong>。 <strong>默认档的口径与代价（如实披露）</strong>：类 fal 改变了 $e_1$ 的轨迹，故所有依赖 $e_1$ 的检测量（律 D 的门控、T 自适应的冻结判据）都必须在默认档下标定——本文全部数值即在该档下取得。 稳态代价依赖工作点与噪声档：600 rpm 实验室档的稳态 RMS 比线性档高 $19\%$，900/1200 rpm 反而低 $8\%/14\%$；报数必须同时写明 $(a,\delta,\lambda)$ 与噪声档。</div></div>
 <h2 id="sec:arch">自适应 RCESO 结构与耦合</h2>
 
-<div class="tablewrap"><table><thead><tr><th>通道</th><th>驱动</th><th>自适应状态</th><th>作用</th></tr></thead><tbody><tr><td>遗忘自适应</td><td>带通驱动 $D$（§<a class="xref" href="#sec:bpw">3.3</a>）</td><td>$Q$</td><td>突变 $\Rightarrow$ 快速遗忘（$Q$ 降）</td></tr><tr><td>辅助滤波</td><td>$e_f^{2}$</td><td>$E_o$（$\phi$ 尺度 $c$）</td><td>归一化与幅值压缩</td></tr><tr><td>律 D（突变侧）</td><td>$e_1$ 的 $T$ 窗均值（§<a class="xref" href="#sec:lawd">4</a>）</td><td>$k_p^{\rm eff},\ \omega_o^{\rm eff}$</td><td>加载/阶跃期提前出力</td></tr><tr><td>T 自适应（周期侧）</td><td>基波残余 $A$（§<a class="xref" href="#sec:tes">5</a>）</td><td>$\delta$（周期修正）</td><td>相位对齐、稳态抑制</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>通道</th><th>驱动</th><th>自适应状态</th><th>作用</th></tr></thead><tbody><tr><td>遗忘自适应</td><td>带通驱动 $D$（§<a class="xref" href="#sec:bpw">3.3</a>）</td><td>$Q$</td><td>突变 $\Rightarrow$ 快速遗忘（$Q$ 降）</td></tr><tr><td>辅助滤波</td><td>$e_f^{2}$</td><td>$E_o$（$\phi$ 尺度 $c$）</td><td>归一化与幅值压缩</td></tr><tr><td>律 D（突变侧）</td><td>$e_1$ 的 $T$ 窗均值（§<a class="xref" href="#sec:lawd">4</a>）</td><td>$k_p^{\rm eff},\ \omega_o^{\rm eff}$</td><td>加载/阶跃期提前出力</td></tr><tr><td>T 自适应（周期侧）</td><td>基波残余 $A$（§<a class="xref" href="#sec:tes">5</a>）</td><td>$\delta$（周期修正）</td><td>相位对齐、稳态抑制</td></tr><tr><td>J 自适应（惯量）</td><td>调试期 dither 的 $T_e/\omega$（§<a class="xref" href="#sec:jadapt">5.6</a>）</td><td>$\hat J$（$b_0$）</td><td>匹配真实惯量</td></tr></tbody></table></div>
 
 <p><strong>驱动取带通形式</strong>：快/慢两路低通（$w_f,w_l$）构成带通驱动 $D=w_f-w_l$；本版只有 $Q$ 通道由它驱动，且取单向死区 $D_Q=\max(0,D)$（§<a class="xref" href="#sec:bpw">3.3</a>）。</p>
+<p>J 环不参与 $e_1$ 驱动：它在调试期用外加 dither 独立辨识，之后冻结（§<a class="xref" href="#sec:jadapt">5.6</a>）。</p>
 <p>两条通道的驱动完全由式 <a class="xref" href="#eq:shared-D">(8)</a> 给出。</p>
 <p><strong>回路划分</strong>：内模侧（$e_f\to Q\to$ 内模）与观测器内环共用 $e_f$ 与 $e_1$，不能分别证明、必须构造整体 Lyapunov 函数（归并见 §<a class="xref" href="#sec:uub">6.2</a>）；律 D 作用在 $k_p$ 与 $\omega_o$ 上，T 自适应作用在内模周期 $T$ 上，两者时间尺度相差两个数量级。</p>
 <h2 id="sec:law">自适应律（与实现逐条对应）</h2>
@@ -341,6 +342,32 @@ window.MathJax = {
 
 <ol><li><strong>“公式说 $-14.3\%$，实测为何 $-12\%$”</strong>：公式只含记忆低通那 $20$\,ms；控制拍离散化、电流环与测速滤波还叠加 $2$–$3$ 个百分点的附加相位， 故实测谷在 $-12\%$（300 rpm 实测 $-8\%$、理论 $-8.9\%$）：趋势一致、绝对值有偏。</li><li><strong>“$A$ 最优在 $-12\%$、RMS 最优为何在 $-8\%$”</strong>：$A$ 只含基波，RMS 还含 $5.9$\,Hz 振动与噪声；整定看 $A$、验收看 RMS，两者不可混读（新律下两者不再重合）。</li><li><strong>“为什么不直接减小 $\tau$ 或提高 $Q$”</strong>：$\tau$ 是陷波宽度与噪声抑制的折中，而 $Q\to1$ 会使 $\mu_{\max}=1-Q^{2}\to0$； 本文的做法是<strong>在给定 $(\tau,Q)$ 下补偿相位</strong>，而不是取消低通。</li><li><strong>“换速时定理还成立吗”</strong>：不成立。准静态有定理，换速瞬态只有“有界、可重复”的实验证据与冻结判据，未给出瞬态期间的定量界。</li></ol>
 
+<h3 id="sec:jadapt">J 自适应：第三环（惯量辨识与 $b_0$ 更新）</h3>
+
+<p>律 D 作用在毫秒级的突变窗，T 自适应作用在秒级的周期修正；两者都不改变 ESO 的输入增益 $b_0$。真实传动链的惯量 $J_{\rm true}$（电机 $+$ 联轴器 $+$ 圆盘/齿轮箱折算）通常大于电机标称 $J_{\rm nom}$，若 $b_0$ 只按标称整定，环路增益随 $1/J_{\rm true}$ 下降：$J_{\rm true}=5.26J_{\rm nom}$ 时同一故障的 $10$\,Hz 纹波由 $26.2$ 涨到 $33.3$\,rpm（附录 C）。第三环因此辨识 $\hat J$ 并更新 $b_0$。</p>
+
+<p>方案（完整推导、状态机与验证见附录 C）：调试期在电流指令上叠加 $T_d=A\sin(2\pi f_d t)$（$f_d=100$\,Hz、$A=0.1$\,N$\cdot$m），用 $T_e$ 与 $\omega$ 的 DFT 比值</p>
+
+<div class="eqwrap" id="eq:jhat"><div class="eq">\[\hat J=\frac{|T_{e,f_d}|}{2\pi f_d\,|\omega_{f_d}|}, \]</div><div class="eqno">(22)</div></div>
+<p>在 $0$–$2$\,s 内估计并冻结，然后一次性更新</p>
+
+<div class="eqwrap" id="eq:jupdate"><div class="eq">\[b_0\leftarrow b_0\,\frac{J_{\rm nom}}{\hat J},\qquad \hat J\in[0.5,\,50]J_{\rm nom}. \]</div><div class="eqno">(23)</div></div>
+<p>上电状态机为“空闲 $\to$ 辨识 $\to$ 应用 / 回退”：有效窗数 $\ge3$、窗间标准差 $\le15\%$、dither 转速幅值 $\ge2$\,rpm 才允许提前应用；超时无有效窗则保持标称 $b_0$。</p>
+
+<p><strong>三环正交性</strong>：</p>
+
+<div class="tablewrap"><table><thead><tr><th>环</th><th>时间尺度</th><th>驱动信号</th><th>作用对象</th></tr></thead><tbody><tr><td>律 D</td><td>ms（$T$ 窗）</td><td>$e_1$ 的 $T$ 窗均值</td><td>$k_p,\ \omega_o$</td></tr><tr><td>T 自适应</td><td>s（$P_d=1.5$\,s）</td><td>基波残余 $A$（10\,Hz 带通）</td><td>$\delta$（周期修正）</td></tr><tr><td>J 自适应</td><td>上电一次（0–2\,s）</td><td>100\,Hz dither 的 $T_e/\omega$</td><td>$b_0$（或 $\hat J$）</td></tr></tbody></table></div>
+
+<p>频率上分离：$10$\,Hz 故障带、$100$\,Hz 辨识 dither、ms 级门控；$T$ 窗均值把 $100$\,Hz 平均为零，D 的门控不受 dither 影响；T 的 $A$ 取 $10$\,Hz 带通，$100$\,Hz 被滤除。时间上也可串行：上电先做 J 辨识（$0$–$2$\,s），ESC 从 $t=3$\,s 起搜索，D 全程在线。</p>
+
+<p><strong>三环同时投运的实测</strong>（$J_{\rm true}=5.26J_{\rm nom}$、$T_1=0.057$\,N$\cdot$m、$12$\,s，600 rpm）：</p>
+
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>$10$\,Hz/rpm</th><th>稳态 RMS/rpm</th><th>$|i_q|$ 峰值/A</th><th>$\hat J$</th></tr></thead><tbody><tr><td>D $+$ T（J 关）</td><td>$20.2$</td><td>$16.4$</td><td>$5.00$</td><td>—</td></tr><tr><td><strong>D $+$ T $+$ J</strong></td><td>$\mathbf{3.25}$</td><td>$\mathbf{5.44}$</td><td>$5.85$</td><td>$1.06\times10^{-4}$（$+6.5\%$）</td></tr></tbody></table></div>
+
+<p>三环叠加后 $10$\,Hz 纹波再降 $84\%$，$i_q$ 峰值 $5.85$\,A 仍在额定 $6.31$\,A 内；ESC 的 $\delta$ 收敛到 $-16.0\%$（D$+$T 单独为 $-15.0\%$），说明 J 环更新 $b_0$ 后 T 环仍能正常工作。</p>
+
+<p><strong>边界（如实披露）</strong>：无故障时 dither 的转速响应只有约 $4$\,rpm（接近编码器 $6$\,rpm 量化台阶），$\hat J$ 偏高约 $15\%$，应用后 $i_q$ 可升到 $6.4$\,A；生产版必须加“应用后 $0.5$\,s 校验、恶化 $&gt;20\%$ 回退”。$J_{\rm true}/J_{\rm nom}&gt;5$ 时，除 $b_0$ 外还应复核 $k_p$ 与 $\omega_o$ 的整定。</p>
+
 <h2 id="sec:stab">可证结论：驱动有界性与名义闭环 UUB</h2>
 <h3 id="sec:newpremise">结构前提：驱动有界性</h3>
 <p>本版驱动 $D=w_f-w_l$（<a class="xref" href="#eq:bpw">(7)</a>）是<em>带通</em>，其“非负 / 周期零均值”均不成立，故不能沿用旧放缩。下面两条引理给出对本版驱动直接成立的前提，<strong>证明只用到 $\phi$ 的 $1$-Lipschitz 性与滤波核为凸组合</strong>，与驱动的符号结构无关。</p>
@@ -356,7 +383,7 @@ window.MathJax = {
 <p>$|Q_0v(t-T)+\beta_3\tanh(e_1/\zeta)|\le Q_0\bar V+\beta_3$（$\bar V:=\sup_{[t-T,t]}|v|$）；</p>
 <p>一阶低通在 $|w|\le W$ 下满足 $|v(t)|\le W+(|v(0)|-W)e^{-t/\tau_0}$，逐周期迭代得</p>
 
-<div class="eqwrap" id="eq:uub-v"><div class="eq">\[\limsup_{t\to\infty}|v(t)|\le\bar v:=\frac{\beta_3}{1-Q_0}. \]</div><div class="eqno">(22)</div></div>
+<div class="eqwrap" id="eq:uub-v"><div class="eq">\[\limsup_{t\to\infty}|v(t)|\le\bar v:=\frac{\beta_3}{1-Q_0}. \]</div><div class="eqno">(24)</div></div>
 <p><em>关键</em>：该界<strong>与 $e_1$ 的大小无关</strong>（因 $\tanh$ 有界），故 $v$ 通道“自持”，不构成代数环。</p>
 
 <p><strong>引理 2（ESO 误差 UUB）</strong>：ESO 误差动态为 $\dot e_1=-2\omega_o e_1+e_2-v$、$\dot e_2=-\omega_o^{2}e_1+h$。</p>
@@ -365,20 +392,20 @@ window.MathJax = {
 <p>解 $A_0^{\!\top}P_0+P_0A_0=-I$ 得 $P_0=\left[\begin{smallmatrix}0.5&-0.5\\-0.5&1.5\end{smallmatrix}\right]\succ0$（特征值 $0.191/1.809$），$\|P_0B_0\|_F=\sqrt3$。</p>
 <p>取 $V=\xi^{\!\top}P_0\xi$ 得 $\dot V\le-\omega_o\|\xi\|^{2}+2\sqrt3\,\|\xi\|\,\|w_d\|$，故</p>
 
-<div class="eqwrap" id="eq:uub-eso"><div class="eq">\[\limsup_{t\to\infty}\|\xi(t)\|\le\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} . \]</div><div class="eqno">(23)</div></div>
+<div class="eqwrap" id="eq:uub-eso"><div class="eq">\[\limsup_{t\to\infty}\|\xi(t)\|\le\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} . \]</div><div class="eqno">(25)</div></div>
 
 <p><strong>引理 3（跟踪误差 UUB）</strong>：控制律的比例项取观测状态 $z_1$，</p>
 <p>$u=\frac{1}{b_0}\bigl[k_p^{\rm eff}(r-z_1)-z_2-v\bigr]$，并记 $e_1=y-z_1$。</p>
 <p>由 $r-z_1=(r-y)+(y-z_1)=\sigma+e_1$ 得</p>
 
-<div class="eqwrap" id="eq:sig"><div class="eq">\[\dot\sigma=-\frac{b}{b_0}k_p^{\rm eff}\,\sigma+\frac{b}{b_0}k_p^{\rm eff}\,e_1+w(t), \qquad |w(t)|\le W:=\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr). \]</div><div class="eqno">(24)</div></div>
+<div class="eqwrap" id="eq:sig"><div class="eq">\[\dot\sigma=-\frac{b}{b_0}k_p^{\rm eff}\,\sigma+\frac{b}{b_0}k_p^{\rm eff}\,e_1+w(t), \qquad |w(t)|\le W:=\sup|d|+\frac{b}{b_0}\bigl(\sup|x_2|+\bar v\bigr). \]</div><div class="eqno">(26)</div></div>
 <p>由变分公式，$e_1$ 那一项的贡献不超过 $\sup|e_1|$（因 $\int a\,e^{-\int a}\le1$），$w$ 那一项由 $a\ge a_{\min}=\frac{b}{b_0}k_p$ 控制，故</p>
 
-<div class="eqwrap" id="eq:uub-track"><div class="eq">\[\limsup_{t\to\infty}|\sigma(t)| \le \bar e_1+\frac{b_0}{bk_p}\,W, \qquad \bar e_1:=\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} . \]</div><div class="eqno">(25)</div></div>
-<p><strong>注意</strong>：与“比例项用 $r-y$”的写法相比，式 <a class="xref" href="#eq:uub-track">(25)</a> 多了一项<strong>观测误差地板</strong> $\bar e_1$——</p>
+<div class="eqwrap" id="eq:uub-track"><div class="eq">\[\limsup_{t\to\infty}|\sigma(t)| \le \bar e_1+\frac{b_0}{bk_p}\,W, \qquad \bar e_1:=\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+\bigl(H/\omega_o\bigr)^{2}} . \]</div><div class="eqno">(27)</div></div>
+<p><strong>注意</strong>：与“比例项用 $r-y$”的写法相比，式 <a class="xref" href="#eq:uub-track">(27)</a> 多了一项<strong>观测误差地板</strong> $\bar e_1$——</p>
 <p>这正是用估计状态做反馈的代价；由于 $\bar e_1$ 与 $k_p$ 无关，调度仍然不放大该界（见推论）。</p>
 
-<p><strong>定理（名义闭环 UUB）</strong>：在 (A1)–(A3) 下，式 <a class="xref" href="#eq:uub-v">(22)</a>–<a class="xref" href="#eq:uub-track">(25)</a> 同时成立，</p>
+<p><strong>定理（名义闭环 UUB）</strong>：在 (A1)–(A3) 下，式 <a class="xref" href="#eq:uub-v">(24)</a>–<a class="xref" href="#eq:uub-track">(27)</a> 同时成立，</p>
 <p>闭环全部信号一致最终有界，界<strong>显式</strong>依赖 $(\beta_3,Q_0,\omega_o,k_p,b,b_0,H)$。</p>
 <p><em>注</em>：(a) 本例回代：$\beta_3=4000$、$Q_0=0.98\Rightarrow\bar v=2\times10^{5}$、$\omega_o=500$；三个界都是<strong>保守上界</strong></p>
 <p>（仿真实测 $|v|\approx4.5\times10^{2}$、$|e_1|\approx0.05$，相差 $10^{2}\sim10^{5}$ 倍），定量行为以仿真为准；</p>
@@ -387,7 +414,7 @@ window.MathJax = {
 
 <p><strong>推论（含 $Q$ 与律 D 调度）</strong>：$g=\bar e_1^{2}/(\bar e_1^{2}+\varepsilon_g^{2})\in[0,1)$ 由构造保证，$k_b,a\ge0$，</p>
 <p>故 $k_p^{\rm eff}=k_p(1+k_b g)\ge k_p$、$\omega_o^{\rm eff}=\omega_o(1+a g)\ge\omega_o$；</p>
-<p>式 <a class="xref" href="#eq:uub-eso">(23)</a><a class="xref" href="#eq:uub-track">(25)</a> 的界对 $(\omega_o,k_p)$ <strong>单调不增</strong>，故<em>名义界即调度闭环的界</em>：</p>
+<p>式 <a class="xref" href="#eq:uub-eso">(25)</a><a class="xref" href="#eq:uub-track">(27)</a> 的界对 $(\omega_o,k_p)$ <strong>单调不增</strong>，故<em>名义界即调度闭环的界</em>：</p>
 <p><strong>调度可证地不放大一致最终界</strong>。这与“调度放大噪声本底”的仿真事实不矛盾——噪声不在本确定性框架内，由敏感性一节单独量化。</p>
 <h2 id="sec:verify">数值验证（沿真实轨迹逐条核对）</h2>
 <p>轨迹来源：<code>nk_trace.npz</code>（本版带通律，$\gamma=3$、$\sigma_1^{\mathrm{code}}=10^{5}$、$\sigma_2=5$、$\mu=0.03$、$q'_{\max}=1.0$、$\tau'\in[0.2,5]$，$c_1=c_2=0$（<em>本档未启用 $\phi$ 压缩与驱动死区</em>）、$\varepsilon=6.5$、$\Delta t=2\times10^{-5}$ s，$5\times10^{5}$ 步）。</p>
@@ -559,10 +586,10 @@ window.MathJax = {
 
 <h2 id="sec:concl">结论</h2>
 
-<ol><li><strong>结构</strong>：真实对象上为“低通重复通道（内模）+ 灰箱 ESO + 律 D + T 自适应”。 三条回路共用 $e_f=\tau\dot v$ 或 $e_1$，不能分别证明，必须整体处理。</li><li><strong>律 D（改良版）</strong>：检测量取 $e_1$ 的 $T$ 窗均值，对任何 $k f_0$ 分量结构性失明，故只对非周期事件响应，且空载段逐位退回定稿。 在电流约束 $|i_q|\le6.31$\,A 下，$k_p$ 与 $\omega_o$ 联合调度取 $k_b=6,a=3$：600 rpm 给出 突变窗 RMS $-19.4\%$、恢复时间 $-66\%$、跌落 $-7.6\%$、$|i_q|$ 峰值 $6.21$\,A（额定内），代价是稳态 RMS 略升 $2.6\%$； 900 rpm 的高转速电流受限情形见 §<a class="xref" href="#sec:lawd-900">9.3</a>。</li><li><strong>T 自适应</strong>：标称周期 $2\pi/\omega$ 只对齐频率、不对齐相位；相位对齐条件给出 $\delta^{*}(\omega)=-\arctan(\omega\tau)/2\pi$（600 rpm 为 $-14.3\%$、300 rpm 为 $-8.9\%$），实测最优 $-12\%$ 与 $-8\%$。 锁相 ESC 把稳态 RMS 由 $30.20$ 降到 $27.49$\,rpm（$-9.0\%$）；离线最优在 $-8\%$（$27.00$\,rpm）， $A$ 最优在 $-12\%$——两者不再重合，平台很平。换速时前馈重置把 $26.29$ 降到 $20.41$； 往返试验的 <em>RMS</em> 可重复（差 $0.24$\,rpm），但 $\delta$ 会落在平台的不同点，不能表述为“δ 完全可逆”。</li><li><strong>一致有界性</strong>：$v$ 通道自持 UUB（界 $\beta_3/(1-Q_0)$，与 $e_1$ 无关）；ESO 误差界 $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+(H/\omega_o)^{2}}$；跟踪误差界 $\bar e_1+\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$—— 比例项改用观测状态 $z_1$ 后多出观测误差地板 $\bar e_1$，这是估计状态反馈的固有代价。 因 $g\in[0,1)$ 且 $\bar e_1$ 与 $k_p$ 无关、调度只增不减增益，<strong>名义界即调度闭环的界</strong>——律 D 不放大 UUB 界。 T 自适应在准静态下满足小增益 $\gamma=Q/\sqrt{1-\mu}&lt;1$；换速瞬态由冻结判据兜底。</li><li><strong>律 F 作废</strong>：复位型律 F（含 F-A/F-B、$D_m$ 检测器、反相复位）已整体撤除；原因是回声只活一拍（一周期改写 $99.3\%$）， 而检测至少需要一个周期，oracle 上界也只有 $1.82$ 倍。其脚本与数据只作历史证据保留。</li><li><strong>边界</strong>：见 §<a class="xref" href="#sec:limit">11</a>——参数口径不可互引、类 fal 的稳态代价依赖工作点、随机噪声不在确定性框架内、台架未测。</li></ol>
+<ol><li><strong>结构</strong>：真实对象上为“低通重复通道（内模）+ 灰箱 ESO + 律 D + T 自适应 + J 自适应”。 前三条回路共用 $e_f=\tau\dot v$ 或 $e_1$，不能分别证明，必须整体处理；J 环用调试期 dither 独立辨识， 在时间上（上电 0–2\,s）与频率上（100\,Hz vs 10\,Hz）与 D/T 分离（§<a class="xref" href="#sec:jadapt">5.6</a>）。</li><li><strong>律 D（改良版）</strong>：检测量取 $e_1$ 的 $T$ 窗均值，对任何 $k f_0$ 分量结构性失明，故只对非周期事件响应，且空载段逐位退回定稿。 在电流约束 $|i_q|\le6.31$\,A 下，$k_p$ 与 $\omega_o$ 联合调度取 $k_b=6,a=3$：600 rpm 给出 突变窗 RMS $-19.4\%$、恢复时间 $-66\%$、跌落 $-7.6\%$、$|i_q|$ 峰值 $6.21$\,A（额定内），代价是稳态 RMS 略升 $2.6\%$； 900 rpm 的高转速电流受限情形见 §<a class="xref" href="#sec:lawd-900">9.3</a>。</li><li><strong>T 自适应</strong>：标称周期 $2\pi/\omega$ 只对齐频率、不对齐相位；相位对齐条件给出 $\delta^{*}(\omega)=-\arctan(\omega\tau)/2\pi$（600 rpm 为 $-14.3\%$、300 rpm 为 $-8.9\%$），实测最优 $-12\%$ 与 $-8\%$。 锁相 ESC 把稳态 RMS 由 $30.20$ 降到 $27.49$\,rpm（$-9.0\%$）；离线最优在 $-8\%$（$27.00$\,rpm）， $A$ 最优在 $-12\%$——两者不再重合，平台很平。换速时前馈重置把 $26.29$ 降到 $20.41$； 往返试验的 <em>RMS</em> 可重复（差 $0.24$\,rpm），但 $\delta$ 会落在平台的不同点，不能表述为“δ 完全可逆”。</li><li><strong>一致有界性</strong>：$v$ 通道自持 UUB（界 $\beta_3/(1-Q_0)$，与 $e_1$ 无关）；ESO 误差界 $\frac{2\sqrt3}{\omega_o}\sqrt{\bar v^{2}+(H/\omega_o)^{2}}$；跟踪误差界 $\bar e_1+\frac{b_0}{bk_p}(\sup|d|+\frac{b}{b_0}(\sup|x_2|+\bar v))$—— 比例项改用观测状态 $z_1$ 后多出观测误差地板 $\bar e_1$，这是估计状态反馈的固有代价。 因 $g\in[0,1)$ 且 $\bar e_1$ 与 $k_p$ 无关、调度只增不减增益，<strong>名义界即调度闭环的界</strong>——律 D 不放大 UUB 界。 T 自适应在准静态下满足小增益 $\gamma=Q/\sqrt{1-\mu}&lt;1$；换速瞬态由冻结判据兜底。</li><li><strong>律 F 作废</strong>：复位型律 F（含 F-A/F-B、$D_m$ 检测器、反相复位）已整体撤除；原因是回声只活一拍（一周期改写 $99.3\%$）， 而检测至少需要一个周期，oracle 上界也只有 $1.82$ 倍。其脚本与数据只作历史证据保留。</li><li><strong>边界</strong>：见 §<a class="xref" href="#sec:limit">11</a>——参数口径不可互引、类 fal 的稳态代价依赖工作点、随机噪声不在确定性框架内、台架未测。</li></ol>
 
 <h2 id="sec:handoff">接手说明（给下一个 agent）</h2>
-<p><strong>现状</strong>：本文档 v5.0 的数值口径为 2026-11-11 工况（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz）；</p>
+<p><strong>现状</strong>：本文档 v5.5 的数值口径为 2026-11-11 工况（圆盘型线 V2、实验室噪声、$f_{ci}=500$\,Hz）；</p>
 <p>律 D 为 $k_p+\omega_o$ 联合调度（$k_b=6,a=3$）；T 自适应为锁相 ESC（$\Delta=0.5\%,\sigma=1\%$）；</p>
 <p>复位型律 F 已作废。理论/证明部分（§<a class="xref" href="#sec:model">1</a>–§<a class="xref" href="#sec:stab">6</a>）仍在标幺一阶模型上给出，只用于结构性质。</p>
 
@@ -574,11 +601,11 @@ window.MathJax = {
 
 <p><strong>硬约束（违反即返工）</strong>：</p>
 
-<ul><li><strong>对象铁律</strong>：新数值只能来自 <code>pmsm_inv_sim</code>；旧一阶/降阶对象的结果不得引用。</li><li><strong>版本纪律</strong>：新旧口径不得并存；换口径必须同步删旧数。</li><li><strong>律 D 定稿</strong>：$k_b=6$、$a=3$、$\varepsilon_g=0.01$（v5.3 由 8/2 调整，以守住额定电流）；$\beta_3$ 不调度（$b=0$）。</li><li><strong>T 自适应定稿</strong>：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”。</li><li><strong>低通不可去除</strong>：$\tau_0=20$\,ms 必须保留；$\tau\le10$\,ms 在本对象上进 $\sim190$\,Hz 极限环（§<a class="xref" href="#sec:tau-role">1.3</a>）。若要减小相位滞后，用超前–滞后或线性相位 FIR，而不是去掉滤波。</li><li><strong>律 F 作废</strong>：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。</li><li>出图只输出 PNG；<code>includegraphics</code> 指向 PNG。</li></ul>
+<ul><li><strong>对象铁律</strong>：新数值只能来自 <code>pmsm_inv_sim</code>；旧一阶/降阶对象的结果不得引用。</li><li><strong>版本纪律</strong>：新旧口径不得并存；换口径必须同步删旧数。</li><li><strong>律 D 定稿</strong>：$k_b=6$、$a=3$、$\varepsilon_g=0.01$（v5.3 由 8/2 调整，以守住额定电流）；$\beta_3$ 不调度（$b=0$）。</li><li><strong>T 自适应定稿</strong>：$\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$；换速必须走“冻结 + 前馈重置”。</li><li><strong>J 自适应定稿</strong>：调试期 100\,Hz dither（$A=0.1$\,N$\cdot$m，0–2\,s）辨识 $\hat J$，按 $b_0\leftarrow b_0J_{\rm nom}/\hat J$ 更新并冻结；上电状态机含超时回退；生产版需加应用后校验。</li><li><strong>低通不可去除</strong>：$\tau_0=20$\,ms 必须保留；$\tau\le10$\,ms 在本对象上进 $\sim190$\,Hz 极限环（§<a class="xref" href="#sec:tau-role">1.3</a>）。若要减小相位滞后，用超前–滞后或线性相位 FIR，而不是去掉滤波。</li><li><strong>律 F 作废</strong>：不得再引入复位型触发律或回声抑制结论；相关脚本只作历史证据。</li><li>出图只输出 PNG；<code>includegraphics</code> 指向 PNG。</li></ul>
 
 <p><strong>当前未完成</strong>：(1) ESC 的 8 种子统计（现有为单种子 30–60 s 轨迹）；(2) 900 rpm 与 1200 rpm 的 $\delta^{*}$ 标定；</p>
 <p>(3) 律 D 与 ESC 联调的 8 种子验收；(4) 用 $A$ 做前馈预置记忆与故障诊断（$\delta$ 长期漂移 $\Rightarrow$ 参数/延时变化）；</p>
-<p>(5) 死区逐开关状态机、母线 LC；(6) 台架实测。</p>
+<p>(5) 死区逐开关状态机、母线 LC；(6) 台架实测；(7) J 自适应的应用后校验 / 回退（状态 4）。</p>
 
 <p><strong>交付前自检</strong>：<code>xelatex</code> 0 error、无未定义引用；HTML 自检通过、内嵌图齐全；</p>
 <p>表内数字可由 JSON/npz 复算；正文不存在旧对象数字与律 F 结论；新增结果标注真实对象参数与噪声档。</p>
@@ -591,53 +618,53 @@ window.MathJax = {
 
 <p>取 $\theta=0$ 时的姿态</p>
 
-<div class="eqwrap"><div class="eq">\[e_x=(\cos\beta,\,0,\,-\sin\beta),\qquad e_y=(0,\,1,\,0),\qquad e_z=(\sin\beta,\,0,\,\cos\beta),\]</div><div class="eqno">(26)</div></div>
+<div class="eqwrap"><div class="eq">\[e_x=(\cos\beta,\,0,\,-\sin\beta),\qquad e_y=(0,\,1,\,0),\qquad e_z=(\sin\beta,\,0,\,\cos\beta),\]</div><div class="eqno">(28)</div></div>
 <p>为右手系（$e_x\times e_y=e_z$）。实际轴 $Z$ 在体固系中的坐标——由于 $Z$ 是旋转轴，它在体固系中为常矢量——为</p>
 
-<div class="eqwrap" id="eq:app-zhat"><div class="eq">\[\hat Z^{(r)}=(-\sin\beta,\;0,\;\cos\beta). \]</div><div class="eqno">(27)</div></div>
-<p>若改取 $\beta\to-\beta$，则 $\hat Z^{(r)}=(\sin\beta,0,\cos\beta)$，本文所有横向分量整体反号，模值不变；下面全部按式~<a class="xref" href="#eq:app-zhat">(27)</a> 推导，可逐项复核。</p>
+<div class="eqwrap" id="eq:app-zhat"><div class="eq">\[\hat Z^{(r)}=(-\sin\beta,\;0,\;\cos\beta). \]</div><div class="eqno">(29)</div></div>
+<p>若改取 $\beta\to-\beta$，则 $\hat Z^{(r)}=(\sin\beta,0,\cos\beta)$，本文所有横向分量整体反号，模值不变；下面全部按式~<a class="xref" href="#eq:app-zhat">(29)</a> 推导，可逐项复核。</p>
 
 <p>转子质心（静平衡情形）</p>
 
-<div class="eqwrap"><div class="eq">\[r_C^{(r)}=(0,\,0,\,l),\]</div><div class="eqno">(28)</div></div>
+<div class="eqwrap"><div class="eq">\[r_C^{(r)}=(0,\,0,\,l),\]</div><div class="eqno">(30)</div></div>
 <p>其中 $l$ 为质心沿几何轴到 $O$ 的距离。质心到实际轴的距离为</p>
 
-<div class="eqwrap" id="eq:app-d"><div class="eq">\[d=\bigl|r_C-(r_C\cdot\hat Z)\hat Z\bigr|=l\sin\beta . \]</div><div class="eqno">(29)</div></div>
+<div class="eqwrap" id="eq:app-d"><div class="eq">\[d=\bigl|r_C-(r_C\cdot\hat Z)\hat Z\bigr|=l\sin\beta . \]</div><div class="eqno">(31)</div></div>
 
 <h3 id="h8">A.2 运动学</h3>
 
 <p>体固系绕 $Z$ 以角速度 $\omega$ 旋转，故</p>
 
-<div class="eqwrap" id="eq:app-omega"><div class="eq">\[\vec\omega^{(r)}=\omega\hat Z^{(r)} =\omega\,(-\sin\beta,\;0,\;\cos\beta), \qquad \omega_x=-\omega\sin\beta,\quad \omega_y=0,\quad \omega_z=\omega\cos\beta . \]</div><div class="eqno">(30)</div></div>
+<div class="eqwrap" id="eq:app-omega"><div class="eq">\[\vec\omega^{(r)}=\omega\hat Z^{(r)} =\omega\,(-\sin\beta,\;0,\;\cos\beta), \qquad \omega_x=-\omega\sin\beta,\quad \omega_y=0,\quad \omega_z=\omega\cos\beta . \]</div><div class="eqno">(32)</div></div>
 <p>$\omega_x\neq0$ 是角不对中的运动学标志：几何轴“斜着”绕实际轴旋转。$\beta=0$ 时退化为 $(0,0,\omega)$。</p>
 
 <h3 id="h9">A.3 惯量与绕轴转动惯量</h3>
 
 <p>绕质心的惯量张量（几何轴为对称轴）</p>
 
-<div class="eqwrap"><div class="eq">\[J_C=\mathrm{diag}(I_t,\,I_t,\,I_p),\]</div><div class="eqno">(31)</div></div>
+<div class="eqwrap"><div class="eq">\[J_C=\mathrm{diag}(I_t,\,I_t,\,I_p),\]</div><div class="eqno">(33)</div></div>
 <p>其中 $I_p$ 为绕几何轴的极惯量，$I_t$ 为横向惯量。由平行轴定理，绕固定点 $O$：</p>
 
-<div class="eqwrap"><div class="eq">\[J_O=J_C+m\bigl(l^2E-r_Cr_C^{\mathrm T}\bigr) =\mathrm{diag}(I_t+ml^2,\;I_t+ml^2,\;I_p) \equiv\mathrm{diag}(I_t',\,I_t',\,I_p), \qquad I_t'=I_t+ml^2 .\]</div><div class="eqno">(32)</div></div>
+<div class="eqwrap"><div class="eq">\[J_O=J_C+m\bigl(l^2E-r_Cr_C^{\mathrm T}\bigr) =\mathrm{diag}(I_t+ml^2,\;I_t+ml^2,\;I_p) \equiv\mathrm{diag}(I_t',\,I_t',\,I_p), \qquad I_t'=I_t+ml^2 .\]</div><div class="eqno">(34)</div></div>
 <p>绕实际轴 $Z$ 的等效转动惯量为</p>
 
-<div class="eqwrap" id="eq:app-In"><div class="eq">\[I_n=\hat Z^{\mathrm T}J_O\hat Z =I_t'\sin^2\beta+I_p\cos^2\beta =I_t\sin^2\beta+I_p\cos^2\beta+m d^2 . \]</div><div class="eqno">(33)</div></div>
+<div class="eqwrap" id="eq:app-In"><div class="eq">\[I_n=\hat Z^{\mathrm T}J_O\hat Z =I_t'\sin^2\beta+I_p\cos^2\beta =I_t\sin^2\beta+I_p\cos^2\beta+m d^2 . \]</div><div class="eqno">(35)</div></div>
 <p>极限检查：$\beta=0\Rightarrow I_n=I_p$；$\beta=\pi/2\Rightarrow I_n=I_t+ml^2$。</p>
 
 <h3 id="h10">A.4 欧拉方程与横向力矩</h3>
 
 <p>对固定点 $O$ 的欧拉方程</p>
 
-<div class="eqwrap" id="eq:app-euler"><div class="eq">\[\vec\tau_{ext}=J_O\dot{\vec\omega}+\vec\omega\times(J_O\vec\omega). \]</div><div class="eqno">(34)</div></div>
+<div class="eqwrap" id="eq:app-euler"><div class="eq">\[\vec\tau_{ext}=J_O\dot{\vec\omega}+\vec\omega\times(J_O\vec\omega). \]</div><div class="eqno">(36)</div></div>
 <p>体固系中 $J_O$ 与 $\hat Z$ 均为常矢量，代入 $\vec\omega=\omega\hat Z$：</p>
 
-<div class="eqwrap"><div class="eq">\[J_O\vec\omega=\omega\,(-I_t'\sin\beta,\;0,\;I_p\cos\beta), \qquad \vec\omega\times(J_O\vec\omega) =\omega^2(I_p-I_t')\sin\beta\cos\beta\;\hat e_y .\]</div><div class="eqno">(35)</div></div>
+<div class="eqwrap"><div class="eq">\[J_O\vec\omega=\omega\,(-I_t'\sin\beta,\;0,\;I_p\cos\beta), \qquad \vec\omega\times(J_O\vec\omega) =\omega^2(I_p-I_t')\sin\beta\cos\beta\;\hat e_y .\]</div><div class="eqno">(37)</div></div>
 <p>于是</p>
 
-<div class="eqwrap" id="eq:app-tau"><div class="eq">\[\;\tau_x=-I_t'\dot\omega\sin\beta,\qquad \tau_y=\omega^2(I_p-I_t')\sin\beta\cos\beta,\qquad \tau_z=I_p\dot\omega\cos\beta\;} \]</div><div class="eqno">(36)</div></div>
+<div class="eqwrap" id="eq:app-tau"><div class="eq">\[\;\tau_x=-I_t'\dot\omega\sin\beta,\qquad \tau_y=\omega^2(I_p-I_t')\sin\beta\cos\beta,\qquad \tau_z=I_p\dot\omega\cos\beta\;} \]</div><div class="eqno">(38)</div></div>
 <p>绕实际轴的转矩分量</p>
 
-<div class="eqwrap" id="eq:app-tauZ"><div class="eq">\[\tau_Z=\hat Z\cdot\vec\tau =(-\sin\beta)\tau_x+\cos\beta\,\tau_z =I_t'\dot\omega\sin^2\beta+I_p\dot\omega\cos^2\beta =I_n\dot\omega . \]</div><div class="eqno">(37)</div></div>
+<div class="eqwrap" id="eq:app-tauZ"><div class="eq">\[\tau_Z=\hat Z\cdot\vec\tau =(-\sin\beta)\tau_x+\cos\beta\,\tau_z =I_t'\dot\omega\sin^2\beta+I_p\dot\omega\cos^2\beta =I_n\dot\omega . \]</div><div class="eqno">(39)</div></div>
 
 <p>由此可得三条结论：(i) 匀速（$\dot\omega=0$）时 $\tau_x=0$，只剩横向力矩 $\tau_y$，它是随转子旋转的 $1\times$ 矢量，由轴承弯矩承担；(ii) $\tau_y\perp Z$，不进入绕轴转矩方程，故<em>理想刚性、匀速的角不对中不产生 $1\times$ 转矩纹波</em>，只产生 $1\times$ 振动与弯矩；(iii) $\tau_y$ 是“轴承对转子”的力矩，转子对轴承反号。</p>
 
@@ -645,68 +672,68 @@ window.MathJax = {
 
 <p>质心相对实际轴的垂足矢量</p>
 
-<div class="eqwrap"><div class="eq">\[r_\perp=r_C-(r_C\cdot\hat Z)\hat Z =\bigl(l\sin\beta\cos\beta,\;0,\;l\sin^2\beta\bigr), \qquad |r_\perp|=l\sin\beta=d .\]</div><div class="eqno">(38)</div></div>
+<div class="eqwrap"><div class="eq">\[r_\perp=r_C-(r_C\cdot\hat Z)\hat Z =\bigl(l\sin\beta\cos\beta,\;0,\;l\sin^2\beta\bigr), \qquad |r_\perp|=l\sin\beta=d .\]</div><div class="eqno">(40)</div></div>
 <p>离心力（体固系中的常矢量）</p>
 
-<div class="eqwrap"><div class="eq">\[\vec F_c=m\omega^2r_\perp =m\omega^2\bigl(l\sin\beta\cos\beta,\;0,\;l\sin^2\beta\bigr).\]</div><div class="eqno">(39)</div></div>
+<div class="eqwrap"><div class="eq">\[\vec F_c=m\omega^2r_\perp =m\omega^2\bigl(l\sin\beta\cos\beta,\;0,\;l\sin^2\beta\bigr).\]</div><div class="eqno">(41)</div></div>
 <p>它对 $O$ 点的力矩</p>
 
-<div class="eqwrap" id="eq:app-Mc"><div class="eq">\[\vec M_c=r_C\times\vec F_c =\bigl(0,\;m\omega^2l^2\sin\beta\cos\beta,\;0\bigr)\neq0 . \]</div><div class="eqno">(40)</div></div>
+<div class="eqwrap" id="eq:app-Mc"><div class="eq">\[\vec M_c=r_C\times\vec F_c =\bigl(0,\;m\omega^2l^2\sin\beta\cos\beta,\;0\bigr)\neq0 . \]</div><div class="eqno">(42)</div></div>
 <p><strong>离心力对 $O$ 点的力矩不是零</strong>。并且</p>
 
-<div class="eqwrap" id="eq:app-split"><div class="eq">\[\vec\omega\times(J_O\vec\omega) =\omega^2(I_p-I_t')\sin\beta\cos\beta\,\hat e_y =\underbrace{\omega^2(I_p-I_t)\sin\beta\cos\beta\,\hat e_y}_{\text{惯量各向异性}} -\underbrace{\vec M_c}_{\text{离心力矩}} . \]</div><div class="eqno">(41)</div></div>
+<div class="eqwrap" id="eq:app-split"><div class="eq">\[\vec\omega\times(J_O\vec\omega) =\omega^2(I_p-I_t')\sin\beta\cos\beta\,\hat e_y =\underbrace{\omega^2(I_p-I_t)\sin\beta\cos\beta\,\hat e_y}_{\text{惯量各向异性}} -\underbrace{\vec M_c}_{\text{离心力矩}} . \]</div><div class="eqno">(43)</div></div>
 <p>即离心力矩与 $J_O$ 中 $ml^2$ 部分等值反号，<strong>已包含在欧拉项内</strong>。因此计算轴承力矩时只能二选一：用 $\vec\omega\times(J_O\vec\omega)$（本文做法），或用“各向异性力矩 $-$ 离心力矩”；<strong>不能两者相加</strong>，否则重复计入。</p>
 
 <h3 id="h12">A.6 重力</h3>
 
 <p>重力在体固系中为</p>
 
-<div class="eqwrap"><div class="eq">\[\vec F_g^{(r)}=\bigl(-mg\cos\beta\sin\theta,\;-mg\cos\theta,\;-mg\sin\beta\sin\theta\bigr), \qquad \theta=\omega t .\]</div><div class="eqno">(42)</div></div>
+<div class="eqwrap"><div class="eq">\[\vec F_g^{(r)}=\bigl(-mg\cos\beta\sin\theta,\;-mg\cos\theta,\;-mg\sin\beta\sin\theta\bigr), \qquad \theta=\omega t .\]</div><div class="eqno">(44)</div></div>
 <p>对 $O$ 点的力矩</p>
 
-<div class="eqwrap"><div class="eq">\[\vec M_g=r_C\times\vec F_g =\bigl(mgl\cos\theta,\;-mgl\cos\beta\sin\theta,\;0\bigr),\]</div><div class="eqno">(43)</div></div>
+<div class="eqwrap"><div class="eq">\[\vec M_g=r_C\times\vec F_g =\bigl(mgl\cos\theta,\;-mgl\cos\beta\sin\theta,\;0\bigr),\]</div><div class="eqno">(45)</div></div>
 <p>绕实际轴的分量</p>
 
-<div class="eqwrap" id="eq:app-MgZ"><div class="eq">\[M_{gZ}=\hat Z\cdot\vec M_g=-mg\,l\sin\beta\cos\theta=-mg\,d\cos\theta . \]</div><div class="eqno">(44)</div></div>
+<div class="eqwrap" id="eq:app-MgZ"><div class="eq">\[M_{gZ}=\hat Z\cdot\vec M_g=-mg\,l\sin\beta\cos\theta=-mg\,d\cos\theta . \]</div><div class="eqno">(46)</div></div>
 <p>幅值为 $mgd$、频率为 $1\times$ 转频；符号取决于 $\theta$ 的相位定义，物理上有意义的是幅值与阶次。</p>
 
 <h3 id="h13">A.7 轴承反力（力平衡 + 力矩平衡）</h3>
 
 <p>两轴承 $A,B$ 位于 $z_A=-a,\;z_B=+b$，跨距 $L=a+b$，径向反力 $R_A,R_B\perp Z$。质心作圆周运动，向心加速度</p>
 
-<div class="eqwrap"><div class="eq">\[a_{CM}=-\omega^2r_\perp .\]</div><div class="eqno">(45)</div></div>
+<div class="eqwrap"><div class="eq">\[a_{CM}=-\omega^2r_\perp .\]</div><div class="eqno">(47)</div></div>
 <p>力平衡：</p>
 
-<div class="eqwrap" id="eq:app-force"><div class="eq">\[m a_{CM}=R_A+R_B+F_g+F_{coup} \quad\Longrightarrow\quad R_A+R_B=-m\omega^2r_\perp-F_g-F_{coup}\equiv F . \]</div><div class="eqno">(46)</div></div>
+<div class="eqwrap" id="eq:app-force"><div class="eq">\[m a_{CM}=R_A+R_B+F_g+F_{coup} \quad\Longrightarrow\quad R_A+R_B=-m\omega^2r_\perp-F_g-F_{coup}\equiv F . \]</div><div class="eqno">(48)</div></div>
 <p>对 $O$ 点的力矩平衡（$r_A=-a\hat Z,\;r_B=b\hat Z$）：</p>
 
-<div class="eqwrap" id="eq:app-moment"><div class="eq">\[r_A\times R_A+r_B\times R_B =\vec\omega\times J_O\vec\omega-M_g-M_{coup}\equiv N . \]</div><div class="eqno">(47)</div></div>
-<p>把式~<a class="xref" href="#eq:app-moment">(47)</a> 投影到 $\perp Z$ 平面，并用 $\hat Z\times R_A$ 等消去轴向分量；利用 $\hat Z\times(\hat Z\times R)=-R$ 得</p>
+<div class="eqwrap" id="eq:app-moment"><div class="eq">\[r_A\times R_A+r_B\times R_B =\vec\omega\times J_O\vec\omega-M_g-M_{coup}\equiv N . \]</div><div class="eqno">(49)</div></div>
+<p>把式~<a class="xref" href="#eq:app-moment">(49)</a> 投影到 $\perp Z$ 平面，并用 $\hat Z\times R_A$ 等消去轴向分量；利用 $\hat Z\times(\hat Z\times R)=-R$ 得</p>
 
-<div class="eqwrap"><div class="eq">\[aR_A-bR_B=\hat Z\times N ,\]</div><div class="eqno">(48)</div></div>
-<p>与式~<a class="xref" href="#eq:app-force">(46)</a> 联立：</p>
+<div class="eqwrap"><div class="eq">\[aR_A-bR_B=\hat Z\times N ,\]</div><div class="eqno">(50)</div></div>
+<p>与式~<a class="xref" href="#eq:app-force">(48)</a> 联立：</p>
 
-<div class="eqwrap" id="eq:app-RA"><div class="eq">\[\;R_A=\frac{bF+\hat Z\times N}{a+b},\qquad R_B=\frac{aF-\hat Z\times N}{a+b}\;} \]</div><div class="eqno">(49)</div></div>
+<div class="eqwrap" id="eq:app-RA"><div class="eq">\[\;R_A=\frac{bF+\hat Z\times N}{a+b},\qquad R_B=\frac{aF-\hat Z\times N}{a+b}\;} \]</div><div class="eqno">(51)</div></div>
 <p>其中 $F=-m\omega^2r_\perp-F_g-F_{coup}$，$N=\vec\omega\times J_O\vec\omega-M_g-M_{coup}$；以上均为 $\perp Z$ 平面内的二维矢量，轴向分量由轴向力平衡单独处理。</p>
 
 <p>物理解读：陀螺力矩以力偶 $\pm\tau_y/L$ 分配到两轴承；重力与联轴器弹性力按杠杆比 $b/L$、$a/L$ 分配。直接把三个力取模当轴承载荷，既没有杠杆分配，又可能把离心力矩与陀螺力矩重复计入。</p>
 
 <h3 id="h14">A.8 轴承摩擦转矩</h3>
 
-<div class="eqwrap" id="eq:app-Tf"><div class="eq">\[T_f(\theta,\omega)=T_{f0}+\mu_b r_b\bigl(|R_A|+|R_B|\bigr)+c_v\omega+T_{cage}(\theta), \]</div><div class="eqno">(50)</div></div>
+<div class="eqwrap" id="eq:app-Tf"><div class="eq">\[T_f(\theta,\omega)=T_{f0}+\mu_b r_b\bigl(|R_A|+|R_B|\bigr)+c_v\omega+T_{cage}(\theta), \]</div><div class="eqno">(52)</div></div>
 <p>其中 $T_{f0}$ 为预紧/密封常数项，$\mu_b r_b(\cdot)$ 为载荷相关项，$c_v\omega$ 为粘性项，$T_{cage}$ 为保持架与滚动体通过等周期扰动。由于 $|R_A|,|R_B|$ 含 $1\times$（重力、弯矩）与 $2\times$（联轴器、间隙）分量，$T_f$ 也含 $1\times$、$2\times$ 纹波。</p>
 
 <h3 id="h15">A.9 绕轴转矩方程与转速纹波</h3>
 
-<div class="eqwrap" id="eq:app-torque"><div class="eq">\[\;I_n\dot\omega=T_e-T_L(\theta)-T_f(\theta,\omega)+M_{gZ}(\theta)+T_{mis}(\theta)\;} \]</div><div class="eqno">(51)</div></div>
+<div class="eqwrap" id="eq:app-torque"><div class="eq">\[\;I_n\dot\omega=T_e-T_L(\theta)-T_f(\theta,\omega)+M_{gZ}(\theta)+T_{mis}(\theta)\;} \]</div><div class="eqno">(53)</div></div>
 <p>其中 $T_e$ 为电磁转矩，$T_L$ 为负载转矩（含不对中/偏心等效），$T_{mis}$ 为联轴器角刚度各向异性给出的绕轴分量（理想刚性联轴器为 $0$）。</p>
 
 <p>对第 $k$ 次转矩谐波 $T_k\cos(k\theta-\psi_k)$，开环机械响应为</p>
 
-<div class="eqwrap"><div class="eq">\[\Delta\omega_k\approx-\frac{T_k}{I_nk\omega}\sin(k\theta-\psi_k)\qquad(\text{开环}),\]</div><div class="eqno">(52)</div></div>
+<div class="eqwrap"><div class="eq">\[\Delta\omega_k\approx-\frac{T_k}{I_nk\omega}\sin(k\theta-\psi_k)\qquad(\text{开环}),\]</div><div class="eqno">(54)</div></div>
 <p>计入速度环灵敏度 $S(s)$ 后</p>
 
-<div class="eqwrap" id="eq:app-dw"><div class="eq">\[\;\Delta\omega_k\approx|S(jk\omega)|\,\frac{T_k}{I_nk\omega}\;} \]</div><div class="eqno">(53)</div></div>
+<div class="eqwrap" id="eq:app-dw"><div class="eq">\[\;\Delta\omega_k\approx|S(jk\omega)|\,\frac{T_k}{I_nk\omega}\;} \]</div><div class="eqno">(55)</div></div>
 
 <h3 id="h16">A.10 谐波来源：$1\times$、$2\times$ 与高阶</h3>
 
@@ -714,7 +741,7 @@ window.MathJax = {
 
 <p>刚性角不对中本身只给 $1\times$ <em>弯矩</em>；$2\times$ 必须由联轴器运动学或几何非线性解释。以 Hooke 联轴器为例，从动轴角速度比为</p>
 
-<div class="eqwrap"><div class="eq">\[\frac{\omega_2}{\omega_1}=\frac{\cos\beta}{1-\sin^2\beta\cos^2\theta},\]</div><div class="eqno">(54)</div></div>
+<div class="eqwrap"><div class="eq">\[\frac{\omega_2}{\omega_1}=\frac{\cos\beta}{1-\sin^2\beta\cos^2\theta},\]</div><div class="eqno">(56)</div></div>
 <p>小角度展开 $\omega_2/\omega_1\approx1+\frac{\beta^2}{2}\cos2\theta$，即 $2\times$ 纹波幅值正比于 $\beta^2/2$。</p>
 
 <h3 id="h17">A.11 与台架 $T(\theta)$ 的数值对应</h3>
@@ -727,13 +754,13 @@ window.MathJax = {
 
 <h3 id="h18">A.12 常见错误与纠正</h3>
 
-<ol><li>“离心力对 $O$ 点力矩为零”——错。正确为式~<a class="xref" href="#eq:app-Mc">(40)</a>；它已含在欧拉项中，不能再叠加。</li><li>“轴承载荷 $=|\vec F_{mis}+\vec F_g+\vec F_c|$”——错。须按式~<a class="xref" href="#eq:app-RA">(49)</a> 做力/力矩平衡；陀螺力矩按 $\pm\tau_y/L$ 分配。</li><li>“重力矩是 $1\times$ 故障转矩主源”——量级不对。$mgd\sim10^{-4}$\,N$\cdot$m，远小于负载/摩擦调制；仅在低速、大偏心时显著。</li><li>“$\hat Z^{(r)}=(\sin\beta,0,\cos\beta)$ 且重力表达式照旧”——符号不闭合：此写法对应 $(-\sin\beta,0,\cos\beta)$，两者必须统一。</li><li>平行不对中不能写成 $d=\sqrt{\delta^2+(l\sin\beta)^2}$；$e$、$\delta$、$l\sin\beta$ 是矢量，应先合成再取模。</li><li>转速纹波不能只写开环 $T_k/(I_nk\omega)$；台架开环 $459$\,rpm 对实测 $22$\,rpm，必须乘 $|S(jk\omega)|$。</li><li>$2\times$ 转矩不能由刚性角不对中推出；需联轴器运动学（如式 Hooke 角速度比）或几何非线性。</li><li>符号：$\tau_y$ 的符号随姿态取向变化；“轴承对转子”与“转子对轴承”反号，须区分。</li></ol>
+<ol><li>“离心力对 $O$ 点力矩为零”——错。正确为式~<a class="xref" href="#eq:app-Mc">(42)</a>；它已含在欧拉项中，不能再叠加。</li><li>“轴承载荷 $=|\vec F_{mis}+\vec F_g+\vec F_c|$”——错。须按式~<a class="xref" href="#eq:app-RA">(51)</a> 做力/力矩平衡；陀螺力矩按 $\pm\tau_y/L$ 分配。</li><li>“重力矩是 $1\times$ 故障转矩主源”——量级不对。$mgd\sim10^{-4}$\,N$\cdot$m，远小于负载/摩擦调制；仅在低速、大偏心时显著。</li><li>“$\hat Z^{(r)}=(\sin\beta,0,\cos\beta)$ 且重力表达式照旧”——符号不闭合：此写法对应 $(-\sin\beta,0,\cos\beta)$，两者必须统一。</li><li>平行不对中不能写成 $d=\sqrt{\delta^2+(l\sin\beta)^2}$；$e$、$\delta$、$l\sin\beta$ 是矢量，应先合成再取模。</li><li>转速纹波不能只写开环 $T_k/(I_nk\omega)$；台架开环 $459$\,rpm 对实测 $22$\,rpm，必须乘 $|S(jk\omega)|$。</li><li>$2\times$ 转矩不能由刚性角不对中推出；需联轴器运动学（如式 Hooke 角速度比）或几何非线性。</li><li>符号：$\tau_y$ 的符号随姿态取向变化；“轴承对转子”与“转子对轴承”反号，须区分。</li></ol>
 
 <h3 id="h19">A.13 仿真实现</h3>
 
-<p>式~<a class="xref" href="#eq:app-tau">(36)</a>（横向陀螺力矩）与式~<a class="xref" href="#eq:app-MgZ">(44)</a>（重力矩）已封装为可移植函数 <code>fault_torque</code> 中的 <code>misalign_torque</code>：</p>
+<p>式~<a class="xref" href="#eq:app-tau">(38)</a>（横向陀螺力矩）与式~<a class="xref" href="#eq:app-MgZ">(46)</a>（重力矩）已封装为可移植函数 <code>fault_torque</code> 中的 <code>misalign_torque</code>：</p>
 
-<div class="eqwrap" id="eq:app-impl-mis"><div class="eq">\[T_m(\theta,\omega,\beta) =-M g\,l\sin\beta\,\sin\theta +\kappa\,T_0\left[\frac{1-\sin^2\beta\cos^2\theta}{\cos\beta}-1\right] \]</div><div class="eqno">(55)</div></div>
+<div class="eqwrap" id="eq:app-impl-mis"><div class="eq">\[T_m(\theta,\omega,\beta) =-M g\,l\sin\beta\,\sin\theta +\kappa\,T_0\left[\frac{1-\sin^2\beta\cos^2\theta}{\cos\beta}-1\right] \]</div><div class="eqno">(57)</div></div>
 <p>（方括号项为 Hooke 联轴器的 $2\times$ 调制，默认关闭）。$\kappa$ 为台架等效放大系数，$\kappa=1$ 即物理值。</p>
 
 <p>接入方式：在 <code>pmsm_inv_sim.py</code> 主循环中 <code>_tl = TL[k]</code> 之后，用机械角 $\theta=th/P_{\mathrm{pol}}$ 与机械角速度 $w$ 计算并叠加。配置键 <code>cfg["tl_fault"]</code> 取字典 \texttt{\{"start":\ldots,\ "misalign":\{"M":\ldots,\ "beta":\ldots,\ "l":\ldots,\ "kappa":\ldots\}\}}；默认 <code>tl_fault=None</code>，原有结果逐位不变。</p>
@@ -758,96 +785,96 @@ window.MathJax = {
 
 <p>总质量与质心偏心距：</p>
 
-<div class="eqwrap" id="eq:unb-e"><div class="eq">\[M_t=M+m,\qquad e=\frac{mR}{M_t}. \]</div><div class="eqno">(56)</div></div>
+<div class="eqwrap" id="eq:unb-e"><div class="eq">\[M_t=M+m,\qquad e=\frac{mR}{M_t}. \]</div><div class="eqno">(58)</div></div>
 <p>若偏心质量自身还有绕其质心轴的惯量 $I_s$，则绕转轴的转动惯量为</p>
 
-<div class="eqwrap" id="eq:unb-In"><div class="eq">\[I_n=\frac12MR^2+I_s+mR^2 . \]</div><div class="eqno">(57)</div></div>
+<div class="eqwrap" id="eq:unb-In"><div class="eq">\[I_n=\frac12MR^2+I_s+mR^2 . \]</div><div class="eqno">(59)</div></div>
 <p>多个边缘质量 $m_i$（同在半径 $R$）时，用矢量合成：</p>
 
-<div class="eqwrap"><div class="eq">\[e=\frac{1}{M_t}\Bigl|\sum_i m_i\vec r_i\Bigr|,\qquad I_n=\frac12MR^2+\sum_i m_iR^2 .\]</div><div class="eqno">(58)</div></div>
+<div class="eqwrap"><div class="eq">\[e=\frac{1}{M_t}\Bigl|\sum_i m_i\vec r_i\Bigr|,\qquad I_n=\frac12MR^2+\sum_i m_iR^2 .\]</div><div class="eqno">(60)</div></div>
 
 <h3 id="h22">B.2 重力矩：$1\times$ 脉动转矩</h3>
 
 <p>取转轴 $Z$ 水平，盘面为竖直平面；$X$ 水平、$Y$ 竖直向上，重力 $\vec F_g=(0,\,-M_t g)$ 作用在整体质心 $C$ 上。质心位置</p>
 
-<div class="eqwrap"><div class="eq">\[\vec r_C=e\,(\sin\theta,\,-\cos\theta),\]</div><div class="eqno">(59)</div></div>
+<div class="eqwrap"><div class="eq">\[\vec r_C=e\,(\sin\theta,\,-\cos\theta),\]</div><div class="eqno">(61)</div></div>
 <p>其中 $\theta$ 从“竖直向下”量起。重力对转轴的力矩为</p>
 
-<div class="eqwrap" id="eq:unb-taug"><div class="eq">\[\tau_g=(\vec r_C\times\vec F_g)_Z =e\sin\theta\,(-M_t g)-(-e\cos\theta)\cdot 0 =-M_t g\,e\sin\theta . \]</div><div class="eqno">(60)</div></div>
+<div class="eqwrap" id="eq:unb-taug"><div class="eq">\[\tau_g=(\vec r_C\times\vec F_g)_Z =e\sin\theta\,(-M_t g)-(-e\cos\theta)\cdot 0 =-M_t g\,e\sin\theta . \]</div><div class="eqno">(62)</div></div>
 <p>代入 $M_te=mR$：</p>
 
-<div class="eqwrap" id="eq:unb-taug2"><div class="eq">\[\;\tau_g=-M_t g\,e\sin\theta=-m g R\sin\theta\;} \]</div><div class="eqno">(61)</div></div>
+<div class="eqwrap" id="eq:unb-taug2"><div class="eq">\[\;\tau_g=-M_t g\,e\sin\theta=-m g R\sin\theta\;} \]</div><div class="eqno">(63)</div></div>
 <p>即<em>幅值为 $M_tge=m gR$、频率为 $1\times$ 的正弦脉动转矩</em>。匀速时</p>
 
-<div class="eqwrap" id="eq:unb-Tg"><div class="eq">\[\tau_g(t)=-T_g\sin(\omega t+\theta_0),\qquad T_g=M_t g\,e=m g R . \]</div><div class="eqno">(62)</div></div>
+<div class="eqwrap" id="eq:unb-Tg"><div class="eq">\[\tau_g(t)=-T_g\sin(\omega t+\theta_0),\qquad T_g=M_t g\,e=m g R . \]</div><div class="eqno">(64)</div></div>
 <p>注意：$T_g$ 与转速 $\omega$ <strong>无关</strong>，只取决于重力与偏心量。</p>
 
 <p>若转轴与水平面成 $\gamma$ 角（$\gamma=0$ 水平、$\gamma=\pi/2$ 竖直），则重力矩幅值乘以 $\cos\gamma$：</p>
 
-<div class="eqwrap" id="eq:unb-gamma"><div class="eq">\[T_g=M_t g\,e\cos\gamma . \]</div><div class="eqno">(63)</div></div>
+<div class="eqwrap" id="eq:unb-gamma"><div class="eq">\[T_g=M_t g\,e\cos\gamma . \]</div><div class="eqno">(65)</div></div>
 <p>竖直轴（$\gamma=\pi/2$）时重力沿轴，不产生绕轴转矩。</p>
 
 <h3 id="h23">B.3 离心力：$1\times$ 径向力，不是转矩</h3>
 
 <p>偏心质量旋转产生离心力</p>
 
-<div class="eqwrap" id="eq:unb-Fu"><div class="eq">\[F_u=M_t e\,\omega^2=m R\,\omega^2, \]</div><div class="eqno">(64)</div></div>
+<div class="eqwrap" id="eq:unb-Fu"><div class="eq">\[F_u=M_t e\,\omega^2=m R\,\omega^2, \]</div><div class="eqno">(66)</div></div>
 <p>方向沿 $\vec r_C$（随转子以 $1\times$ 旋转）。它对转轴的力矩的 $Z$ 分量为零：</p>
 
-<div class="eqwrap" id="eq:unb-tauFu"><div class="eq">\[\tau_Z(\vec F_u)=\hat Z\cdot(\vec r_C\times\vec F_u)=0, \]</div><div class="eqno">(65)</div></div>
+<div class="eqwrap" id="eq:unb-tauFu"><div class="eq">\[\tau_Z(\vec F_u)=\hat Z\cdot(\vec r_C\times\vec F_u)=0, \]</div><div class="eqno">(67)</div></div>
 <p>因为 $\vec F_u$ 与 $\vec r_C$ 共线、叉积为零。所以<strong>离心力不直接产生绕轴转矩</strong>，它产生的是径向载荷与振动。</p>
 
 <p>两轴承 $A,B$（位于 $z=-a,+b$，跨距 $L=a+b$）的径向反力，在质心位于跨中时按杠杆比分配：</p>
 
-<div class="eqwrap"><div class="eq">\[\vec R_A=\frac{b}{L}\bigl(\vec F_u+M_t\vec g\bigr),\qquad \vec R_B=\frac{a}{L}\bigl(\vec F_u+M_t\vec g\bigr).\]</div><div class="eqno">(66)</div></div>
+<div class="eqwrap"><div class="eq">\[\vec R_A=\frac{b}{L}\bigl(\vec F_u+M_t\vec g\bigr),\qquad \vec R_B=\frac{a}{L}\bigl(\vec F_u+M_t\vec g\bigr).\]</div><div class="eqno">(68)</div></div>
 <p>质心轴向偏离跨中 $z_C$ 时，附加力偶 $\pm z_C\hat Z\times\vec F_u/L$ 分配到两轴承；这就是不平衡“动反力”的来源。</p>
 
 <h3 id="h24">B.4 绕轴转矩方程与转速纹波</h3>
 
 <p>绕轴写转矩平衡：</p>
 
-<div class="eqwrap" id="eq:unb-torque"><div class="eq">\[\;I_n\dot\omega=T_e-T_L(\theta)-T_f(\theta,\omega)+\tau_g(\theta)\;} \]</div><div class="eqno">(67)</div></div>
-<p>其中 $T_e$ 为电磁转矩，$T_L$ 为名义负载，$T_f$ 为轴承摩擦，$\tau_g$ 为式~<a class="xref" href="#eq:unb-taug2">(61)</a> 的重力矩。稳态（$\dot\omega\approx0$）时电机必须输出</p>
+<div class="eqwrap" id="eq:unb-torque"><div class="eq">\[\;I_n\dot\omega=T_e-T_L(\theta)-T_f(\theta,\omega)+\tau_g(\theta)\;} \]</div><div class="eqno">(69)</div></div>
+<p>其中 $T_e$ 为电磁转矩，$T_L$ 为名义负载，$T_f$ 为轴承摩擦，$\tau_g$ 为式~<a class="xref" href="#eq:unb-taug2">(63)</a> 的重力矩。稳态（$\dot\omega\approx0$）时电机必须输出</p>
 
-<div class="eqwrap"><div class="eq">\[T_e\approx T_L+T_f+M_t g\,e\sin\theta,\]</div><div class="eqno">(68)</div></div>
+<div class="eqwrap"><div class="eq">\[T_e\approx T_L+T_f+M_t g\,e\sin\theta,\]</div><div class="eqno">(70)</div></div>
 <p>即电磁转矩中出现与重力矩同幅反相的 $1\times$ 分量。</p>
 
 <p>对速度环灵敏度 $S(s)$，$1\times$ 转速纹波为</p>
 
-<div class="eqwrap" id="eq:unb-dw"><div class="eq">\[\Delta\omega_1=|S(j\omega)|\,\frac{T_g}{I_n\omega} =|S(j\omega)|\,\frac{M_t g e}{I_n\omega}. \]</div><div class="eqno">(69)</div></div>
+<div class="eqwrap" id="eq:unb-dw"><div class="eq">\[\Delta\omega_1=|S(j\omega)|\,\frac{T_g}{I_n\omega} =|S(j\omega)|\,\frac{M_t g e}{I_n\omega}. \]</div><div class="eqno">(71)</div></div>
 
 <h3 id="h25">B.5 轴承摩擦的 $1\times$ 调制（二阶小量）</h3>
 
 <p>轴承法向载荷是重力与离心力的矢量和：</p>
 
-<div class="eqwrap"><div class="eq">\[|\vec F_n|^2=(M_t g)^2+(mR\omega^2)^2+2M_t g\,mR\omega^2\cos\varphi,\]</div><div class="eqno">(70)</div></div>
+<div class="eqwrap"><div class="eq">\[|\vec F_n|^2=(M_t g)^2+(mR\omega^2)^2+2M_t g\,mR\omega^2\cos\varphi,\]</div><div class="eqno">(72)</div></div>
 <p>其 $1\times$ 纹波幅值为 $M_tg\cdot mR\omega^2/F_0$，$F_0=\sqrt{(M_tg)^2+(mR\omega^2)^2}$。乘以摩擦系数得摩擦转矩的 $1\times$ 分量</p>
 
-<div class="eqwrap" id="eq:unb-DTf"><div class="eq">\[\Delta T_f=\mu_b r_b\,\frac{M_t g\,mR\omega^2}{\sqrt{(M_tg)^2+(mR\omega^2)^2}}, \]</div><div class="eqno">(71)</div></div>
+<div class="eqwrap" id="eq:unb-DTf"><div class="eq">\[\Delta T_f=\mu_b r_b\,\frac{M_t g\,mR\omega^2}{\sqrt{(M_tg)^2+(mR\omega^2)^2}}, \]</div><div class="eqno">(73)</div></div>
 <p>通常远小于重力矩 $T_g$。</p>
 
 <h3 id="h26">B.6 动态不平衡（力偶）</h3>
 
 <p>两个质量 $m$ 在半径 $R$ 处相差 $180^\circ$、轴向相距 $l$，形成旋转力偶</p>
 
-<div class="eqwrap" id="eq:unb-Mu"><div class="eq">\[M_u=mR\,\omega^2\,l . \]</div><div class="eqno">(72)</div></div>
+<div class="eqwrap" id="eq:unb-Mu"><div class="eq">\[M_u=mR\,\omega^2\,l . \]</div><div class="eqno">(74)</div></div>
 <p>它同样<strong>不产生绕轴转矩</strong>（力偶垂直于轴），只以 $\pm M_u/L$ 的形式作用在两轴承上，是“动不平衡”的典型特征。</p>
 
 <h3 id="h27">B.7 与台架 $T(\theta)$ 型线的对应</h3>
 
 <p>台架 $600$\,rpm、$I_n\approx1.89\times10^{-5}$\,kg$\cdot$m$^2$、型线 $1\times$ 分量 $T_1\approx0.0571$\,N$\cdot$m。<strong>若</strong>把它解释为重力不平衡矩，则</p>
 
-<div class="eqwrap"><div class="eq">\[F_u=\frac{T_1\omega^2}{g} =\frac{0.0571\times(62.83)^2}{9.81}\approx23\ \mathrm{N}, \qquad mR=\frac{F_u}{\omega^2}\approx5.8\times10^{-3}\ \mathrm{kg\cdot m},\]</div><div class="eqno">(73)</div></div>
+<div class="eqwrap"><div class="eq">\[F_u=\frac{T_1\omega^2}{g} =\frac{0.0571\times(62.83)^2}{9.81}\approx23\ \mathrm{N}, \qquad mR=\frac{F_u}{\omega^2}\approx5.8\times10^{-3}\ \mathrm{kg\cdot m},\]</div><div class="eqno">(75)</div></div>
 <p>即 $R=50$\,mm 时需要约 $116$\,g 的偏心质量——离心力 $23$\,N 是重量的二十余倍，这样的转子在台架上会剧烈振动。反过来，取一个现实的不平衡量 $mR=10^{-4}$\,kg$\cdot$m（$2$\,g 偏置 $50$\,mm），则</p>
 
-<div class="eqwrap"><div class="eq">\[F_u=mR\omega^2\approx0.39\ \mathrm{N},\qquad T_g=M_t g e=\frac{g}{\omega^2}F_u\approx9.8\times10^{-4}\ \mathrm{N\cdot m},\]</div><div class="eqno">(74)</div></div>
+<div class="eqwrap"><div class="eq">\[F_u=mR\omega^2\approx0.39\ \mathrm{N},\qquad T_g=M_t g e=\frac{g}{\omega^2}F_u\approx9.8\times10^{-4}\ \mathrm{N\cdot m},\]</div><div class="eqno">(76)</div></div>
 <p>只有型线的 $1.7\%$。因此：</p>
 
 <ul><li><strong>物理不平衡</strong>：$1\times$ 径向力 $mR\omega^2$ 可以可观，但 $1\times$ 绕轴转矩 $M_tge=(g/\omega^2)F_u$ 很小；</li><li><strong>台架型线</strong>：$0.095$\,N$\cdot$m 峰值是程序注入的等效故障，用于给 RCESO 一个可测的周期扰动，不能反推为真实的偏心质量。</li></ul>
 
 <p>两者的换算关系可写成</p>
 
-<div class="eqwrap" id="eq:unb-conv"><div class="eq">\[T_g=\frac{g}{\omega^2}F_u,\qquad F_u=\frac{\omega^2}{g}T_g . \]</div><div class="eqno">(75)</div></div>
+<div class="eqwrap" id="eq:unb-conv"><div class="eq">\[T_g=\frac{g}{\omega^2}F_u,\qquad F_u=\frac{\omega^2}{g}T_g . \]</div><div class="eqno">(77)</div></div>
 <p>在 $600$\,rpm 处 $g/\omega^2\approx2.5\times10^{-3}$\,m：同一不平衡量产生的<strong>转矩</strong>比<strong>力</strong>小三个数量级。</p>
 
 <h3 id="h28">B.8 常见错误与纠正</h3>
@@ -856,9 +883,9 @@ window.MathJax = {
 
 <h3 id="h29">B.9 仿真实现</h3>
 
-<p>式~<a class="xref" href="#eq:unb-taug2">(61)</a>（重力矩）与式~<a class="xref" href="#eq:unb-DTf">(71)</a>（摩擦调制）已封装为 <code>fault_torque</code> 中的 <code>unbalance_torque</code>：</p>
+<p>式~<a class="xref" href="#eq:unb-taug2">(63)</a>（重力矩）与式~<a class="xref" href="#eq:unb-DTf">(73)</a>（摩擦调制）已封装为 <code>fault_torque</code> 中的 <code>unbalance_torque</code>：</p>
 
-<div class="eqwrap" id="eq:unb-impl"><div class="eq">\[T_u(\theta,\omega,e)=-M g\,e\sin\theta+\mu_b r_b\,M e\,\omega^2\cos\theta , \]</div><div class="eqno">(76)</div></div>
+<div class="eqwrap" id="eq:unb-impl"><div class="eq">\[T_u(\theta,\omega,e)=-M g\,e\sin\theta+\mu_b r_b\,M e\,\omega^2\cos\theta , \]</div><div class="eqno">(78)</div></div>
 <p>第二项默认关闭（$\mu_b=0$）。接入点与附录 A 相同（主循环 <code>_tl = TL[k]</code> 之后，$\theta=th/P_{\mathrm{pol}}$、$\omega=w$）。配置键 <code>cfg["tl_fault"]</code> 取字典 \texttt{\{"start":\ldots,\ "unbalance":\{"M":\ldots,\ "e":\ldots,\ "kappa":\ldots\}\}}；默认 <code>tl_fault=None</code> 时逐位不变。</p>
 
 <p><strong>量级与验证</strong>：$\kappa=1$ 时 $1\times$ 幅值 $Mge=9.8\times10^{-5}$\,N$\cdot$m，10\,Hz 分量 $1.09$\,rpm、稳态 RMS $15.13$\,rpm（基准 $1.25$ / $15.57$）；</p>
@@ -868,10 +895,10 @@ window.MathJax = {
 
 <p><strong>关于 $J_{\rm true}$ 与 $J_{\rm nom}$</strong>：附录中的 $T_u$、$T_m$ 注入的是<strong>电机轴</strong>上的等效力矩。仿真主循环必须用真实传动链惯量</p>
 
-<div class="eqwrap" id="eq:unb-Jtrue"><div class="eq">\[J_{\rm true}=J_{\rm motor}+J_{\rm cpl}+\frac{J_{\rm disc}}{n_g^{2}}+\frac{n_bJ_b}{n_g^{2}}, \]</div><div class="eqno">(77)</div></div>
+<div class="eqwrap" id="eq:unb-Jtrue"><div class="eq">\[J_{\rm true}=J_{\rm motor}+J_{\rm cpl}+\frac{J_{\rm disc}}{n_g^{2}}+\frac{n_bJ_b}{n_g^{2}}, \]</div><div class="eqno">(79)</div></div>
 <p>而 ESO 的 $b_0$ 只用标定值 $J_{\rm nom}$（本报告 $1.89\times10^{-5}$\,kg$\cdot$m$^2$，通常为电机转子部分），二者之差 $1/J_{\rm true}-1/J_{\rm nom}$ 作为扰动由 ESO 估计。</p>
 <p>若故障在齿轮箱负载侧，注入电机轴的转矩应除以速比 $n_g$、角度换成 $\theta/n_g$。</p>
-<p>本报告的全部数值结果取 $J_{\rm true}=J_{\rm nom}$；若台架含圆盘/齿轮箱，必须按式~<a class="xref" href="#eq:unb-Jtrue">(77)</a> 重算 $J_{\rm true}$ 并复跑（$J$ 失配超过约 $5$ 倍时固定增益的速度环自身会失稳，需重新标定 $k_p,\omega_o$）。</p>
+<p>本报告的全部数值结果取 $J_{\rm true}=J_{\rm nom}$；若台架含圆盘/齿轮箱，必须按式~<a class="xref" href="#eq:unb-Jtrue">(79)</a> 重算 $J_{\rm true}$ 并复跑（$J$ 失配超过约 $5$ 倍时固定增益的速度环自身会失稳，需重新标定 $k_p,\omega_o$）。</p>
 
 <h3 id="h30">B.10 符号表</h3>
 
@@ -883,8 +910,8 @@ window.MathJax = {
 
 <p>ESO 与主循环必须用两个不同的惯量：$J_{\rm nom}$ 是标定值（只进 $b_0$），$J_{\rm true}$ 是传动链真实值（进主循环的机械方程）。二者之差</p>
 
-<div class="eqwrap"><div class="eq">\[\frac{1}{J_{\rm true}}-\frac{1}{J_{\rm nom}}\]</div><div class="eqno">(78)</div></div>
-<p>作为扰动由 ESO 的 $z_2$ 估计。$J_{\rm true}$ 按附录 B.9 的式~<a class="xref" href="#eq:unb-Jtrue">(77)</a> 折算。本文选一组自洽的台架参数（表 C.1），得到 $J_{\rm true}=9.95\times10^{-5}$，即 $5.26J_{\rm nom}$。</p>
+<div class="eqwrap"><div class="eq">\[\frac{1}{J_{\rm true}}-\frac{1}{J_{\rm nom}}\]</div><div class="eqno">(80)</div></div>
+<p>作为扰动由 ESO 的 $z_2$ 估计。$J_{\rm true}$ 按附录 B.9 的式~<a class="xref" href="#eq:unb-Jtrue">(79)</a> 折算。本文选一组自洽的台架参数（表 C.1），得到 $J_{\rm true}=9.95\times10^{-5}$，即 $5.26J_{\rm nom}$。</p>
 
 <div class="tablewrap"><table><thead><tr><th>部件</th><th>参数</th><th>$J$ / kg$\cdot$m$^2$</th></tr></thead><tbody><tr><td>电机转子</td><td>已知</td><td>$1.89\times10^{-5}$</td></tr><tr><td>联轴器</td><td>小钢盘</td><td>$1.5\times10^{-6}$</td></tr><tr><td>圆盘</td><td>$M_d=0.15$\,kg、$R_d=30$\,mm</td><td>$6.75\times10^{-5}$</td></tr><tr><td>轴承（2 个）</td><td>$m_b=20$\,g、$r_i=10$\,mm、$r_o=22$\,mm</td><td>$1.16\times10^{-5}$</td></tr><tr><td>合计</td><td>$n_g=1$</td><td>$9.95\times10^{-5}$</td></tr></tbody></table></div>
 
@@ -896,13 +923,13 @@ window.MathJax = {
 
 <p>在电流指令上叠加一个小转矩 dither</p>
 
-<div class="eqwrap"><div class="eq">\[T_d(t)=A\sin(2\pi f_d t),\qquad A=0.1\ \mathrm{N\cdot m},\ f_d=100\ \mathrm{Hz},\]</div><div class="eqno">(79)</div></div>
+<div class="eqwrap"><div class="eq">\[T_d(t)=A\sin(2\pi f_d t),\qquad A=0.1\ \mathrm{N\cdot m},\ f_d=100\ \mathrm{Hz},\]</div><div class="eqno">(81)</div></div>
 <p>取 $0.2$\,s 窗（$20$ 个整周期，且为 $10$\,Hz 的 $2$ 个整周期，与故障正交），用 $T_e$ 与 $\omega$ 的 DFT 比值估计</p>
 
-<div class="eqwrap" id="eq:appC-jhat"><div class="eq">\[\hat J=\frac{|T_{e,f_d}|}{2\pi f_d\,|\omega_{f_d}|}. \]</div><div class="eqno">(80)</div></div>
+<div class="eqwrap" id="eq:appC-jhat"><div class="eq">\[\hat J=\frac{|T_{e,f_d}|}{2\pi f_d\,|\omega_{f_d}|}. \]</div><div class="eqno">(82)</div></div>
 <p>该式在闭环下仍成立：被控对象满足 $\omega=T_e/(Js)$，负载在 $100$\,Hz 无分量；控制器的反作用已包含在实测 $T_e$ 中。辨识只做 $0$–$2$\,s（调试期），随后冻结 $\hat J$、关闭 dither，并一次性更新</p>
 
-<div class="eqwrap" id="eq:appC-b0"><div class="eq">\[b_0\leftarrow b_0\,\frac{J_{\rm nom}}{\hat J},\qquad k_p\ \text{不变},\qquad \hat J\in[0.5,\,50]J_{\rm nom}. \]</div><div class="eqno">(81)</div></div>
+<div class="eqwrap" id="eq:appC-b0"><div class="eq">\[b_0\leftarrow b_0\,\frac{J_{\rm nom}}{\hat J},\qquad k_p\ \text{不变},\qquad \hat J\in[0.5,\,50]J_{\rm nom}. \]</div><div class="eqno">(83)</div></div>
 
 <p><strong>为什么只更新 $b_0$、且只在调试期做</strong>：(i) 控制律 $u=(k_p e-z_2-v)/b_0$ 的环路增益为 $b\,k_p/b_0$，把 $b_0$ 调到真实 $b$ 即恢复增益，若同时放大 $k_p$ 会双重补偿（实测 $i_q$ 冲到 $19$\,A）；(ii) 编码器 $2500$\,PPR（$4$ 倍频）在 $600$\,rpm、$1$\,ms 采样下的量化台阶约 $6$\,rpm，$100$\,Hz dither 的转速幅值需 $\ge0.1$\,N$\cdot$m 才有足够信噪比，连续在线辨识会因 $\hat J$ 抖动导致增益抖动，实测出现 $i_q$ 发散；调试期辨识 + 冻结是工业伺服的标准做法。</p>
 
