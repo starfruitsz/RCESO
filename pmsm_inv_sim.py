@@ -90,6 +90,15 @@ def sim_inv(t, TL, cfg=None):
     # 辨识是否一开始就打开（用于 j_val 的默认值：只有 j_id 开时才可能进入校验）
     _jid_on0 = _jid
     _jhat = J_M
+    # ---- ESO/DO 观测器在线惯量辨识（实验，2026-11-14；默认关闭）----
+    _jdo_on = bool(cfg.get("j_do", False))
+    _jdo_gamma = float(cfg.get("j_do_gamma", 2.0e-4))
+    _jdo_lpf = float(cfg.get("j_do_lpf", 0.02))
+    _jdo_tau = float(cfg.get("j_do_tau", 0.5))
+    _jdo_J = J_M
+    _jdo_TL = 0.0
+    _jdo_wprev = 0.0
+    _jdo_wdotf = 0.0
     _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
     _KPe = KP
     # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
@@ -539,6 +548,18 @@ def sim_inv(t, TL, cfg=None):
             _tk = k * dt
             _fb = (_yref - z1n) if u_z1 else (_yref - y_m)
             u = (kpe * _fb - z2n - vn) / _B0e
+            # ---- ESO/DO 在线 J 辨识（实验）：DO 估 T_L，梯度更新 J，慢更新 b0 ----
+            if _jdo_on and _tk > 0.2:
+                _wdot = (w_enc - _jdo_wprev) / 1e-3
+                _a = 1.0 - math.exp(-1e-3 / _jdo_lpf)
+                _jdo_wdotf += _a * (_wdot - _jdo_wdotf)
+                _jdo_TL += _a * (Te - _jdo_J * _jdo_wdotf - _jdo_TL)
+                _eJ = Te - _jdo_TL - _jdo_J * _jdo_wdotf
+                _jdo_J += _jdo_gamma * 1e-3 * _jdo_wdotf * _eJ
+                _jdo_J = min(max(_jdo_J, 0.5 * J_M), 50.0 * J_M)
+                _jhat = _jdo_J
+                _B0e += (1e-3 / _jdo_tau) * (B0 * (J_M / _jdo_J) - _B0e)
+            _jdo_wprev = w_enc
             if _jid:
                 if _tk >= _jid_tend:                 # 超时：有有效窗则进入应用/校验，否则回退
                     _jid = False
