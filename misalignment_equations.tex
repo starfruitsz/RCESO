@@ -1,0 +1,193 @@
+% =============================================================================
+%  不对中故障的转矩与受力：MathType 可直接读取的 LaTeX 片段
+%  版本：2026-11-13
+%
+%  用法（MathType）：
+%    1) MathType → Preferences → Workspace Preferences
+%       勾选 "Allow TeX language input"（允许 TeX 语言输入）；
+%    2) 复制下面任意一行的公式（不含行首的 % 注释行）；
+%    3) 在 MathType 编辑窗口中粘贴并回车，即转成公式。
+%
+%  约定：每条公式单行、独立、可单独粘贴；不使用 \begin/\end、\label、\tag、
+%        \text、\operatorname 与自定义宏。
+%  符号约定：体固系取 e_x=(cosβ,0,-sinβ)、e_y=(0,1,0)、e_z=(sinβ,0,cosβ)，
+%            故 \hat Z^(r)=(-sinβ,0,cosβ)；若改取 β→-β，横向分量整体反号。
+% =============================================================================
+
+% A1 角不对中定义
+\beta=\angle\left(z,Z\right)
+
+% A2 实际轴在体固系中的坐标
+\hat{Z}^{(r)}=\left(-\sin\beta,\ 0,\ \cos\beta\right)
+
+% A3 姿态基（右手系）
+e_x=\left(\cos\beta,\ 0,\ -\sin\beta\right),\quad e_y=\left(0,\ 1,\ 0\right),\quad e_z=\left(\sin\beta,\ 0,\ \cos\beta\right)
+
+% A4 质心位置
+r_C^{(r)}=\left(0,\ 0,\ l\right)
+
+% A5 质心到实际轴距离
+d=l\sin\beta
+
+% A6 转角
+\theta=\omega t
+
+% B1 体固系角速度
+\vec{\omega}^{(r)}=\omega\hat{Z}^{(r)}
+
+% B2 角速度分量
+\vec{\omega}^{(r)}=\omega\left(-\sin\beta,\ 0,\ \cos\beta\right)
+
+% B3 三个分量
+\omega_x=-\omega\sin\beta,\quad \omega_y=0,\quad \omega_z=\omega\cos\beta
+
+% C1 绕质心惯量
+J_C=\mathrm{diag}\left(I_t,\ I_t,\ I_p\right)
+
+% C2 平行轴定理
+J_O=J_C+m\left(l^2 E-r_C r_C^{\mathrm{T}}\right)
+
+% C3 绕 O 的惯量
+J_O=\mathrm{diag}\left(I_t+ml^2,\ I_t+ml^2,\ I_p\right)
+
+% C4 横向等效惯量
+I_t'=I_t+ml^2
+
+% C5 简写
+J_O=\mathrm{diag}\left(I_t',\ I_t',\ I_p\right)
+
+% C6 绕轴惯量定义
+I_n=\hat{Z}^{\mathrm{T}}J_O\hat{Z}
+
+% C7 绕轴惯量展开
+I_n=I_t\sin^2\beta+I_p\cos^2\beta+md^2
+
+% C8 绕轴惯量等价式
+I_n=I_t'\sin^2\beta+I_p\cos^2\beta
+
+% D1 欧拉方程
+\vec{\tau}_{ext}=J_O\dot{\vec{\omega}}+\vec{\omega}\times\left(J_O\vec{\omega}\right)
+
+% D2 角速度
+\vec{\omega}=\omega\hat{Z}
+
+% D3 角动量
+J_O\vec{\omega}=\omega\left(-I_t'\sin\beta,\ 0,\ I_p\cos\beta\right)
+
+% D4 陀螺项
+\vec{\omega}\times\left(J_O\vec{\omega}\right)=\omega^2\left(I_p-I_t'\right)\sin\beta\cos\beta\ \hat{e}_y
+
+% D5 横向分量 x
+\tau_x=-I_t'\dot{\omega}\sin\beta
+
+% D6 横向分量 y（陀螺力矩）
+\tau_y=\omega^2\left(I_p-I_t'\right)\sin\beta\cos\beta
+
+% D7 横向分量 z
+\tau_z=I_p\dot{\omega}\cos\beta
+
+% D8 绕轴分量
+\tau_Z=\hat{Z}\cdot\vec{\tau}=I_n\dot{\omega}
+
+% E1 垂足矢量定义
+r_{\perp}=r_C-\left(r_C\cdot\hat{Z}\right)\hat{Z}
+
+% E2 垂足矢量分量
+r_{\perp}=\left(l\sin\beta\cos\beta,\ 0,\ l\sin^2\beta\right)
+
+% E3 垂足模长
+\left|r_{\perp}\right|=l\sin\beta=d
+
+% E4 离心力定义
+\vec{F}_c=m\omega^2 r_{\perp}
+
+% E5 离心力分量
+\vec{F}_c=m\omega^2\left(l\sin\beta\cos\beta,\ 0,\ l\sin^2\beta\right)
+
+% E6 离心力矩（不为零）
+\vec{M}_c=r_C\times\vec{F}_c=\left(0,\ m\omega^2 l^2\sin\beta\cos\beta,\ 0\right)
+
+% E7 陀螺项分解（含离心力矩）
+\vec{\omega}\times\left(J_O\vec{\omega}\right)=\omega^2\left(I_p-I_t\right)\sin\beta\cos\beta\ \hat{e}_y-\vec{M}_c
+
+% F1 重力在体固系
+\vec{F}_g^{(r)}=\left(-mg\cos\beta\sin\theta,\ -mg\cos\theta,\ -mg\sin\beta\sin\theta\right)
+
+% F2 重力矩
+\vec{M}_g=r_C\times\vec{F}_g=\left(mgl\cos\theta,\ -mgl\cos\beta\sin\theta,\ 0\right)
+
+% F3 绕轴重力矩
+M_{gZ}=\hat{Z}\cdot\vec{M}_g=-mgd\cos\theta
+
+% G1 质心加速度
+a_{CM}=-\omega^2 r_{\perp}
+
+% G2 力平衡
+R_A+R_B=-m\omega^2 r_{\perp}-F_g-F_{coup}
+
+% G3 合力定义
+F=-m\omega^2 r_{\perp}-F_g-F_{coup}
+
+% G4 力矩平衡
+r_A\times R_A+r_B\times R_B=\vec{\omega}\times J_O\vec{\omega}-M_g-M_{coup}
+
+% G5 合力矩定义
+N=\vec{\omega}\times J_O\vec{\omega}-M_g-M_{coup}
+
+% G6 二维叉乘恒等式
+\hat{Z}\times\left(\hat{Z}\times R\right)=-R
+
+% G7 力矩平衡的二维形式
+aR_A-bR_B=\hat{Z}\times N
+
+% G8 轴承 A 反力
+R_A=\frac{bF+\hat{Z}\times N}{a+b}
+
+% G9 轴承 B 反力
+R_B=\frac{aF-\hat{Z}\times N}{a+b}
+
+% H1 摩擦转矩模型
+T_f\left(\theta,\omega\right)=T_{f0}+\mu_b r_b\left(\left|R_A\right|+\left|R_B\right|\right)+c_v\omega+T_{cage}\left(\theta\right)
+
+% I1 绕轴转矩方程
+I_n\dot{\omega}=T_e-T_L\left(\theta\right)-T_f\left(\theta,\omega\right)+M_{gZ}\left(\theta\right)+T_{mis}\left(\theta\right)
+
+% I2 开环转速纹波
+\Delta\omega_k=-\frac{T_k}{I_n k\omega}\sin\left(k\theta-\psi_k\right)
+
+% I3 闭环转速纹波
+\Delta\omega_k=\left|S\left(jk\omega\right)\right|\frac{T_k}{I_n k\omega}
+
+% J1 静不平衡离心力
+\vec{F}_u=me\omega^2
+
+% J2 陀螺力矩（标量）
+\tau_{gyro}=\omega^2\left(I_t'-I_p\right)\sin\beta\cos\beta
+
+% J3 Hooke 联轴器角速度比
+\frac{\omega_2}{\omega_1}=\frac{\cos\beta}{1-\sin^2\beta\cos^2\theta}
+
+% J4 小角度展开（2× 来源）
+\frac{\omega_2}{\omega_1}\approx 1+\frac{\beta^2}{2}\cos 2\theta
+
+% K1 开环纹波公式
+\Delta\omega_1=\frac{T_1}{I_n\omega}
+
+% K2 台架开环数值
+\Delta\omega_1=\frac{0.0571}{1.89\times10^{-5}\times62.83}\approx 459\ \mathrm{rpm}
+
+% K3 速度环衰减
+\left|S\left(j2\pi\cdot 10\right)\right|\approx 0.048
+
+% K4 型线基波
+T_1\approx\frac{0.095}{1.664}=0.0571\ \mathrm{N\cdot m}
+
+% K5 重力矩幅值
+M_{gZ}=mgd
+
+% K6 陀螺力矩量级
+\tau_{gyro}\approx 6.5\times10^{-4}\ \mathrm{N\cdot m}
+
+% K7 离心力量级
+F_c\approx 0.34\ \mathrm{N}
+

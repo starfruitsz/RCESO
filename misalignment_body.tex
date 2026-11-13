@@ -1,0 +1,271 @@
+% =====================================================================
+%  misalignment_body.tex —— 不对中故障的转矩与受力（附录正文，可被报告 \input）
+% =====================================================================
+
+\subsection*{A.1 坐标、姿态与符号}
+
+惯性系 $S_0=(X,Y,Z)$：$Z$ 取实际旋转轴（水平），重力 $\vec g=-g\hat Y$。体固系 $S_r=(x,y,z)$：$z$ 取转子几何对称轴，原点 $O$ 取两轴交点（空间固定点），角不对中角 $\beta=\angle(z,Z)$。
+
+取 $\theta=0$ 时的姿态
+\begin{equation}
+e_x=(\cos\beta,\,0,\,-\sin\beta),\qquad
+e_y=(0,\,1,\,0),\qquad
+e_z=(\sin\beta,\,0,\,\cos\beta),
+\end{equation}
+为右手系（$e_x\times e_y=e_z$）。实际轴 $Z$ 在体固系中的坐标——由于 $Z$ 是旋转轴，它在体固系中为常矢量——为
+\begin{equation}
+\hat Z^{(r)}=(-\sin\beta,\;0,\;\cos\beta).
+\label{eq:app-zhat}
+\end{equation}
+若改取 $\beta\to-\beta$，则 $\hat Z^{(r)}=(\sin\beta,0,\cos\beta)$，本文所有横向分量整体反号，模值不变；下面全部按式~\eqref{eq:app-zhat} 推导，可逐项复核。
+
+转子质心（静平衡情形）
+\begin{equation}
+r_C^{(r)}=(0,\,0,\,l),
+\end{equation}
+其中 $l$ 为质心沿几何轴到 $O$ 的距离。质心到实际轴的距离为
+\begin{equation}
+d=\bigl|r_C-(r_C\cdot\hat Z)\hat Z\bigr|=l\sin\beta .
+\label{eq:app-d}
+\end{equation}
+
+\subsection*{A.2 运动学}
+
+体固系绕 $Z$ 以角速度 $\omega$ 旋转，故
+\begin{equation}
+\vec\omega^{(r)}=\omega\hat Z^{(r)}
+=\omega\,(-\sin\beta,\;0,\;\cos\beta),
+\qquad
+\omega_x=-\omega\sin\beta,\quad \omega_y=0,\quad \omega_z=\omega\cos\beta .
+\label{eq:app-omega}
+\end{equation}
+$\omega_x\neq0$ 是角不对中的运动学标志：几何轴“斜着”绕实际轴旋转。$\beta=0$ 时退化为 $(0,0,\omega)$。
+
+\subsection*{A.3 惯量与绕轴转动惯量}
+
+绕质心的惯量张量（几何轴为对称轴）
+\begin{equation}
+J_C=\mathrm{diag}(I_t,\,I_t,\,I_p),
+\end{equation}
+其中 $I_p$ 为绕几何轴的极惯量，$I_t$ 为横向惯量。由平行轴定理，绕固定点 $O$：
+\begin{equation}
+J_O=J_C+m\bigl(l^2E-r_Cr_C^{\mathrm T}\bigr)
+=\mathrm{diag}(I_t+ml^2,\;I_t+ml^2,\;I_p)
+\equiv\mathrm{diag}(I_t',\,I_t',\,I_p),
+\qquad I_t'=I_t+ml^2 .
+\end{equation}
+绕实际轴 $Z$ 的等效转动惯量为
+\begin{equation}
+I_n=\hat Z^{\mathrm T}J_O\hat Z
+=I_t'\sin^2\beta+I_p\cos^2\beta
+=I_t\sin^2\beta+I_p\cos^2\beta+m d^2 .
+\label{eq:app-In}
+\end{equation}
+极限检查：$\beta=0\Rightarrow I_n=I_p$；$\beta=\pi/2\Rightarrow I_n=I_t+ml^2$。
+
+\subsection*{A.4 欧拉方程与横向力矩}
+
+对固定点 $O$ 的欧拉方程
+\begin{equation}
+\vec\tau_{ext}=J_O\dot{\vec\omega}+\vec\omega\times(J_O\vec\omega).
+\label{eq:app-euler}
+\end{equation}
+体固系中 $J_O$ 与 $\hat Z$ 均为常矢量，代入 $\vec\omega=\omega\hat Z$：
+\begin{equation}
+J_O\vec\omega=\omega\,(-I_t'\sin\beta,\;0,\;I_p\cos\beta),
+\qquad
+\vec\omega\times(J_O\vec\omega)
+=\omega^2(I_p-I_t')\sin\beta\cos\beta\;\hat e_y .
+\end{equation}
+于是
+\begin{equation}
+\boxed{\;\tau_x=-I_t'\dot\omega\sin\beta,\qquad
+\tau_y=\omega^2(I_p-I_t')\sin\beta\cos\beta,\qquad
+\tau_z=I_p\dot\omega\cos\beta\;}
+\label{eq:app-tau}
+\end{equation}
+绕实际轴的转矩分量
+\begin{equation}
+\tau_Z=\hat Z\cdot\vec\tau
+=(-\sin\beta)\tau_x+\cos\beta\,\tau_z
+=I_t'\dot\omega\sin^2\beta+I_p\dot\omega\cos^2\beta
+=I_n\dot\omega .
+\label{eq:app-tauZ}
+\end{equation}
+
+由此可得三条结论：(i) 匀速（$\dot\omega=0$）时 $\tau_x=0$，只剩横向力矩 $\tau_y$，它是随转子旋转的 $1\times$ 矢量，由轴承弯矩承担；(ii) $\tau_y\perp Z$，不进入绕轴转矩方程，故\emph{理想刚性、匀速的角不对中不产生 $1\times$ 转矩纹波}，只产生 $1\times$ 振动与弯矩；(iii) $\tau_y$ 是“轴承对转子”的力矩，转子对轴承反号。
+
+\subsection*{A.5 离心力及其力矩}
+
+质心相对实际轴的垂足矢量
+\begin{equation}
+r_\perp=r_C-(r_C\cdot\hat Z)\hat Z
+=\bigl(l\sin\beta\cos\beta,\;0,\;l\sin^2\beta\bigr),
+\qquad |r_\perp|=l\sin\beta=d .
+\end{equation}
+离心力（体固系中的常矢量）
+\begin{equation}
+\vec F_c=m\omega^2r_\perp
+=m\omega^2\bigl(l\sin\beta\cos\beta,\;0,\;l\sin^2\beta\bigr).
+\end{equation}
+它对 $O$ 点的力矩
+\begin{equation}
+\vec M_c=r_C\times\vec F_c
+=\bigl(0,\;m\omega^2l^2\sin\beta\cos\beta,\;0\bigr)\neq0 .
+\label{eq:app-Mc}
+\end{equation}
+\textbf{离心力对 $O$ 点的力矩不是零}。并且
+\begin{equation}
+\vec\omega\times(J_O\vec\omega)
+=\omega^2(I_p-I_t')\sin\beta\cos\beta\,\hat e_y
+=\underbrace{\omega^2(I_p-I_t)\sin\beta\cos\beta\,\hat e_y}_{\text{惯量各向异性}}
+-\underbrace{\vec M_c}_{\text{离心力矩}} .
+\label{eq:app-split}
+\end{equation}
+即离心力矩与 $J_O$ 中 $ml^2$ 部分等值反号，\textbf{已包含在欧拉项内}。因此计算轴承力矩时只能二选一：用 $\vec\omega\times(J_O\vec\omega)$（本文做法），或用“各向异性力矩 $-$ 离心力矩”；\textbf{不能两者相加}，否则重复计入。
+
+\subsection*{A.6 重力}
+
+重力在体固系中为
+\begin{equation}
+\vec F_g^{(r)}=\bigl(-mg\cos\beta\sin\theta,\;-mg\cos\theta,\;-mg\sin\beta\sin\theta\bigr),
+\qquad \theta=\omega t .
+\end{equation}
+对 $O$ 点的力矩
+\begin{equation}
+\vec M_g=r_C\times\vec F_g
+=\bigl(mgl\cos\theta,\;-mgl\cos\beta\sin\theta,\;0\bigr),
+\end{equation}
+绕实际轴的分量
+\begin{equation}
+M_{gZ}=\hat Z\cdot\vec M_g=-mg\,l\sin\beta\cos\theta=-mg\,d\cos\theta .
+\label{eq:app-MgZ}
+\end{equation}
+幅值为 $mgd$、频率为 $1\times$ 转频；符号取决于 $\theta$ 的相位定义，物理上有意义的是幅值与阶次。
+
+\subsection*{A.7 轴承反力（力平衡 + 力矩平衡）}
+
+两轴承 $A,B$ 位于 $z_A=-a,\;z_B=+b$，跨距 $L=a+b$，径向反力 $R_A,R_B\perp Z$。质心作圆周运动，向心加速度
+\begin{equation}
+a_{CM}=-\omega^2r_\perp .
+\end{equation}
+力平衡：
+\begin{equation}
+m a_{CM}=R_A+R_B+F_g+F_{coup}
+\quad\Longrightarrow\quad
+R_A+R_B=-m\omega^2r_\perp-F_g-F_{coup}\equiv F .
+\label{eq:app-force}
+\end{equation}
+对 $O$ 点的力矩平衡（$r_A=-a\hat Z,\;r_B=b\hat Z$）：
+\begin{equation}
+r_A\times R_A+r_B\times R_B
+=\vec\omega\times J_O\vec\omega-M_g-M_{coup}\equiv N .
+\label{eq:app-moment}
+\end{equation}
+把式~\eqref{eq:app-moment} 投影到 $\perp Z$ 平面，并用 $\hat Z\times R_A$ 等消去轴向分量；利用 $\hat Z\times(\hat Z\times R)=-R$ 得
+\begin{equation}
+aR_A-bR_B=\hat Z\times N ,
+\end{equation}
+与式~\eqref{eq:app-force} 联立：
+\begin{equation}
+\boxed{\;R_A=\frac{bF+\hat Z\times N}{a+b},\qquad
+R_B=\frac{aF-\hat Z\times N}{a+b}\;}
+\label{eq:app-RA}
+\end{equation}
+其中 $F=-m\omega^2r_\perp-F_g-F_{coup}$，$N=\vec\omega\times J_O\vec\omega-M_g-M_{coup}$；以上均为 $\perp Z$ 平面内的二维矢量，轴向分量由轴向力平衡单独处理。
+
+物理解读：陀螺力矩以力偶 $\pm\tau_y/L$ 分配到两轴承；重力与联轴器弹性力按杠杆比 $b/L$、$a/L$ 分配。直接把三个力取模当轴承载荷，既没有杠杆分配，又可能把离心力矩与陀螺力矩重复计入。
+
+\subsection*{A.8 轴承摩擦转矩}
+
+\begin{equation}
+T_f(\theta,\omega)=T_{f0}+\mu_b r_b\bigl(|R_A|+|R_B|\bigr)+c_v\omega+T_{cage}(\theta),
+\label{eq:app-Tf}
+\end{equation}
+其中 $T_{f0}$ 为预紧/密封常数项，$\mu_b r_b(\cdot)$ 为载荷相关项，$c_v\omega$ 为粘性项，$T_{cage}$ 为保持架与滚动体通过等周期扰动。由于 $|R_A|,|R_B|$ 含 $1\times$（重力、弯矩）与 $2\times$（联轴器、间隙）分量，$T_f$ 也含 $1\times$、$2\times$ 纹波。
+
+\subsection*{A.9 绕轴转矩方程与转速纹波}
+
+\begin{equation}
+\boxed{\;I_n\dot\omega=T_e-T_L(\theta)-T_f(\theta,\omega)+M_{gZ}(\theta)+T_{mis}(\theta)\;}
+\label{eq:app-torque}
+\end{equation}
+其中 $T_e$ 为电磁转矩，$T_L$ 为负载转矩（含不对中/偏心等效），$T_{mis}$ 为联轴器角刚度各向异性给出的绕轴分量（理想刚性联轴器为 $0$）。
+
+对第 $k$ 次转矩谐波 $T_k\cos(k\theta-\psi_k)$，开环机械响应为
+\begin{equation}
+\Delta\omega_k\approx-\frac{T_k}{I_nk\omega}\sin(k\theta-\psi_k)\qquad(\text{开环}),
+\end{equation}
+计入速度环灵敏度 $S(s)$ 后
+\begin{equation}
+\boxed{\;\Delta\omega_k\approx|S(jk\omega)|\,\frac{T_k}{I_nk\omega}\;}
+\label{eq:app-dw}
+\end{equation}
+
+\subsection*{A.10 谐波来源：$1\times$、$2\times$ 与高阶}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}cll@{}}
+\toprule
+阶次 & 来源 & 备注\\
+\midrule
+$1\times$ & 静不平衡 $me\omega^2$、角不对中弯矩 $\tau_y$、重力 $mgd$、联轴器/摩擦调制 & 随转子旋转的空间固定矢量\\
+$2\times$ & 十字滑块/Hooke 联轴器运动学（幅值 $\sim\beta^2/2$）、平行不对中柔性联轴器、间隙 & 运动学/几何非线性\\
+高阶 & 盘面偏摆、齿式联轴器、滚动体通过、间隙碰撞 & 非线性接触\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+刚性角不对中本身只给 $1\times$ \emph{弯矩}；$2\times$ 必须由联轴器运动学或几何非线性解释。以 Hooke 联轴器为例，从动轴角速度比为
+\begin{equation}
+\frac{\omega_2}{\omega_1}=\frac{\cos\beta}{1-\sin^2\beta\cos^2\theta},
+\end{equation}
+小角度展开 $\omega_2/\omega_1\approx1+\frac{\beta^2}{2}\cos2\theta$，即 $2\times$ 纹波幅值正比于 $\beta^2/2$。
+
+\subsection*{A.11 与台架 $T(\theta)$ 的数值对应}
+
+台架 $600$\,rpm、$I_n\approx1.89\times10^{-5}$\,kg$\cdot$m$^2$、额定 $0.637$\,N$\cdot$m：
+
+\begin{itemize}
+  \item 型线 V2 峰值 $0.095$\,N$\cdot$m，基波 $T_1\approx0.095/1.664=0.0571$\,N$\cdot$m；
+  \item 开环 $10$\,Hz 纹波：$\Delta\omega_1=T_1/(I_n\omega)=0.0571/(1.89\times10^{-5}\times62.83)\approx459$\,rpm；
+  \item 实测 $\sim22$\,rpm $\Rightarrow |S(j2\pi10)|\approx0.048$——速度环把机械纹波压到约 $5\%$；
+  \item 重力矩（$m=0.1$\,kg、$d=0.1$\,mm）：$mgd\approx9.8\times10^{-5}$\,N$\cdot$m，约为额定的 $1.5\times10^{-4}$；
+  \item 陀螺力矩（$\beta=1^\circ$、$I_t'-I_p\approx-0.94\times10^{-5}$）：$\approx6.5\times10^{-4}$\,N$\cdot$m；
+  \item 离心力（$l=50$\,mm、$\beta=1^\circ$）：$F_c\approx0.34$\,N。
+\end{itemize}
+
+可见：物理不对中在\emph{轴承载荷}上可达 N 级，但在\emph{绕轴转矩}上很小；台架那 $0.095$\,N$\cdot$m 是程序注入的等效故障，不能与物理不对中量直接相加或互相替代。
+
+\subsection*{A.12 常见错误与纠正}
+
+\begin{enumerate}
+  \item “离心力对 $O$ 点力矩为零”——错。正确为式~\eqref{eq:app-Mc}；它已含在欧拉项中，不能再叠加。
+  \item “轴承载荷 $=|\vec F_{mis}+\vec F_g+\vec F_c|$”——错。须按式~\eqref{eq:app-RA} 做力/力矩平衡；陀螺力矩按 $\pm\tau_y/L$ 分配。
+  \item “重力矩是 $1\times$ 故障转矩主源”——量级不对。$mgd\sim10^{-4}$\,N$\cdot$m，远小于负载/摩擦调制；仅在低速、大偏心时显著。
+  \item “$\hat Z^{(r)}=(\sin\beta,0,\cos\beta)$ 且重力表达式照旧”——符号不闭合：此写法对应 $(-\sin\beta,0,\cos\beta)$，两者必须统一。
+  \item 平行不对中不能写成 $d=\sqrt{\delta^2+(l\sin\beta)^2}$；$e$、$\delta$、$l\sin\beta$ 是矢量，应先合成再取模。
+  \item 转速纹波不能只写开环 $T_k/(I_nk\omega)$；台架开环 $459$\,rpm 对实测 $22$\,rpm，必须乘 $|S(jk\omega)|$。
+  \item $2\times$ 转矩不能由刚性角不对中推出；需联轴器运动学（如式 Hooke 角速度比）或几何非线性。
+  \item 符号：$\tau_y$ 的符号随姿态取向变化；“轴承对转子”与“转子对轴承”反号，须区分。
+\end{enumerate}
+
+\subsection*{A.13 符号表}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+符号 & 含义\\
+\midrule
+$\beta$ & 角不对中（几何轴与实际轴夹角）\\
+$l$ & 质心沿几何轴到交点 $O$ 的距离\\
+$d=l\sin\beta$ & 质心到实际轴距离\\
+$I_p,\;I_t$ & 极/横向转动惯量（绕质心）\\
+$I_t'=I_t+ml^2$ & 绕 $O$ 的横向惯量\\
+$I_n$ & 绕实际轴的等效转动惯量\\
+$a,\;b,\;L$ & 两轴承到 $O$ 的距离与跨距\\
+$S(s)$ & 速度环灵敏度函数\\
+$T_k,\;\psi_k$ & 第 $k$ 次转矩谐波幅值与相位\\
+\bottomrule
+\end{tabular}
+\end{center}

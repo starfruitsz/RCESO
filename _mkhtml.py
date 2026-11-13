@@ -294,9 +294,13 @@ while i < len(lines):
         i += 1; continue
 
     # ---- section / subsection（花括号配对：标题含 } 或 ^ 不再截断）----
-    if s.startswith("\\subsection{") or s.startswith("\\section{"):
-        _tag = "h3" if s.startswith("\\subsection{") else "h2"
-        _pre = "\\subsection{" if _tag == "h3" else "\\section{"
+    if s.startswith("\\subsection{") or s.startswith("\\section{") or s.startswith("\\subsection*{") or s.startswith("\\section*{"):
+        _is_sub = s.startswith("\\subsection{") or s.startswith("\\subsection*{")
+        _tag = "h3" if _is_sub else "h2"
+        if s.startswith("\\subsection*{"): _pre = "\\subsection*{"
+        elif s.startswith("\\section*{"): _pre = "\\section*{"
+        elif _is_sub: _pre = "\\subsection{"
+        else: _pre = "\\section{"
         _t, _p = grab(s, len(_pre) - 1)
         _lm = re.search(r"\\label\{([^}]+)\}", s[_p:])
         _id = _lm.group(1) if _lm else ""
@@ -558,7 +562,8 @@ toc = []
 auto_t = 0
 for ln in lines:
     _s = ln.strip()
-    for _pre, _lvl in (("\\section{", "l2"), ("\\subsection{", "l3")):
+    for _pre, _lvl in (("\\section{", "l2"), ("\\subsection{", "l3"),
+                        ("\\section*{", "l2"), ("\\subsection*{", "l3")):
         if _s.startswith(_pre):
             _t, _p = grab(_s, len(_pre) - 1)
             _lm = re.search(r"\\label\{([^}]+)\}", _s[_p:])
@@ -569,7 +574,7 @@ for ln in lines:
             toc.append((_lvl, _id, _t))
             break
 nav = "".join(f'<a class="{c}" href="#{i}">{inline(t)}</a>' for c,i,t in toc)
-CHAIN = "逻辑链：" + " → ".join(f"{k+1} {t}" for k, (c, _i, t) in enumerate([x for x in toc if x[0] == "l2"]))
+CHAIN = "逻辑链：" + " → ".join(f"{k+1} {t}" for k, (c, _i, t) in enumerate([x for x in toc if x[0] == "l2" and not t.startswith("附录")]))
 
 HTML = f"""<!DOCTYPE html>
 <html lang="zh-CN">
