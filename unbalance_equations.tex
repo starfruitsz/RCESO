@@ -1,0 +1,115 @@
+% =============================================================================
+%  圆盘质量不平衡引发的脉动转矩：MathType 可直接读取的 LaTeX 片段
+%  版本：2026-11-13
+%
+%  用法（MathType）：
+%    1) MathType → Preferences → Workspace Preferences
+%       勾选 "Allow TeX language input"（允许 TeX 语言输入）；
+%    2) 复制下面任意一行的公式（不含行首的 % 注释行）；
+%    3) 在 MathType 编辑窗口中粘贴并回车，即转成公式。
+%
+%  约定：每条公式单行、独立、可单独粘贴；不使用环境、编号标签、
+%        \text 类命令与自定义宏。
+%  核心结论：水平轴不平衡的绕轴脉动转矩来自重力，幅值 M_t g e（与转速无关）；
+%            m e ω^2 是径向离心力，不是绕轴转矩。
+% =============================================================================
+
+% U1 总质量
+M_t=M+m
+
+% U2 质心偏心距
+e=\frac{mR}{M_t}
+
+% U3 绕轴转动惯量
+I_n=\frac{1}{2}MR^2+I_s+mR^2
+
+% U4 多质量等效偏心
+e=\frac{1}{M_t}\left|\sum_i m_i\vec{r}_i\right|
+
+% U5 多质量转动惯量
+I_n=\frac{1}{2}MR^2+\sum_i m_iR^2
+
+% U6 转角
+\theta=\omega t+\theta_0
+
+% U7 质心位置
+\vec{r}_C=e\left(\sin\theta,\ -\cos\theta\right)
+
+% U8 重力矩
+\tau_g=\left(\vec{r}_C\times\vec{F}_g\right)_Z=-M_t g e\sin\theta
+
+% U9 用边缘质量表示
+\tau_g=-m g R\sin\theta
+
+% U10 重力矩幅值
+T_g=M_t g e=m g R
+
+% U11 时域脉动转矩
+\tau_g\left(t\right)=-T_g\sin\left(\omega t+\theta_0\right)
+
+% U12 轴倾角修正
+T_g=M_t g e\cos\gamma
+
+% U13 离心力
+F_u=M_t e\omega^2=mR\omega^2
+
+% U14 离心力对轴无力矩
+\tau_Z\left(\vec{F}_u\right)=\hat{Z}\cdot\left(\vec{r}_C\times\vec{F}_u\right)=0
+
+% U15 轴承 A 反力
+\vec{R}_A=\frac{b}{L}\left(\vec{F}_u+M_t\vec{g}\right)
+
+% U16 轴承 B 反力
+\vec{R}_B=\frac{a}{L}\left(\vec{F}_u+M_t\vec{g}\right)
+
+% U17 绕轴转矩方程
+I_n\dot{\omega}=T_e-T_L\left(\theta\right)-T_f\left(\theta,\omega\right)+\tau_g\left(\theta\right)
+
+% U18 稳态电磁转矩
+T_e\approx T_L+T_f+M_t g e\sin\theta
+
+% U19 转速纹波
+\Delta\omega_1=\left|S\left(j\omega\right)\right|\frac{M_t g e}{I_n\omega}
+
+% U20 法向载荷平方
+\left|\vec{F}_n\right|^2=\left(M_t g\right)^2+\left(mR\omega^2\right)^2+2M_t g\,mR\omega^2\cos\varphi
+
+% U21 摩擦纹波
+\Delta T_f=\mu_b r_b\frac{M_t g\,mR\omega^2}{\sqrt{\left(M_tg\right)^2+\left(mR\omega^2\right)^2}}
+
+% U22 动态不平衡力偶
+M_u=mR\omega^2 l
+
+% U23 力偶的轴承载荷
+R_{uA}=R_{uB}=\frac{M_u}{L}
+
+% U24 转矩与力的换算
+T_g=\frac{g}{\omega^2}F_u
+
+% U25 反解离心力
+F_u=\frac{\omega^2}{g}T_g
+
+% U26 由型线反推
+F_u=\frac{T_1\omega^2}{g}
+
+% U27 台架反推数值
+F_u=\frac{0.0571\times\left(62.83\right)^2}{9.81}\approx23\ \mathrm{N}
+
+% U28 等效不平衡量
+mR=\frac{F_u}{\omega^2}\approx5.8\times10^{-3}\ \mathrm{kg\cdot m}
+
+% U29 现实不平衡量下的离心力
+F_u=mR\omega^2\approx0.39\ \mathrm{N}
+
+% U30 相应重力矩
+T_g=\frac{g}{\omega^2}F_u\approx9.8\times10^{-4}\ \mathrm{N\cdot m}
+
+% U31 占比
+\frac{T_g}{T_1}\approx1.7\%
+
+% U32 竖直轴重力矩
+T_g=0
+
+% U33 质心轴向偏置的附加力偶
+\pm\frac{z_C\hat{Z}\times\vec{F}_u}{L}
+

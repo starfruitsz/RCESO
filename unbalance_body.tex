@@ -1,0 +1,181 @@
+% =====================================================================
+%  unbalance_body.tex —— 圆盘质量不平衡引发的脉动转矩（附录正文）
+% =====================================================================
+
+\subsection*{B.1 模型与符号}
+
+均质圆盘质量 $M$、半径 $R$，转轴过圆心 $O$ 且垂直于盘面；盘的边缘附一个偏心质量 $m$（按质点处理，也可推广为多个 $m_i$）。取转轴为水平轴 $Z$，重力沿 $-Y$；设偏心方向与“竖直向下”的夹角为 $\theta$，匀速旋转时 $\theta=\omega t+\theta_0$。
+
+总质量与质心偏心距：
+\begin{equation}
+M_t=M+m,\qquad
+e=\frac{mR}{M_t}.
+\label{eq:unb-e}
+\end{equation}
+若偏心质量自身还有绕其质心轴的惯量 $I_s$，则绕转轴的转动惯量为
+\begin{equation}
+I_n=\frac12MR^2+I_s+mR^2 .
+\label{eq:unb-In}
+\end{equation}
+多个边缘质量 $m_i$（同在半径 $R$）时，用矢量合成：
+\begin{equation}
+e=\frac{1}{M_t}\Bigl|\sum_i m_i\vec r_i\Bigr|,\qquad
+I_n=\frac12MR^2+\sum_i m_iR^2 .
+\end{equation}
+
+\subsection*{B.2 重力矩：$1\times$ 脉动转矩}
+
+取转轴 $Z$ 水平，盘面为竖直平面；$X$ 水平、$Y$ 竖直向上，重力 $\vec F_g=(0,\,-M_t g)$ 作用在整体质心 $C$ 上。质心位置
+\begin{equation}
+\vec r_C=e\,(\sin\theta,\,-\cos\theta),
+\end{equation}
+其中 $\theta$ 从“竖直向下”量起。重力对转轴的力矩为
+\begin{equation}
+\tau_g=(\vec r_C\times\vec F_g)_Z
+=e\sin\theta\,(-M_t g)-(-e\cos\theta)\cdot 0
+=-M_t g\,e\sin\theta .
+\label{eq:unb-taug}
+\end{equation}
+代入 $M_te=mR$：
+\begin{equation}
+\boxed{\;\tau_g=-M_t g\,e\sin\theta=-m g R\sin\theta\;}
+\label{eq:unb-taug2}
+\end{equation}
+即\emph{幅值为 $M_tge=m gR$、频率为 $1\times$ 的正弦脉动转矩}。匀速时
+\begin{equation}
+\tau_g(t)=-T_g\sin(\omega t+\theta_0),\qquad T_g=M_t g\,e=m g R .
+\label{eq:unb-Tg}
+\end{equation}
+注意：$T_g$ 与转速 $\omega$ \textbf{无关}，只取决于重力与偏心量。
+
+若转轴与水平面成 $\gamma$ 角（$\gamma=0$ 水平、$\gamma=\pi/2$ 竖直），则重力矩幅值乘以 $\cos\gamma$：
+\begin{equation}
+T_g=M_t g\,e\cos\gamma .
+\label{eq:unb-gamma}
+\end{equation}
+竖直轴（$\gamma=\pi/2$）时重力沿轴，不产生绕轴转矩。
+
+\subsection*{B.3 离心力：$1\times$ 径向力，不是转矩}
+
+偏心质量旋转产生离心力
+\begin{equation}
+F_u=M_t e\,\omega^2=m R\,\omega^2,
+\label{eq:unb-Fu}
+\end{equation}
+方向沿 $\vec r_C$（随转子以 $1\times$ 旋转）。它对转轴的力矩的 $Z$ 分量为零：
+\begin{equation}
+\tau_Z(\vec F_u)=\hat Z\cdot(\vec r_C\times\vec F_u)=0,
+\label{eq:unb-tauFu}
+\end{equation}
+因为 $\vec F_u$ 与 $\vec r_C$ 共线、叉积为零。所以\textbf{离心力不直接产生绕轴转矩}，它产生的是径向载荷与振动。
+
+两轴承 $A,B$（位于 $z=-a,+b$，跨距 $L=a+b$）的径向反力，在质心位于跨中时按杠杆比分配：
+\begin{equation}
+\vec R_A=\frac{b}{L}\bigl(\vec F_u+M_t\vec g\bigr),\qquad
+\vec R_B=\frac{a}{L}\bigl(\vec F_u+M_t\vec g\bigr).
+\end{equation}
+质心轴向偏离跨中 $z_C$ 时，附加力偶 $\pm z_C\hat Z\times\vec F_u/L$ 分配到两轴承；这就是不平衡“动反力”的来源。
+
+\subsection*{B.4 绕轴转矩方程与转速纹波}
+
+绕轴写转矩平衡：
+\begin{equation}
+\boxed{\;I_n\dot\omega=T_e-T_L(\theta)-T_f(\theta,\omega)+\tau_g(\theta)\;}
+\label{eq:unb-torque}
+\end{equation}
+其中 $T_e$ 为电磁转矩，$T_L$ 为名义负载，$T_f$ 为轴承摩擦，$\tau_g$ 为式~\eqref{eq:unb-taug2} 的重力矩。稳态（$\dot\omega\approx0$）时电机必须输出
+\begin{equation}
+T_e\approx T_L+T_f+M_t g\,e\sin\theta,
+\end{equation}
+即电磁转矩中出现与重力矩同幅反相的 $1\times$ 分量。
+
+对速度环灵敏度 $S(s)$，$1\times$ 转速纹波为
+\begin{equation}
+\Delta\omega_1=|S(j\omega)|\,\frac{T_g}{I_n\omega}
+=|S(j\omega)|\,\frac{M_t g e}{I_n\omega}.
+\label{eq:unb-dw}
+\end{equation}
+
+\subsection*{B.5 轴承摩擦的 $1\times$ 调制（二阶小量）}
+
+轴承法向载荷是重力与离心力的矢量和：
+\begin{equation}
+|\vec F_n|^2=(M_t g)^2+(mR\omega^2)^2+2M_t g\,mR\omega^2\cos\varphi,
+\end{equation}
+其 $1\times$ 纹波幅值为 $M_tg\cdot mR\omega^2/F_0$，$F_0=\sqrt{(M_tg)^2+(mR\omega^2)^2}$。乘以摩擦系数得摩擦转矩的 $1\times$ 分量
+\begin{equation}
+\Delta T_f=\mu_b r_b\,\frac{M_t g\,mR\omega^2}{\sqrt{(M_tg)^2+(mR\omega^2)^2}},
+\label{eq:unb-DTf}
+\end{equation}
+通常远小于重力矩 $T_g$。
+
+\subsection*{B.6 动态不平衡（力偶）}
+
+两个质量 $m$ 在半径 $R$ 处相差 $180^\circ$、轴向相距 $l$，形成旋转力偶
+\begin{equation}
+M_u=mR\,\omega^2\,l .
+\label{eq:unb-Mu}
+\end{equation}
+它同样\textbf{不产生绕轴转矩}（力偶垂直于轴），只以 $\pm M_u/L$ 的形式作用在两轴承上，是“动不平衡”的典型特征。
+
+\subsection*{B.7 与台架 $T(\theta)$ 型线的对应}
+
+台架 $600$\,rpm、$I_n\approx1.89\times10^{-5}$\,kg$\cdot$m$^2$、型线 $1\times$ 分量 $T_1\approx0.0571$\,N$\cdot$m。\textbf{若}把它解释为重力不平衡矩，则
+\begin{equation}
+F_u=\frac{T_1\omega^2}{g}
+=\frac{0.0571\times(62.83)^2}{9.81}\approx23\ \mathrm{N},
+\qquad
+mR=\frac{F_u}{\omega^2}\approx5.8\times10^{-3}\ \mathrm{kg\cdot m},
+\end{equation}
+即 $R=50$\,mm 时需要约 $116$\,g 的偏心质量——离心力 $23$\,N 是重量的二十余倍，这样的转子在台架上会剧烈振动。反过来，取一个现实的不平衡量 $mR=10^{-4}$\,kg$\cdot$m（$2$\,g 偏置 $50$\,mm），则
+\begin{equation}
+F_u=mR\omega^2\approx0.39\ \mathrm{N},\qquad
+T_g=M_t g e=\frac{g}{\omega^2}F_u\approx9.8\times10^{-4}\ \mathrm{N\cdot m},
+\end{equation}
+只有型线的 $1.7\%$。因此：
+
+\begin{itemize}
+  \item \textbf{物理不平衡}：$1\times$ 径向力 $mR\omega^2$ 可以可观，但 $1\times$ 绕轴转矩 $M_tge=(g/\omega^2)F_u$ 很小；
+  \item \textbf{台架型线}：$0.095$\,N$\cdot$m 峰值是程序注入的等效故障，用于给 RCESO 一个可测的周期扰动，不能反推为真实的偏心质量。
+\end{itemize}
+
+两者的换算关系可写成
+\begin{equation}
+T_g=\frac{g}{\omega^2}F_u,\qquad
+F_u=\frac{\omega^2}{g}T_g .
+\label{eq:unb-conv}
+\end{equation}
+在 $600$\,rpm 处 $g/\omega^2\approx2.5\times10^{-3}$\,m：同一不平衡量产生的\textbf{转矩}比\textbf{力}小三个数量级。
+
+\subsection*{B.8 常见错误与纠正}
+
+\begin{enumerate}
+  \item “不平衡转矩 $=m e\omega^2$”——错。$m e\omega^2$ 是\textbf{径向离心力}；绕轴转矩（水平轴、重力所致）是 $M_t g e$，与 $\omega$ 无关。
+  \item “不平衡转矩随 $\omega^2$ 增长”——只对径向力成立；重力矩不随转速变。
+  \item “竖直轴不平衡会产生 $1\times$ 转矩”——错。重力沿轴，$T_g=0$，只剩径向力与振动。
+  \item “不平衡会产生 $2\times$ 转矩”——错。刚性转子匀速时 $I_n$ 为常数，无惯性转矩纹波；$2\times$ 来自联轴器运动学、间隙或电磁偏心。
+  \item “$I_n$ 随转角变化”——错。绕固定轴旋转的刚体，$I_n=\hat Z^{\mathrm T}J\hat Z$ 在体固系中为常数。
+  \item “不平衡力对轴有力矩”——错。离心力与偏心矢量共线，对轴的力矩为零；只有轴向偏置才产生力偶。
+\end{enumerate}
+
+\subsection*{B.9 符号表}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+符号 & 含义\\
+\midrule
+$M,\;R$ & 圆盘质量与半径\\
+$m$ & 边缘偏心质量（或多个 $m_i$）\\
+$M_t=M+m$ & 总质量\\
+$e$ & 质心偏心距（$e=mR/M_t$）\\
+$I_n$ & 绕转轴的转动惯量\\
+$\theta=\omega t+\theta_0$ & 偏心方向相对竖直向下的转角\\
+$\tau_g$ & 重力矩（$1\times$ 脉动转矩）\\
+$T_g=M_t g e$ & 重力矩幅值\\
+$F_u=M_t e\omega^2$ & 离心力\\
+$M_u=mR\omega^2l$ & 动态不平衡力偶\\
+$S(s)$ & 速度环灵敏度\\
+\bottomrule
+\end{tabular}
+\end{center}
