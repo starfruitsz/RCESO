@@ -69,6 +69,9 @@ def sim_inv(t, TL, cfg=None):
     # 真实机械惯量（仿真主循环用；默认等于 J_M，向后兼容）
     # 物理折算：J_true = J_motor + J_coupling + J_disc/gear^2 + n_bearings*J_bearing
     J_TRUE = float(cfg.get("J_true", J_M))
+    _J_STEP_T = float(cfg.get("j_step_t", 1e9))
+    _J_STEP_V = float(cfg.get("j_step_val", J_TRUE))
+    _Jt = J_TRUE
     # ---- J 辨识/自适应（2026-11-13）----
     _jid = bool(cfg.get("j_id", False))
     _jid_f = float(cfg.get("j_id_f", 100.0))
@@ -117,6 +120,23 @@ def sim_inv(t, TL, cfg=None):
     _ako_TL_prev = 0.0
     _ako_Te_prev = 0.0
     _ako_first = True
+    # ---- 周期 dither 复检（实验，2026-11-14；默认关闭）----
+    _jrec = bool(cfg.get("j_recheck", False))
+    _jrec_period = float(cfg.get("j_recheck_period", 5.0))
+    _jrec_len = float(cfg.get("j_recheck_len", 0.6))
+    _jrec_f = float(cfg.get("j_recheck_f", 100.0))
+    _jrec_w = 2.0 * math.pi * _jrec_f
+    _jrec_amp = float(cfg.get("j_recheck_amp", 0.157))
+    _jrec_n = max(int(round(0.2 / 1e-3)), 10)
+    _jrec_nmin = int(cfg.get("j_recheck_nmin", 2))
+    _jrec_t0 = float(cfg.get("j_recheck_t0", 1.0))
+    _jrec_next = _jrec_t0
+    _jrec_active = False
+    _jrec_end = 0.0
+    _jrec_list = []
+    _jrec_nid = 0
+    _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+    _jrec_jhat = J_M
     _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
     _KPe = KP
     # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
@@ -406,7 +426,9 @@ def sim_inv(t, TL, cfg=None):
                 _tlv = -_tlv
             _tl += _tlv
         _tl_tot = _tl + TLn[min(k // nTstep, nT - 1)]      # 实际施加的总负载（含负载噪声）
-        w += dt * (Te - _tl_tot) / J_TRUE  # 主循环用真实 J；B0 仍由 J_M 标称
+        if k * dt >= _J_STEP_T:
+            _Jt = _J_STEP_V
+        w += dt * (Te - _tl_tot) / _Jt  # 主循环用真实 J；B0 仍由 J_M 标称
 
         # ---- 电流环：每个 PWM 周期一次 ----
         if k % npwm == 0:
@@ -625,6 +647,37 @@ def sim_inv(t, TL, cfg=None):
                     _ako_Te_prev = Te
                     _jhat = _ako_J
                     _B0e += (1e-3 / 0.5) * (B0 * (J_M / _ako_J) - _B0e)
+            # ---- 周期 dither 复检：每 period 开 len 秒 dither，DFT 更新 b0 ----
+            if _jrec:
+                if (not _jrec_active) and _tk >= _jrec_next:
+                    _jrec_active = True
+                    _jrec_end = _tk + _jrec_len
+                    _jrec_next = _tk + _jrec_period
+                    _jrec_list = []; _jrec_nid = 0
+                    _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+                if _jrec_active:
+                    if _tk < _jrec_end:
+                        _ph = _jrec_w * _tk
+                        u += _jrec_amp * math.sin(_ph)
+                        _jrec_te_c += Te * math.cos(_ph); _jrec_te_s += Te * math.sin(_ph)
+                        _jrec_w_c += w_enc * math.cos(_ph); _jrec_w_s += w_enc * math.sin(_ph)
+                        _jrec_nid += 1
+                        if _jrec_nid >= _jrec_n:
+                            _ate = 2.0 / _jrec_nid * math.hypot(_jrec_te_c, _jrec_te_s)
+                            _aw = 2.0 / _jrec_nid * math.hypot(_jrec_w_c, _jrec_w_s)
+                            _snr = _aw * 60.0 / (2.0 * math.pi)
+                            if _aw > 1e-9 and _snr >= 2.0:
+                                _jn = _ate / (_jrec_w * _aw)
+                                _jn = min(max(_jn, 0.5 * J_M), 50.0 * J_M)
+                                _jrec_list.append(_jn)
+                                if len(_jrec_list) >= _jrec_nmin:
+                                    _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
+                                    _jhat = _jrec_jhat
+                                    _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
+                            _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+                            _jrec_nid = 0
+                    else:
+                        _jrec_active = False
             if _jid:
                 if _tk >= _jid_tend:                 # 超时：有有效窗则进入应用/校验，否则回退
                     _jid = False
