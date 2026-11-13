@@ -1,0 +1,333 @@
+% !TeX program = xelatex
+% =============================================================================
+%  自适应 J 的周期 dither 复检：公式推导与实现（RCESO v5.6，2026-11-14）
+%  独立文档；与 律J_周期复检_公式与实现.md 同口径。
+%  编译：xelatex 两次。
+% =============================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[UTF8,fontset=windows]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{url}
+\allowdisplaybreaks
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{0pt}
+\newcommand{\Jnom}{J_{\mathrm{nom}}}
+\newcommand{\Jtrue}{J_{\mathrm{true}}}
+\newcommand{\Jhat}{\hat J}
+\newcommand{\bzero}{b_0}
+\newcommand{\wref}{\omega_{\mathrm{ref}}}
+\newcommand{\Te}{T_e}
+\newcommand{\rpm}{\mathrm{rpm}}
+\newcommand{\Sat}{S_{\mathrm{T}}}
+\newcommand{\Saw}{S_{\omega}}
+\title{\bfseries 自适应 $J$ 的周期 dither 复检：公式推导与实现}
+\author{RCESO 技术文档（与 \texttt{rcso\_v3.tex} 附录 C 同口径）}
+\date{v5.6 \quad 2026-11-14}
+\begin{document}
+\maketitle
+\vspace{-4mm}
+\begin{center}
+\small 三相 PWM 逆变器 + PMSM 转速环 \quad $\Jnom=1.89\times10^{-5}$\,kg$\cdot$m$^2$\\
+定稿台架 $\Jtrue=4.81\times10^{-5}=2.545\Jnom$ \quad 应力测试 $\Jtrue=9.95\times10^{-5}=5.26\Jnom$
+\end{center}
+
+本文给出“调试期一次辨识 + 运行中周期 dither 复检”的完整公式推导：复检时序、dither 注入、0.2\,s 单频 DFT、$\Jhat$ 估计、$\bzero$ 更新与速率限制、死区与应用后校验，并给出 30\,s $J$ 阶跃验证结果。符号与 \texttt{rcso\_v3.tex} 附录 C 一致。
+
+\section{方法定位与状态机}
+
+与“连续在线辨识”不同，周期复检只在离散的 burst 窗内开 dither、估一次 $\Jhat$，其余时间冻结 $\bzero$：
+\begin{itemize}
+  \item 调试期：0--2\,s 一次辨识，建立初始 $\bzero$；
+  \item 运行中：每 $T_{\mathrm{rc}}=5$\,s 开 $T_b=0.6$\,s 的 100\,Hz dither，用 0.2\,s 窗估 $\Jhat$，更新 $\bzero$；
+  \item burst 外：dither 关，$\bzero$ 保持；ESO 与状态 4 继续兜底。
+\end{itemize}
+状态机见表~\ref{tab:state}。
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{周期复检状态机}\label{tab:state}
+\begin{tabular}{@{}clll@{}}
+\toprule
+状态 & 含义 & 进入条件 & 动作\\
+\midrule
+0 & 空闲/冻结 & 非 burst 窗 & dither 关，$\bzero$ 保持\\
+1 & 复检 burst & $t=t_k$ & 开 dither，累计 DFT\\
+2 & 已应用 & 有效窗 $\ge n_{\min}$ & 更新 $\bzero$，回 0\\
+3 & 超时/无效 & burst 结束仍无有效窗 & 保持旧 $\bzero$，回 0\\
+4 & 校验回退 & $i_q$ AC-RMS 或 10\,Hz 恶化 $>20\%$ & 回退上一安全 $\bzero$\\
+5 & 死区 & $|\rho-1|\le0.20$ & 不更新，回 0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{控制律与 $\bzero$ 标幺化}
+
+速度环控制律（$e=r-z_1$，$z_1,z_2$ 为 ESO 状态，$v$ 为重复通道输出）：
+\begin{equation}
+u=\frac{1}{\bzero}\left[k_p^{\mathrm{eff}}e-z_2-v\right],\qquad
+k_p^{\mathrm{eff}}=k_p\left(1+k_{p,\mathrm{boost}}g\right),
+\label{eq:law}
+\end{equation}
+$g\in[0,1)$ 为律 D 的突变门控。机械方程与标幺化：
+\begin{equation}
+J\dot\omega=\Te-T_L,\qquad
+y=\frac{\omega}{\wref},\qquad i_q=I_{\mathrm{base}}u.
+\label{eq:mech}
+\end{equation}
+代入 $\Te=k_tI_{\mathrm{base}}u$ 得
+\begin{equation}
+\dot y=\underbrace{\frac{k_tI_{\mathrm{base}}}{\Jtrue\wref}}_{b}u-\underbrace{\frac{T_L}{\Jtrue\wref}}_{d},
+\qquad
+b=\frac{k_tI_{\mathrm{base}}}{\Jtrue\wref}=\frac{0.637}{\Jtrue\wref},
+\label{eq:bplant}
+\end{equation}
+其中 $k_tI_{\mathrm{base}}=1.5p\psi_fI_{\mathrm{base}}=0.637$\,N$\cdot$m。初始化取 $20\%$ 裕量：
+\begin{equation}
+\bzero(0)=1.2\,b(\Jnom)=1.2\,\frac{0.637}{\Jnom\wref}.
+\label{eq:b0init}
+\end{equation}
+环路增益正比于 $b k_p/\bzero$；把 $\bzero$ 调到 $1.2b(\Jtrue)$ 即恢复设计增益。$\bzero$ 同时是 ESO 的输入增益，故只改 $\bzero$ 就同时修正了观测器模型。
+
+\section{复检时序}
+
+首次 burst 从 $t_0=1.0$\,s 开始，之后每 $T_{\mathrm{rc}}=5$\,s 一次，每次 $T_b=0.6$\,s：
+\begin{equation}
+t_k=t_0+kT_{\mathrm{rc}},\qquad
+\mathrm{burst}_k=\left\{t\,\middle|\,t_k\le t<t_k+T_b\right\},
+\label{eq:schedule}
+\end{equation}
+占空比
+\begin{equation}
+D=\frac{T_b}{T_{\mathrm{rc}}}=\frac{0.6}{5}=12\%.
+\label{eq:duty}
+\end{equation}
+burst 外 dither 关、$\bzero$ 冻结；burst 内才允许更新。
+
+\section{dither 注入}
+
+物理转矩 dither 与归一化电流指令：
+\begin{equation}
+T_d(t)=A\sin(2\pi f_dt),\qquad
+u\leftarrow u+a_d\sin(\omega_dt),
+\label{eq:dither}
+\end{equation}
+\begin{equation}
+A=0.1\ \mathrm{N\cdot m},\quad f_d=100\ \mathrm{Hz},\quad
+a_d=\frac{A}{k_tI_{\mathrm{base}}}=0.157,\quad \omega_d=2\pi f_d.
+\label{eq:ad}
+\end{equation}
+100\,Hz 与 10\,Hz 故障正交；$T_w=0.2$\,s 窗恰好是 20 个 100\,Hz 周期、2 个 10\,Hz 周期。
+
+\section{0.2\,s 单频 DFT 推导}
+
+窗长 $T_w=0.2$\,s，采样 $T_s=1$\,ms，点数 $N=T_w/T_s=200$；窗内采样时刻 $t_n=t_k+nT_s$。定义正交累计
+\begin{align}
+S_{\mathrm{T},c}&=\sum_{n=0}^{N-1}\Te(t_n)\cos(\omega_dt_n),&
+S_{\mathrm{T},s}&=\sum_{n=0}^{N-1}\Te(t_n)\sin(\omega_dt_n),\label{eq:ST}\\
+S_{\omega,c}&=\sum_{n=0}^{N-1}\omega(t_n)\cos(\omega_dt_n),&
+S_{\omega,s}&=\sum_{n=0}^{N-1}\omega(t_n)\sin(\omega_dt_n).\label{eq:Sw}
+\end{align}
+
+设 $x(t)=a\sin(\omega_dt+\phi)$ 在窗内为常数幅值。利用整数周期上的正交性
+\begin{equation}
+\sum_{n=0}^{N-1}\cos^2(\omega_dt_n)=\sum_{n=0}^{N-1}\sin^2(\omega_dt_n)=\frac{N}{2},
+\qquad
+\sum_{n=0}^{N-1}\sin(\omega_dt_n)\cos(\omega_dt_n)=0,
+\label{eq:orth}
+\end{equation}
+可得
+\begin{equation}
+S_c=\frac{aN}{2}\sin\phi,\qquad S_s=\frac{aN}{2}\cos\phi,
+\label{eq:ScSs}
+\end{equation}
+故幅值
+\begin{equation}
+a=\frac{2}{N}\sqrt{S_c^2+S_s^2}.
+\label{eq:amp}
+\end{equation}
+对 $\Te$ 与 $\omega$ 分别取 $a_{\mathrm{T}}$、$a_{\omega}$：
+\begin{equation}
+a_{\mathrm{T}}=\frac{2}{N}\sqrt{S_{\mathrm{T},c}^2+S_{\mathrm{T},s}^2},\qquad
+a_{\omega}=\frac{2}{N}\sqrt{S_{\omega,c}^2+S_{\omega,s}^2}.
+\label{eq:amps}
+\end{equation}
+转速幅值换 rpm：$a_{\omega,\rpm}=a_{\omega}\,60/(2\pi)$。
+
+\paragraph{10\,Hz 故障的正交性。}
+$T_w=0.2$\,s 时
+\begin{equation}
+\int_0^{T_w}\sin(2\pi100t)\sin(2\pi10t)\,\mathrm{d}t=0,
+\label{eq:orth10}
+\end{equation}
+因为和/差频率 $110$\,Hz、$90$\,Hz 在 $0.2$\,s 内分别正好是 22、18 个整周期；故 10\,Hz 故障不泄漏进 100\,Hz 的 DFT。
+
+\section{$\Jhat$ 的频域比值推导}
+
+在 100\,Hz 上，负载/故障转矩 $T_L$ 无分量；把 $\Te$、$\omega$ 写成
+\begin{equation}
+\Te(t)=\bar T_{\mathrm{e}}+a_{\mathrm{T}}\sin(\omega_dt+\phi_{\mathrm{T}}),\qquad
+\omega(t)=\bar\omega+a_{\omega}\sin(\omega_dt+\phi_{\omega}).
+\label{eq:harm}
+\end{equation}
+代入机械方程 $J\dot\omega=\Te-T_L$，并只取 100\,Hz 分量：
+\begin{equation}
+J\omega_da_{\omega}\cos(\omega_dt+\phi_{\omega})
+=a_{\mathrm{T}}\sin(\omega_dt+\phi_{\mathrm{T}}).
+\label{eq:balance}
+\end{equation}
+两边幅值相等，且相位差 $90^\circ$：
+\begin{equation}
+a_{\mathrm{T}}=J\omega_da_{\omega}
+\quad\Longrightarrow\quad
+\boxed{\ \Jhat=\frac{a_{\mathrm{T}}}{\omega_da_{\omega}}\ }.
+\label{eq:Jhat}
+\end{equation}
+这就是“频域比值”辨识：不需要知道 $T_L$，也不需要控制器模型；只要 100\,Hz 上 $T_L\approx0$、窗内 $a_{\mathrm{T}},a_{\omega}$ 近似常数。
+
+单窗限幅与有效窗：
+\begin{equation}
+\Jhat_i\leftarrow\mathrm{clip}\left(\Jhat_i,\,0.5\Jnom,\,50\Jnom\right),
+\qquad
+a_{\omega}>0,\quad a_{\omega,\rpm}\ge2\ \rpm.
+\label{eq:clip}
+\end{equation}
+每个 burst 至少 $n_{\min}=2$ 个有效窗，取平均
+\begin{equation}
+\Jhat_{\mathrm{burst}}=\frac{1}{n}\sum_{i=1}^{n}\Jhat_i,\qquad n\ge n_{\min}.
+\label{eq:jburst}
+\end{equation}
+建议再加窗间一致性
+\begin{equation}
+\sqrt{\frac{1}{n}\sum_{i=1}^{n}\left(\Jhat_i-\Jhat_{\mathrm{burst}}\right)^2}
+\le0.15\,\Jhat_{\mathrm{burst}}.
+\label{eq:std}
+\end{equation}
+不满足则状态 3：保持旧 $\bzero$，本 burst 作废。
+
+\section{$\bzero$ 更新与速率限制}
+
+目标
+\begin{equation}
+\bzero^{\star}=B_0\frac{\Jnom}{\Jhat_{\mathrm{burst}}},\qquad
+B_0=1.2\,b(\Jnom).
+\label{eq:b0star}
+\end{equation}
+实现中每有效窗更新一次，$\alpha=0.8$：
+\begin{equation}
+\bzero\leftarrow\bzero+\alpha\left(\bzero^{\star}-\bzero\right).
+\label{eq:b0upd}
+\end{equation}
+建议加 burst 级速率限制与限幅：
+\begin{equation}
+\left|\Delta\bzero\right|\le\rho_b\bzero,\quad \rho_b=0.5\ \mathrm{per\ burst},
+\qquad
+\bzero\in\left[0.2B_0,\,5B_0\right].
+\label{eq:rate}
+\end{equation}
+burst 外 $\bzero$ 不更新；下次 burst 从当前值继续。
+
+\section{死区与应用后校验}
+
+死区：
+\begin{equation}
+\rho=\frac{\Jhat_{\mathrm{burst}}}{\Jnom},\qquad
+\left|\rho-1\right|\le0.20
+\ \Longrightarrow\ \text{状态 5：不更新，关 dither。}
+\label{eq:dead}
+\end{equation}
+应用后校验用 $i_q$ AC-RMS 与 10\,Hz 幅值：
+\begin{equation}
+i_{q,\mathrm{AC}}=\sqrt{\frac{1}{N}\sum_{k=1}^{N}i_{q,k}^2-\left(\frac{1}{N}\sum_{k=1}^{N}i_{q,k}\right)^2},
+\label{eq:iqac}
+\end{equation}
+\begin{equation}
+A_{10}=\frac{2}{N}\left|\sum_{k=1}^{N}e_ke^{-j2\pi10t_k}\right|,\qquad
+e_k=n(t_k)-n_{\mathrm{ref}}.
+\label{eq:a10}
+\end{equation}
+定义两个比值：
+\begin{equation}
+r_{iq}=\frac{i_{q,\mathrm{AC}}^{\mathrm{post}}}{i_{q,\mathrm{AC}}^{\mathrm{base}}},
+\qquad
+r_{A10}=\frac{A_{10}^{\mathrm{post}}}{A_{10}^{\mathrm{base}}}.
+\label{eq:ratios}
+\end{equation}
+回退判据：
+\begin{equation}
+r_{iq}>1.20
+\quad\text{or}\quad
+\left(A_{10}^{\mathrm{base}}\ge2\ \rpm\ \text{and}\ r_{A10}>1.20\right).
+\label{eq:rollback}
+\end{equation}
+满足则 $\bzero\leftarrow\bzero^{\mathrm{safe}}$（上一 burst 的安全值），状态 4。
+
+\clearpage
+\section{30\,s $J$ 阶跃验证}
+
+15\,s 时 $\Jtrue$ 由 $9.95\times10^{-5}$ 阶跃到 $4.81\times10^{-5}$；复检 0.6\,s/5\,s；对比一次冻结与固定 $\bzero$。结果见表~\ref{tab:res} 与图~\ref{fig:res}。
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{30\,s $J$ 阶跃结果（600\,rpm、$T_1=0.057$\,N$\cdot$m、10\,Hz 故障）}\label{tab:res}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+指标 & 周期复检 & 一次冻结 & 固定 $\bzero$\\
+\midrule
+15\,s 前 10\,Hz & $\mathbf{4.0}$\,rpm & 4.4\,rpm & 33\,rpm\\
+15\,s 后 10\,Hz 均值 & 8.6\,rpm & 8.4\,rpm & 29\,rpm\\
+15\,s 后 RMS（末 1\,s） & $\mathbf{9.3}$\,rpm & $\mathbf{172.8}$\,rpm & 25.1\,rpm\\
+$\Jhat$ 终值 & $5.26\times10^{-5}$（$+9.3\%$） & $1.04\times10^{-4}$（停在旧值） & ---\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{../fig_j_recheck_long.png}
+\caption{周期复检在 $J$ 阶跃下的 30\,s 表现：(a) $\Jhat$；(b) 10\,Hz 均值；(c) 转速误差 RMS。}
+\label{fig:res}
+\end{figure}
+
+判读：复检在 16\,s 的 burst 后把 $\Jhat$ 从 $1.04\times10^{-4}$ 拉到 $5.26\times10^{-5}$，误差 $+9.3\%$，落在 $\pm10\%$ 内；15\,s 后 10\,Hz 的 8.6\,rpm 是 $J$ 变小后的物理故障响应，真正区分稳定性的是 RMS：复检 9.3\,rpm vs 冻结 172.8\,rpm。代价是 12\% 占空比；$J$ 阶跃瞬间 $i_q$ 原始峰值 22.6\,A（冻结 20.7\,A），需速率限制/状态 4 门控。
+
+\section{参数与边界}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{复检参数}\label{tab:par}
+\begin{tabular}{@{}lll@{}}
+\toprule
+参数 & 取值 & 说明\\
+\midrule
+$f_d$ / $A$ & 100\,Hz / 0.1\,N$\cdot$m & dither\\
+$a_d$ & 0.157 & 归一化电流幅值\\
+$T_w$ / $N$ & 0.2\,s / 200 & DFT 窗\\
+$T_b$ / $T_{\mathrm{rc}}$ & 0.6\,s / 5\,s & burst / 周期\\
+$D$ & 12\% & 占空比\\
+$t_0$ & 1.0\,s & 首次 burst\\
+$n_{\min}$ & 2 & 每 burst 有效窗\\
+SNR 门限 & 2\,rpm & $a_{\omega,\rpm}$\\
+$\Jhat$ 限幅 & $[0.5,50]\Jnom$ & \\
+$\alpha$ & 0.8 & 每窗 $\bzero$ 更新\\
+$\rho_b$ & 0.5/burst & 建议速率限制\\
+$\Jnom$ & $1.89\times10^{-5}$ & kg$\cdot$m$^2$\\
+$B_0$ & 643.7\,s$^{-1}$ & 600\,rpm、$\Jnom$\\
+额定电流 & 6.31\,A（1\,ms 包络） & 10\,$\mu$s 原始峰值含 PWM 纹波\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+边界：
+\begin{enumerate}
+  \item 5\,s 周期偏长：$J$ 阶跃后到 16\,s 才复检，1.4\,s 失配造成 RMS 尖峰；可改 2\,s 周期（占空比 30\%）或事件触发。
+  \item $i_q$ 尖峰：22.6\,A 是阶跃瞬态；加 $\bzero$ 速率限制（$\rho_b=0.5$/burst）或状态 4 门控可压。
+  \item $J$ 阶跃是人为测试：真实台架 $J$ 不会突跳；复检的价值在于换圆盘/换负载后的再整定，以及慢漂移。
+  \item 编码器 6\,rpm：SNR 门限 2\,rpm 已接近量化极限；再低不可靠。
+  \item 下一步：2/5/10\,s 三档周期对比；每 burst 状态 4 校验；台架实测。
+\end{enumerate}
+
+\end{document}
