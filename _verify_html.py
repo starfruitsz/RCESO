@@ -30,10 +30,10 @@ miss_img = [s for s in set(srcs) if not os.path.exists(s)]
 chk("figures", len(srcs) == 8 and not miss_img, "n=%d missing=%s" % (len(srcs), miss_img))
 
 chk("h2", len(re.findall(r"<h2 ", b)) == 17, str(len(re.findall(r"<h2 ", b))))
-chk("h3", len(re.findall(r"<h3 ", b)) == 64, str(len(re.findall(r"<h3 ", b))))
+chk("h3", len(re.findall(r"<h3 ", b)) == 65, str(len(re.findall(r"<h3 ", b))))
 chk("h4", len(re.findall(r"<h4>", b)) == 2, str(len(re.findall(r"<h4>", b))))
 # 2026-11-13：附录 A/B 增加“仿真实现”小节——h2=16、h3=58、表=23
-chk("tables", len(re.findall(r"<table>", b)) == 25, str(len(re.findall(r"<table>", b))))
+chk("tables", len(re.findall(r"<table>", b)) == 26, str(len(re.findall(r"<table>", b))))
 chk("tabcap", len(re.findall(r'class="tabcap"', b)) == 0, str(len(re.findall(r'class="tabcap"', b))))
 chk("notice", len(re.findall(r"box notice", b)) == 2, str(len(re.findall(r"box notice", b))))
 chk("figcaption", len(re.findall(r"<figcaption>", b)) == 8, str(len(re.findall(r"<figcaption>", b))))

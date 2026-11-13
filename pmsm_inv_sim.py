@@ -77,6 +77,13 @@ def sim_inv(t, TL, cfg=None):
     _jid_n = max(int(round(float(cfg.get("j_id_win", 0.2)) / 1e-3)), 10)
     _jid_lp = float(cfg.get("j_id_lp", 0.5))
     _jid_tend = float(cfg.get("j_id_tend", 1e9))   # 调试期结束：冻结估计、关闭 dither
+    _jid_t0 = float(cfg.get("j_id_t0", 0.5))       # 辨识起始（避开启动瞬态）
+    _jid_snr_min = float(cfg.get("j_id_snr_min", 2.0))   # 转速 dither 幅值下限 / rpm
+    _jid_nmin = int(cfg.get("j_id_nmin", 3))
+    _jid_std_max = float(cfg.get("j_id_std_max", 0.15))
+    _jlist = []
+    _jstate = 0 if not _jid else 1
+    jstate_o = []
     _j_adapt_b0 = bool(cfg.get("j_adapt_b0", True))
     _j_adapt_kp = bool(cfg.get("j_adapt_kp", False))
     _oracle = bool(cfg.get("j_oracle", False))
@@ -482,30 +489,41 @@ def sim_inv(t, TL, cfg=None):
                 _yref = 1.0
             _fb = (_yref - z1n) if u_z1 else (_yref - y_m)
             u = (kpe * _fb - z2n - vn) / _B0e
-            if _jid and k * dt >= _jid_tend:
-                _jid = False
-                _B0e = B0 * (J_M / _jhat)       # 冻结估计，应用一次
-                _KPe = KP
             if _jid:
-                _ph = _jid_w * k * dt
-                u += _jid_amp * math.sin(_ph)          # 转矩 dither（叠加在电流指令上）
-                _te_c += Te * math.cos(_ph); _te_s += Te * math.sin(_ph)
-                _w_c += w_enc * math.cos(_ph); _w_s += w_enc * math.sin(_ph)
-                _nid += 1
-                if _nid >= _jid_n:
-                    _ate = 2.0 / _nid * math.hypot(_te_c, _te_s)
-                    _aw = 2.0 / _nid * math.hypot(_w_c, _w_s)
-                    if _aw > 1e-9:
-                        _jnew = _ate / (_jid_w * _aw)
-                        _jnew = min(max(_jnew, 0.5 * J_M), 50.0 * J_M)
-                        _jhat = (1.0 - _jid_lp) * _jhat + _jid_lp * _jnew
-                        if _j_adapt_b0:
-                            _B0e = B0 * (J_M / _jhat)
-                        if _j_adapt_kp:
-                            _KPe = KP * (_jhat / J_M)
-                    _te_c = _te_s = _w_c = _w_s = 0.0
-                    _nid = 0
+                _tk = k * dt
+                if _tk >= _jid_tend:                 # 超时：有有效窗则应用，否则回退
+                    _jid = False
+                    if _jlist:
+                        _jhat = sum(_jlist) / len(_jlist)
+                        _B0e = B0 * (J_M / _jhat)
+                        _jstate = 2
+                    else:
+                        _jstate = 3                  # 回退：保持标称 b0
+                elif _tk >= _jid_t0:
+                    _ph = _jid_w * _tk
+                    u += _jid_amp * math.sin(_ph)
+                    _te_c += Te * math.cos(_ph); _te_s += Te * math.sin(_ph)
+                    _w_c += w_enc * math.cos(_ph); _w_s += w_enc * math.sin(_ph)
+                    _nid += 1
+                    if _nid >= _jid_n:
+                        _ate = 2.0 / _nid * math.hypot(_te_c, _te_s)
+                        _aw = 2.0 / _nid * math.hypot(_w_c, _w_s)
+                        _snr_rpm = _aw * 60.0 / (2.0 * math.pi)
+                        if _aw > 1e-9 and _snr_rpm >= _jid_snr_min:
+                            _jnew = _ate / (_jid_w * _aw)
+                            _jnew = min(max(_jnew, 0.5 * J_M), 50.0 * J_M)
+                            _jlist.append(_jnew)
+                            _jhat = sum(_jlist) / len(_jlist)
+                            if len(_jlist) >= _jid_nmin:
+                                _sd = math.sqrt(sum((x - _jhat) ** 2 for x in _jlist) / len(_jlist))
+                                if _sd <= _jid_std_max * _jhat:   # 置信：提前应用
+                                    _jid = False
+                                    _B0e = B0 * (J_M / _jhat)
+                                    _jstate = 2
+                        _te_c = _te_s = _w_c = _w_s = 0.0
+                        _nid = 0
             jhat_o.append(_jhat)
+            jstate_o.append(_jstate)
             # F-B 检测：包络比值（ff_flush）和/或记忆失配（ff_mism），默认关
             if ff_flush > 0.0 or ff_mism > 0.0:
                 fft = max(0.0, fft - 1e-3); fft2 = max(0.0, fft2 - 1e-3)
@@ -605,5 +623,6 @@ def sim_inv(t, TL, cfg=None):
                 iqr=iqr_o[:m], fl=fl_o[:m], dm=dm_o[:m], tl=tl_o[:m], sg=sg_o[:m],
                 b3=b3_o[:m], amp=a_o[:m], es=es_o[:m],
                 trig=trig_log, oracle=oracle_log,
-                jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3)
+                jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3,
+                jstate=np.asarray(jstate_o))
 
