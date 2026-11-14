@@ -126,10 +126,10 @@ def sim_inv(t, TL, cfg=None):
     _jrec_len = float(cfg.get("j_recheck_len", 0.6))
     _jrec_f = float(cfg.get("j_recheck_f", 100.0))
     _jrec_f_auto = bool(cfg.get("j_recheck_f_auto", False))
-    _jrec_f_q = float(cfg.get("j_recheck_f_q", 10.0))
+    _jrec_f_q = float(cfg.get("j_recheck_f_q", 6.0))
     _jrec_f_alpha = float(cfg.get("j_recheck_f_alpha", 0.35))
-    _jrec_f_min = float(cfg.get("j_recheck_f_min", 80.0))
-    _jrec_f_max = float(cfg.get("j_recheck_f_max", 190.0))
+    _jrec_f_min = float(cfg.get("j_recheck_f_min", 50.0))
+    _jrec_f_max = float(cfg.get("j_recheck_f_max", 150.0))
     _jrec_f_grid = float(cfg.get("j_recheck_f_grid", 5.0))
     _jrec_fd = _jrec_f
     _jrec_w = 2.0 * math.pi * _jrec_fd
@@ -312,6 +312,8 @@ def sim_inv(t, TL, cfg=None):
     #                      "misalign":  {"M":0.1,"beta":0.01745,"l":0.05,"kappa":1.0}}
     _tflt = cfg.get("tl_fault", None)
     _tflt_n0 = int(round(float((_tflt or {}).get("start", 0.0)) / dt))
+    _tflt_rev = float(_tflt["rev"]) if (_tflt and "rev" in _tflt) else None
+    _tflt_rev_done = False
     _nangr = int(round(float(_tlar) / dt)) if _tlar is not None else None
     ff_wait = cfg.get("ff_wait", 0.0)          # 检测后再等待的相位延迟（s），0=立即复位
     ff_confirm = cfg.get("ff_confirm", 0.0)    # 连续确认窗（ms），0=首拍触发
@@ -460,6 +462,10 @@ def sim_inv(t, TL, cfg=None):
             _m = _tflt.get("misalign")
             if _m:
                 _tlf += misalign_torque(_phimf, w, **_m)
+            if _tflt_rev is not None and (not _tflt_rev_done) and (k * dt >= _tflt_rev):
+                _tflt_rev_done = True
+            if _tflt_rev_done:
+                _tlf = -_tlf
             _tl += _tlf
         if _TLA is not None and k >= _nang0 and (_nang1 is None or k < _nang1):  # 角度锁相分量：按当前机械角查表
             _phim = (th / P_POL) % TWO_PI
