@@ -136,6 +136,8 @@ def sim_inv(t, TL, cfg=None):
     _jrec_amp = float(cfg.get("j_recheck_amp", 0.157))
     _jrec_amp_auto = bool(cfg.get("j_recheck_amp_auto", False))
     _jrec_amp_use = _jrec_amp
+    _jrec_apply = bool(cfg.get("j_recheck_apply", True))
+    _jrec_alpha = float(cfg.get("j_recheck_alpha", 0.8))
     _jrec_win = float(cfg.get("j_recheck_win", 0.2))
     _jrec_n = max(int(round(_jrec_win / 1e-3)), 10)
     _jrec_nmin = int(cfg.get("j_recheck_nmin", 2))
@@ -778,7 +780,8 @@ def sim_inv(t, TL, cfg=None):
                                 if (not _jrec_gate) and len(_jrec_list) >= _jrec_nmin:
                                     _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
                                     _jhat = _jrec_jhat
-                                    _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
+                                    if _jrec_apply:
+                                        _B0e += _jrec_alpha * (B0 * (J_M / _jrec_jhat) - _B0e)
                             _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
                             _jrec_nid = 0
                     elif _jrec_active and _tk >= _jrec_end:
@@ -795,7 +798,8 @@ def sim_inv(t, TL, cfg=None):
                                         _jrec_jref = _jn
                                     _jrec_jhat = _jn
                                     _jhat = _jrec_jhat
-                                    _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
+                                    if _jrec_apply:
+                                        _B0e += _jrec_alpha * (B0 * (J_M / _jrec_jhat) - _B0e)
                                     _jstate = 2
                                     _jrec_val_pending = True
                                     _jrec_val_t = _tk + 0.7
