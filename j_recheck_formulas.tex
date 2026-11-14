@@ -455,6 +455,40 @@ $e(k)=r-z_1$。burst 前要求预窗内 $e_{\mathrm{lp}}$ 的极差不超过 $\e
   \item 500\,rpm 的低频振荡可能来自律 T/重复通道，不全是 $J$ 失配；复检只能修 $b_0$，修不了 T 的失谐。
 \end{itemize}
 
+
+\subsection{30\,s / 2\,s 周期复核}
+
+把复检周期从 5\,s 缩到 2\,s、并把状态 4 接进每个 burst，30\,s 结果见表~\ref{tab:30s} 与图~\ref{fig:30s}。500/600\,rpm 的 $\Jhat$ 在 5--10\,s 内稳定，1000\,rpm 仍持续偏高。
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{2\,s 周期 + 每 burst 状态 4 的 30\,s 复核（15 个 burst）}\label{tab:30s}
+\begin{tabular}{@{}cccccc@{}}
+\toprule
+$n$/rpm & $f_d$/Hz & $\Jhat$ 终值 & 误差 & $b_0^{\mathrm e}$ 终值 & 真实 $J$ 对应 $b_0$\\
+\midrule
+500 & 85 & $1.068\times10^{-4}$ & $+7.3\%$ & 136.5 & 146.7\\
+600 & 105 & $1.094\times10^{-4}$ & $+10.0\%$ & 111.0 & 122.3\\
+1000 & 170 & $1.186\times10^{-4}$ & $+19.2\%$ & 62.0 & 73.4\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{../fig_j_2s_30s.png}
+\caption{2\,s 周期 + 每 burst 状态 4 的 30\,s 复核：(a) $\Jhat$；(b) $b_0^{\mathrm e}$（虚线为真实 $J$ 对应目标）。}\label{fig:30s}
+\end{figure}
+
+判读：
+\begin{itemize}
+  \item 500/600\,rpm：15 个 burst 全部通过门控与状态 4，$b_0$ 收敛到\textbf{估计目标}（136.5/111.0），但 $\Jhat$ 仍偏高 $+7.3\%/+10.0\%$，所以 $b_0$ 比真实目标低约 $7\%\sim9\%$。
+  \item 1000\,rpm：$f_d=170$\,Hz 时 $\Jhat$ 漂到 $1.186\times10^{-4}$（$+19.2\%$），$b_0$ 收敛到 62.0（真实目标 73.4）；即使加 $1.7\times$ 幅度补偿，仍偏高 $+19.2\%$（无补偿 $+23.9\%$）。状态 4 没有拦住，因为它只比较 $i_q$ AC-RMS 与故障频率幅值，\textbf{不校验 $\Jhat$ 本身是否可信}。
+  \item $i_q$：500\,rpm 原始峰值 7.68\,A（10\,$\mu$s，含 PWM 纹波），需按 1\,ms 包络复核；600\,rpm 5.34\,A。
+\end{itemize}
+
+结论修正：2\,s 周期 + 每 burst 状态 4 在 \textbf{500/600\,rpm 可用}；\textbf{1000\,rpm 暂不可用}，需要再加“$\Jhat$ 一致性/信噪比”门控，或把 $f_d$ 上限降到 150\,Hz 以下并重新标定幅度。当前 1000\,rpm 的高频 dither 不宜写进“已验证”。
+
 \section{参数与边界}
 
 \begin{table}[H]
@@ -488,7 +522,7 @@ $B_0$ & 643.7\,s$^{-1}$ & 600\,rpm、$\Jnom$\\
   \item $i_q$ 尖峰：22.6\,A 是阶跃瞬态；加 $\bzero$ 速率限制（$\rho_b=0.5$/burst）或状态 4 门控可压。
   \item $J$ 阶跃是人为测试：真实台架 $J$ 不会突跳；复检的价值在于换圆盘/换负载后的再整定，以及慢漂移。
   \item 编码器 6\,rpm：SNR 门限 2\,rpm 已接近量化极限；再低不可靠。
-  \item 下一步：2/5/10\,s 三档周期对比；每 burst 状态 4 校验；台架实测。
+  \item 下一步：500/600\,rpm 用 2\,s 周期；1000\,rpm 加 $\Jhat$ 一致性/SNR 门控或把 $f_d$ 上限降到 150\,Hz；台架按 1\,ms 包络复核。
 \end{enumerate}
 
 \end{document}

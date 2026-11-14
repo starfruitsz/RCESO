@@ -134,6 +134,8 @@ def sim_inv(t, TL, cfg=None):
     _jrec_fd = _jrec_f
     _jrec_w = 2.0 * math.pi * _jrec_fd
     _jrec_amp = float(cfg.get("j_recheck_amp", 0.157))
+    _jrec_amp_auto = bool(cfg.get("j_recheck_amp_auto", False))
+    _jrec_amp_use = _jrec_amp
     _jrec_win = float(cfg.get("j_recheck_win", 0.2))
     _jrec_n = max(int(round(_jrec_win / 1e-3)), 10)
     _jrec_nmin = int(cfg.get("j_recheck_nmin", 2))
@@ -160,6 +162,20 @@ def sim_inv(t, TL, cfg=None):
     _jrec_B0_pre = 0.0
     _jrec_fd_o = []
     _jrec_abort_o = []
+    # 每 burst 状态4校验：0.6 s 环形窗（基线与后窗），2 s 周期内完成
+    _jrec_ring_n = 600
+    _jrec_iq_ring = np.zeros(_jrec_ring_n)
+    _jrec_e_ring = np.zeros(_jrec_ring_n)
+    _jrec_t_ring = np.zeros(_jrec_ring_n)
+    _jrec_ring_i = 0
+    _jrec_ring_fill = 0
+    _jrec_base_iq = float("nan")
+    _jrec_base_a = float("nan")
+    _jrec_val_t = 1e9
+    _jrec_val_pending = False
+    _jrec_val_iq0 = float("nan")
+    _jrec_val_a0 = float("nan")
+    _jrec_fv = n_ref / 60.0
     _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
     _KPe = KP
     # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
@@ -672,6 +688,12 @@ def sim_inv(t, TL, cfg=None):
                     _B0e += (1e-3 / 0.5) * (B0 * (J_M / _ako_J) - _B0e)
             # ---- 周期 dither 复检：每 period 开 len 秒 dither，DFT 更新 b0 ----
             if _jrec:
+                _jrec_iq_ring[_jrec_ring_i] = idq[1]
+                _jrec_e_ring[_jrec_ring_i] = (y_m - 1.0) * n_ref
+                _jrec_t_ring[_jrec_ring_i] = _tk
+                _jrec_ring_i = (_jrec_ring_i + 1) % _jrec_ring_n
+                if _jrec_ring_fill < _jrec_ring_n:
+                    _jrec_ring_fill += 1
                 if _jrec_gate:
                     _er = _fb * n_ref
                     _jrec_er_lp += _jrec_lp_alpha * (_er - _jrec_er_lp)
@@ -696,7 +718,16 @@ def sim_inv(t, TL, cfg=None):
                         _jrec_B0_pre = _B0e
                         _jrec_abort = False
                         _jrec_bad_cnt = 0
+                        _jrec_val_pending = False
                         _jrec_pre_mean = (sum(_jrec_lp_hist) / len(_jrec_lp_hist)) if _jrec_gate else 0.0
+                        if _jrec_ring_fill >= _jrec_ring_n:
+                            _mi = float(np.mean(_jrec_iq_ring))
+                            _jrec_base_iq = float(np.sqrt(np.mean((_jrec_iq_ring - _mi) ** 2)))
+                            _phb = 2.0 * math.pi * _jrec_fv * _jrec_t_ring
+                            _jrec_base_a = float(2.0 / _jrec_ring_n * np.hypot(
+                                np.sum(_jrec_e_ring * np.cos(_phb)), np.sum(_jrec_e_ring * np.sin(_phb))))
+                        else:
+                            _jrec_base_iq = float("nan"); _jrec_base_a = float("nan")
                         if _jrec_f_auto:
                             _fv = max(n_ref / 60.0, 1e-3)
                             _fd = (_jrec_f_q + _jrec_f_alpha) * _fv
@@ -711,6 +742,7 @@ def sim_inv(t, TL, cfg=None):
                         else:
                             _jrec_fd = _jrec_f
                         _jrec_w = 2.0 * math.pi * _jrec_fd
+                        _jrec_amp_use = _jrec_amp * (max(1.0, _jrec_fd / 100.0) if _jrec_amp_auto else 1.0)
                         _jrec_fd_o.append((_tk, _jrec_fd))
                         _jstate = 1
                 if _jrec_active:
@@ -728,7 +760,7 @@ def sim_inv(t, TL, cfg=None):
                             _jrec_abort_o.append((_tk, 1.0))
                     if _jrec_active and _tk < _jrec_end:
                         _ph = _jrec_w * _tk
-                        u += _jrec_amp * math.sin(_ph)
+                        u += _jrec_amp_use * math.sin(_ph)
                         _jrec_te_c += Te * math.cos(_ph); _jrec_te_s += Te * math.sin(_ph)
                         _jrec_w_c += w_enc * math.cos(_ph); _jrec_w_s += w_enc * math.sin(_ph)
                         _jrec_nid += 1
@@ -754,12 +786,32 @@ def sim_inv(t, TL, cfg=None):
                                 _jhat = _jrec_jhat
                                 _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
                                 _jstate = 2
+                                _jrec_val_pending = True
+                                _jrec_val_t = _tk + 0.7
+                                _jrec_val_iq0 = _jrec_base_iq
+                                _jrec_val_a0 = _jrec_base_a
                             else:
                                 _B0e = _jrec_B0_pre
                                 _jstate = 3 if not _jrec_abort else 6
                             _jrec_abort_o.append((_tk, 0.0 if not _jrec_abort else 1.0))
                         else:
                             _jstate = 2 if len(_jrec_list) >= _jrec_nmin else 3
+            # ---- 每 burst 状态4校验：burst 后 0.7 s 比较 iq AC-RMS 与故障频率幅值 ----
+            if _jrec and _jrec_val_pending and (not _jrec_active) and _tk >= _jrec_val_t:
+                _jrec_val_pending = False
+                if _jrec_ring_fill >= _jrec_ring_n:
+                    _mi = float(np.mean(_jrec_iq_ring))
+                    _piq = float(np.sqrt(np.mean((_jrec_iq_ring - _mi) ** 2)))
+                    _php = 2.0 * math.pi * _jrec_fv * _jrec_t_ring
+                    _pa = float(2.0 / _jrec_ring_n * np.hypot(
+                        np.sum(_jrec_e_ring * np.cos(_php)), np.sum(_jrec_e_ring * np.sin(_php))))
+                    _bad_iq = (_jrec_val_iq0 == _jrec_val_iq0) and (_jrec_val_iq0 > 0.0) and (_piq / _jrec_val_iq0 > 1.20)
+                    _bad_a = (_jrec_val_a0 == _jrec_val_a0) and (_jrec_val_a0 >= 2.0) and (_pa / _jrec_val_a0 > 1.20)
+                    if _bad_iq or _bad_a:
+                        _B0e = _jrec_B0_pre
+                        _jstate = 4
+                    else:
+                        _jstate = 2
             if _jid:
                 if _tk >= _jid_tend:                 # 超时：有有效窗则进入应用/校验，否则回退
                     _jid = False
