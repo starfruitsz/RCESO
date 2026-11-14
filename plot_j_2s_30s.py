@@ -18,15 +18,15 @@ plt.rcParams.update({
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.33, 5.4))
 fig.subplots_adjust(left=0.065, right=0.985, top=0.84, bottom=0.13, wspace=0.22)
 
-for n, f in ((500, "_wave_j_2s_500.npz"), (600, "_wave_j_2s_600.npz"), (1000, "_wave_j_2s_1000_cap105.npz")):
+for n, f in ((500, "_wave_j_500_q9.0_fmax105.npz"), (600, "_wave_j_600_q9.0_fmax105.npz"), (1000, "_wave_j_1000_q8.0_fmax90.npz")):
     z = np.load(f); t = z["t_j"]; jh = np.asarray(z["jhat"]) * 1e6; b0 = np.asarray(z["b0e"])
-    ax1.plot(t, jh, color=C[n], lw=1.3, label=("%d rpm (105 Hz)" % n) if n==1000 else ("%d rpm" % n))
+    ax1.plot(t, jh, color=C[n], lw=1.3, label={500:"500 rpm (80 Hz)",600:"600 rpm (95 Hz)",1000:"1000 rpm (90 Hz)"}[n])
     ax2.plot(t, b0, color=C[n], lw=1.3, label="%d rpm" % n)
     ax2.axhline(B0[n] * JM / JB, color=C[n], ls="--", lw=0.8, alpha=0.7)
 ax1.axhline(JB * 1e6, color="#555", ls="--", lw=0.9, label=r"$J_{\rm true}=99.5$")
 ax1.set_xlim(0, 30); ax1.set_ylim(0, 140)
 ax1.set_xlabel("时间 / s"); ax1.set_ylabel(r"$\hat J$ / ($10^{-6}$ kg·m$^2$)")
-ax1.set_title("(a) $\\hat J$：500/600/1000（105 Hz）均稳定", fontsize=10.0, pad=5)
+ax1.set_title("(a) $\\hat J$：500/600/1000（q=9，80/95/90 Hz）均 +7~8%", fontsize=10.0, pad=5)
 ax1.legend(loc="lower right", fontsize=7.6)
 
 ax2.set_xlim(0, 30); ax2.set_ylim(0, 820)
@@ -34,7 +34,7 @@ ax2.set_xlabel("时间 / s"); ax2.set_ylabel(r"$b_0^{\rm e}$ / s$^{-1}$")
 ax2.set_title("(b) $b_0$ 收敛到“估计目标”（虚线为真实 J 对应目标）", fontsize=9.8, pad=5)
 ax2.legend(loc="upper right", fontsize=7.6)
 
-fig.suptitle("2 s 复检周期 + 每 burst 状态 4：500/600 rpm 收敛；1000 rpm 用 105 Hz 后 +8.8%（30 s）",
+fig.suptitle("q=9 + 分段上限（105/90 Hz）：500/600/1000 rpm 的 $\\hat J$ 都收敛到 +7~8%（30 s）",
              fontsize=10.4, y=0.95)
 fig.savefig("fig_j_2s_30s.png", dpi=150, bbox_inches=None, facecolor="white")
 print("ok")
