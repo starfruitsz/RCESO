@@ -26,6 +26,9 @@ DT, TEND, TL0 = 2e-6, 8.0, 2.0
 N_REF = 600.0
 AMP_ANG = 0.1
 T_RATED = 0.637
+FAULT = dict(start=TL0,
+             unbalance=dict(M=0.1, e=1e-4, kappa=580.0),
+             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0))
 
 
 CASES = [("eso", "纯 ESO", dict(beta3=0.0)),
@@ -40,7 +43,7 @@ def main():
                 sig_n=NC.NOISE_LAB["sig_n_rpm"],
                 sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
                 seed_i=20261018,
-                tl_ang=disc_unbalance_profile(), tl_ang_amp=AMP_ANG, tl_ang_start=TL0,
+                tl_fault=FAULT,
                 eso_law="fal", eso_a=0.75, eso_delta=0.10, eso_lam=10.0)
     out = {}
     meta = {}
