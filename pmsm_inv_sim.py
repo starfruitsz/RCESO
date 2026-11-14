@@ -176,6 +176,9 @@ def sim_inv(t, TL, cfg=None):
     _jrec_val_iq0 = float("nan")
     _jrec_val_a0 = float("nan")
     _jrec_fv = n_ref / 60.0
+    _jrec_jband = float(cfg.get("j_recheck_jband", 0.0))
+    _jrec_jref = 0.0
+    _jrec_reject = 0
     _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
     _KPe = KP
     # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
@@ -782,14 +785,22 @@ def sim_inv(t, TL, cfg=None):
                         _jrec_active = False
                         if _jrec_gate:
                             if (not _jrec_abort) and len(_jrec_list) >= _jrec_nmin:
-                                _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
-                                _jhat = _jrec_jhat
-                                _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
-                                _jstate = 2
-                                _jrec_val_pending = True
-                                _jrec_val_t = _tk + 0.7
-                                _jrec_val_iq0 = _jrec_base_iq
-                                _jrec_val_a0 = _jrec_base_a
+                                _jn = sum(_jrec_list) / len(_jrec_list)
+                                if (_jrec_jband > 0.0) and (_jrec_jref > 0.0) and (abs(_jn / _jrec_jref - 1.0) > _jrec_jband):
+                                    _B0e = _jrec_B0_pre
+                                    _jstate = 3
+                                    _jrec_reject += 1
+                                else:
+                                    if _jrec_jref <= 0.0:
+                                        _jrec_jref = _jn
+                                    _jrec_jhat = _jn
+                                    _jhat = _jrec_jhat
+                                    _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
+                                    _jstate = 2
+                                    _jrec_val_pending = True
+                                    _jrec_val_t = _tk + 0.7
+                                    _jrec_val_iq0 = _jrec_base_iq
+                                    _jrec_val_a0 = _jrec_base_a
                             else:
                                 _B0e = _jrec_B0_pre
                                 _jstate = 3 if not _jrec_abort else 6
