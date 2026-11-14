@@ -384,6 +384,77 @@ w_n=0.5-0.5\cos\frac{2\pi n}{N-1},
 \end{equation}
 矩形窗对应 $\sum w_n=N$，即式~\eqref{eq:amp}。
 
+
+\section{转速自适应 dither 与跟踪门控（实现验证）}
+
+\subsection{频率表与锁窗}
+
+按转速给 dither，但避开整数次谐波：
+\begin{equation}
+f_d=\mathrm{clip}\left((q+\alpha)\frac{n}{60},\ f_{\min},\ f_{\max}\right),
+\qquad q=10,\ \alpha=0.35,\ f_{\min}=80,\ f_{\max}=190,
+\label{eq:fdtable}
+\end{equation}
+再量化到 $5$\,Hz 栅格，并检查 $f_d/(n/60)$ 不是整数；若接近整数，$\pm5$\,Hz 跳开。窗长仍取 $T_w=0.2$\,s、$N=200$，故 $f_d$ 必须是 $5$\,Hz 的整数倍，保证窗内整数个 dither 周期。
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{自动频率 + 门控的 10\,s 验证（$J_{\rm true}=9.95\times10^{-5}$，两个 burst）}\label{tab:autofd}
+\begin{tabular}{@{}cccccc@{}}
+\toprule
+$n$/rpm & $f_v$/Hz & $f_d$/Hz & $f_d/f_v$ & $\Jhat$/$\times10^{-5}$（误差） & $i_q$ 原始峰值/A\\
+\midrule
+500 & 8.33 & 85 & 10.2 & 1.067（$+7.2\%$） & 7.13\\
+600 & 10.0 & 105 & 10.5 & 1.060（$+6.5\%$） & 3.97\\
+1000 & 16.67 & 170 & 10.2 & 1.072（$+7.7\%$） & 6.15\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+三个转速均未触发 abort，说明频率表/锁窗可用；$\Jhat$ 误差 $+6.5\%\sim+7.7\%$，与固定 100\,Hz 的 $+8\%\sim+9\%$ 同级。$i_q$ 为 10\,$\mu$s 原始峰值（含 PWM 纹波），500\,rpm 的 7.13\,A 需在台架上按 1\,ms 包络复核。
+
+\subsection{跟踪门控与冻结/回滚}
+
+直接用 $|r-z_1|$ 的绝对值做门控会\textbf{死锁}：$J$ 失配下稳态误差/极限环的峰峰值可达上百 rpm，每次 burst 都被判为“跟踪”，复检永远不启动。验证中把绝对门限设为 12\,rpm 时，500/600\,rpm 的 burst 全部被跳过。
+
+改为“低通 + 相对偏移”：
+\begin{equation}
+e_{\mathrm{lp}}(k)=e_{\mathrm{lp}}(k-1)+\alpha_e\left[e(k)-e_{\mathrm{lp}}(k-1)\right],
+\qquad \alpha_e=1-e^{-T_s/0.25},
+\label{eq:lp}
+\end{equation}
+$e(k)=r-z_1$。burst 前要求预窗内 $e_{\mathrm{lp}}$ 的极差不超过 $\epsilon_{\mathrm{ac}}=10$\,rpm；burst 内若
+\begin{equation}
+\left|e_{\mathrm{lp}}(k)-\bar e_{\mathrm{pre}}\right|>\epsilon_{\mathrm{step}}=10\ \mathrm{rpm}
+\quad\text{持续 }20\ \mathrm{ms},
+\label{eq:gateburst}
+\end{equation}
+则整 burst 作废、$b_0\leftarrow b_0^{\mathrm{pre}}$、状态 6，等下一次复检。$b_0$ 只在 burst 完整通过后统一更新，窗内不写。
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{burst 内 0.3\,N$\cdot$m 负载阶跃（2.2\,s）门控开/关对比}\label{tab:gate}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+配置 & abort 时刻/s & $\Jhat$ 终值 & $b_0^{\mathrm e}$ 终值\\
+\midrule
+门控开 & 2.266 & $1.89\times10^{-5}$（保持） & 643.7（冻结）\\
+门控关 & --- & $1.051\times10^{-4}$ & 136.9（被污染后更新）\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表~\ref{tab:gate} 验证了冻结/回滚：门控开时 burst 在 2.266\,s 中止，$\Jhat$ 与 $b_0$ 都保持 burst 前的值；门控关时 DFT 被阶跃污染，$\Jhat$ 变成 $1.051\times10^{-4}$，$b_0$ 被错误更新到 136.9。
+
+\subsection{结论与边界}
+
+\begin{itemize}
+  \item 转速自适应频率表可用，但必须“避整数谐波 + 5\,Hz 锁窗 + 上限 190\,Hz”；不要用 $f_d\propto n$ 的直线。
+  \item 绝对 $|r-z_1|$ 门控不可用（会死锁）；用 0.25\,s 低通后的\textbf{相对偏移}，并整 burst 作废/回滚。
+  \item 门限 10/10\,rpm 是试跑值；500\,rpm 的 $i_q$ 7.13\,A 偏高、$b_0$ 两个 burst 后仍在收敛，需在台架上按 1\,ms 包络和更多 burst 复核。
+  \item 500\,rpm 的低频振荡可能来自律 T/重复通道，不全是 $J$ 失配；复检只能修 $b_0$，修不了 T 的失谐。
+\end{itemize}
+
 \section{参数与边界}
 
 \begin{table}[H]

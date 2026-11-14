@@ -125,7 +125,14 @@ def sim_inv(t, TL, cfg=None):
     _jrec_period = float(cfg.get("j_recheck_period", 5.0))
     _jrec_len = float(cfg.get("j_recheck_len", 0.6))
     _jrec_f = float(cfg.get("j_recheck_f", 100.0))
-    _jrec_w = 2.0 * math.pi * _jrec_f
+    _jrec_f_auto = bool(cfg.get("j_recheck_f_auto", False))
+    _jrec_f_q = float(cfg.get("j_recheck_f_q", 10.0))
+    _jrec_f_alpha = float(cfg.get("j_recheck_f_alpha", 0.35))
+    _jrec_f_min = float(cfg.get("j_recheck_f_min", 80.0))
+    _jrec_f_max = float(cfg.get("j_recheck_f_max", 190.0))
+    _jrec_f_grid = float(cfg.get("j_recheck_f_grid", 5.0))
+    _jrec_fd = _jrec_f
+    _jrec_w = 2.0 * math.pi * _jrec_fd
     _jrec_amp = float(cfg.get("j_recheck_amp", 0.157))
     _jrec_win = float(cfg.get("j_recheck_win", 0.2))
     _jrec_n = max(int(round(_jrec_win / 1e-3)), 10)
@@ -138,6 +145,21 @@ def sim_inv(t, TL, cfg=None):
     _jrec_nid = 0
     _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
     _jrec_jhat = J_M
+    # 跟踪门控与冻结/回滚（实验）：gate=False 时保持旧的“每窗立即更新”行为
+    _jrec_gate = bool(cfg.get("j_recheck_gate", False))
+    _jrec_gate_ac = float(cfg.get("j_recheck_gate_ac", 4.0))       # rpm，预窗 LP 波动
+    _jrec_gate_step = float(cfg.get("j_recheck_gate_step", 8.0))   # rpm，burst 内 LP 偏移
+    _jrec_gate_pre = float(cfg.get("j_recheck_gate_pre", 0.3))     # s
+    _jrec_gate_bad = max(int(cfg.get("j_recheck_gate_bad_ms", 20)), 1)
+    _jrec_lp_alpha = 1.0 - math.exp(-1e-3 / 0.25)   # 0.25 s 低通，压 10 Hz 纹波
+    _jrec_er_lp = 0.0
+    _jrec_lp_hist = []
+    _jrec_pre_mean = 0.0
+    _jrec_bad_cnt = 0
+    _jrec_abort = False
+    _jrec_B0_pre = 0.0
+    _jrec_fd_o = []
+    _jrec_abort_o = []
     _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
     _KPe = KP
     # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
@@ -650,14 +672,61 @@ def sim_inv(t, TL, cfg=None):
                     _B0e += (1e-3 / 0.5) * (B0 * (J_M / _ako_J) - _B0e)
             # ---- 周期 dither 复检：每 period 开 len 秒 dither，DFT 更新 b0 ----
             if _jrec:
+                if _jrec_gate:
+                    _er = _fb * n_ref
+                    _jrec_er_lp += _jrec_lp_alpha * (_er - _jrec_er_lp)
+                    _jrec_lp_hist.append(_jrec_er_lp)
+                    _pre_need = int(round(_jrec_gate_pre / 1e-3))
+                    if len(_jrec_lp_hist) > _pre_need:
+                        _jrec_lp_hist.pop(0)
                 if (not _jrec_active) and _tk >= _jrec_next:
-                    _jrec_active = True
-                    _jrec_end = _tk + _jrec_len
-                    _jrec_next = _tk + _jrec_period
-                    _jrec_list = []; _jrec_nid = 0
-                    _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+                    _pre_need = int(round(_jrec_gate_pre / 1e-3))
+                    _pre_ok = (not _jrec_gate) or (len(_jrec_lp_hist) >= _pre_need and
+                                                   (max(_jrec_lp_hist) - min(_jrec_lp_hist)) <= _jrec_gate_ac)
+                    if not _pre_ok:
+                        _jrec_next = _tk + _jrec_period
+                        _jstate = 6
+                        _jrec_abort_o.append((_tk, 1.0))
+                    else:
+                        _jrec_active = True
+                        _jrec_end = _tk + _jrec_len
+                        _jrec_next = _tk + _jrec_period
+                        _jrec_list = []; _jrec_nid = 0
+                        _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+                        _jrec_B0_pre = _B0e
+                        _jrec_abort = False
+                        _jrec_bad_cnt = 0
+                        _jrec_pre_mean = (sum(_jrec_lp_hist) / len(_jrec_lp_hist)) if _jrec_gate else 0.0
+                        if _jrec_f_auto:
+                            _fv = max(n_ref / 60.0, 1e-3)
+                            _fd = (_jrec_f_q + _jrec_f_alpha) * _fv
+                            _fd = min(max(_fd, _jrec_f_min), _jrec_f_max)
+                            _fd = round(_fd / _jrec_f_grid) * _jrec_f_grid
+                            _ratio = _fd / _fv
+                            if abs(_ratio - round(_ratio)) < 0.05:
+                                _fd += _jrec_f_grid
+                                if _fd > _jrec_f_max:
+                                    _fd -= 2.0 * _jrec_f_grid
+                            _jrec_fd = _fd
+                        else:
+                            _jrec_fd = _jrec_f
+                        _jrec_w = 2.0 * math.pi * _jrec_fd
+                        _jrec_fd_o.append((_tk, _jrec_fd))
+                        _jstate = 1
                 if _jrec_active:
-                    if _tk < _jrec_end:
+                    if _jrec_gate:
+                        if abs(_jrec_er_lp - _jrec_pre_mean) > _jrec_gate_step:
+                            _jrec_bad_cnt += 1
+                        else:
+                            _jrec_bad_cnt = 0
+                        if _jrec_bad_cnt >= _jrec_gate_bad:
+                            _jrec_abort = True
+                            _jrec_active = False
+                            _B0e = _jrec_B0_pre
+                            _jstate = 6
+                            _jrec_list = []
+                            _jrec_abort_o.append((_tk, 1.0))
+                    if _jrec_active and _tk < _jrec_end:
                         _ph = _jrec_w * _tk
                         u += _jrec_amp * math.sin(_ph)
                         _jrec_te_c += Te * math.cos(_ph); _jrec_te_s += Te * math.sin(_ph)
@@ -671,14 +740,26 @@ def sim_inv(t, TL, cfg=None):
                                 _jn = _ate / (_jrec_w * _aw)
                                 _jn = min(max(_jn, 0.5 * J_M), 50.0 * J_M)
                                 _jrec_list.append(_jn)
-                                if len(_jrec_list) >= _jrec_nmin:
+                                if (not _jrec_gate) and len(_jrec_list) >= _jrec_nmin:
                                     _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
                                     _jhat = _jrec_jhat
                                     _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
                             _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
                             _jrec_nid = 0
-                    else:
+                    elif _jrec_active and _tk >= _jrec_end:
                         _jrec_active = False
+                        if _jrec_gate:
+                            if (not _jrec_abort) and len(_jrec_list) >= _jrec_nmin:
+                                _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
+                                _jhat = _jrec_jhat
+                                _B0e += 0.8 * (B0 * (J_M / _jrec_jhat) - _B0e)
+                                _jstate = 2
+                            else:
+                                _B0e = _jrec_B0_pre
+                                _jstate = 3 if not _jrec_abort else 6
+                            _jrec_abort_o.append((_tk, 0.0 if not _jrec_abort else 1.0))
+                        else:
+                            _jstate = 2 if len(_jrec_list) >= _jrec_nmin else 3
             if _jid:
                 if _tk >= _jid_tend:                 # 超时：有有效窗则进入应用/校验，否则回退
                     _jid = False
@@ -899,6 +980,7 @@ def sim_inv(t, TL, cfg=None):
                 jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3,
                 jstate=np.asarray(jstate_o),
                 b0e=np.asarray(b0e_o),
+                fd=np.asarray(_jrec_fd_o), abort=np.asarray(_jrec_abort_o),
                 # ---- J 应用后校验（状态 4）记录 ----
                 jval=dict(enable=bool(_j_val_on), rho=float(_jv_rho),
                           t_decision=_jv_tdec, t_final=_jv_tfinal,
