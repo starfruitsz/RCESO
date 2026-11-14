@@ -294,6 +294,96 @@ $\Jhat$ 终值 & $5.26\times10^{-5}$（$+9.3\%$） & $1.04\times10^{-4}$（停�
 
 判读：复检在 16\,s 的 burst 后把 $\Jhat$ 从 $1.04\times10^{-4}$ 拉到 $5.26\times10^{-5}$，误差 $+9.3\%$，落在 $\pm10\%$ 内；15\,s 后 10\,Hz 的 8.6\,rpm 是 $J$ 变小后的物理故障响应，真正区分稳定性的是 RMS：复检 9.3\,rpm vs 冻结 172.8\,rpm。代价是 12\% 占空比；$J$ 阶跃瞬间 $i_q$ 原始峰值 22.6\,A（冻结 20.7\,A），需速率限制/状态 4 门控。
 
+\clearpage
+\section{转速适应性与非倍频扰动}
+
+\subsection{扰动频率随转速变化}
+
+机械不平衡、不对中等扰动的基频与转速成正比：
+\begin{equation}
+f_v=\frac{n}{60}\ \mathrm{Hz},
+\label{eq:fv}
+\end{equation}
+$n$ 为 rpm。600\,rpm 时 $f_v=10$\,Hz；500\,rpm 时 $f_v=8.333$\,Hz。dither 仍固定 $f_d=100$\,Hz，故 100\,Hz 与 1$\times$ 扰动仍相距很远。
+
+DFT 的严格正交条件不是“$f_d$ 与 $f_v$ 成整数倍”，而是窗内两者都取整数个周期：
+\begin{equation}
+T_w=\frac{k}{f_d}=\frac{m}{f_v},\qquad k,m\in\mathbb{N}.
+\label{eq:orthwin}
+\end{equation}
+500\,rpm 时 $f_d/f_v=12$，最小窗为 $T_w=0.12$\,s（$k=12,m=1$）；600\,rpm 时 $f_d/f_v=10$，$T_w=0.1$\,s 即可，0.2\,s 也满足（$k=20,m=2$）。若固定 $T_w=0.2$\,s，500\,rpm 下 8.333\,Hz 只含 1.667 个周期，理论上会有泄漏；但 91.67\,Hz 的间隔对应的矩形窗旁瓣已很小：
+\begin{equation}
+\frac{\left|X(f_d)\right|}{\left|X(f_v)\right|}
+\approx\left|\mathrm{sinc}\left((f_v-f_d)T_w\right)\right|
+=\left|\frac{\sin\left(\pi(f_v-f_d)T_w\right)}{\pi(f_v-f_d)T_w}\right|.
+\label{eq:sinc}
+\end{equation}
+500\,rpm、$T_w=0.2$\,s 时 $(f_v-f_d)T_w=-18.33$，式~\eqref{eq:sinc} 约 $0.017$（$-35$\,dB），故 1$\times$ 扰动泄漏可忽略。
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{转速与窗长对 $\Jhat$ 的影响（$J_{\rm true}=9.95\times10^{-5}$，$\Jhat$ 终值）}\label{tab:speed}
+\begin{tabular}{@{}lcccl@{}}
+\toprule
+工况 & 转速/rpm & $T_w$/s & 附加扰动 & $\Jhat$ / $10^{-5}$（误差）\\
+\midrule
+基准 & 600 & 0.2 & 无 & 1.088（$+9.3\%$）\\
+500\,rpm，0.2\,s 窗 & 500 & 0.2 & 无 & 1.076（$+8.1\%$）\\
+500\,rpm，0.12\,s 窗 & 500 & 0.12 & 无 & 1.086（$+9.1\%$）\\
+非倍频振动 97.3\,Hz & 600 & 0.2 & $0.02$\,N$\cdot$m & 1.088（$+9.3\%$）\\
+100\,Hz 振动 & 600 & 0.2 & $0.02$\,N$\cdot$m & 1.054（$+5.9\%$）\\
+100\,Hz 振动 & 500 & 0.2 & $0.02$\,N$\cdot$m & 1.023（$+2.8\%$）\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表~\ref{tab:speed} 说明：500\,rpm 下 0.2\,s 与 0.12\,s 窗的估计差 0.9 个百分点，0.12\,s 并没有更好；主导误差不是 1$\times$ 扰动泄漏，而是闭环/DFT 的固有偏差。\textbf{固定 100\,Hz 在 500\,rpm 下仍然可用，但不会因为转速降低而“更好”。}
+
+\subsection{100\,Hz 与转速谐波重合}
+
+真正需要警惕的是高次谐波。100\,Hz 对应
+\begin{equation}
+q=\frac{f_d}{f_v}=\frac{100}{n/60}
+\ \Longrightarrow\
+q=\begin{cases}
+10, & n=600\ \mathrm{rpm},\\
+12, & n=500\ \mathrm{rpm}.
+\end{cases}
+\label{eq:harmq}
+\end{equation}
+若负载/电机存在 10 次或 12 次转矩谐波，100\,Hz 的 dither 与扰动同频，DFT 无法分离，$\Jhat$ 会被拉偏。表~\ref{tab:speed} 中 100\,Hz、$0.02$\,N$\cdot$m 振动使 600\,rpm 估计从 $+9.3\%$ 变到 $+5.9\%$，500\,rpm 从 $+8.1\%$ 变到 $+2.8\%$，即为同频污染。
+
+对策：
+\begin{enumerate}
+  \item 选不与转速谐波重合的 $f_d$，例如 $f_d=(q+0.35)f_v$，或固定 97/103\,Hz；
+  \item 频率跳变/多频 dither，避免长期落在同一谐波；
+  \item 用相干性 $\gamma^2$ 或双频一致性剔除被污染的 burst。
+\end{enumerate}
+
+\subsection{非倍频扰动与 DFT 泄漏}
+
+矩形窗 DFT 只对 $1/T_w$ 的整数倍严格正交；任意 $f_v$ 的泄漏由式~\eqref{eq:sinc} 给出。需要注意两类扰动：
+
+\begin{itemize}
+  \item \textbf{转矩型振动}（如 97.3\,Hz、$0.02$\,N$\cdot$m）：它同时进入 $\Te$ 与 $\omega$，两者泄漏近似同相，比值 $\Jhat=a_{\mathrm{T}}/(\omega_da_{\omega})$ 中大部分抵消。表~\ref{tab:speed} 中 97.3\,Hz 振动下 $\Jhat$ 与无振动完全相同（$1.088\times10^{-4}$），验证了这一点。
+  \item \textbf{单通道扰动}（编码器/转速测量振动、电流传感器噪声、EMI）：只污染 $a_{\omega}$ 或 $a_{\mathrm{T}}$，不会抵消，会直接偏置 $\Jhat$。此时矩形窗旁瓣是主要误差源。
+\end{itemize}
+
+因此“DFT 能否准确提取”取决于扰动是否共模：
+\begin{itemize}
+  \item 共模转矩振动：比值法有较强抑制；97.3\,Hz 试验已验证；
+  \item 单通道/近频振动：不能保证准确；需加窗（Hann/Kaiser，注意相干增益修正）、100\,Hz 窄带带通、相干性/信噪比门控、或多窗中值/剔野值。
+\end{itemize}
+
+加 Hann 窗时幅值修正为
+\begin{equation}
+a=\frac{2}{\sum_{n=0}^{N-1}w_n}\sqrt{S_c^2+S_s^2},
+\qquad
+w_n=0.5-0.5\cos\frac{2\pi n}{N-1},
+\label{eq:hann}
+\end{equation}
+矩形窗对应 $\sum w_n=N$，即式~\eqref{eq:amp}。
+
 \section{参数与边界}
 
 \begin{table}[H]
