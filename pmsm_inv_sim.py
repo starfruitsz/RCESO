@@ -140,6 +140,7 @@ def sim_inv(t, TL, cfg=None):
     _jrec_apply = bool(cfg.get("j_recheck_apply", True))
     _jrec_alpha = float(cfg.get("j_recheck_alpha", 0.8))
     _jrec_btau = float(cfg.get("j_recheck_btau", 0.0))   # b0 更新低通时间常数 / s，0=瞬时更新（原行为）
+    _jrec_b0d = bool(cfg.get("j_b0_direct", False))      # True：直接测 b0（不经 J 中间量）
     _jrec_bgoal = None
     _jrec_win = float(cfg.get("j_recheck_win", 0.2))
     _jrec_n = max(int(round(_jrec_win / 1e-3)), 10)
@@ -150,7 +151,7 @@ def sim_inv(t, TL, cfg=None):
     _jrec_end = 0.0
     _jrec_list = []
     _jrec_nid = 0
-    _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+    _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0; _jrec_iq_c = _jrec_iq_s = 0.0
     _jrec_jhat = J_M
     # 跟踪门控与冻结/回滚（实验）：gate=False 时保持旧的“每窗立即更新”行为
     _jrec_gate = bool(cfg.get("j_recheck_gate", False))
@@ -754,7 +755,7 @@ def sim_inv(t, TL, cfg=None):
                         _jrec_end = _tk + _jrec_len
                         _jrec_next = _tk + _jrec_period
                         _jrec_list = []; _jrec_nid = 0
-                        _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+                        _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0; _jrec_iq_c = _jrec_iq_s = 0.0
                         _jrec_B0_pre = _B0e
                         _jrec_abort = False
                         _jrec_bad_cnt = 0
@@ -803,25 +804,33 @@ def sim_inv(t, TL, cfg=None):
                         u += _jrec_amp_use * math.sin(_ph)
                         _jrec_te_c += Te * math.cos(_ph); _jrec_te_s += Te * math.sin(_ph)
                         _jrec_w_c += w_enc * math.cos(_ph); _jrec_w_s += w_enc * math.sin(_ph)
+                        _jrec_iq_c += idq[1] * math.cos(_ph); _jrec_iq_s += idq[1] * math.sin(_ph)
                         _jrec_nid += 1
                         if _jrec_nid >= _jrec_n:
                             _ate = 2.0 / _jrec_nid * math.hypot(_jrec_te_c, _jrec_te_s)
                             _aw = 2.0 / _jrec_nid * math.hypot(_jrec_w_c, _jrec_w_s)
                             _snr = _aw * 60.0 / (2.0 * math.pi)
                             if _aw > 1e-9 and _snr >= 2.0:
-                                _jn = _ate / (_jrec_w * _aw)
-                                _jn = min(max(_jn, 0.5 * J_M), 50.0 * J_M)
+                                if _jrec_b0d:
+                                    # 直接测 b0：b0 = 1.2·ω_d·A_ω·I_base/(A_iq·ω_ref)
+                                    # A_iq 取实测 q 轴电流的 dither 幅值（含电流环/速度环反作用），不经 J、k_t
+                                    _aiq = 2.0 / _jrec_nid * math.hypot(_jrec_iq_c, _jrec_iq_s)
+                                    _jn = 1.2 * (_jrec_w * _aw * I_BASE) / max(_aiq * w_ref, 1e-12)
+                                    _jn = min(max(_jn, 0.02 * B0), 2.4 * B0)
+                                else:
+                                    _jn = _ate / (_jrec_w * _aw)
+                                    _jn = min(max(_jn, 0.5 * J_M), 50.0 * J_M)
                                 _jrec_list.append(_jn)
                                 if (not _jrec_gate) and len(_jrec_list) >= _jrec_nmin:
                                     _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
-                                    _jhat = _jrec_jhat
+                                    _jhat = (J_M * B0 / _jrec_jhat) if _jrec_b0d else _jrec_jhat
                                     if _jrec_apply:
-                                        _bt = B0 * (J_M / _jrec_jhat)
+                                        _bt = _jrec_jhat if _jrec_b0d else B0 * (J_M / _jrec_jhat)
                                         if _jrec_btau > 0.0:
                                             _jrec_bgoal = _B0e + _jrec_alpha * (_bt - _B0e)
                                         else:
                                             _B0e += _jrec_alpha * (_bt - _B0e)
-                            _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
+                            _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0; _jrec_iq_c = _jrec_iq_s = 0.0
                             _jrec_nid = 0
                     elif _jrec_active and _tk >= _jrec_end:
                         _jrec_active = False
@@ -836,9 +845,9 @@ def sim_inv(t, TL, cfg=None):
                                     if _jrec_jref <= 0.0:
                                         _jrec_jref = _jn
                                     _jrec_jhat = _jn
-                                    _jhat = _jrec_jhat
+                                    _jhat = (J_M * B0 / _jrec_jhat) if _jrec_b0d else _jrec_jhat
                                     if _jrec_apply:
-                                        _bt = B0 * (J_M / _jrec_jhat)
+                                        _bt = _jrec_jhat if _jrec_b0d else B0 * (J_M / _jrec_jhat)
                                         if _jrec_btau > 0.0:
                                             _jrec_bgoal = _B0e + _jrec_alpha * (_bt - _B0e)
                                         else:

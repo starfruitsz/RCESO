@@ -9,6 +9,9 @@ import noise_cfg as NC
 from pmsm_inv_sim import sim_inv
 
 tag = sys.argv[1]; mode = sys.argv[2]
+PERIOD = float(sys.argv[3]) if len(sys.argv) > 3 else 2.0
+B0D = (len(sys.argv) > 4 and sys.argv[4] == "1")
+T0 = float(sys.argv[5]) if len(sys.argv) > 5 else 1.0
 DT = 2e-6; TEND = 30.0
 FAULT = dict(start=2.0,
              unbalance=dict(M=0.1, e=1e-4, kappa=580.0),
@@ -35,12 +38,12 @@ else:
     cfg.update(T_es=False, a_ref=1.0)
 
 if use_j:
-    cfg.update(j_recheck=True, j_recheck_period=2.0, j_recheck_len=0.6, j_recheck_amp=0.157,
-               j_recheck_nmin=2, j_recheck_t0=1.0, j_recheck_f_auto=True, j_recheck_f_q=6.0,
+    cfg.update(j_recheck=True, j_recheck_period=PERIOD, j_recheck_len=0.6, j_recheck_amp=0.157,
+               j_recheck_nmin=2, j_recheck_t0=T0, j_recheck_f_auto=True, j_recheck_f_q=6.0,
                j_recheck_f_alpha=0.35, j_recheck_f_min=50.0, j_recheck_f_max=110.0,
                j_recheck_amp_auto=True, j_recheck_gate=True, j_recheck_gate_ac=10.0,
                j_recheck_gate_step=10.0, j_recheck_apply=True, j_recheck_alpha=0.8,
-               j_recheck_btau=20e-3)
+               j_recheck_btau=20e-3, j_b0_direct=B0D)
 
 t0 = time.time()
 Y = sim_inv(t, TL, cfg)
@@ -67,7 +70,7 @@ iq1 = np.abs(iq[:len(iq)//n1*n1].reshape(-1, n1).mean(axis=1))
 t1 = tt[:len(iq1)*n1:n1]
 iq1ms = float(iq1[t1 >= 2.0].max())
 
-d = dict(tag=tag, mode=mode, use_t=use_t, use_j=use_j, J_true=9.95e-5,
+d = dict(tag=tag, mode=mode, use_t=use_t, use_j=use_j, J_true=9.95e-5, period=PERIOD, b0d=B0D, t0=T0,
          jfin=float(jh[-1]), jerr_pct=float(100.0 * (jh[-1] / 9.95e-5 - 1.0)),
          b0e=float(b0[-1]), es_end=float(es[-1] if es.size else 0.0),
          es_mean=float(np.mean(es[tt >= 25.0])) if es.size else 0.0,
