@@ -169,6 +169,7 @@ def sim_inv(t, TL, cfg=None):
     _jrec_fd_o = []
     _jrec_abort_o = []
     # 每 burst 状态4校验：0.6 s 环形窗（基线与后窗），2 s 周期内完成
+    _es_nofreeze = bool(cfg.get("es_nofreeze", False))   # True：换速时不冻结 ESC（用于验证无冻结行为）
     _jrec_val_on = bool(cfg.get("j_validate", False))  # 默认关闭状态4 的 burst 后校验（不回退）；b0 慢变，周期自检无需频繁
     _jrec_val_log = []      # 状态4 校验日志：(t, iq比, 幅值比, bad_iq, bad_a)
     _jrec_ring_n = 600
@@ -599,7 +600,7 @@ def sim_inv(t, TL, cfg=None):
                 if T_es:
                     # 换速冻结：标称周期相对 20 ms 低通偏离 >5% 时暂停搜索并清空累加器
                     _al = 1.0 - math.exp(-1e-3 / 0.02)
-                    if abs(_Tgnow - _Tglp) > 0.05 * _Tglp:
+                    if (not _es_nofreeze) and abs(_Tgnow - _Tglp) > 0.05 * _Tglp:
                         _es_tfreeze = k * dt + es_freeze
                         _es_I = 0.0
                         _es_tnext = k * dt + es_freeze + es_N * es_Pd
