@@ -1,0 +1,129 @@
+% =============================================================================
+%  es_freeze_proof.tex —— 律T 锁相解调中"额外积分项不改变符号"的推导
+%  编译：xelatex（两遍即可）；可直接 \input 进主报告
+% =============================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[UTF8,fontset=windows]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.2cm]{geometry}
+\newtheorem{proposition}{命题}
+\newtheorem{remark}{注}
+\begin{document}
+
+\section{律T 连续域解调的额外积分项}
+
+\paragraph{假设}
+\begin{equation}
+A(\delta)=A^{*}\bigl[1+\kappa(\delta-\delta^{*})^{2}\bigr],
+\qquad
+\delta(t)=\hat\delta(t)+\Delta\sin\omega_d t,
+\qquad
+\omega_d=\frac{2\pi}{P_d},
+\qquad
+T_w=NP_d ,
+\label{eq:esA}
+\end{equation}
+其中 $A^{*}>0$，$\kappa>0$（$\delta^{*}$ 为极小点），$\Delta$ 为抖动幅值，$T_w$ 为解调窗（整数个抖动周期）。
+
+\paragraph{解调量的四项分解}
+\begin{equation}
+\begin{aligned}
+I(t)
+&=\frac{2}{T_w}\int_{0}^{T_w}A(\delta)\sin\omega_d t\,\mathrm{d}t\\[2pt]
+&=\underbrace{\frac{2A^{*}}{T_w}\int_{0}^{T_w}\sin\omega_d t\,\mathrm{d}t}_{(i)}
++\underbrace{\frac{2\kappa A^{*}}{T_w}\int_{0}^{T_w}e^{2}(t)\sin\omega_d t\,\mathrm{d}t}_{(ii)}\\
+&\quad
++\underbrace{\frac{4\kappa A^{*}\Delta}{T_w}\int_{0}^{T_w}e(t)\sin^{2}\omega_d t\,\mathrm{d}t}_{(iii)}
++\underbrace{\frac{2\kappa A^{*}\Delta^{2}}{T_w}\int_{0}^{T_w}\sin^{3}\omega_d t\,\mathrm{d}t}_{(iv)},
+\end{aligned}
+\label{eq:esI}
+\end{equation}
+其中 $e(t)\equiv\hat\delta(t)-\delta^{*}$。
+
+\paragraph{零项与主项}
+\begin{equation}
+(i)=(iv)=0,
+\label{eq:eszero}
+\end{equation}
+\begin{equation}
+(iii)=\frac{4\kappa A^{*}\Delta}{T_w}\int_{0}^{T_w}e(t)\sin^{2}\omega_d t\,\mathrm{d}t
+\simeq 2\kappa A^{*}\Delta\,e_w\equiv D,
+\qquad e_w=\frac{1}{T_w}\int_{0}^{T_w}e(t)\,\mathrm{d}t .
+\label{eq:esD}
+\end{equation}
+
+\paragraph{额外项：窗内线性漂移的矩}
+令 $e(t)=e_w+\dot e\,(t-\tfrac{T_w}{2})$，则
+\begin{equation}
+\int_{0}^{T_w}\sin\omega_d t\,\mathrm{d}t=0,
+\qquad
+\int_{0}^{T_w}\Bigl(t-\frac{T_w}{2}\Bigr)\sin\omega_d t\,\mathrm{d}t=-\frac{T_w}{\omega_d},
+\qquad
+\int_{0}^{T_w}\Bigl(t-\frac{T_w}{2}\Bigr)^{2}\sin\omega_d t\,\mathrm{d}t=0 .
+\label{eq:esmoments}
+\end{equation}
+二次漂移项的积分恰为零，故
+\begin{equation}
+(ii)=\frac{2\kappa A^{*}}{T_w}\cdot 2e_w\dot e\Bigl(-\frac{T_w}{\omega_d}\Bigr)
+=-\frac{4\kappa A^{*}e_w\dot e}{\omega_d}.
+\label{eq:esextra}
+\end{equation}
+代入连续符号更新律
+\begin{equation}
+\dot e=\dot{\hat\delta}=-\frac{\sigma}{T_w}\operatorname{sgn}I,
+\label{eq:eslaw}
+\end{equation}
+得
+\begin{equation}
+(ii)=\frac{4\kappa A^{*}\sigma\,|e_w|}{T_w\omega_d}
+= r\,|D|,
+\qquad
+r\equiv\frac{2\sigma}{T_w\omega_d\Delta}=\frac{\sigma}{\pi N\Delta}.
+\label{eq:esr}
+\end{equation}
+
+\paragraph{符号保持}
+\begin{equation}
+I=D+r|D|=D\bigl(1+r\operatorname{sgn}D\bigr)
+\quad\Longrightarrow\quad
+\operatorname{sgn}I=\operatorname{sgn}D
+\quad\text{当且仅当}\quad r<1
+\;\Longleftrightarrow\;\sigma<\pi N\Delta .
+\label{eq:essign}
+\end{equation}
+
+\begin{proposition}[不动点唯一]
+定义 $T(S)=\operatorname{sgn}\bigl[e_w(2\kappa A^{*}\Delta+cS)\bigr]$，
+$c\equiv4\kappa A^{*}\sigma/(T_w\omega_d)$，$S\in\{+1,-1\}$，则 $S=T(S)$ 的唯一解为 $S=\operatorname{sgn}e_w$。
+\end{proposition}
+\begin{proof}
+若 $S=\operatorname{sgn}e_w$，括号内为 $2\kappa A^{*}\Delta+c\operatorname{sgn}e_w\ge 2\kappa A^{*}\Delta-c
+=2\kappa A^{*}\Delta(1-r)>0$（$r<1$），故 $T(S)=\operatorname{sgn}e_w=S$，为不动点。
+若 $S=-\operatorname{sgn}e_w$，括号内为 $2\kappa A^{*}\Delta-c\operatorname{sgn}e_w\ge 2\kappa A^{*}\Delta-c>0$，
+故 $T(S)=\operatorname{sgn}e_w\ne S$，不是不动点。故唯一。
+\end{proof}
+
+\begin{remark}[$r\ge 1$ 的失效]
+当 $\sigma\ge\pi N\Delta$ 时 $c\ge 2\kappa A^{*}\Delta$；对 $e_w<0$ 有
+\begin{equation}
+I=e_w\bigl(2\kappa A^{*}\Delta-c\bigr)>0 ,
+\label{eq:esfail}
+\end{equation}
+负侧符号翻转，搜索在 $\delta^{*}$ 下方停住（"一侧走不动"）。
+\end{remark}
+
+\begin{remark}[死区的不对称]
+幅值型判据 $|I|>I_{\mathrm{dead}}$ 受 $r|D|$ 影响：等价门限为
+$I_{\mathrm{dead}}(1+r)$（$D>0$ 侧）与 $I_{\mathrm{dead}}(1-r)$（$D<0$ 侧），
+必要时按方向缩放。
+\end{remark}
+
+\paragraph{本项目数值}
+$N=3$、$P_d=1.5\,\mathrm{s}$、$\Delta=0.005$、$\sigma=0.01$：
+\begin{equation}
+r=\frac{\sigma}{\pi N\Delta}=\frac{0.01}{\pi\cdot 3\cdot 0.005}=0.212,
+\qquad
+\sigma=0.01<\pi N\Delta=0.047 .
+\end{equation}
+
+\end{document}
