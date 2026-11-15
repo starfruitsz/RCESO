@@ -169,7 +169,7 @@ def sim_inv(t, TL, cfg=None):
     _jrec_fd_o = []
     _jrec_abort_o = []
     # 每 burst 状态4校验：0.6 s 环形窗（基线与后窗），2 s 周期内完成
-    _jrec_val_on = bool(cfg.get("j_validate", True))   # False：关闭状态4 的 burst 后校验（不回退）
+    _jrec_val_on = bool(cfg.get("j_validate", False))  # 默认关闭状态4 的 burst 后校验（不回退）；b0 慢变，周期自检无需频繁
     _jrec_val_log = []      # 状态4 校验日志：(t, iq比, 幅值比, bad_iq, bad_a)
     _jrec_ring_n = 600
     _jrec_iq_ring = np.zeros(_jrec_ring_n)

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""_tj_recompute.py —— 指标重算（含校验开关）。"""
+"""_tj_recompute.py —— 指标重算（新配置：10 s burst、直测 b0、校验关）。"""
 import numpy as np, json
 
 TAGS = ("base","t","j","fusion","j10","fusion10","jd2","jd10","fd2","fd10","o2","o10","d2","d10",
-        "d2n","d10n","o2n","o10n")
+        "d2n","d10n","o2n","o10n","base10","t10","j10d","f10d")
 for tag in TAGS:
     try:
         z = np.load("_tj_%s.npz" % tag)
