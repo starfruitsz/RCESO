@@ -169,6 +169,8 @@ def sim_inv(t, TL, cfg=None):
     _jrec_fd_o = []
     _jrec_abort_o = []
     # 每 burst 状态4校验：0.6 s 环形窗（基线与后窗），2 s 周期内完成
+    _jrec_val_on = bool(cfg.get("j_validate", True))   # False：关闭状态4 的 burst 后校验（不回退）
+    _jrec_val_log = []      # 状态4 校验日志：(t, iq比, 幅值比, bad_iq, bad_a)
     _jrec_ring_n = 600
     _jrec_iq_ring = np.zeros(_jrec_ring_n)
     _jrec_e_ring = np.zeros(_jrec_ring_n)
@@ -866,7 +868,9 @@ def sim_inv(t, TL, cfg=None):
             # ---- 每 burst 状态4校验：burst 后 0.7 s 比较 iq AC-RMS 与故障频率幅值 ----
             if _jrec and _jrec_val_pending and (not _jrec_active) and _tk >= _jrec_val_t:
                 _jrec_val_pending = False
-                if _jrec_ring_fill >= _jrec_ring_n:
+                if not _jrec_val_on:
+                    _jstate = 2                      # 校验关闭：直接接受，不回退
+                elif _jrec_ring_fill >= _jrec_ring_n:
                     _mi = float(np.mean(_jrec_iq_ring))
                     _piq = float(np.sqrt(np.mean((_jrec_iq_ring - _mi) ** 2)))
                     _php = 2.0 * math.pi * _jrec_fv * _jrec_t_ring
@@ -874,6 +878,10 @@ def sim_inv(t, TL, cfg=None):
                         np.sum(_jrec_e_ring * np.cos(_php)), np.sum(_jrec_e_ring * np.sin(_php))))
                     _bad_iq = (_jrec_val_iq0 == _jrec_val_iq0) and (_jrec_val_iq0 > 0.0) and (_piq / _jrec_val_iq0 > 1.20)
                     _bad_a = (_jrec_val_a0 == _jrec_val_a0) and (_jrec_val_a0 >= 2.0) and (_pa / _jrec_val_a0 > 1.20)
+                    _jrec_val_log.append((float(_tk),
+                                          float(_piq / _jrec_val_iq0) if _jrec_val_iq0 > 0 else -1.0,
+                                          float(_pa / _jrec_val_a0) if _jrec_val_a0 >= 2.0 else -1.0,
+                                          int(_bad_iq), int(_bad_a)))
                     if _bad_iq or _bad_a:
                         _B0e = _jrec_B0_pre; _jrec_bgoal = None
                         _jstate = 4
@@ -1100,7 +1108,7 @@ def sim_inv(t, TL, cfg=None):
                 jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3,
                 jstate=np.asarray(jstate_o),
                 b0e=np.asarray(b0e_o),
-                fd=np.asarray(_jrec_fd_o), abort=np.asarray(_jrec_abort_o),
+                fd=np.asarray(_jrec_fd_o), abort=np.asarray(_jrec_abort_o), jval_log=_jrec_val_log,
                 # ---- J 应用后校验（状态 4）记录 ----
                 jval=dict(enable=bool(_j_val_on), rho=float(_jv_rho),
                           t_decision=_jv_tdec, t_final=_jv_tfinal,

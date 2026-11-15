@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-"""_tj_recompute.py —— 指标重算（b0-direct / 10 s burst / t0=4 版本）。"""
+"""_tj_recompute.py —— 指标重算（含校验开关）。"""
 import numpy as np, json
 
-TAGS = ("base","t","j","fusion","j10","fusion10","jd2","jd10","fd2","fd10","o2","o10","d2","d10")
+TAGS = ("base","t","j","fusion","j10","fusion10","jd2","jd10","fd2","fd10","o2","o10","d2","d10",
+        "d2n","d10n","o2n","o10n")
 for tag in TAGS:
     try:
         z = np.load("_tj_%s.npz" % tag)
     except FileNotFoundError:
         continue
     tt = np.asarray(z["t"]); y = np.asarray(z["y"]); iq = np.asarray(z["iq"])
-    es = np.asarray(z["es"]); jh = np.asarray(z["jhat"]); b0 = np.asarray(z["b0e"])
+    es = np.asarray(z["es"]); b0 = np.asarray(z["b0e"])
     e = (y - 1.0) * 600.0
     m = tt >= 25.0
     rms = float(np.sqrt(np.mean(e[m] ** 2)))
@@ -26,5 +27,5 @@ for tag in TAGS:
              es_mean=float(np.mean(es[tt >= 25.0])) if es.size else 0.0,
              rms=rms, amp10=a10, iq1ms=float(iq1.max()), iq_raw=float(np.abs(iq).max()))
     json.dump(d, open("_tj_%s.json" % tag, "w"), indent=1)
-    print("%-8s RMS %6.2f  10Hz %6.2f  iq1ms %5.2f  b0e %6.1f (%+5.1f%%)  es %7.3f" % (
+    print("%-8s RMS %6.2f  10Hz %6.2f  iq1ms %5.2f  b0e %6.1f (%+6.1f%%)  es %7.3f" % (
         tag, rms, a10, d["iq1ms"], d["b0e"], d["b0_err_pct"], d["es_mean"]), flush=True)
