@@ -64,7 +64,8 @@ a10 = float(2.0 * np.abs(X[k10]) / np.sum(np.hanning(len(x))))
 # iq1ms（t>=2 起）
 n1 = int(round(1e-3 / (tt[1] - tt[0])))
 iq1 = np.abs(iq[:len(iq)//n1*n1].reshape(-1, n1).mean(axis=1))
-iq1ms = float(iq1[tt[:len(iq1)] >= 2.0].max())
+t1 = tt[:len(iq1)*n1:n1]
+iq1ms = float(iq1[t1 >= 2.0].max())
 
 d = dict(tag=tag, mode=mode, use_t=use_t, use_j=use_j, J_true=9.95e-5,
          jfin=float(jh[-1]), jerr_pct=float(100.0 * (jh[-1] / 9.95e-5 - 1.0)),
