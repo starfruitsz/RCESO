@@ -139,6 +139,8 @@ def sim_inv(t, TL, cfg=None):
     _jrec_amp_use = _jrec_amp
     _jrec_apply = bool(cfg.get("j_recheck_apply", True))
     _jrec_alpha = float(cfg.get("j_recheck_alpha", 0.8))
+    _jrec_btau = float(cfg.get("j_recheck_btau", 0.0))   # b0 更新低通时间常数 / s，0=瞬时更新（原行为）
+    _jrec_bgoal = None
     _jrec_win = float(cfg.get("j_recheck_win", 0.2))
     _jrec_n = max(int(round(_jrec_win / 1e-3)), 10)
     _jrec_nmin = int(cfg.get("j_recheck_nmin", 2))
@@ -249,6 +251,7 @@ def sim_inv(t, TL, cfg=None):
     #   e1 经"自适应中心频率的带通（巴斯沃夫/SVF）"取出周期基波 → 一个周期 RMS 估幅值 A
     #   β₃_eff = β₃min + (β₃max-β₃min)·min(1,(A/A_ref)²)
     rc_bp = float(cfg.get("rc_bp", 0.0))         # >0 启用；值即带通 Q（±10% 带宽 ⇒ Q=5）
+    _T_dft = float(cfg.get("T_dft", 0.0))        # >0：改用整数机械周期 DFT 取基波幅值（单位 = 周期数），带通仍在跑但 A 被覆盖
     b3_min = float(cfg.get("b3_min", 1000.0))
     b3_max = float(cfg.get("b3_max", 4000.0))
     a_ref = float(cfg.get("a_ref", 0.02))        # 目标基波幅值（归一化转速误差）
@@ -400,6 +403,8 @@ def sim_inv(t, TL, cfg=None):
     _es_tnext = es_t0 + es_N * es_Pd; _es_ph = 0.0
     _es_tfreeze = 0.0; _es_n = 0; _Tgnow = T; _Tgprev = None; _Tglp = T
     bp_acc = 0.0; bp_buf = np.zeros(nd); bp_p = 0; _A_now = 0.0; _b3_now = BETA3
+    _dft_q = []                                   # T_dft：最近 N 个 (x·cosθ, x·sinθ)
+    _dft_N = 0
     trig_log = []
     oracle_log = []
     oracle_done = False
@@ -515,6 +520,12 @@ def sim_inv(t, TL, cfg=None):
             w_enc = dcnt / ENC_CPR * TWO_PI / 1e-3
             cnt_prev = cnt
             y_m = (w_enc / w_ref) + NW[min(k // nsp, nS - 1)] / n_ref
+            if (_jrec_btau > 0.0) and (_jrec_bgoal is not None):   # b0 无扰切换：一阶低通逼近目标
+                _ba = 1.0 - math.exp(-1e-3 / max(_jrec_btau, 1e-6))
+                _B0e += _ba * (_jrec_bgoal - _B0e)
+                if abs(_jrec_bgoal - _B0e) <= 1e-4 * max(abs(_jrec_bgoal), 1.0):
+                    _B0e = _jrec_bgoal
+                    _jrec_bgoal = None
             e1 = y_m - z1
             # g 门控：e1 的 T 窗均值
             e1g_acc += e1 * 1e-3 - e1g_buf[e1g_p]; e1g_buf[e1g_p] = e1 * 1e-3
@@ -565,6 +576,23 @@ def sim_inv(t, TL, cfg=None):
                 bp_acc += _v2 - bp_buf[bp_p]; bp_buf[bp_p] = _v2
                 bp_p = (bp_p + 1) % nd
                 _A_now = math.sqrt(max(bp_acc, 0.0) / nd)
+                if _T_dft > 0.0:
+                    # 整数机械周期 DFT（机械角为相位基准，等价 1× 锁相）：
+                    #   A = sqrt(2)/N * |sum x[k-i] exp(-j*theta_m[k-i])|，N = m*T/1ms
+                    _Nnew = int(round(_T_dft * (TWO_PI / max(abs(_wT), 1e-6)) / 1e-3))
+                    _Nnew = max(8, min(2000, _Nnew))
+                    if (_dft_N == 0) or (abs(_Nnew - _dft_N) > max(2, int(0.05 * _dft_N))):
+                        _dft_N = _Nnew; _dft_q = []
+                    _thm = th / P_POL
+                    _xv = e1 if rc_src == "e1" else (1.0 - y_m)
+                    _dft_q.append((_xv * math.cos(_thm), _xv * math.sin(_thm)))
+                    if len(_dft_q) > _dft_N:
+                        _dft_q.pop(0)
+                    if len(_dft_q) >= _dft_N:
+                        _dft_c = 0.0; _dft_s = 0.0
+                        for _pq in _dft_q:
+                            _dft_c += _pq[0]; _dft_s += _pq[1]
+                        _A_now = math.sqrt(2.0) * math.hypot(_dft_c, _dft_s) / len(_dft_q)
                 if T_es:
                     # 换速冻结：标称周期相对 20 ms 低通偏离 >5% 时暂停搜索并清空累加器
                     _al = 1.0 - math.exp(-1e-3 / 0.02)
@@ -766,7 +794,7 @@ def sim_inv(t, TL, cfg=None):
                         if _jrec_bad_cnt >= _jrec_gate_bad:
                             _jrec_abort = True
                             _jrec_active = False
-                            _B0e = _jrec_B0_pre
+                            _B0e = _jrec_B0_pre; _jrec_bgoal = None
                             _jstate = 6
                             _jrec_list = []
                             _jrec_abort_o.append((_tk, 1.0))
@@ -788,7 +816,11 @@ def sim_inv(t, TL, cfg=None):
                                     _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
                                     _jhat = _jrec_jhat
                                     if _jrec_apply:
-                                        _B0e += _jrec_alpha * (B0 * (J_M / _jrec_jhat) - _B0e)
+                                        _bt = B0 * (J_M / _jrec_jhat)
+                                        if _jrec_btau > 0.0:
+                                            _jrec_bgoal = _B0e + _jrec_alpha * (_bt - _B0e)
+                                        else:
+                                            _B0e += _jrec_alpha * (_bt - _B0e)
                             _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0
                             _jrec_nid = 0
                     elif _jrec_active and _tk >= _jrec_end:
@@ -797,7 +829,7 @@ def sim_inv(t, TL, cfg=None):
                             if (not _jrec_abort) and len(_jrec_list) >= _jrec_nmin:
                                 _jn = sum(_jrec_list) / len(_jrec_list)
                                 if (_jrec_jband > 0.0) and (_jrec_jref > 0.0) and (abs(_jn / _jrec_jref - 1.0) > _jrec_jband):
-                                    _B0e = _jrec_B0_pre
+                                    _B0e = _jrec_B0_pre; _jrec_bgoal = None
                                     _jstate = 3
                                     _jrec_reject += 1
                                 else:
@@ -806,14 +838,18 @@ def sim_inv(t, TL, cfg=None):
                                     _jrec_jhat = _jn
                                     _jhat = _jrec_jhat
                                     if _jrec_apply:
-                                        _B0e += _jrec_alpha * (B0 * (J_M / _jrec_jhat) - _B0e)
+                                        _bt = B0 * (J_M / _jrec_jhat)
+                                        if _jrec_btau > 0.0:
+                                            _jrec_bgoal = _B0e + _jrec_alpha * (_bt - _B0e)
+                                        else:
+                                            _B0e += _jrec_alpha * (_bt - _B0e)
                                     _jstate = 2
                                     _jrec_val_pending = True
                                     _jrec_val_t = _tk + 0.7
                                     _jrec_val_iq0 = _jrec_base_iq
                                     _jrec_val_a0 = _jrec_base_a
                             else:
-                                _B0e = _jrec_B0_pre
+                                _B0e = _jrec_B0_pre; _jrec_bgoal = None
                                 _jstate = 3 if not _jrec_abort else 6
                             _jrec_abort_o.append((_tk, 0.0 if not _jrec_abort else 1.0))
                         else:
@@ -830,7 +866,7 @@ def sim_inv(t, TL, cfg=None):
                     _bad_iq = (_jrec_val_iq0 == _jrec_val_iq0) and (_jrec_val_iq0 > 0.0) and (_piq / _jrec_val_iq0 > 1.20)
                     _bad_a = (_jrec_val_a0 == _jrec_val_a0) and (_jrec_val_a0 >= 2.0) and (_pa / _jrec_val_a0 > 1.20)
                     if _bad_iq or _bad_a:
-                        _B0e = _jrec_B0_pre
+                        _B0e = _jrec_B0_pre; _jrec_bgoal = None
                         _jstate = 4
                     else:
                         _jstate = 2
@@ -1050,6 +1086,7 @@ def sim_inv(t, TL, cfg=None):
                 vd=vd_o[:m], vq=vq_o[:m], u=u_o[:m], vqc=vqc_o[:m],
                 iqr=iqr_o[:m], fl=fl_o[:m], dm=dm_o[:m], tl=tl_o[:m], sg=sg_o[:m],
                 b3=b3_o[:m], amp=a_o[:m], es=es_o[:m],
+                dftN=_dft_N, dftn=len(_dft_q), wT=float(_wT),
                 trig=trig_log, oracle=oracle_log,
                 jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3,
                 jstate=np.asarray(jstate_o),

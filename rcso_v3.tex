@@ -456,11 +456,38 @@ $\tau=20$\,ms 时 600\,rpm 为 $-14.3\%$、300\,rpm 为 $-8.9\%$——\textbf{�
 \end{remark}
 
 \subsection{基波幅值观测器}\label{sec:tes-obs}
-取 $\pm10\%$ 带通（状态变量结构，$Q_{\rm bp}=5$），再取一周期均方根：
+取\emph{整数机械周期}的 DFT（相位基准为编码器机械角 $\theta_m=\theta/P$）：它等价于一个中心频率跟随转速、且对直流与整数次谐波精确零增益的理想窄带滤波器：
 \begin{equation}
-A[k]=\sqrt{\frac{1}{N_T}\sum_{i=0}^{N_T-1}y_{\rm bp}^{2}[k-i]},\qquad N_T=\frac{T_g}{\Delta t_s}.
+A[k]=\frac{\sqrt{2}}{N}\Bigl|\sum_{i=0}^{N-1}x[k-i]\,e^{-j\theta_m[k-i]}\Bigr|,
+\qquad N=\frac{mT_g}{\Delta t_s}.
 \label{eq:tes-amp}
 \end{equation}
+其中 $x=e_1$，$m$ 为窗长（机械周期数，本文取 $m=2$，600\,rpm 时 $N=205$）。对 $1\times$ 分量有 $\bigl|\sum\bigr|=A_1N/2$，故 $A=A_1/\sqrt{2}$ 即\emph{真实 $1\times$ 残余 RMS}；直流与 $2\times$（不对中）在整数转窗内的积分为零，无需另加陷波。
+
+\begin{remark}[与 $Q_{\rm bp}=5$ 带通口径的关系]\label{rem:tes-amp-bp}
+v5.6 及以前用 $\pm10\%$ 带通（状态变量结构，$Q_{\rm bp}=5$）再取一周期均方根。该结构在中心频率的增益恰为 $Q_{\rm bp}$（离线实测 $5.000$），故旧口径的 $A$ 是真实 RMS 的 $Q_{\rm bp}$ 倍；除以 $Q_{\rm bp}$ 后与 \eqref{eq:tes-amp} 在 6--10\,s 的均值比为 $1.02$，两者同源。改用 DFT 后须同步重标定死区与参考：$I_{\rm dead}:10^{-5}\to2\times10^{-6}$、$a_{\rm ref}:1.0\to0.2$；不重标定时搜索会比理论最优点早一步停下（表~\ref{tab:tes-amp} 第 2 行）。
+\end{remark}
+
+\begin{table}[H]
+\centering
+\caption{基波幅值观测器口径对比（600\,rpm、30\,s、组合故障、dither ESC）}\label{tab:tes-amp}
+\begin{tabular}{lccc}
+\toprule
+幅值观测器 & 3--30\,s RMS/rpm & 10\,Hz 残余/rpm & 末段 $\hat\delta$ \\
+\midrule
+$\pm10\%$ 带通，$Q_{\rm bp}=5$（v5.6 口径） & 24.50 & 23.78 & $-14.64\%$ \\
+DFT $m=2$（$I_{\rm dead}=10^{-5}$） & 24.36 & 23.06 & $-13.03\%$ \\
+DFT $m=2$（重标定 $2\times10^{-6}$） & 24.44 & 23.32 & $-13.64\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_t_dft_report.png}
+\caption{基波幅值观测器：带通（除以 $Q_{\rm bp}$ 后）与整数周期 DFT 的 $A$ 对比（a）；三种口径下极值搜索的 $\hat\delta$ 轨迹（b）。}
+\label{fig:tes-amp}
+\end{figure}
 \begin{remark}[$A$ 只能做目标，不能做调度量]\label{rem:tes-amp}
 $A$ 的物理含义是“内模频段内尚未被抑制的残余”，与抑制质量成反比，故只能作\emph{最小化}目标。
 实测用它调度 $\beta_3$ 会使空载噪声上升 $11\%\sim55\%$、加载跌落反而加深：$A$ 小恰是控制有效的\emph{结果}，
@@ -592,12 +619,12 @@ b_0\leftarrow b_0\,\frac{J_{\rm nom}}{\hat J},\qquad \hat J\in[0.5,\,50]J_{\rm n
 环 & 时间尺度 & 驱动信号 & 作用对象\\
 \midrule
 律 D & ms（$T$ 窗） & $e_1$ 的 $T$ 窗均值 & $k_p,\ \omega_o$\\
-T 自适应 & s（$P_d=1.5$\,s） & 基波残余 $A$（10\,Hz 带通） & $\delta$（周期修正）\\
+T 自适应 & s（$P_d=1.5$\,s） & 基波残余 $A$（整数周期 DFT） & $\delta$（周期修正）\\
 J 自适应 & 上电一次（0--2\,s） & 100\,Hz dither 的 $T_e/\omega$ & $b_0$（或 $\hat J$）\\
 \bottomrule
 \end{tabular}
 \end{center}
-频率上分离：$10$\,Hz 故障带、$100$\,Hz 辨识 dither、ms 级门控；$T$ 窗均值把 $100$\,Hz 平均为零，D 的门控不受 dither 影响；T 的 $A$ 取 $10$\,Hz 带通，$100$\,Hz 被滤除。时间上也可串行：上电先做 J 辨识（$0$--$2$\,s），ESC 从 $t=3$\,s 起搜索，D 全程在线。
+频率上分离：$10$\,Hz 故障带、$100$\,Hz 辨识 dither、ms 级门控；$T$ 窗均值把 $100$\,Hz 平均为零，D 的门控不受 dither 影响；T 的 $A$ 取整数机械周期 DFT（1 转窗内直流与整数次谐波为零，$100$\,Hz 远在窗外被抑制）。时间上也可串行：上电先做 J 辨识（$0$--$2$\,s），ESC 从 $t=3$\,s 起搜索，D 全程在线。
 
 \textbf{三环同时投运的实测}（定稿台架 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$、$T_1=0.15$\,N$\cdot$m、$12$\,s，600 rpm；指标取 $11$--$12$\,s）：
 \begin{center}\footnotesize

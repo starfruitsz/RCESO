@@ -278,10 +278,17 @@ window.MathJax = {
 <div class="box remark" id="rem:tes-speed"><div class="box-h">注 12（转速依赖性）</div><div class="box-b">$\delta^{*}(\omega)$ 随转速单调漂移：$\omega\to0$ 时趋于 $0$，$\omega\to\infty$ 时趋于 $-25\%$。 $\tau=20$\,ms 时 600\,rpm 为 $-14.3\%$、300\,rpm 为 $-8.9\%$——<strong>换速后必然重新失配</strong>，必须在线整定或前馈重置。</div></div>
 
 <h3 id="sec:tes-obs">基波幅值观测器</h3>
-<p>取 $\pm10\%$ 带通（状态变量结构，$Q_{\rm bp}=5$），再取一周期均方根：</p>
+<p>取<em>整数机械周期</em>的 DFT（相位基准为编码器机械角 $\theta_m=\theta/P$）：它等价于一个中心频率跟随转速、且对直流与整数次谐波精确零增益的理想窄带滤波器：</p>
 
-<div class="eqwrap" id="eq:tes-amp"><div class="eq">\[A[k]=\sqrt{\frac{1}{N_T}\sum_{i=0}^{N_T-1}y_{\rm bp}^{2}[k-i]},\qquad N_T=\frac{T_g}{\Delta t_s}. \]</div><div class="eqno">(16)</div></div>
-<div class="box remark" id="rem:tes-amp"><div class="box-h">注 13（$A$ 只能做目标，不能做调度量）</div><div class="box-b">$A$ 的物理含义是“内模频段内尚未被抑制的残余”，与抑制质量成反比，故只能作<em>最小化</em>目标。 实测用它调度 $\beta_3$ 会使空载噪声上升 $11\%\sim55\%$、加载跌落反而加深：$A$ 小恰是控制有效的<em>结果</em>， 用它降增益等于把残余顶在参考值上。</div></div>
+<div class="eqwrap" id="eq:tes-amp"><div class="eq">\[A[k]=\frac{\sqrt{2}}{N}\Bigl|\sum_{i=0}^{N-1}x[k-i]\,e^{-j\theta_m[k-i]}\Bigr|, \qquad N=\frac{mT_g}{\Delta t_s}. \]</div><div class="eqno">(16)</div></div>
+<p>其中 $x=e_1$，$m$ 为窗长（机械周期数，本文取 $m=2$，600\,rpm 时 $N=205$）。对 $1\times$ 分量有 $\bigl|\sum\bigr|=A_1N/2$，故 $A=A_1/\sqrt{2}$ 即<em>真实 $1\times$ 残余 RMS</em>；直流与 $2\times$（不对中）在整数转窗内的积分为零，无需另加陷波。</p>
+
+<div class="box remark" id="rem:tes-amp-bp"><div class="box-h">注 13（与 $Q_{\rm bp}=5$ 带通口径的关系）</div><div class="box-b">v5.6 及以前用 $\pm10\%$ 带通（状态变量结构，$Q_{\rm bp}=5$）再取一周期均方根。该结构在中心频率的增益恰为 $Q_{\rm bp}$（离线实测 $5.000$），故旧口径的 $A$ 是真实 RMS 的 $Q_{\rm bp}$ 倍；除以 $Q_{\rm bp}$ 后与 <a class="xref" href="#eq:tes-amp">(16)</a> 在 6–10\,s 的均值比为 $1.02$，两者同源。改用 DFT 后须同步重标定死区与参考：$I_{\rm dead}:10^{-5}\to2\times10^{-6}$、$a_{\rm ref}:1.0\to0.2$；不重标定时搜索会比理论最优点早一步停下（表~<a class="xref" href="#tab:tes-amp">1</a> 第 2 行）。</div></div>
+
+<div class="tabcap">表 1：基波幅值观测器口径对比（600\,rpm、30\,s、组合故障、dither ESC）</div><div class="tablewrap" id="tab:tes-amp"><table><thead><tr><th>幅值观测器</th><th>3–30\,s RMS/rpm</th><th>10\,Hz 残余/rpm</th><th>末段 $\hat\delta$</th></tr></thead><tbody><tr><td>$\pm10\%$ 带通，$Q_{\rm bp}=5$（v5.6 口径）</td><td>24.50</td><td>23.78</td><td>$-14.64\%$</td></tr><tr><td>DFT $m=2$（$I_{\rm dead}=10^{-5}$）</td><td>24.36</td><td>23.06</td><td>$-13.03\%$</td></tr><tr><td>DFT $m=2$（重标定 $2\times10^{-6}$）</td><td>24.44</td><td>23.32</td><td>$-13.64\%$</td></tr></tbody></table></div>
+
+<figure id="fig:tes-amp"><img src="fig_t_dft_report.png" alt="图 3"><figcaption><span class="fignum">图 3</span> 基波幅值观测器：带通（除以 $Q_{\rm bp}$ 后）与整数周期 DFT 的 $A$ 对比（a）；三种口径下极值搜索的 $\hat\delta$ 轨迹（b）。</figcaption></figure>
+<div class="box remark" id="rem:tes-amp"><div class="box-h">注 14（$A$ 只能做目标，不能做调度量）</div><div class="box-b">$A$ 的物理含义是“内模频段内尚未被抑制的残余”，与抑制质量成反比，故只能作<em>最小化</em>目标。 实测用它调度 $\beta_3$ 会使空载噪声上升 $11\%\sim55\%$、加载跌落反而加深：$A$ 小恰是控制有效的<em>结果</em>， 用它降增益等于把残余顶在参考值上。</div></div>
 
 <h3 id="sec:tes-esc">锁相极值搜索</h3>
 <p>两层周期：内层给频率、外层修相位。</p>
@@ -289,12 +296,12 @@ window.MathJax = {
 <div class="eqwrap" id="eq:tes-two-layer"><div class="eq">\[T[k]=T_{\rm gross}[k]\bigl(1+\delta[k]\bigr),\qquad \delta[k]=\hat\delta_k+\Delta\sin(\omega_d t),\qquad |\hat\delta_k|\le\delta_{\max}, \]</div><div class="eqno">(17)</div></div>
 
 <div class="eqwrap" id="eq:tes-esc"><div class="eq">\[I_k=\frac{2}{NP_d}\int_{(k-1)NP_d}^{kNP_d}A(t)\sin(\omega_d t)\,\mathrm dt, \qquad \hat\delta_{k+1}=\mathrm{clip}\bigl(\hat\delta_k-\sigma\,\mathrm{sgn}(I_k),\ \pm\delta_{\max}\bigr). \]</div><div class="eqno">(18)</div></div>
-<div class="box remark" id="rem:tes-conv"><div class="box-h">注 14（收敛条件）</div><div class="box-b">平台附近可二次近似 $A(\delta)\approx A^{*}\bigl(1+\kappa(\delta-\delta^{*})^{2}\bigr)$，解调量 $I_k\approx2\kappa A^{*}(\hat\delta_k-\delta^{*})\Delta$。可分辨条件为单步调制量大于 $A$ 的噪声： $2\kappa A^{*}\sigma|\hat\delta-\delta^{*}|\gtrsim\eta_A$。实测 $\kappa\sim20$–$130$、$\Delta=0.5\%$： 偏离最优点 $1\%$ 以上即可可靠定向，$1\%$ 以内停在线性环内，代价约 $0.2\%$ 的 $A$。</div></div>
+<div class="box remark" id="rem:tes-conv"><div class="box-h">注 15（收敛条件）</div><div class="box-b">平台附近可二次近似 $A(\delta)\approx A^{*}\bigl(1+\kappa(\delta-\delta^{*})^{2}\bigr)$，解调量 $I_k\approx2\kappa A^{*}(\hat\delta_k-\delta^{*})\Delta$。可分辨条件为单步调制量大于 $A$ 的噪声： $2\kappa A^{*}\sigma|\hat\delta-\delta^{*}|\gtrsim\eta_A$。实测 $\kappa\sim20$–$130$、$\Delta=0.5\%$： 偏离最优点 $1\%$ 以上即可可靠定向，$1\%$ 以内停在线性环内，代价约 $0.2\%$ 的 $A$。</div></div>
 
 <h3 id="sec:tes-impl">离散实现</h3>
 
 <ul><li><strong>分数阶延迟</strong>：$n_d=T/\Delta t_s$ 取小数，$v[k-n_d]\approx(1-\lambda)v[k-i_0]+\lambda v[k-i_0-1]$，$i_0=\lfloor n_d\rfloor$。 不插值时 $1$\,ms 量化对应约 $1\%$ 的 $T$，会吞掉 $1\%$ 的搜索步长。</li><li><strong>冻结与保护</strong>：标称周期突变 $&gt;5\%$ 或 $|1-y|&gt;0.1$ 时冻结 ESC，保持 $\hat\delta$ 共 $2$\,s。</li><li><strong>前馈重置</strong>：冻结期间每毫秒按实测转速重设 $\hat\delta\leftarrow\mathrm{clip}\bigl(-\arctan(\omega_f\tau)/2\pi,\ \pm\delta_{\max}\bigr)$，解冻后 ESC 只做 $\pm3\%$ 的细调。</li><li><strong>终版参数</strong>：$\delta_{\max}=\pm20\%$、$\sigma=1\%$、$\Delta=0.5\%$、$P_d=1.5$\,s、$N=3$、 $\hat\delta_0=-14.3\%$（理论初值）、死区 $I_{\rm dead}=10^{-5}$。</li></ul>
-<div class="box remark" id="rem:tes-lawd"><div class="box-h">注 15（与律 D 的时间尺度分离）</div><div class="box-b">ESC 的更新周期 $NP_d=4.5$\,s，律 D 的门控时间常数约 $20$\,ms，二者相差两个数量级以上： 律 D 在 ESC 的一个更新周期内已完成多次动作，ESC 看到的 $A$ 是“律 D 稳定后”的残余。 故两者在频域上互不干扰，§<a class="xref" href="#sec:tes-res">10</a> 的实测即两者同时开启。</div></div>
+<div class="box remark" id="rem:tes-lawd"><div class="box-h">注 16（与律 D 的时间尺度分离）</div><div class="box-b">ESC 的更新周期 $NP_d=4.5$\,s，律 D 的门控时间常数约 $20$\,ms，二者相差两个数量级以上： 律 D 在 ESC 的一个更新周期内已完成多次动作，ESC 看到的 $A$ 是“律 D 稳定后”的残余。 故两者在频域上互不干扰，§<a class="xref" href="#sec:tes-res">10</a> 的实测即两者同时开启。</div></div>
 
 <h3 id="sec:tes-intuition">附：T 自适应的直观推导</h3>
 <p>本小节把 §<a class="xref" href="#sec:tes-phase">5.1</a>–§<a class="xref" href="#sec:tes-impl">5.4</a> 的结论按“先机理、后证明”重讲一遍，目标是让第一次读的人能回答三个问题：</p>
@@ -356,9 +363,9 @@ window.MathJax = {
 
 <p><strong>三环正交性</strong>：</p>
 
-<div class="tablewrap"><table><thead><tr><th>环</th><th>时间尺度</th><th>驱动信号</th><th>作用对象</th></tr></thead><tbody><tr><td>律 D</td><td>ms（$T$ 窗）</td><td>$e_1$ 的 $T$ 窗均值</td><td>$k_p,\ \omega_o$</td></tr><tr><td>T 自适应</td><td>s（$P_d=1.5$\,s）</td><td>基波残余 $A$（10\,Hz 带通）</td><td>$\delta$（周期修正）</td></tr><tr><td>J 自适应</td><td>上电一次（0–2\,s）</td><td>100\,Hz dither 的 $T_e/\omega$</td><td>$b_0$（或 $\hat J$）</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>环</th><th>时间尺度</th><th>驱动信号</th><th>作用对象</th></tr></thead><tbody><tr><td>律 D</td><td>ms（$T$ 窗）</td><td>$e_1$ 的 $T$ 窗均值</td><td>$k_p,\ \omega_o$</td></tr><tr><td>T 自适应</td><td>s（$P_d=1.5$\,s）</td><td>基波残余 $A$（整数周期 DFT）</td><td>$\delta$（周期修正）</td></tr><tr><td>J 自适应</td><td>上电一次（0–2\,s）</td><td>100\,Hz dither 的 $T_e/\omega$</td><td>$b_0$（或 $\hat J$）</td></tr></tbody></table></div>
 
-<p>频率上分离：$10$\,Hz 故障带、$100$\,Hz 辨识 dither、ms 级门控；$T$ 窗均值把 $100$\,Hz 平均为零，D 的门控不受 dither 影响；T 的 $A$ 取 $10$\,Hz 带通，$100$\,Hz 被滤除。时间上也可串行：上电先做 J 辨识（$0$–$2$\,s），ESC 从 $t=3$\,s 起搜索，D 全程在线。</p>
+<p>频率上分离：$10$\,Hz 故障带、$100$\,Hz 辨识 dither、ms 级门控；$T$ 窗均值把 $100$\,Hz 平均为零，D 的门控不受 dither 影响；T 的 $A$ 取整数机械周期 DFT（1 转窗内直流与整数次谐波为零，$100$\,Hz 远在窗外被抑制）。时间上也可串行：上电先做 J 辨识（$0$–$2$\,s），ESC 从 $t=3$\,s 起搜索，D 全程在线。</p>
 
 <p><strong>三环同时投运的实测</strong>（定稿台架 $J_{\rm true}=4.81\times10^{-5}=2.545J_{\rm nom}$、$T_1=0.15$\,N$\cdot$m、$12$\,s，600 rpm；指标取 $11$–$12$\,s）：</p>
 
@@ -373,8 +380,8 @@ window.MathJax = {
 <h3 id="sec:newpremise">结构前提：驱动有界性</h3>
 <p>本版驱动 $D=w_f-w_l$（<a class="xref" href="#eq:bpw">(7)</a>）是<em>带通</em>，其“非负 / 周期零均值”均不成立，故不能沿用旧放缩。下面两条引理给出对本版驱动直接成立的前提，<strong>证明只用到 $\phi$ 的 $1$-Lipschitz 性与滤波核为凸组合</strong>，与驱动的符号结构无关。</p>
 <div class="box lemma" id="lem:Dbound"><div class="box-h">引理 1（零均值带通驱动的有界性）</div><div class="box-b">设 $M_t:=\sup_{s\le t}e_f^{2}(s)&lt;\infty$、$\varepsilon&gt;0$、$c&gt;0$、$\tau_f^{w},\tau_l^{w}&gt;0$，实参取零均值形式 <a class="xref" href="#eq:phi-x">(6)</a>。则 \[ |D(t)|\le\min\Bigl\{2,\;\frac{2M_t}{\varepsilon}\Bigr\},\qquad\text{从而}\qquad |D_Q(t)|=|D(t)|.  \] <em>证明.</em> 记 $x=\dfrac{e_f^{2}-E_o}{E_o+\varepsilon}$，则 $\phi(0)=0$ 且 $\phi(\cdot,c)$ 为 $1$-Lipschitz，故 $|w|=|\phi(x,c)|\le|x|$。 又 $|x|\le\dfrac{|e_f^{2}|+E_o}{E_o+\varepsilon}\le1+\dfrac{|e_f^{2}|}{E_o+\varepsilon}\le1+\dfrac{M_t}{\varepsilon}$； 且 $|x|\le\dfrac{|e_f^{2}-E_o|}{\varepsilon}\le\dfrac{M_t}{\varepsilon}$（用 $E_o\ge0$）。两式取小即得 $|w|\le\min\{1,M_t/\varepsilon\}$。 一阶低通的核 $\frac{1}{\tau^{w}}e^{-t/\tau^{w}}$ 非负、积分为 $1$，故 $w_f,w_l$ 均为 $w$ 的历史凸组合，各自落在 $[\inf w,\sup w]$ 内，于是 $|D|=|w_f-w_l|\le2\sup|w|$。 因 $D_Q=D$（<a class="xref" href="#eq:shared-D">(8)</a>），驱动界即为 $Q$ 通道的界。$\square$</div></div>
-<div class="box remark" id="rem:zero-mean"><div class="box-h">注 16（零均值实参在分析上的两重好处）</div><div class="box-b"><strong>(i) 界更紧且与 $\varepsilon$ 解耦</strong>：实参取 $e_f^{2}/(E_o+\varepsilon)$（恒正）时只能得到 $|D|\le2M_t/\varepsilon$，$\varepsilon\to0$ 时界发散；取零均值形式后有 $|D|\le2$，<strong>对一切 $\varepsilon&gt;0$ 一致成立</strong>。 <strong>(ii) 平衡点回到可用区</strong>：恒正实参使 $w$ 恒正、$\overline{D}&gt;0$，$Q$ 被单向压到底（实测动作仅 $\pm1.5\times10^{-4}$）；零均值实参使 $\overline{D}\approx0$，$Q$ 的平衡点回到 $1$ 附近，$Q$ 才具备调节能力。</div></div>
-<div class="box remark" id="rem:robust"><div class="box-h">注 17（闭环一致有界性的归并与仍开放的问题）</div><div class="box-b"><strong>(已归并)</strong> 名义闭环的 UUB 与“含 $Q$ 与律 D（$k_p,\omega_o$）调度”的推论见 §<a class="xref" href="#sec:uub">6.2</a>：$v$ 通道自持有界（界 $\beta_3/(1-Q_0)$，与 $e_1$ 大小无关）， ESO 误差与跟踪误差的界显式依赖 $(\beta_3,Q_0,\omega_o,k_p,b,b_0,H)$；且因 $g\in[0,1)$、$\kappa\ge0$ 使增益只增不减，<strong>名义界即调度闭环的界</strong>。 <strong>(仍开放)</strong> (i) 随机噪声（电流/负载噪声）不属该确定性框架，其定量影响由敏感性一节单独量化； (ii) 三个界都是<em>保守上界</em>（与仿真实测相差 $10^{2}\sim10^{5}$ 倍），收紧界需更强的结构信息。</div></div>
+<div class="box remark" id="rem:zero-mean"><div class="box-h">注 17（零均值实参在分析上的两重好处）</div><div class="box-b"><strong>(i) 界更紧且与 $\varepsilon$ 解耦</strong>：实参取 $e_f^{2}/(E_o+\varepsilon)$（恒正）时只能得到 $|D|\le2M_t/\varepsilon$，$\varepsilon\to0$ 时界发散；取零均值形式后有 $|D|\le2$，<strong>对一切 $\varepsilon&gt;0$ 一致成立</strong>。 <strong>(ii) 平衡点回到可用区</strong>：恒正实参使 $w$ 恒正、$\overline{D}&gt;0$，$Q$ 被单向压到底（实测动作仅 $\pm1.5\times10^{-4}$）；零均值实参使 $\overline{D}\approx0$，$Q$ 的平衡点回到 $1$ 附近，$Q$ 才具备调节能力。</div></div>
+<div class="box remark" id="rem:robust"><div class="box-h">注 18（闭环一致有界性的归并与仍开放的问题）</div><div class="box-b"><strong>(已归并)</strong> 名义闭环的 UUB 与“含 $Q$ 与律 D（$k_p,\omega_o$）调度”的推论见 §<a class="xref" href="#sec:uub">6.2</a>：$v$ 通道自持有界（界 $\beta_3/(1-Q_0)$，与 $e_1$ 大小无关）， ESO 误差与跟踪误差的界显式依赖 $(\beta_3,Q_0,\omega_o,k_p,b,b_0,H)$；且因 $g\in[0,1)$、$\kappa\ge0$ 使增益只增不减，<strong>名义界即调度闭环的界</strong>。 <strong>(仍开放)</strong> (i) 随机噪声（电流/负载噪声）不属该确定性框架，其定量影响由敏感性一节单独量化； (ii) 三个界都是<em>保守上界</em>（与仿真实测相差 $10^{2}\sim10^{5}$ 倍），收紧界需更强的结构信息。</div></div>
 <h3 id="sec:uub">名义闭环的一致有界性（UUB）：完整证明</h3>
 <p><strong>设定</strong>：名义闭环指 $\tau\equiv\tau_0$、$Q\equiv Q_0$ 固定、调度全关（$g\equiv0$）的闭环。</p>
 <p>记 $e_1=x_1-z_1$、$e_2=x_2-z_2$，$x_2$ 为含输入失配的扩张状态，$\dot x_2=:h$。</p>
@@ -448,7 +455,7 @@ window.MathJax = {
 
 <div class="tablewrap"><table><thead><tr><th>工况</th><th>转速噪声</th><th>dq 电流噪声</th><th>负载转矩噪声</th></tr></thead><tbody><tr><td>实验室</td><td>$\le0.5\%$（$3$\,rpm）</td><td>$\le0.1$\,A</td><td>$\le0.01$\,N$\cdot$m</td></tr><tr><td>标准（默认）</td><td>$1\%$（$6$\,rpm）</td><td>$0.2$\,A</td><td>$0.025$\,N$\cdot$m</td></tr><tr><td>恶劣</td><td>$&gt;2\%$（取 $2.5\%$，$15$\,rpm）</td><td>$&gt;0.3$\,A（取 $0.4$）</td><td>$&gt;0.05$\,N$\cdot$m（取 $0.06$）</td></tr></tbody></table></div>
 
-<figure id="fig:inv-demo"><img src="fig_inv_demo.png" alt="图 3"><figcaption><span class="fignum">图 3</span> <strong>真实逆变器对象的电流</strong>。(a) 转速误差；(b) 加载瞬态 $i_q/i_q^*$； (c) 相电流 $200\,\mu$s 放大（$10$\,kHz PWM 纹波）；(d) dq 电流 $20$\,ms 放大（图示为标准噪声档 $\pm0.2$\,A 的采样噪声/纹波）； (e)(f) $i_q$/相电流频谱（$10$\,kHz 开关峰与死区谐波）。</figcaption></figure>
+<figure id="fig:inv-demo"><img src="fig_inv_demo.png" alt="图 4"><figcaption><span class="fignum">图 4</span> <strong>真实逆变器对象的电流</strong>。(a) 转速误差；(b) 加载瞬态 $i_q/i_q^*$； (c) 相电流 $200\,\mu$s 放大（$10$\,kHz PWM 纹波）；(d) dq 电流 $20$\,ms 放大（图示为标准噪声档 $\pm0.2$\,A 的采样噪声/纹波）； (e)(f) $i_q$/相电流频谱（$10$\,kHz 开关峰与死区谐波）。</figcaption></figure>
 
 <h3 id="h5">参数与 500\,Hz 低带宽代价</h3>
 <p>电流环取 $f_{ci}=500$\,Hz（$2\pi\cdot500\approx3142$\,rad/s），沿用 $\tau_0=20$\,ms、$\beta_3=4000$；$2$\,kHz 口径下扫出的 $220$\,Hz 极限环边界不再适用，$500$\,Hz 下未重做该扫描。</p>
@@ -493,7 +500,7 @@ window.MathJax = {
 <p>a2.0_kb8 的跌落/恢复最好（$-133.7$\,rpm / $10.0$\,ms），但包络 $6.27$\,A 只剩 $0.6\%$ 余量；a3.0_kb10 的 $6.22$\,A 也只剩 $1.4\%$。</p>
 <p>在“瞬态基本并列”的前提下电流余量优先，故取 $(6,3)$；1D 中 $\varepsilon_g=0.005$ 的 kb8/de.005 更好（$15.93$\,rpm @ $6.02$\,A），但那是另一条门控档，留作改进项（§<a class="xref" href="#sec:handoff">14</a>）。</p>
 
-<figure id="fig:lawd-final"><img src="fig_lawd_cmp_600.png" alt="图 4"><figcaption><span class="fignum">图 4</span> <strong>无自适应与律 D（$k_b=6,a=3$）的对比</strong>（600 rpm、真实 $J=2.545J_{\rm nom}$、<code>j_oracle</code>、圆盘型线 V2、实验室噪声、单种子）。 律 D 在加载瞬间同时抬高比例增益与观测带宽：跌落 $-127.4\to-121.8$\,rpm、恢复 $29.8\to25.7$\,ms、突变窗 RMS $18.60\to17.24$\,rpm； $1$\,ms 包络 $5.98\to5.85$\,A（原始瞬时峰值 $6.72\to6.92$\,A）在额定内，稳态 RMS 略升 $2.3\%$。</figcaption></figure>
+<figure id="fig:lawd-final"><img src="fig_lawd_cmp_600.png" alt="图 5"><figcaption><span class="fignum">图 5</span> <strong>无自适应与律 D（$k_b=6,a=3$）的对比</strong>（600 rpm、真实 $J=2.545J_{\rm nom}$、<code>j_oracle</code>、圆盘型线 V2、实验室噪声、单种子）。 律 D 在加载瞬间同时抬高比例增益与观测带宽：跌落 $-127.4\to-121.8$\,rpm、恢复 $29.8\to25.7$\,ms、突变窗 RMS $18.60\to17.24$\,rpm； $1$\,ms 包络 $5.98\to5.85$\,A（原始瞬时峰值 $6.72\to6.92$\,A）在额定内，稳态 RMS 略升 $2.3\%$。</figcaption></figure>
 
 <h3 id="sec:lawd-900">900\,rpm 复核与 600\,rpm 最终指标</h3>
 
@@ -545,7 +552,7 @@ window.MathJax = {
 <p>三者（$12.28$–$12.44$）相差 $\le1.3\%$，与单种子波动同量级：真实 $J$ 下 $A$ 已接近噪声底，ESC 的方向判别余量变小，</p>
 <p>收益主要来自“离开 $\delta=0$”，而不是精确收敛到某一点；离线最优 $-11\%$ 的 $11.70$\,rpm 也已接近该噪声下限。</p>
 
-<figure id="fig:tes-esc"><img src="fig_t_es3.png" alt="图 5"><figcaption><span class="fignum">图 5</span> <strong>锁相 ESC 的收敛</strong>（真实 $J$；左：$\delta$ 轨迹；右：稳态 RMS 对比）。 由 $-5\%$ 出发收敛到 $-10.27\%$，由理论初值出发收敛到 $-11.57\%$；两档 RMS 为 $12.28/12.41$\,rpm，与固定 $-12\%$ 的 $12.37$ 并列。</figcaption></figure>
+<figure id="fig:tes-esc"><img src="fig_t_es3.png" alt="图 6"><figcaption><span class="fignum">图 6</span> <strong>锁相 ESC 的收敛</strong>（真实 $J$；左：$\delta$ 轨迹；右：稳态 RMS 对比）。 由 $-5\%$ 出发收敛到 $-10.27\%$，由理论初值出发收敛到 $-11.57\%$；两档 RMS 为 $12.28/12.41$\,rpm，与固定 $-12\%$ 的 $12.37$ 并列。</figcaption></figure>
 
 <h3 id="sec:tes-res-dither">抖动权衡：终版 $\Delta=0.5\%$、$\sigma=1\%$</h3>
 <p>稳态窗口 $20$–$30$\,s：</p>
@@ -558,7 +565,7 @@ window.MathJax = {
 <p>终版仍取 $\Delta=0.5\%$、$\sigma=1\%$、$P_d=1.5$\,s、$N=3$、$\hat\delta_0=-14.3\%$：</p>
 <p>它在 RMS 并列的前提下把 $\delta$ 峰峰压到 $2.10\%$（$\Delta=1\%$ 时为 $3.00\%$），且与名义 $J$ 的整定一致——这是保守选择，不是显著收益。</p>
 
-<figure id="fig:tes-dither"><img src="fig_t_es4.png" alt="图 6"><figcaption><span class="fignum">图 6</span> <strong>抖动幅度与稳态的权衡</strong>（真实 $J$）。左：$\delta$ 峰峰由 $3.00\%$ 降到 $1.50\%$；右：稳态 RMS 与抖动幅度—— RMS 全部落在 $12.37$–$12.58$\,rpm，差异 $\le1.7\%$，与固定 $-12\%$ 并列。</figcaption></figure>
+<figure id="fig:tes-dither"><img src="fig_t_es4.png" alt="图 7"><figcaption><span class="fignum">图 7</span> <strong>抖动幅度与稳态的权衡</strong>（真实 $J$）。左：$\delta$ 峰峰由 $3.00\%$ 降到 $1.50\%$；右：稳态 RMS 与抖动幅度—— RMS 全部落在 $12.37$–$12.58$\,rpm，差异 $\le1.7\%$，与固定 $-12\%$ 并列。</figcaption></figure>
 
 <h3 id="sec:tes-res-speed">变转速：最优周期随转速漂移，前馈重置闭合换速</h3>
 <p><strong>(1) 300\,rpm 的真实最优</strong>（20\,s 仿真，$14$–$20$\,s 统计）：</p>
@@ -585,7 +592,7 @@ window.MathJax = {
 <p>两段 600 rpm 的稳态 RMS 只差 $0.13$\,rpm（$1.0\%$），$\delta$ 只差 $0.04$ 个百分点（$-14.27\%$ 对 $-14.31\%$）——</p>
 <p><strong>真实 $J$ 下 $\delta$ 与 RMS 都可重复、无累积漂移</strong>；$\delta$ 的两次 600 rpm 均值只差 $0.04$ 个百分点，不再需要“RMS 可重复但 $\delta$ 不可逆”的保留表述。</p>
 
-<figure id="fig:tes-rt"><img src="fig_t_es_rt.png" alt="图 7"><figcaption><span class="fignum">图 7</span> <strong>变转速验证</strong>（真实 $J$）。左：300\,rpm 下 $A(\delta)$ 与稳态 RMS，两者的最小点都在 $-8\%$； 右：往返 $600\to300\to600$ 的 $\delta$ 轨迹（$-14.27\%\to-7.45\%\to-14.31\%$），$\delta$ 与 RMS 都可重复、无累积漂移。</figcaption></figure>
+<figure id="fig:tes-rt"><img src="fig_t_es_rt.png" alt="图 8"><figcaption><span class="fignum">图 8</span> <strong>变转速验证</strong>（真实 $J$）。左：300\,rpm 下 $A(\delta)$ 与稳态 RMS，两者的最小点都在 $-8\%$； 右：往返 $600\to300\to600$ 的 $\delta$ 轨迹（$-14.27\%\to-7.45\%\to-14.31\%$），$\delta$ 与 RMS 都可重复、无累积漂移。</figcaption></figure>
 
 <h2 id="sec:limit">适用范围之外（如实披露）</h2>
 <h3 id="sec:no-lawf">复位型律 F 已作废（2026-11-12）</h3>
@@ -929,7 +936,7 @@ window.MathJax = {
 <p>$\kappa=1$ 时 $1\times$ 幅值 $Mge=9.8\times10^{-5}$\,N$\cdot$m，10\,Hz 分量 $0.51$\,rpm、稳态 RMS $6.49$\,rpm（同口径无故障基准 $0.38$ / $6.82$）；</p>
 <p>$\kappa=580$ 时幅值 $0.0569$\,N$\cdot$m，10\,Hz 分量 $9.97$\,rpm、RMS $10.02$\,rpm。</p>
 <p>若仍用标称 $b_0$（不投 J 自适应），$10$\,Hz/RMS 在 $\kappa=1$ 为 $1.92$ / $12.04$、在 $\kappa=580$ 为 $29.22$ / $24.47$——</p>
-<p>失配越大、$J$ 环的收益越大；完整扫描见附图~<a class="xref" href="#fig:fault-sweep">8</a>。</p>
+<p>失配越大、$J$ 环的收益越大；完整扫描见附图~<a class="xref" href="#fig:fault-sweep">9</a>。</p>
 <p>要复现台架 $0.057$\,N$\cdot$m 而用 $\kappa=1$，需要 $e\approx58$\,mm，物理上不可能；故台架型线必须按“等效注入”理解。</p>
 <p>离心力 $F_u=Me\omega^2$ 用 <code>unbalance_force</code> 单独读取（轴承/振动通道），不进入 $T$。</p>
 
@@ -942,7 +949,7 @@ window.MathJax = {
 <p>失配 $1/J_{\rm true}-1/J_{\rm nom}$ 因此不进入 $z_2$，只剩辨识残差。未校正时的后果见上段“若仍用标称 $b_0$”的对比行。</p>
 <p>若故障在齿轮箱负载侧，注入电机轴的转矩应除以速比 $n_g$、角度换成 $\theta/n_g$；换圆盘时必须按式~<a class="xref" href="#eq:unb-Jtrue">(79)</a> 重算 $J_{\rm true}$ 并复跑。</p>
 
-<figure id="fig:fault-sweep"><img src="fig_fault_sweep.png" alt="图 8"><figcaption><span class="fignum">图 8</span> <strong>故障 $\to$ 转速纹波映射</strong>（$600$\,rpm、$8$\,s、RC 开、不加载型线；真实 $J=2.545J_{\rm nom}$、<code>j_oracle</code>）。 灰线为标称 $b_0$（不投 J 自适应），红线为校正后 $b_0$。(a) 不平衡 $10$\,Hz 纹波；(b) 不平衡稳态 RMS；(c) 不对中 $10$\,Hz 纹波； (d) 投运后的纹波抑制比（$0.26$–$0.39$，即 $2.5$–$3.8$ 倍）。同一 $\kappa$ 下 $J$ 环把纹波压到约 $1/3$，$\kappa$ 越大收益越大。</figcaption></figure>
+<figure id="fig:fault-sweep"><img src="fig_fault_sweep.png" alt="图 9"><figcaption><span class="fignum">图 9</span> <strong>故障 $\to$ 转速纹波映射</strong>（$600$\,rpm、$8$\,s、RC 开、不加载型线；真实 $J=2.545J_{\rm nom}$、<code>j_oracle</code>）。 灰线为标称 $b_0$（不投 J 自适应），红线为校正后 $b_0$。(a) 不平衡 $10$\,Hz 纹波；(b) 不平衡稳态 RMS；(c) 不对中 $10$\,Hz 纹波； (d) 投运后的纹波抑制比（$0.26$–$0.39$，即 $2.5$–$3.8$ 倍）。同一 $\kappa$ 下 $J$ 环把纹波压到约 $1/3$，$\kappa$ 越大收益越大。</figcaption></figure>
 
 <h3 id="h30">B.10 符号表</h3>
 
@@ -989,7 +996,7 @@ window.MathJax = {
 
 <div class="tablewrap"><table><thead><tr><th>工况</th><th>$\hat J$ 误差</th><th>$10$\,Hz/rpm</th><th>辨识期 $100$\,Hz/rpm</th><th>运行段 $100$\,Hz/rpm</th><th>$i_q$/A</th></tr></thead><tbody><tr><td>标称 $J$（基准）</td><td>—</td><td>$26.2$</td><td>—</td><td>—</td><td>$1.89$</td></tr><tr><td>$J_{\rm true}=5.26J_{\rm nom}$，固定标称</td><td>—</td><td>$33.3$</td><td>—</td><td>—</td><td>$3.97$</td></tr><tr><td>oracle 重整定（$b_0$ 按 $J_{\rm true}$）</td><td>—</td><td>$4.6$</td><td>—</td><td>—</td><td>$7.03$</td></tr><tr><td><strong>辨识 + $b_0$ 自适应</strong></td><td>$+9.5\%$</td><td>$\mathbf{4.0}$</td><td>$18.2$</td><td>$\mathbf{0.16}$</td><td>$\mathbf{5.06}$</td></tr></tbody></table></div>
 
-<figure id="fig:appC-jadapt"><img src="fig_j_adapt.png" alt="图 9"><figcaption><span class="fignum">图 9</span> <strong>$J$ 辨识与 $b_0$ 自适应</strong>（应力测试配置：$600$\,rpm、$T_1=0.057$\,N$\cdot$m、$J_{\rm true}=5.26J_{\rm nom}$）。 (a) $\hat J$ 在 $2$\,s 内收敛到 $+9.5\%$ 后冻结；(b) 故障抑制：固定标称 $33.3$\,rpm，oracle $4.6$，自适应 $4.0$； (c) dither 代价仅存在于辨识期（$18.2$\,rpm），运行段 $0.16$\,rpm；(d) 稳态时域对比。</figcaption></figure>
+<figure id="fig:appC-jadapt"><img src="fig_j_adapt.png" alt="图 10"><figcaption><span class="fignum">图 10</span> <strong>$J$ 辨识与 $b_0$ 自适应</strong>（应力测试配置：$600$\,rpm、$T_1=0.057$\,N$\cdot$m、$J_{\rm true}=5.26J_{\rm nom}$）。 (a) $\hat J$ 在 $2$\,s 内收敛到 $+9.5\%$ 后冻结；(b) 故障抑制：固定标称 $33.3$\,rpm，oracle $4.6$，自适应 $4.0$； (c) dither 代价仅存在于辨识期（$18.2$\,rpm），运行段 $0.16$\,rpm；(d) 稳态时域对比。</figcaption></figure>
 
 <h3 id="h35">C.5 与文献方法的对照</h3>
 
