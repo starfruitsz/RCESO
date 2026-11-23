@@ -1595,19 +1595,81 @@ $0.3\%$ 的“错拍”误当作算法差异。
 
 \subsection{长时为什么必然分叉}
 
-三条机制叠加，使“逐点一致”在长时上不可能达到：
+三条机制叠加，使“逐点一致”在长时上不可能达到。定量地说，\textbf{主因是单精度时基}，
+另两条只起放大作用：
 
 \begin{enumerate}
+\item \textbf{float32 时基漂移（主因）。}C 版以 \texttt{t\_now += 1e-3f} 计时，$130$ s 后累计误差
+$-45$ ms（$124.6$ s 处 $-57$ ms），burst 起始拍随之逐 burst 拉大，末端已错开 $52$ 拍。
 \item \textbf{注入波形本身就不同。}C 版用 $256$ 点 LUT（象限折叠 + 八阶 Taylor），MATLAB 版用
 $\sin/\cos$。相位分辨率 $2\pi/256$ 折合 $1.4^\circ$，逐点差峰值 $2.9\times10^{-3}$ pu，
-占幅值 $2.5\%$（图 \ref{fig:cmp}(d)）。
-\item \textbf{float32 时基漂移。}C 版以 \texttt{t\_now += 1e-3f} 计时，$130$ s 后累计误差
-$-45$ ms（$124.6$ s 处 $-57$ ms），相当于 burst 调度错开 $45$–$57$ 拍。错位一旦跨过段边界，
-一个在注入而另一个在空载段，$|\Delta u|$ 直接等于幅值 $0.118$ pu。
+占幅值 $2.5\%$（图 \ref{fig:cmp}(d)）。它在回放里只改变解调参考，量级比时基小两个数量级。
 \item \textbf{门控分段 + 自指。}$\hat b_0$ 进入差分式 \eqref{eq:curdiff} 的 $b_0(u_2-u_1)$ 项，
 一次分叉不会被负反馈拉回；而门控的指数分支是分段定义的，微小的 $\hat b_0$ 差可改变所选分支，
 于是分叉被“锁存”而不再收敛。
 \end{enumerate}
+
+
+\paragraph{定量归因。}把同一条输入流分别回放给四个变体（其余代码一字不改），末值见表 \ref{tab:variant}。
+
+\begin{table}[H]
+\centering
+\caption{变体回放：漂移归因（同一条 $130$ s 输入流）}
+\label{tab:variant}
+\small
+\begin{tabular}{llcc}
+\toprule
+变体 & 改动 & 末值 $\hat b_0$ & 相对 MATLAB \\
+\midrule
+现役 C & float32 + $256$ 点 LUT & $573.17$ & $+7.8\%$\\
+C-1 & float32 + 精确 $\sin/\cos$ & $573.10$ & $+7.8\%$\\
+\textbf{C-2} & \textbf{float32 + double 累加时基} & $\bm{531.68}$ & $\bm{-0.03\%}$\\
+C-3 & double 全程 + LUT & $531.15$ & $-0.13\%$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+结论很干脆：\textbf{漂移几乎全部来自单精度时基}。换掉 LUT 只改了 $0.07$（千分之一量级），
+说明它对估计的口径没有实质影响；把时基改成 double 累加，其余仍是 float32、仍用 LUT，
+末值立刻回到 $531.68$，与 MATLAB 的 $531.84$ 只差 $-0.03\%$。
+
+\paragraph{时基误差如何变成偏差。}表 \ref{tab:lag} 给出实测滞后：从第 $1$ 个 burst 的 $0$ 拍增长到第 $24$ 个 burst 的 $52$ 拍
+（$52$ ms），平均每个 burst 多滞后 $2.2$ 拍；早期有 $\pm2$ 拍的取整抖动，此后单调增长。
+
+\begin{table}[H]
+\centering
+\caption{burst 起始拍相对记录流的滞后（由两版注入非零点直接读出）}
+\label{tab:lag}
+\small
+\begin{tabular}{lcccccccc}
+\toprule
+burst & $1$ & $4$ & $8$ & $12$ & $16$ & $20$ & $23$ & $24$\\
+\midrule
+滞后 / 拍 & $0$ & $-2$ & $9$ & $17$ & $28$ & $40$ & $49$ & $52$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+关键在于回放是\textbf{定输入}的：记录流里的注入窗口固定在原时刻，而 C 版的段边界按自己的
+（变慢的）时基滑动。滞回 $L$ 拍后，本版的“无注入参考段”会有 $L/200$ 的样本落到记录流的注入段上——
+末端已达 $26\%$。式 \eqref{eq:curdiff} 的前提是前段真的没有注入，一旦前段混入注入，
+差分 $\Delta$ 就被污染，$\hat b$ 随之单向偏移。漂移是“时基变慢 $\to$ 参考段被污染 ”
+累积出来的，而不是某一次计算出错。
+
+闭环里这个问题不显形，因为注入由同一个时钟产生、段边界与注入窗口始终自洽（\S\ref{sec:sim} 的
+$-0.90\%$ 就是闭环结果）。它只在\textbf{记录—回放}这一类离策略测试里暴露；也正因如此，
+它是很好的“时基健康度”探针。
+
+\paragraph{修法。}把时基从浮点秒数改成整数拍计数，一行即可，且对板子更省：
+
+\begin{verbatim}
+/* 旧：DW->t_now += P->dT;            // float32 累加，130 s 漂 45 ms */
+DW->tick += 1u;                       /* uint32_t，每拍 +1，永不漂 */
+DW->next_tick = DW->tick + 5000u;     /* 5 s；period_run/period_idle 同理 */
+\end{verbatim}
+
+按 $1$ kHz 折算，现役做法的漂移率约 $0.042\%$（约 $1.5$ s/h）：对 $120$ s 的辨识窗口无关紧要，
+但会让“同一段输入、两个实现”的任何逐点比对失效。
 
 \subsection{回放终值不等于闭环终值}
 
@@ -1683,7 +1745,8 @@ $u$ 与 $i_q$ 采样同刻（消去 $23^\circ$ 错位）、中位数自适应权
 五者叠加后，一阶对象闭环 $90$ s 中 $\hat b_0$ 由旧法的 $+15.3\%$ 改善到 $+1.84\%$，
 稳态 RMS 仅上升 $4.6\%$，$10$ Hz 纹波下降 $5\%$；在 PMSM $dq$ 闭环上达到 $-0.90\%$（真值 $536.40$）。
 \item \textbf{验收口径}：首 burst 的逐点相对差 $10^{-5}$ 量级、闭环终值差 $0.1\%$ 量级即可；
-不要求 C 版与 MATLAB 版长时逐位一致——float32 时基漂移与 LUT 相位量化使它不可能（\S\ref{sec:sim}）。
+不要求 C 版与 MATLAB 版长时逐位一致——主因是 float32 时基漂移，换成整数拍计数即可消除，
+LUT 相位量化只是次要扰动（\S\ref{sec:sim}）。
 \end{enumerate}
 
 \appendix
