@@ -1,0 +1,3 @@
+LOAD_OK
+SIM_OK b0=530.6 w=600.0 du_max=0.1180
+colored blocks at root: 39

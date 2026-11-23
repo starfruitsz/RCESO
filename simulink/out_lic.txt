@@ -1,0 +1,7 @@
+Simscape                     1
+Simscape_Electrical          0
+SimPowerSystems              0
+Simulink_Control_Design      1
+--- exist sps_lib: 4
+PMSM found: 0
+SIMSCAPE_OK

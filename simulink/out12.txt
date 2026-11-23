@@ -1,0 +1,8 @@
+FORM1 OK
+  raw = [b0_ident.c / b0_ident_wrap.c]
+  AVAIL = []
+  PORTS = [0 0 0 0 0 0 0 0 0 0]
+FORM2 OK
+  raw = [D:\Desktop\RCESO\simulink\b0_ident.c / D:\Desktop\RCESO\simulink\b0_ident_wrap.c]
+  AVAIL = []
+  PORTS = [0 0 0 0 0 0 0 0 0 0]

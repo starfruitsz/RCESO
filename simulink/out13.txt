@@ -1,0 +1,10 @@
+--- update 前 ---
+AVAIL=[]
+UPDATE_FAIL 无法从 C Caller 模块 'p9/C' 中调用函数 'b0_ident_u'。函数未在自定义代码中定义，或是 C Caller 模块不支持的类型。
+AVAIL_after_update=[]
+PORTS=[0 0 0 0 0 0 0 0 0 0]
+--- SimCustomHeaderCode ---
+HDR_OK
+AVAIL_after_hdr=[b0_ident_u]
+--- mex 测试 ---
+MEX_FAIL 未检测到支持的编译器。您可以安装免费提供的 MinGW-w64 C/C++ 编译器；请访问 https://www.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c-compiler。有关更多选项，请访问 https://www.mathworks.com/support/compilers。

@@ -1,0 +1,16 @@
+# b0_ident 代码风格
+BasedOnStyle: Microsoft
+Language: Cpp
+Standard: c++17
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+BreakBeforeBraces: Attach
+AllowShortIfStatementsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
+AlignConsecutiveAssignments: false
+PointerAlignment: Right
+SpacesBeforeTrailingComments: 2
+IndentCaseLabels: false
+SortIncludes: false

@@ -1,0 +1,9 @@
+# 构建与 IDE 中间产物
+build/
+.vs/
+*.obj
+*.o
+*.exe
+*.pdb
+*.ilk
+compile_commands.json

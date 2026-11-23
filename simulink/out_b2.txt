@@ -1,0 +1,2 @@
+params ok
+PORTS=[0 0 0 0 0 0 0 0 0 0]

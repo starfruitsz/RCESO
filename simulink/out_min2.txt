@@ -1,0 +1,5 @@
+MW_MINGW64_LOC=D:\Matlab2023\bin\win64\mingw64
+SELECTED=MinGW64 Compiler (C) | loc=D:\Matlab2023\bin\win64\mingw64
+MEX_C_OK
+SETUP_OK
+AFTER_SETUP=MinGW64 Compiler (C)

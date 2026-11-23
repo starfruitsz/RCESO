@@ -1,0 +1,11 @@
+PMSM 本体                11 块 -> lightBlue
+fail eq : 参数 'BackgroundColor' 的 Sum block 'eq' 中的设置无效
+fail gkp : 参数 'BackgroundColor' 的 Gain block 'gkp' 中的设置无效
+fail iqint : 参数 'BackgroundColor' 的 DiscreteIntegrator block 'iqint' 中的设置无效
+fail gki : 参数 'BackgroundColor' 的 Gain block 'gki' 中的设置无效
+fail vq : 参数 'BackgroundColor' 的 Sum block 'vq' 中的设置无效
+电流环 PI                  0 块 -> lightGreen
+观测器 ESO+重复内模           17 块 -> yellow
+控制律                     5 块 -> orange
+b0 辨识 C Caller          1 块 -> magenta
+SAVED

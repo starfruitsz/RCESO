@@ -1,0 +1,10 @@
+script_len_before=619
+TRIVIAL_ERR 数据 <a href="matlab:sfprivate('sfOpenObjectBySId','b0_closed:1:::e1o')">'e1o'</a> 的推断类型('double')与从 Simulink 反向传播的类型('single')不匹配。
+
+
+PERSIST_ERR 数据 <a href="matlab:sfprivate('sfOpenObjectBySId','b0_closed:1:::e1o')">'e1o'</a> 的推断类型('double')与从 Simulink 反向传播的类型('single')不匹配。
+
+
+VEC_ERR 数据 <a href="matlab:sfprivate('sfOpenObjectBySId','b0_closed:1:::u')">'u'</a> 的推断类型('double')与从 Simulink 反向传播的类型('single')不匹配。
+
+

@@ -1,0 +1,19 @@
+FAIL simpowersystems/Electrical Machines/Permanent Magnet Synchronous Machine
+     没有名为 'simpowersystems/Electrical Machines/Permanent Magnet Synchronous Machine' 的模块
+FAIL simscape/Electrical/Specialized Power Systems/Fundamental Blocks/Electrical Machines/Permanent Magnet Synchronous Machine
+     没有名为 'simscape/Electrical/Specialized Power Systems/Fundamental Blocks/Electrical Machines/Permanent Magnet Synchronous Machine' 的模块
+FAIL sps_lib/Permanent Magnet Synchronous Machine
+     没有名为 'sps_lib/Permanent Magnet Synchronous Machine' 的模块
+OK   sps_lib/Electrical Machines/Permanent Magnet Synchronous Machine
+FAIL sps_lib/Universal Bridge
+     没有名为 'sps_lib/Universal Bridge' 的模块
+--- sps_lib 顶层 (9) ---
+  sps_lib/Control
+  sps_lib/Electrical Machines
+  sps_lib/Passives
+  sps_lib/Power Electronics
+  sps_lib/Power Grid Elements
+  sps_lib/Sensors and Measurements
+  sps_lib/Sources
+  sps_lib/Utilities
+  sps_lib/powergui

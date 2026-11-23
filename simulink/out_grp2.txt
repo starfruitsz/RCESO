@@ -1,0 +1,4 @@
+FAIL PMSM_Plant : CELL2MAT 不支持包含元胞数组或对象的元胞数组。
+FAIL CurrentLoop_PI : CELL2MAT 不支持包含元胞数组或对象的元胞数组。
+FAIL ADRC_SpeedLoop : CELL2MAT 不支持包含元胞数组或对象的元胞数组。
+SAVED

@@ -1,0 +1,4 @@
+MW_MINGW64_LOC=C:\Program Files\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\mingw64
+SELECTED=MinGW64 Compiler (C)
+  loc=C:\Program Files\x86_64-8.1.0-release-posix-seh-rt_v6-rev0\mingw64
+MEX_C_FAIL: 未检测到支持的编译器。您可以安装免费提供的 MinGW-w64 C/C++ 编译器；请访问 https://www.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c-compiler。有关更多选项，请访问 https://www.mathworks.com/support/compilers。

@@ -1,0 +1,12 @@
+no_codegen FAIL: 解析 <a href="matlab:sfprivate('sfOpenObjectBySId','b0_closed:1')">'b0_closed/ctrl_rceso'</a> 时出错。
+
+
+no_single FAIL: 解析 <a href="matlab:sfprivate('sfOpenObjectBySId','b0_closed:1')">'b0_closed/ctrl_rceso'</a> 时出错。
+
+
+scalar_buf FAIL: 解析 <a href="matlab:sfprivate('sfOpenObjectBySId','b0_closed:1')">'b0_closed/ctrl_rceso'</a> 时出错。
+
+
+full FAIL: 解析 <a href="matlab:sfprivate('sfOpenObjectBySId','b0_closed:1')">'b0_closed/ctrl_rceso'</a> 时出错。
+
+

@@ -1,0 +1,2 @@
+SIM_OK b0=400.00 du_max=1.3444 nz=5.0%
+FIG_OK

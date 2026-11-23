@@ -1,0 +1,71 @@
+=== 含 head/custom/sim 的参数 ===
+customwebblocks_plugin     = off
+CustomBLASCallback         = 
+CustomCodeDeterministicFunctions = 
+CustomCodeFunctionArrayLayout = []
+CustomCodeGlobalsAsFunctionIO = off
+CustomCodeUndefinedFunction = FilterOut
+CustomCommentsFcn          = 
+CustomDefine               = 
+CustomFFTCallback          = 
+CustomHeaderCode           = 
+CustomInclude              = 
+CustomInitializer          = 
+CustomLAPACKCallback       = 
+CustomLibrary              = 
+CustomSource               = 
+CustomSourceCode           = 
+CustomSymbolStrBlkIO       = rtb_$N$M
+CustomSymbolStrEmxFcn      = emx$M$N
+CustomSymbolStrEmxType     = emxArray_$M$N
+CustomSymbolStrFcn         = $R$N$M$F
+CustomSymbolStrFcnArg      = rt$I$N$M
+CustomSymbolStrField       = $N$M
+CustomSymbolStrGlobalVar   = $R$N$M
+CustomSymbolStrMacro       = $R$N$M
+CustomSymbolStrTmpVar      = $N$M
+CustomSymbolStrType        = $N$R$M_T
+CustomSymbolStrUtil        = $N$C
+CustomTerminator           = 
+CustomToolchainOptions     = []
+CustomUserTokenString      = 
+DefaultCustomCodeDeterministicFunctions = None
+DefaultCustomCodeFunctionArrayLayout = NotSpecified
+ERTCustomFileBanners       = off
+ERTHeaderFileRootName      = $R$E
+EnableCustomComments       = off
+GPUCustomComputeCapability = 
+GenerateFullHeader         = on
+IgnoreCustomStorageClasses = on
+OptimizationCustomize      = on
+RTWCustomCompilerOptimizations = 
+RTWUseLocalCustomCode      = on
+RTWUseSimCustomCode        = off
+ShowCustomHardwareApp      = off
+SimAnalyzeCustomCode       = off
+SimCustomCompilerFlags     = 
+SimCustomHeaderCode        = 
+SimCustomInitializer       = 
+SimCustomLinkerFlags       = 
+SimCustomSourceCode        = 
+SimCustomTerminator        = 
+SimDebugExecutionForCustomCode = off
+SimGPUCustomComputeCapability = 
+SimParseCustomCode         = on
+SimUseLocalCustomCode      = on
+SimUserDefines             = 
+SimUserIncludeDirs         = D:\Desktop\RCESO\simulink
+SimUserLibraries           = 
+SimUserSources             = b0_ident.c b0_ident_wrap.c
+SupportModelReferenceSimTargetCustomCode = off
+
+=== 尝试设置 header ===
+FAIL SimCustomHeader : block_diagram 没有名为 'SimCustomHeader' 的参数
+FAIL CustomHeader : block_diagram 没有名为 'CustomHeader' 的参数
+FAIL SimCustomInclude : block_diagram 没有名为 'SimCustomInclude' 的参数
+OK set CustomInclude
+
+=== C Caller ===
+AVAIL = []
+PORTS = [0 0 0 0 0 0 0 0 0 0]
+portSpec err 'b0_ident_u' is not a recognized function. Use get_param(gcb,'AvailableFunctions') to display a list of valid function name(s) to which the C Caller block can be mapped.
