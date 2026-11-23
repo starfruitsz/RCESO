@@ -25,7 +25,8 @@ static float run_case(const char *name, float b_true, float b0_init,
     P.d1 = 0.10f; P.d2 = 0.20f; P.dmax = 0.50f;
     P.alpha_base = 0.30f; P.mu = 0.35f;
     P.n_seg = (uint16_t)nseg; P.n_warm = 3; P.n_ident = (uint16_t)(nburst+1);
-    P.n_freeze = 4; P.period_run = 2.0f*nseg*dT; P.period_idle = 3600.0f;
+    P.n_freeze = 4; P.period_run = 1.0f;  /* 起点周期 1 s：0.4 s 段 + 0.6 s 空闲 */
+    P.period_idle = 3600.0f;
     b0_ident_init(&P, &DW);
 
     for (k = 0; k < ntot; k++) {

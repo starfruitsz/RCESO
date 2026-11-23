@@ -97,6 +97,7 @@ typedef struct {
     uint8_t  active;       /* 1 = burst 进行中 */
     uint32_t next_tick;    /* 下次 burst 起始的拍序号（整数，永不漂） */
     uint32_t tick;         /* 内部时基：已执行的拍数（1 kHz 下约 49.7 天回绕） */
+    uint32_t burst_start;  /* 本次 burst 的起始拍（周期按起点计，非终点） */
 
     /* 前段锁存的复量 */
     B0_REAL  d0_re, d0_im;

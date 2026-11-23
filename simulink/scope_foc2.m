@@ -13,9 +13,11 @@ load_system([srcDir '\b0_foc2.slx']);
 set_param(mdl,'StopTime','150');
 out = sim(mdl);
 W = out.w_log; B = out.b0_log; D = out.du_log; Q = out.iq_log; U = out.u_log;
+E = out.e1_log; V = out.v_log;
 % 存成纯 double 数组（timeseries 对象在 scipy 里读不出）
 tw = W.Time; wv = W.Data;  tb = B.Time; bv = B.Data;
 td = D.Time; dv = D.Data;  tq = Q.Time; qv = Q.Data;  tu = U.Time; uv = U.Data;
-save([srcDir '\foc2_log.mat'],'tw','wv','tb','bv','td','dv','tq','qv','tu','uv','-v7');
+te = E.Time; ev = E.Data;  tv = V.Time; vv = V.Data;
+save([srcDir '\foc2_log.mat'],'tw','wv','tb','bv','td','dv','tq','qv','tu','uv','te','ev','tv','vv','-v7');
 fprintf('SAVED b0=%.2f du_max=%.4f w_end=%.2f\n', B.Data(end), max(abs(D.Data)), W.Data(end));
 close_system(mdl,0);

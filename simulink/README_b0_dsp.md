@@ -188,3 +188,13 @@ python plot_scope_foc2.py                                          % 出 fig_sco
 
 `scope_foc2.m` 必须先注册总线类型 `b0_res_t`（C Caller 的结构体返回），
 否则报 "Unable to resolve b0_res_t"；脚本里已含这段。
+
+## 附三：MATLAB Function 块的限制（R2018b 路线必读）
+
+`b0_ident_m.m` 里**不能放顶层 `error()` 断言**。放了之后 MATLAB Function 块会报
+"没有完全确定其输出 'b0out' 的维度"，整模型无法 update/sim（已用最小复现确认：
+去掉那五行的断言立即恢复正常）。频率-段长相干性检查因此只保留在 C 版与本文档里，
+脚本里改成一行注释 + `cyc_nseg` 变量的形式。
+
+另：模型每次 `sim` 前要先把 `b0_res_t` 总线对象放进 base 工作区（`scope_foc2.m` 已含），
+否则 C 块输出类型解析失败。

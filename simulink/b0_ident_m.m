@@ -25,18 +25,17 @@ d2     = 0.20;      % 陡降宽度
 dmax   = 0.50;      % 软底拐点（超过后权重不再下降）
 abase  = 0.30;      % 基增益 alpha
 mu     = 0.35;      % 基线滑动速率
-% 一致性检查：cyc*nseg 必须是整数，否则段内不相干
-if abs(cyc*nseg - round(cyc*nseg)) > 1e-6
-    % 该断言在仿真里会显式报错，避免静默失效
-    error('注入频率 %g Hz 与段长 0.2 s 不相干（cyc*nseg 非整数）', f_inj);
-end
-persistent init ph acc nacc seg active tn xtnext d0 u0 q0 t0
+% 一致性检查：cyc*nseg 必须是整数，否则段内不相干。
+% 注意：MATLAB Function 块里不能放顶层 error() 断言——会让块的输出维度推断失败
+% （"无法沿循环求取信号维度"），此检查只保留在 C 版与移植文档里。
+cyc_nseg = cyc*nseg;   % 移植时人工确认该值为整数（65 Hz x 0.2 s = 13）
+persistent init ph acc nacc seg active tick nxtick tstart d0 u0 q0 t0
 persistent b0v goal gv base bvalid nest blast nblast nburst frozen
 persistent pdC sdC lpa
 if isempty(init)
     init = 1; ph = 0;
     acc = zeros(1,10); nacc = 0; seg = 0; active = 0;
-    tn = 0; xtnext = 1e-3;
+    tick = 0; nxtick = 1; tstart = 0;      % 整数拍时基（与 C 版一致）
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
     b0v = b0_init; goal = b0_init; gv = 0;
     base = 0; bvalid = 0; nest = 0;
@@ -62,10 +61,11 @@ if gv ~= 0
     end
 end
 % ---- 调度 ----
-tn = tn + dT;
+tick = tick + 1;                        % 整数拍计数：不漂
 du = 0;
-if (~active) && (~frozen) && (tn >= xtnext)
+if (~active) && (~frozen) && (tick >= nxtick)
     active = 1; seg = 0; nacc = 0; acc(:) = 0;
+    tstart = tick;                      % 周期按 burst 起点计
 end
 if active
     acc(1) = acc(1) + e1*c;  acc(2) = acc(2) + e1*s;
@@ -95,9 +95,9 @@ if active
                 bq = abs(num/den);              % 取模长：对相位误差免疫
                 bq = min(max(bq, b0lo), b0hi);
                 if ~bvalid
-                    base = bq; bvalid = 1; b0v = bq; goal = bq; gv = 0; nest = 1;
+                    base = bq; bvalid = 1; goal = bq; gv = 1; nest = 1;   % 经低通
                 elseif nest < warm
-                    base = bq; b0v = bq; goal = bq; gv = 0; nest = nest + 1;
+                    base = bq; goal = bq; gv = 1; nest = nest + 1;        % 经低通
                 else
                     dd = abs(bq - base)/max(abs(base),1e-9);
                     if dd <= d1
@@ -121,9 +121,9 @@ if active
             nburst = nburst + 1;
             if nburst >= nident
                 b0v = mean(blast(1:max(nblast,1)));
-                goal = b0v; gv = 0; frozen = 1; xtnext = tn + 3600;
+                goal = b0v; gv = 0; frozen = 1; nxtick = tick + round(3600/dT);
             else
-                xtnext = tn + 5;
+                nxtick = tstart + round(5/dT);        % 5 s 起点周期
             end
             seg = 0;
         end

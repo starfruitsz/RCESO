@@ -162,6 +162,7 @@ void b0_ident_init(b0_ident_P *P, b0_ident_DW *DW)
     DW->n_acc = 0u; DW->seg = 0u; DW->active = 0u;
     DW->tick = 0u;
     DW->next_tick = 1u;                 /* 第一个 burst 在 1 拍后（1 ms） */
+    DW->burst_start = 0u;
     DW->d0_re = 0.0f; DW->d0_im = 0.0f;
     DW->u0_re = 0.0f; DW->u0_im = 0.0f;
     DW->q0_re = 0.0f; DW->q0_im = 0.0f;
@@ -241,13 +242,13 @@ static void b0_seg_end(const b0_ident_P *P, b0_ident_DW *DW)
     DW->b_est = bq;
 
     /* ---- 门控 ---- */
-    if (!DW->base_valid) {                     /* 首次：直接赋值，alpha=1 */
+    if (!DW->base_valid) {                     /* 首次：整份采纳，但经每拍低通 */
         DW->base = bq; DW->base_valid = 1u;
-        DW->b0 = bq; DW->goal = bq; DW->goal_valid = 0u;
+        DW->goal = bq; DW->goal_valid = 1u;    /* 不直接写 b0：由 tau=kp/50 平滑 */
         DW->n_est = 1u; DW->alpha_last = 1.0f;
-    } else if (DW->n_est < P->n_warm) {        /* 预热：alpha=1 */
+    } else if (DW->n_est < P->n_warm) {        /* 预热：alpha=1，同样经低通 */
         DW->base = bq;
-        DW->b0 = bq; DW->goal = bq; DW->goal_valid = 0u;
+        DW->goal = bq; DW->goal_valid = 1u;
         DW->n_est++;
         DW->alpha_last = 1.0f;
     } else {                                   /* 平台 + 软底 */
@@ -317,6 +318,7 @@ void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
         DW->active = 1u;
         DW->seg = 0u;
         DW->n_acc = 0u;
+        DW->burst_start = DW->tick;     /* 周期从起点算：起点 + 5 s */ 
         b0_clear_acc(DW);
     }
 
@@ -356,7 +358,7 @@ void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
                 DW->frozen = 1u;
                 DW->next_tick = DW->tick + b0_ticks(P->period_idle, P->dT);
             } else {
-                DW->next_tick = DW->tick + b0_ticks(P->period_run, P->dT);
+                DW->next_tick = DW->burst_start + b0_ticks(P->period_run, P->dT);
             }
         }
     }
