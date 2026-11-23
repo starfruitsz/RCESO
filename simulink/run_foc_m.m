@@ -1,5 +1,7 @@
 % run_foc_m.m —— 单独跑 b0_foc_m（MATLAB Function 版）取闭环终值
-srcDir = 'D:\Desktop\RCESO\simulink'; cd(srcDir);
+srcDir = fileparts(mfilename('fullpath'));
+if isempty(srcDir), srcDir = pwd; end
+cd(srcDir);
 load_system([srcDir '\b0_foc_m.slx']);
 set_param('b0_foc_m','StopTime','130');
 out = sim('b0_foc_m');

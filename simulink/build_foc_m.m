@@ -1,5 +1,8 @@
 % build_foc2.m —— RCESO 自带子系统版 FOC
-mdl='b0_foc_m'; srcDir='D:\Desktop\RCESO\simulink';
+mdl='b0_foc_m';
+% 目标机可移植：取本脚本所在目录（不再硬编码 D:\Desktop\RCESO\simulink）
+srcDir = fileparts(mfilename('fullpath'));
+if isempty(srcDir), srcDir = pwd; end
 fid=fopen('out_f2.txt','w','n','UTF-8'); p=@(varargin) fprintf(fid,varargin{:});
 R=0.175; L=0.57e-3; PSI=0.016833; PP=4; Jm=1.89e-5; IB=6.3069; WR=62.832;
 wci=2*pi*150; kpi=L*wci; kii=R*wci; kp=75.36; wo=500; q0=0.98; ka=1-exp(-1e-3/20e-3);
