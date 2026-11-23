@@ -1,0 +1,124 @@
+\documentclass[UTF8,a4paper,11pt]{ctexart}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{\textbf{《Online Tracking of Varying Inertia using a SDFT Approach》\\中文译述与技术要点}}
+\author{原文：F. Vanbecelaere, S. Derammelaere, N. Nevaranta, J. De Viaene, F. Verbelen, K. Stockman, M. Monte\\ \small Mechatronics, 2020, 68: 102361. DOI: 10.1016/j.mechatronics.2020.102361}
+\date{译述整理：2026-11-18}
+
+\begin{document}
+\maketitle
+
+\section*{摘要（译文）}
+现代机器的机械动力学往往取决于驱动轴的角位置。为获得最优控制，这类应用通常需要自适应控制等先进控制结构；而惯量、负载转矩与粘性摩擦等动力学参数的变化会限制性能并降低能效。结合前馈的轨迹优化可以节能，但优化与自适应控制都要求已知机械参数随位置的变化关系。在往复机构中，这种位置依赖性非常显著，因此机械参数在高速运行时会快速变化。本文面向“快速、准确地估计快速变化的机械参数”，提出用\textbf{滑动离散傅里叶变换（SDFT）}在线跟踪往复机构的惯量变化，并在工业拾放设备上做了实验验证：既考虑真实机器，也考虑其在多体动力学软件中的 CAD 等效模型；同时证明该惯量跟踪算法可以在标准商用驱动器中实现。
+
+\section{研究背景与问题}
+惯量、负载转矩与摩擦的辨识对电机选型与尺寸设计、轨迹设定点优化、自适应控制与前馈控制的实现都至关重要。已有方法大致分为时域/频域、在线/离线两类：
+\begin{itemize}
+  \item \textbf{离线频域}：以 PRBS 附加转矩做频响辨识，对线性系统有效，但要求辨识期间系统不变，只适合慢变系统的调试（commissioning）。
+  \item \textbf{离线时域}：启发式算法（如粒子群）调参多、收敛慢；稳态响应法只适合负载参数近似恒定的系统。
+  \item \textbf{在线时域}：RLS 计算效率高，但收敛慢；估计的是脉冲传递函数系数，转换为机械参数复杂且耗时，且需要较准的初值。Kalman 滤波抗噪好，但惯量跟踪精度较低，且需要大量调参与初值。
+\end{itemize}
+本文的出发点是：往复机构的惯量随位置快速变化，需要一种\textbf{收敛快、抗噪、且直接得到机械参数}的在线方法。作者选择“单频激励 + 频域比值”的路线：在某个合适的频率上测出“转矩→转速”的增益，再由增益反解惯量；用 SDFT 在每个采样点滑窗更新该频率的傅里叶分量，计算量只与所需谐波数有关。
+
+\section{机械模型与频域分析}
+\subsection{二质量模型}
+把设备简化为“转子惯量 $J_r$ + 弹簧-阻尼耦合（$k,b$）+ 负载惯量 $J_l$（含阻尼 $b_l$）”的二质量系统：
+\begin{equation}
+\begin{cases}
+T-b_r\dot\theta-b(\dot\theta-\dot\theta_l)-k(\theta-\theta_l)=J_r\ddot\theta,\\
+-b_l\dot\theta_l+b(\dot\theta-\dot\theta_l)+k(\theta-\theta_l)=J_l\ddot\theta_l,
+\end{cases}
+\end{equation}
+其转矩到转速的传递函数为
+\begin{equation}
+\frac{\dot\theta(s)}{T(s)}=\frac{J_l s^2+(b+b_l)s+k}{J_rJ_l s^3+\big[(J_r+J_l)b+J_rb_l+J_lb_r\big]s^2+\big[(J_r+J_l)k+b_rb_l+(b_r+b_l)b\big]s+(b_r+b_l)k}.
+\end{equation}
+若忽略弹性与阻尼（刚性纯惯量），退化为
+\begin{equation}
+\frac{\dot\theta(s)}{T(s)}=\frac{1}{(J_r+J_l)s}.
+\end{equation}
+
+\subsection{两个可用频段}
+按增益斜率偏离 $-20$\,dB/dec 的程度，把频响分成 5 个区域；其中只有两个区域（记 $f_1^*$、$f_2^*$）适合估惯量：
+\begin{itemize}
+  \item $f_1^*$：系统可近似为“带阻尼的单质量”，
+  \begin{equation}
+  \frac{\dot\theta(s)}{T(s)}=\frac{1}{(J_r+J_l)s+(b_r+b_l)};
+  \end{equation}
+  \item $f_2^*$：反共振之前的一段，$J_l$ 可由 $J_r,k,b$ 与增益反解。
+\end{itemize}
+
+\subsection{增益到惯量的换算}
+在 $f_1^*$ 内，令 $G=|\dot\theta/T|$、$\omega=2\pi f$，由上式模值解出
+\begin{equation}
+J_l=\frac{1}{\omega}\left(\sqrt{\frac{1}{G^2}-(b_r+b_l)^2}\right)-J_r .
+\label{eq:conv1}
+\end{equation}
+在 $f_2^*$ 内换算更复杂，由式 (13) 的模值解出
+\begin{equation}
+J_l=\frac{A+\sqrt{B}}{C},
+\end{equation}
+其中
+\begin{equation}
+\begin{aligned}
+A&=(k-b^2)G^2J_r\omega^3-(G^2J_rk^2+1)k\omega,\\
+B&=-G^4J_r^4b^2\omega^8+2G^2J_r^2b^2\omega^6+(G^2b^2-1)b^2\omega^4+2G^2b^2k^2\omega^2+G^2k^4,\\
+C&=G^2J_r^2\omega^5-(2G^2J_rk-G^2b^2+1)\omega^3+G^2k^2\omega .
+\end{aligned}
+\end{equation}
+注意 $f_1^*$ 内存在“位置滞后 + 平均误差”，高频段 $f_2^*$ 的窗更短、平均误差更小，因此\textbf{快速变化惯量的估计应选 $f_2^*$ 内较高的频率}。
+
+\section{SDFT 算法}
+第 $k$ 个采样点、窗长 $N$ 的第 $h$ 次谐波定义为
+\begin{equation}
+X_h(k)=\sum_{l=0}^{N-1}x\big(k-(N-1)+l\big)e^{-jh\frac{2\pi}{N}l}.
+\end{equation}
+每来一个新样本，只需“去掉最老样本、加入最新样本”，再乘相位因子，得到递推式
+\begin{equation}
+X_h(k)=\big(X_h(k-1)+x(k)-x(k-N)\big)\,e^{jh\frac{2\pi}{N}} .
+\label{eq:sdf}
+\end{equation}
+因此计算量只与所需谐波数成正比；本文只关心一个激励频率，故只需一个 $h$。
+
+\section{估计流程与约束}
+\begin{enumerate}
+  \item 在转矩指令上叠加单频正弦 $T_d=A\sin(2\pi f t)$，用 SDFT 同时提取 $T$ 与 $\dot\theta$ 在该频率的分量，得到增益 $G=|X_T|/|X_{\dot\theta}|$；
+  \item 按 \eqref{eq:conv1}（或 $f_2^*$ 的复杂式）把 $G$ 换算为 $J_l$；
+  \item 窗长与频率满足 $N=\dfrac{1}{f t_s}\ge 20$（保证正弦在一个窗内被准确复现），时窗 $\delta t=1/f=Nt_s$；
+  \item SDFT 的固有滞后带来\textbf{位置滞后} $\delta\theta=\theta(t_k)-\theta(t_{k-N})$：估计的惯量相当于窗内位置的平均值，位置变化越快、窗越长，平均误差越大；这一项可部分补偿（位置可测），但“窗内平均”不可补偿。
+\end{enumerate}
+
+\section{仿真与实验}
+\begin{itemize}
+  \item \textbf{对象}：工业拾放设备（往复机构），负载惯量随位置在 $548\sim9319$\,kg$\cdot$mm$^2$ 之间变化（约 $18$ 倍）；
+  \item \textbf{验证}：真实机器（Beckhoff/TwinCAT 实时平台）与其多体动力学 CAD 模型联合仿真（co-simulation）；
+  \item \textbf{结果}：$f=80$\,Hz 时估计曲线与理论参考吻合，$1$\,s 内即可跟踪完整惯量曲线；$f=160$\,Hz（超出可用频段）时估计完全错误；噪声对估计几乎无影响；
+  \item \textbf{灵敏度}：$k$ 的 $\pm5\%$、$\pm10\%$ 误差会明显改变估计；$b$ 的 $\pm200\%$ 仍较稳健。主要误差来源是 $k$、$b$ 的不确定，而非噪声。
+\end{itemize}
+
+\section{结论、优点与局限}
+\textbf{优点}：(1) 直接估计机械参数（而非传递函数系数），收敛快；(2) 抗噪好；(3) 所需先验参数少（响应本身不需要先验，只有换算需要 $J_r,k,b$）；(4) 可在商用实时驱动器上实现。
+
+\textbf{局限}：(1) SDFT 固有滞后导致位置滞后与窗内平均误差；(2) 换算需要 $J_r$、$k$、$b$ 的先验值，$k$ 的不确定度是主要误差源；(3) 激励频率必须落在可用频段内，且 $N\ge20$。
+
+\section{对律J（$b_0$/惯量辨识）的启示}
+\begin{enumerate}
+  \item \textbf{同族方法}：律J 的“100\,Hz dither + 0.2\,s 单频 DFT 取幅值 + 比值”与本文的“单频激励 + SDFT 增益 + 换算”本质一致；本文给出了该路线的频域合法性（纯惯量区）与误差来源（滞后、平均、先验 $k,b$）。
+  \item \textbf{频率选择}：激励必须落在“纯惯量区”（$-20$\,dB/dec 段），否则弹性/阻尼会污染估计；这解释了项目中 170\,Hz dither 幅值被衰减、SNR 不足的现象。
+  \item \textbf{窗长}：$N=1/(ft_s)\ge20$；$0.2$\,s 窗对 $100$\,Hz 正好是 $20$ 个周期，符合本文准则。
+  \item \textbf{误差量级}：本文“$1$\,s 内 $18$ 倍范围”的结论支持律J 在 $2$\,s 内完成辨识的设定；其 $+4.7\%$ 的 $b_0$ 偏差可归因于先验/滞后误差，而非算法失效。
+  \item \textbf{对照}：与 RLS/ESO 路线相比，频域比值法直接给参数、收敛快、抗噪，这与律J 放弃 AKO/RLS 而选 DFT 比值的工程判断一致。
+\end{enumerate}
+
+\section*{参考文献（原文）}
+\begin{enumerate}
+  \item[{[21]}] 原文引用的 SDFT 实现文献（滑窗 DFT 递归更新）。
+  \item[{[22]}] 原文引用的 SDFT 递推实现。
+  \item[{[23]}] 原文引用的 SDFT 滞后特性分析。
+\end{enumerate}
+\noindent\footnotesize 原文共 31 条参考文献，完整列表见原文；本文译述只保留与 SDFT/惯量换算直接相关的条目。
+
+\end{document}

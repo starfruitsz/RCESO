@@ -1,0 +1,115 @@
+\documentclass[UTF8,a4paper,11pt]{ctexart}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{\textbf{《Online Identification of a Mechanical System in Frequency Domain Using Sliding DFT》\\中文译述与技术要点}}
+\author{原文：N. Nevaranta, S. Derammelaere, J. Parkkinen, B. Vervisch, T. Lindh,\\ K. Stockman, M. Niemel\"a, O. Pyrh\"onen, J. Pyrh\"onen\\ \small IEEE Transactions on Industrial Electronics, 63(9), 2016, 5712--5723\\ DOI: 10.1109/TIE.2016.2574303}
+\date{译述整理：2026-11-18}
+
+\begin{document}
+\maketitle
+
+\section*{摘要（译文）}
+实时系统辨识对获得足以表征被监测系统特性的解析模型至关重要。时域在线辨识已被广泛认为是系统诊断的有力手段，而频域辨识此前主要用于离线调试。本文研究\textbf{动态变化机械系统的在线频域辨识}，重点是检测系统动态的变化。文中提出一种\textbf{基于选定频率集上滑动离散傅里叶变换（SDFT）的闭环在线辨识方法}，并在行程受限、参数时变的闭环伺服机构上做了实验验证。
+
+\section{研究背景与问题}
+高性能运动控制（机器人、机床、物料搬运、包装等）对控制性能与可靠性要求不断提高，机械部件磨损或动态突变会导致控制性能下降甚至意外停机，因此需要在线检测系统变化。
+\begin{itemize}
+  \item \textbf{离线频域}：傅里叶分析是线性系统非参数频域辨识的经典方法，但本质是“批处理”，只适合调试。
+  \item \textbf{时域参数法}：最小二乘类方法（开环/闭环）需要大量数据存储或较大计算量，不适合实时。
+  \item \textbf{在线递归法}：RLS 因实现简单、计算效率高而最受关注；EKF 也常用于机械参数在线估计，但需要初值与调参。
+  \item \textbf{实时频域}：已有少量工作（有限傅里叶变换的方程误差法、Fourier--Laguerre 级数、Kalman 配置成傅里叶变换等），但多为参数化方法、需要先选模型阶次，或只给粗略频响。
+\end{itemize}
+SDFT 是实时谱分析的经典技术，已在工业中应用，但作者指出：\textbf{此前尚未把 SDFT 用于实时非参数辨识}；已有“滑动窗 DFT + 参数拟合”的方法计算量大且多为开环。本文的目标是把传统闭环离线频域辨识的“间接法”扩展为在线方案，在选定频率集上实时监测机械系统。
+
+\section{频域辨识原理}
+\subsection{开环与闭环}
+开环时，频响可由输入输出互谱与自谱之比估计：
+\begin{equation}
+\hat G(j\omega)=\frac{S_{uy}(j\omega)}{S_{uu}(j\omega)}.
+\end{equation}
+闭环时（图 1），反馈使输入 $u$ 与噪声 $n$ 相关，式 (1) 只在低带宽控制器下近似成立。工程上更常用\textbf{间接法}：利用已知激励 $w(t)$ 的互谱
+\begin{equation}
+\hat G(j\omega)=\frac{S_{wy}(j\omega)}{S_{wu}(j\omega)}.
+\label{eq:indirect}
+\end{equation}
+本文的在线辨识就建立在 \eqref{eq:indirect} 上：激励 $w$ 加在控制器输出端，SDFT 同时跟踪 $w$、$u$、$y$ 在选定频率上的分量，再按 \eqref{eq:indirect} 求频响。
+
+\section{SDFT 与 mSDFT}
+第 $n$ 个采样点、窗长 $N$、第 $k$ 次谐波的定义为
+\begin{equation}
+X_k(n)=\sum_{l=0}^{N-1}x\big(n-(N-1)+l\big)e^{-jk(2\pi/N)l}.
+\end{equation}
+若每个采样点都按 (3) 重算，计算量随 $N$ 线性增长；SDFT 利用“滑窗只换一个样本”的性质：
+\begin{equation}
+X_k(n)=\big(X_k(n-1)+x(n)-x(n-N)\big)e^{jk(2\pi/N)}.
+\label{eq:sdf}
+\end{equation}
+其 $z$ 域传递函数为
+\begin{equation}
+H_{\mathrm{SDFT}}(z)=\frac{(1-z^{-N})e^{jk2\pi/N}}{1-e^{jk2\pi/N}z^{-1}},
+\end{equation}
+极点恰在单位圆上（$z=e^{jk2\pi/N}$），因此只是\textbf{临界稳定}；受有限字长影响，极点可能落到单位圆外导致数值发散。本文采用 Duda 提出的\textbf{调制 SDFT（mSDFT）}保证稳定（计算量略增），后文仍统称 SDFT。
+
+\section{激励信号设计}
+辨识要求激励“持续充分”（persistently exciting），常用 PRBS 或 Schroeder 多正弦。由于激励信号是用户自己设计的，泄漏问题可以避开；本文取多正弦
+\begin{equation}
+w(t)=\sum_k \sin\left(\frac{2\pi k}{N T_s}+\varphi_k\right),
+\end{equation}
+并用 Schroeder 相位降低波峰因数（crest factor）：
+\begin{equation}
+\varphi_k=\varphi_1-\frac{\pi k}{k_{\max}}.
+\end{equation}
+这样既能把能量集中到关心的频点，又不会因峰值过大扰动闭环或激发非线性。
+
+\section{仿真与实验}
+\begin{itemize}
+  \item \textbf{对象}：齿形带传动伺服机构（行程受限），随小车位置变化的二质量动态；仿真中先用 chirp 做离线辨识作参照。
+  \item \textbf{实验台}：4.5\,kW PMSM（3000\,r/min、14.5\,N$\cdot$m）+ ABB ACSM1 变频器 + Beckhoff PLC；用商用运动控制软件实现级联控制。
+  \item \textbf{离线对照}：在 6 个位置静止，用 chirp（幅值提高到 3\,N$\cdot$m 以减小静摩擦影响）按 \eqref{eq:indirect} 辨识频响。
+  \item \textbf{在线}：同一多正弦激励，SDFT 窗长 $N=100$（另用 $N=50$、$200$ 比较），小车以恒定速度运动（避开零速摩擦区）。
+\end{itemize}
+
+\subsection{非参数结果}
+在线估计的幅值随位置变化与离线结果趋势一致，能清晰看到“位置相关动态”；窗长的影响是典型的权衡：
+\begin{itemize}
+  \item $N$ 小：估计噪声大、抖动明显；
+  \item $N$ 大：曲线平滑，但相对真实系统出现滞后。
+\end{itemize}
+因此 $N$ 的选取是“计算量—估计精度”的 case-specific 折中。离线与在线结果存在差异，部分来自非线性与摩擦（离线在静止下测、在线在运动中测），但两者对系统变化的监测结论一致。
+
+\subsection{频域 LS 参数辨识}
+把 \eqref{eq:indirect} 得到的频响点代入离散传递函数
+\begin{equation}
+G(z)=\frac{B(z)}{A(z)}=\frac{b_{q-1}z^{q-1}+\cdots+b_1z+b_0}{z^{q}+a_{q-1}z^{q-1}+\cdots+a_1z+a_0},
+\end{equation}
+在 $z=e^{j\omega_nT_s}$ 处分离实部/虚部，得到线性方程组，最小二乘解为
+\begin{equation}
+\theta=\left(\Phi^{\top}\Phi\right)^{-1}\Phi^{\top}\Psi .
+\end{equation}
+本文取 $q=3$，用 20--120\,Hz、5\,Hz 分辨率的多正弦、$N=200$，估计出 $\hat b_0,\hat b_2,\hat b_3,\hat a_0,\hat a_1,\hat a_2$。与参考模型（惯量 15\%、弹簧 5\%、阻尼 20\% 不确定度）相比，估计参数随位置变化的趋势一致；再用输入—残差、模型输出—残差的归一化互相关做统计校验（97\% 置信限 $2.17/\sqrt{L}$、实用限 0.15，$L=3000$），大部分点落在限内。
+
+\section{结论、优点与局限}
+\textbf{结论}：SDFT 可以在短滑窗数据上实时给出满意的频响估计；结合多正弦激励与频域 LS，可用于跟踪系统变化与参数估计；实验验证了该方法对齿形带传动的有效性。
+
+\textbf{与 RLS 等传统在线方法相比}：
+\begin{itemize}
+  \item 缺点：SDFT 计算量更大；至少需要一个完整信号周期才能得到基波分量；
+  \item 优点：不需要任何初始化或性能相关的参数整定；只需指定要监测的频率集与激励设计，窗长 $N$ 是计算量与精度的折中。
+\end{itemize}
+
+\section{对律J（$b_0$/惯量辨识）的启示}
+\begin{enumerate}
+  \item \textbf{同族方法}：律J 的“单频 dither + 窗内 DFT 取幅值 + 比值”与本文的“多正弦激励 + SDFT 频响 + 比值”同属频域非参数路线；本文给出了它在闭环下的合法性（间接法 \eqref{eq:indirect}）与实现细节。
+  \item \textbf{为什么用 DFT 而不是 RLS}：本文明确指出 SDFT 无需初始化、无需模型阶次，只需选频率与窗长——这正是律J 放弃 AKO/RLS 的工程理由。
+  \item \textbf{窗长权衡}：$N$ 小则噪声大、$N$ 大则滞后；律J 的 $0.2$\,s 窗在 $100$\,Hz 下是 20 个周期，属于“够长以平滑、又不至于滞后过大”的折中。
+  \item \textbf{数值稳定}：标准 SDFT 极点-on-单位圆，长时运行会漂移；本文用 mSDFT/Duda 结构保证稳定，律J 的递推 DFT 实现也应采用同类修正。
+  \item \textbf{间接法}：闭环下用激励 $w$ 的互谱（而不是 $u$ 的互谱）才能无偏，这一点对律J 在闭环下测 $b_0$ 同样适用。
+\end{enumerate}
+
+\section*{参考文献（原文）}
+原文共 38 条；与本文方法直接相关的是 SDFT 三篇（Jacobsen \& Lyons 2003/2004、Duda 2010）、多正弦相位（Schroeder 1970）与频域 LS（Young \& Irwin 1993），完整列表见原文。
+
+\end{document}
