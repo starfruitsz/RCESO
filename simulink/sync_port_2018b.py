@@ -6,7 +6,8 @@ import hashlib, io, os, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PKG = os.path.join(HERE, 'port_2018b')
-FILES = ['b0_ident_m.m', 'build_foc_m.m', 'run_foc_m.m', 'test_b0_m.m', 'README_2018b.md']
+FILES = ['b0_ident_m.m', 'build_foc_m.m', 'run_foc_m.m', 'test_b0_m.m',
+         'README_2018b.md', '移植步骤_R2018b.md']
 
 def sha(p):
     h = hashlib.sha256()
