@@ -146,6 +146,9 @@ MW_MINGW64_LOC=D:\Matlab2023\bin\win64\mingw64 matlab -batch "cd('...\\simulink'
 现已改为 `uint32_t tick` 拍计数：`tick++`、`next_tick = tick + b0_ticks(period, dT)`。
 换回浮点秒时基可复现旧的漂移（`replay_variants.py` 已含四种变体）。
 
+注意：uint32 拍计数在 1 kHz 下约 49.7 天回绕。辨识窗口只有 120 s，
+回绕至多让一次 burst 提前/推迟一拍，无需处理；若将来改成高频流式运行再说。
+
 ### 3. 信号源必须是 single
 
 C Caller 端口默认 `single`，Sine/Constant 默认 `double`，需加
