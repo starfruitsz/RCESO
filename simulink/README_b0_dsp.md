@@ -170,5 +170,21 @@ typedef struct { float b0; float du; } b0_res_t;
 b0_res_t b0_ident_res(float iq, float u, float omega, float e1, float v);
 ```
 
-`b0_foc2` 即用此接口，闭环误差 −0.90%。教训：**自洽测试看不出的缺陷，跑一遍实际波形就露出来**——
+`b0_foc2` 即用此接口，闭环误差 −0.88%（531.67 / 真值 536.40）。教训：**自洽测试看不出的缺陷，跑一遍实际波形就露出来**——
 这也是 `cmp2.m`（C vs MATLAB 逐点回放）存在的理由。
+
+## 附二：看波形（Scope / 出图）
+
+模型 `b0_foc2.slx` 里已带 5 个 Scope：`Scope-du`（注入）、`Scope-iq`（电流）、
+`Scope-w`（转速）、`Scope-b0`（辨识值）、`Scope-u`（指令合计）。
+GUI 里双击即可看；`build_foc2.m` 每次重建都会补上。
+
+命令行/无人值守用两步：
+
+```
+matlab -batch "cd('D:\\Desktop\\RCESO\\simulink'); scope_foc2"   % 跑 150 s，存 foc2_log.mat
+python plot_scope_foc2.py                                          % 出 fig_scope_foc2.png
+```
+
+`scope_foc2.m` 必须先注册总线类型 `b0_res_t`（C Caller 的结构体返回），
+否则报 "Unable to resolve b0_res_t"；脚本里已含这段。

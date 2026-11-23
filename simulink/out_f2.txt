@@ -3,4 +3,5 @@ plant blocks ok
 outer wiring ok
 inner wiring ok
 plant wiring ok
+scopes ok
 SAVED

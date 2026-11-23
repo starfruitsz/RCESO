@@ -169,8 +169,8 @@ add_line(mdl,'iqp/1','giqp/1','autorouting','on');
 add_line(mdl,'wint/1','grpm/1','autorouting','on');
 p('plant wiring ok\n');
 % ---------- 记录 ----------
-vn={'w_log','b0_log','du_log','iq_log'};
-for k=1:4
+vn={'w_log','b0_log','du_log','iq_log','u_log'};
+for k=1:5
     add_block('simulink/Sinks/To Workspace',A(['ws' num2str(k)]),'VariableName',vn{k}, ...
         'SaveFormat','Timeseries','SampleTime','0.001','Position',[1150 20+60*(k-1) 1220 50+60*(k-1)]);
 end
@@ -178,10 +178,22 @@ add_line(mdl,'grpm/1','ws1/1','autorouting','on');
 add_line(mdl,'b0d/1','ws2/1','autorouting','on');
 add_line(mdl,'BS/2','ws3/1','autorouting','on');
 add_line(mdl,'iqp/1','ws4/1','autorouting','on');
+add_line(mdl,'sumu/1','ws5/1','autorouting','on');
+% ---------- 示波器（GUI 里直接看波形） ----------
+sc={'Scope-du','Scope-iq','Scope-w','Scope-b0','Scope-u'};
+ss={'BS/2','iqp/1','grpm/1','b0d/1','sumu/1'};
+for k=1:5
+    add_block('simulink/Sinks/Scope',A(sc{k}),'Position',[1300 20+60*(k-1) 1340 50+60*(k-1)]);
+    set_param(A(sc{k}),'NumInputPorts','1');
+    add_line(mdl,ss{k},[sc{k} '/1'],'autorouting','on');
+end
+p('scopes ok\n');
 save_system(mdl,[srcDir '\b0_foc2.slx']); p('SAVED\n'); fclose(fid); fprintf('SAVED\n');
 try
     out=sim(mdl);
     b=out.b0_log; w=out.w_log; d=out.du_log;
+    w_log=out.w_log; b0_log=out.b0_log; du_log=out.du_log; iq_log=out.iq_log; u_log=out.u_log;
+    save([srcDir '\foc2_log.mat'],'w_log','b0_log','du_log','iq_log','u_log');
     fid2=fopen('out_f2s.txt','w','n','UTF-8');
     fprintf(fid2,'SIM_OK b0=%.2f w=%.2f du_max=%.4f (真值 536.40)\n', b.Data(end), w.Data(end), max(abs(d.Data)));
     fprintf(fid2,'b0轨迹: ');
