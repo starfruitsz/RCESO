@@ -136,6 +136,16 @@ MW_MINGW64_LOC=D:\Matlab2023\bin\win64\mingw64 matlab -batch "cd('...\\simulink'
 
 建议写进用户环境变量（`setx MW_MINGW64_LOC ...`），一劳永逸。
 
+### 2b. 时基必须用整数拍计数（2026-11-23 修正）
+
+调度原来用 `t_now += P->dT`（float32 秒）计时，130 s 会累积 −45 ms 漂移
+（约 0.042%，合 1.5 s/h）。在闭环里看不出来（注入与段边界同源于一个时钟），
+但在“记录—回放”类测试里会让段边界相对记录流滑动，末端错开 52 拍，
+使“无注入参考段”被 26% 的注入污染，回放终值从 531.7 漂到 573.2。
+
+现已改为 `uint32_t tick` 拍计数：`tick++`、`next_tick = tick + b0_ticks(period, dT)`。
+换回浮点秒时基可复现旧的漂移（`replay_variants.py` 已含四种变体）。
+
 ### 3. 信号源必须是 single
 
 C Caller 端口默认 `single`，Sine/Constant 默认 `double`，需加

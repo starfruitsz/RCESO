@@ -95,8 +95,8 @@ typedef struct {
     uint16_t n_acc;        /* 段内已累积拍数 */
     uint8_t  seg;          /* 0 = 注入前段(off)，1 = 注入段(on) */
     uint8_t  active;       /* 1 = burst 进行中 */
-    B0_REAL  t_next;       /* 下次 burst 起始时刻 [s] */
-    B0_REAL  t_now;        /* 内部时基 [s] */
+    uint32_t next_tick;    /* 下次 burst 起始的拍序号（整数，永不漂） */
+    uint32_t tick;         /* 内部时基：已执行的拍数 */
 
     /* 前段锁存的复量 */
     B0_REAL  d0_re, d0_im;

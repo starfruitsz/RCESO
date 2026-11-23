@@ -103,6 +103,15 @@ static void b0_clear_acc(b0_ident_DW *DW)
     DW->ac_w  = 0.0f; DW->as_w  = 0.0f;
 }
 
+/* ---- 秒 -> 拍：调度一律用整数拍数，避免 float32 累加漂移 --------------- */
+static uint32_t b0_ticks(B0_REAL sec, B0_REAL dT)
+{
+    B0_REAL n = sec / (dT + B0_EPS) + 0.5f;   /* 四舍五入到整拍 */
+    if (n < 1.0f) { n = 1.0f; }
+    if (n > 4.0e9f) { n = 4.0e9f; }
+    return (uint32_t)n;
+}
+
 /* ========================================================================
  * 初始化
  * ===================================================================== */
@@ -151,8 +160,8 @@ void b0_ident_init(b0_ident_P *P, b0_ident_DW *DW)
     DW->ph = 0.0f;
     b0_clear_acc(DW);
     DW->n_acc = 0u; DW->seg = 0u; DW->active = 0u;
-    DW->t_now = 0.0f;
-    DW->t_next = P->dT;                 /* 第一个 burst 在 1 ms 后 */
+    DW->tick = 0u;
+    DW->next_tick = 1u;                 /* 第一个 burst 在 1 拍后（1 ms） */
     DW->d0_re = 0.0f; DW->d0_im = 0.0f;
     DW->u0_re = 0.0f; DW->u0_im = 0.0f;
     DW->q0_re = 0.0f; DW->q0_im = 0.0f;
@@ -299,9 +308,9 @@ void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
     }
 
     /* ---- C. 调度 ---- */
-    DW->t_now += P->dT;
+    DW->tick++;                         /* 整数拍计数：130 s 不漂 45 ms */
     if (!DW->active) {
-        if (DW->frozen || (DW->t_now < DW->t_next)) {
+        if (DW->frozen || (DW->tick < DW->next_tick)) {
             *b0_out = DW->b0; *du_out = 0.0f;
             return;
         }
@@ -345,9 +354,9 @@ void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
                 DW->goal = DW->b0;
                 DW->goal_valid = 0u;
                 DW->frozen = 1u;
-                DW->t_next = DW->t_now + P->period_idle;
+                DW->next_tick = DW->tick + b0_ticks(P->period_idle, P->dT);
             } else {
-                DW->t_next = DW->t_now + P->period_run;
+                DW->next_tick = DW->tick + b0_ticks(P->period_run, P->dT);
             }
         }
     }
