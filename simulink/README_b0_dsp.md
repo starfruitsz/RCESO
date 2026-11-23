@@ -127,6 +127,15 @@ mklink /J "D:\Matlab2023\bin\win64\mingw64" "C:\Program Files\x86_64-8.1.0-...\m
 set MW_MINGW64_LOC=D:\Matlab2023\bin\win64\mingw64
 ```
 
+注意：该变量必须出现在 **MATLAB 进程的环境**里。命令行批处理时要显式带上，否则 `mex`
+仍会报“未检测到支持的编译器”：
+
+```bash
+MW_MINGW64_LOC=D:\Matlab2023\bin\win64\mingw64 matlab -batch "cd('...\\simulink'); cmp2"
+```
+
+建议写进用户环境变量（`setx MW_MINGW64_LOC ...`），一劳永逸。
+
 ### 3. 信号源必须是 single
 
 C Caller 端口默认 `single`，Sine/Constant 默认 `double`，需加
@@ -134,22 +143,19 @@ C Caller 端口默认 `single`，Sine/Constant 默认 `double`，需加
 
 修复后验证：`MEX_C_OK` → C Caller 模型 `SIM_OK`。
 
-### 已知问题（待修）
+### 已知问题的结论（已修，2026-11-23）
 
-`b0_ident_sim` 的两个输出指针在 C Caller 里被识别为 **inout**（7 进 2 出）。
-仿真实测：前 12 拍 `du` 正确（±0.118），随后发散到 1.34。
+`du` 从第 13 拍发散到 1.344 的**根因不是 inout 指针，而是 LUT 建表**：
+`b0_build_tab()` 原先在 [0, 2*pi) 上直接展开 Taylor，a≈2*pi 时末项 a^9/9!≈44，
+LUT 输出远大于 1，注入量被放大 11 倍（应为 0.118，实测 1.344）。
+修复：**先按象限折叠到 [0, pi/2] 再展开级数**，LUT 输出回到 |·|<=1。
 
-诊断数据（t=0.200–0.214）：
-```
-0.045 0.085 0.110 0.118 0.105 0.077 0.035 -0.013 -0.054 -0.081 -0.076 -0.020
-0.133 0.429 1.027 1.344   <- 从第 13 拍开始发散
-```
-
-**修复方向**：改为结构体返回值，彻底避开 inout 指针：
+同时把接口改成结构体返回值（`b0_ident_res`，5 进 1 出），顺带消除指针歧义：
 
 ```c
 typedef struct { float b0; float du; } b0_res_t;
 b0_res_t b0_ident_res(float iq, float u, float omega, float e1, float v);
 ```
 
-这样 C Caller 得到 5 进 1 出（总线），无指针歧义。
+`b0_foc2` 即用此接口，闭环误差 −0.90%。教训：**自洽测试看不出的缺陷，跑一遍实际波形就露出来**——
+这也是 `cmp2.m`（C vs MATLAB 逐点回放）存在的理由。

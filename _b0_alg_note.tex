@@ -1510,6 +1510,125 @@ S5 回滚 & $b_0\leftarrow b_0^{\rm pre}$ & 门控失败\\
 至此链条闭合：式 \eqref{eq:D5} 的 $b$ 是物理量，式 \eqref{eq:E8} 给出它在闭环下的可测量，
 式 \eqref{eq:E11}、\eqref{eq:E12} 决定它如何被接纳，而\S\ref{sec:fsm} 的六个状态正是这条链的执行时序。
 
+\section{Simulink 与 FOC 闭环验证}
+\label{sec:sim}
+
+前几节的对象是标量一阶模型。本节把同一套算法放进 $dq$ 闭环，并把 C 实现与 MATLAB 实现
+逐点对齐，用两种口径回答“算法是否真的可用”：\textbf{闭环终值}回答精度，\textbf{逐点差}
+回答两个实现到底差在哪。
+
+\subsection{四个平台与误差}
+
+\begin{table}[H]
+\centering
+\caption{验证平台与误差（$b_0$ 冻结后的终值）}
+\label{tab:plat}
+\small
+\begin{tabular}{llccc}
+\toprule
+平台 & 工况 & $\hat b_0$ & 真值 & 误差\\
+\midrule
+Python（\texttt{pmsm\_inv\_sim.py}） & 一阶对象，$90$ s 闭环 & $101.48$ & $101.89$ & $-0.40\%$\\
+C 自洽（\texttt{test\_b0.c}，gcc） & 解析自洽，$5$ 用例 & $400.01$ & $400.00$ & $+0.002\%$\\
+Simulink \texttt{b0\_loop} & 一阶对象闭环，$b=380$ & $376.70$ & $380.00$ & $-0.87\%$\\
+Simulink \texttt{b0\_foc2} & PMSM $dq$ FOC + ADRC，C Caller & $531.55$ & $536.40$ & $\bm{-0.90\%}$\\
+Simulink \texttt{b0\_foc\_m} & 同上，MATLAB Function 版 & $531.84$ & $536.40$ & $-0.85\%$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+FOC 真值取自式 \eqref{eq:focb}：$R=0.175\ \Omega$、$L=0.57$ mH、$\psi_f=0.016833$ Wb、$p=4$、
+$J=1.89\times10^{-5}$ kg$\cdot$m$^2$、$I_{\rm BASE}=6.3069$ A、$\omega_{\rm ref}=62.832$ rad/s。
+\texttt{b0\_loop} 的对象是 $\dot y=380u+f$。四个平台覆盖了“纯数值—标量对象—$dq$ 闭环”三级，
+误差从 $+0.002\%$ 单调过渡到 $-0.90\%$，说明剩下的偏差来自对象与致动链，而不是算法本身。
+
+\subsection{逐点对比的设置}
+
+逐点对比的输入不另造，直接取 \texttt{b0\_foc\_m} 闭环记录的 $130$ s（$130{,}001$ 拍）序列
+$i_q,u,\omega,e_1,v$，逐拍同时送入两个实现：
+
+\begin{itemize}
+\item C 版经 \texttt{b0\_ident\_mex.c} 的 MEX 包装（\texttt{mex -O}，MinGW gcc）调用；
+\item MATLAB 版直接调用 \texttt{b0\_ident\_m.m}（与 C 版逐行等价，供 R2018b 无编译器使用）；
+\item 两者拿到的 \textbf{每一个输入样本完全相同}，比较对象是每拍的 $\hat b_0$ 与注入量 $\Delta u$。
+\end{itemize}
+
+这使得差异只可能来自实现本身——浮点字长、LUT、以及内含的状态机分支。
+
+\subsection{逐点对比的结果}
+
+\begin{table}[H]
+\centering
+\caption{逐点差的时间线（$N=130{,}001$，$\Delta T=1$ ms）}
+\label{tab:point}
+\begin{tabular}{lccc}
+\toprule
+时刻 & $|\Delta\hat b_0|$ & 相对 & 备注\\
+\midrule
+$0.40$ s（首 burst 末） & $7.2\times10^{-3}$ & $1.3\times10^{-5}$ & float32 舍入水平\\
+$5.80$ s（第 $2$ burst 末） & $1.6\times10^{-2}$ & $3.0\times10^{-5}$ & 预热期，逐 burst 阶跃\\
+$16.6$ s（第 $4$ burst 起） & $1.9\times10^{-2}$ & $3.6\times10^{-5}$ & 低通转入逐拍更新\\
+$38.4$ s & $5.3$ & $1.0\%$ & 首次越过 $1\%$\\
+$130$ s & $41.3$ & $7.8\%$ & C $573.17$ / MATLAB $531.84$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{首 burst 一致到 $1.3\times10^{-5}$（相对）}，即 float32 的舍入水平——这说明两版在
+“算术正确性”上是等价的。此后差值单调放大：第 $2$ 个 burst 末仍只有 $3.0\times10^{-5}$，
+但预热一过（低通转入逐拍更新）便开始爬升，$38$ s 越过 $1\%$，终值相差 $7.8\%$。
+图 \ref{fig:cmp} 给出四个视角。
+
+一个细节值得记下：两个实现的 burst 结束拍并不完全重合（第 $2$ 个 burst，ML 在 $5798$、
+C 在 $5799$），这是下文时基漂移的最早证据；若只取某一拍读数而不取更新后的稳态，会把
+$0.3\%$ 的“错拍”误当作算法差异。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{fig_cmp_pointwise.png}
+\caption{同一输入流下的逐点对比。(a) 两条 $\hat b_0$ 轨迹；(b) $|\Delta\hat b_0|$ 的半对数图，
+可见“浮点精度台阶”与“门控分叉”两个量级；(c) 注入段内的 $\Delta u$ 逐点波形，两条曲线几乎重合；
+(d) 两者之差，峰值 $2.9\times10^{-3}$ pu（占幅值 $2.5\%$），呈量子化台阶——这是 $256$ 点 LUT
+相对 $\sin$ 的相位量化，等效 $0.9^\circ$。}
+\label{fig:cmp}
+\end{figure}
+
+\subsection{长时为什么必然分叉}
+
+三条机制叠加，使“逐点一致”在长时上不可能达到：
+
+\begin{enumerate}
+\item \textbf{注入波形本身就不同。}C 版用 $256$ 点 LUT（象限折叠 + 八阶 Taylor），MATLAB 版用
+$\sin/\cos$。相位分辨率 $2\pi/256$ 折合 $1.4^\circ$，逐点差峰值 $2.9\times10^{-3}$ pu，
+占幅值 $2.5\%$（图 \ref{fig:cmp}(d)）。
+\item \textbf{float32 时基漂移。}C 版以 \texttt{t\_now += 1e-3f} 计时，$130$ s 后累计误差
+$-45$ ms（$124.6$ s 处 $-57$ ms），相当于 burst 调度错开 $45$–$57$ 拍。错位一旦跨过段边界，
+一个在注入而另一个在空载段，$|\Delta u|$ 直接等于幅值 $0.118$ pu。
+\item \textbf{门控分段 + 自指。}$\hat b_0$ 进入差分式 \eqref{eq:curdiff} 的 $b_0(u_2-u_1)$ 项，
+一次分叉不会被负反馈拉回；而门控的指数分支是分段定义的，微小的 $\hat b_0$ 差可改变所选分支，
+于是分叉被“锁存”而不再收敛。
+\end{enumerate}
+
+\subsection{回放终值不等于闭环终值}
+
+回放流来自 \texttt{b0\_foc\_m}，所以 MATLAB 版回放能复现自身的闭环终值（$531.84$，误差 $<0.01$），
+而 C 版在别人的输入流上回放得到 $573.17$（$+7.8\%$）。原因不是 C 版更差，而是\textbf{回放是离策略的（off-policy）}：
+记录下来的 $u$ 与 $i_q$ 与当初那条 $\hat b_0$ 轨迹自洽，换了实现后输入不再与自身估计匹配，
+闭环里本该存在的负反馈消失了。因此有效结论只能取各自闭环的终值：
+$531.55$ 与 $531.84$，相差 $0.05\%$。
+
+\textbf{验收口径。}据此本文建议两条并行使用：首 burst 的逐点相对差 $\lesssim10^{-5}$
+（证明算术等价），闭环终值的相对差 $\lesssim0.1\%$（证明控制等价）。\textbf{不要求长时逐点逐位一致}，
+这一条应写入移植验收单，否则会把实现差异误判成算法缺陷。
+
+\subsection{逐点对比的价值}
+
+逐点对比虽不能当验收标准，却是最有效的缺陷探针。文档里两处关键修正都是它逼出来的：
+一是 LUT 在 $[0,2\pi)$ 上直接展开 Taylor 导致输出超过 $1$：注入量 $11$ 倍超标（应为 $0.118$，
+实测 $1.344$），而自洽测试完全看不见，只有跑实际波形才暴露。二是取实部到取模长的改正
+（\S\ref{sec:mag}）：同一个 FOC 闭环只换这一个符号就得到 $383$ 与 $531.55$ 两个数，
+逼着去追问“虚部到底是什么”，才定位到采样错位引起的相位误差。两条经验合并成一句：\textbf{自洽测试管算术，逐点对比管口径，闭环终值管精度。}
+
 \section{讨论}
 
 \subsection{剩余误差：从 $3.4\%$ 到 $0.9\%$}
@@ -1563,6 +1682,8 @@ $u$ 与 $i_q$ 采样同刻（消去 $23^\circ$ 错位）、中位数自适应权
 \textbf{取模长}（消去相位折扣）。末端 $\div T$ 修正只在确证存在幅值缺口时开启，默认关闭。
 五者叠加后，一阶对象闭环 $90$ s 中 $\hat b_0$ 由旧法的 $+15.3\%$ 改善到 $+1.84\%$，
 稳态 RMS 仅上升 $4.6\%$，$10$ Hz 纹波下降 $5\%$；在 PMSM $dq$ 闭环上达到 $-0.90\%$（真值 $536.40$）。
+\item \textbf{验收口径}：首 burst 的逐点相对差 $10^{-5}$ 量级、闭环终值差 $0.1\%$ 量级即可；
+不要求 C 版与 MATLAB 版长时逐位一致——float32 时基漂移与 LUT 相位量化使它不可能（\S\ref{sec:sim}）。
 \end{enumerate}
 
 \appendix
