@@ -1,0 +1,1574 @@
+This is a version of a publication
+in
+Please cite the publication as follows:
+DOI:
+Copyright of the original publication:
+This is a parallel published version of an original publication.
+This version can differ from the original published article.
+published by
+Online Tracking of Varying Inertia using a SDFT Approach
+Vanbecelaere Foeke, Derammelaere Stijn, Nevaranta Niko, De Viaene Jasper,
+Verbelen Florian, Stockman Kurt, Monte Michael
+Vanbecelaere, F., Derammelaere, S., Nevaranta, N., De Viaene, J., Verbelen, F., Stockman, K.,
+Monte, M. (2020). Online Tracking of Varying Inertia using a SDFT Approach. Mechatronics, vol.
+68. DOI: 10.1016/j.mechatronics.2020.102361
+Post-print
+Elsevier
+Mechatronics
+10.1016/j.mechatronics.2020.102361
+© Elsevier 2020
+Online Tracking of Varying Inertia using a SDFT
+Approach
+Foeke Vanbecelaerea,d, Stijn Derammelaere a,b,d, Niko Nevarantac, Jasper De
+Viaenea,d, Florian Verbelena,d, Kurt Stockman a,d, Michael Montea,d
+aDepartment of Electrical Energy, Metals, Mechanical Constructions and Systems, Ghent
+University Campus Kortrijk, 8500 Kortrijk, Belgium
+bDepartment of Electromechanics, Op3Mech, University of Antwerp, Groenenborgerlaan
+171, 2020 Antwerp, Belgium
+cDepartment of Electrical Engineering, Lappeenranta-Lahti University of Technology, 53850
+Lappeenranta, Finland
+dMember of EEDT partner of Flanders Make
+Abstract
+The mechanical dynamics of modern machines very often depend on the
+angular position of the driven axis. To obtain optimal control, such
+applications typically require an advanced control structure such as an
+adaptive controller. Moreover, the variation in the dynamics like changing
+inertia, load torque, and viscous friction limits the performance and reduces
+the energy eﬃciency. Energy savings can be obtained by using so-called
+trajectory optimization techniques combined with feedforward control.
+However, both optimization and adaptive control require the knowledge of the
+position dependency of the mechanical parameters. In the case of
+reciprocating mechanisms, for instance, this position dependency is signiﬁcant.
+Consequently, the mechanical parameters change rapidly at high operating
+speed of the machine. This paper thus contributes towards fast and accurate
+estimation of rapidly varying mechanical parameters. A sliding discrete
+Fourier transform (SDFT) approach is proposed to track the inertia variation
+of a reciprocating mechanism online. The feasibility is veriﬁed with
+experiments on an industrial pick and place unit. Both the results on the real
+machine and its CAD equivalent, modelled in a multibody dynamics software
+package, are considered. In addition, the developed inertia tracking algorithm
+is proven to be implementable in standard commercial drive components.
+Preprint submitted to Elsevier Mechatronics Journal March 4, 2020
+Keywords: Online parameter estimation, inertia variation, sliding discrete
+Fourier transform (SDFT), motion control, co-simulation
+1. Introduction
+In modern machines, the mechanical structure driven by an electrical
+machine has a large inﬂuence on the optimal trajectory, control and
+dimensioning of the electrical actuator. The mechanical parameters of the
+structure very often depend on the angular position of the driven axis.
+Reciprocating mechanisms are widely used for machines performing repetitive
+tasks because they have the advantage that a desired complex movement of
+the follower linkage is achieved by a simple rotational movement of the driven
+axis. However, an inherent property is that the reduced load parameters such
+as the inertia and static torque depend on the position of that driven axis [1].
+To avoid oversizing, sub-optimal control and unnecessary energy consumption
+it is essential to know these variable parameters. Identifying the inertia,
+among other parameters like load torque and friction is crucial for selection
+and dimensioning of the motor [2], optimization of the trajectory setpoint
+[3, 4] and the implementation of adaptive control [5] and feedforward control
+[6].
+In literature, a wide range of parameter and system identiﬁcation
+techniques are found. The approach is either based on time- or
+frequency-domain observations and the identiﬁcation is either performed
+online or oﬄine.
+The most common oﬄine method is the frequency response identiﬁcation
+with a PRBS-signal as additional torque. This is proven to be a successful
+technique for linear systems [7] and even for non-linear systems in [8]. The
+known drawback is that the system must remain unchanged during the rather
+long identiﬁcation experiment, which means that these methods are only valid
+for time-invariant systems. The oﬄine frequency methods are thus best suited
+2
+for commissioning [9] of slowly varying systems where the parameters change
+due to wear for example.
+Common approaches among the oﬄine time-domain methods are heuristic
+algorithms. In [10] for example, a particle-swarm algorithm is used for
+self-commissioning of a non-linear system with backlash. The disadvantage of
+heuristic algorithms is the extensive tuning and long convergence time.
+Furthermore, accurate estimates of inertia and friction are achieved with the
+steady-state response method in [11], which can be considered as a multi-step
+time-domain procedure. Yet this method, too, is only useful for systems with
+nearly constant load parameters.
+Online approaches are thus required for time-variant systems and are
+typically performed using a recursive algorithm because of computational
+eﬃciency. The most common time-domain approach is the recursive least
+squares (RLS) algorithm. Accurate results with RLS are achieved in [12] for
+the estimation of the coeﬃcients of a high-order pulse-transfer function and in
+[13] for the estimation of frequency responses. In both examples the system
+parameters are constant and the convergence is rather slow. Faster
+convergence is obtained in [14] for the estimation of the time-varying
+coeﬃcients of a second order pulse-transfer function. However, initial guesses
+of the coeﬃcients with an accuracy of ≈ 80% must be available and the
+estimated coeﬃcients are not converted into mechanical parameters. This
+limitation of RLS is also clariﬁed in [15] where the mechanical parameters of a
+two-mass system are estimated. The RLS is designed for estimation of the
+coeﬃcients of a pulse-transfer function based on time samples of the input and
+output signal. How to solve the relations between these coeﬃcients and the
+mechanical parameters is a complex and time-consuming task, especially for
+high-order systems.
+Kalman ﬁlters, known for their excellent noise cancellation, can also be
+used for online estimation in the time-domain. The performance is proven in
+[16] where step changes in the load torque of a theoretical two-mass system are
+3
+accurately estimated in noisy conditions. Also a high variation of inertia is
+tracked, but less precise. Next in [17] the parameters of a slider-crank
+mechanism are estimated online. The cyclic variation of the load torque is
+tracked accurately at high speed, but again the inertia variation tracking is
+less precise. Important to note is that in both examples the tuning of the
+estimation settings is extensive. An initial guess of the parameters is required
+and the process and measurement noise statistics must be known in advance.
+Less extensive tuning is obtained in [18] and [19] where the Kalman ﬁlter is
+redesigned to act as a Fourier Transform for online estimation of a frequency
+response. Yet again, the approach is only accurate for slowly time-varying
+systems because of the rather long identiﬁcation time.
+Despite the eﬀorts of the mentioned time-domain approaches for online
+parameter estimation, a trade-oﬀ between convergence time and accuracy is
+inevitable and extensive tuning is necessary. In order to estimate rapidly
+changing system behaviour, a computationally eﬃcient identiﬁcation technique
+without convergence and with noise cancellation is needed. The sliding
+discrete Fourier transform (SDFT) satisﬁes that requirement. This technique
+updates the phase and gain of the system at predeﬁned frequencies at every
+new time sample [20, 21, 22] without convergence. By analysing the system
+response at frequencies much lower than high-frequency noise signals, the noise
+is inherently cancelled. In recent work, this frequency-domain approach has
+proven to be applicable for online estimation. A few examples are online load
+angle estimation for stepping motor applications in [23] and online transfer
+function estimation of a mechanical system with varying dynamics in [24].
+Moreover, the computational eﬃciency is proven in [25] where the estimation
+algorithm is implemented on a real-time platform.
+Motivated by the advantages, this paper proposes the SDFT for tracking
+of the inherently varying inertia of a reciprocating mechanism. An industrial
+pick and place unit, shown in ﬁgure 1, is used as a proof of concept. The
+performance and applicability is ﬁrst tested on a CAD equivalent of the machine
+4
+Figure 1: An industrial pick and place unit, existing of a reciprocating mechanism
+with a coupled simulation (co-simulation) approach. In a co-simulation, the
+control algorithm is implemented in e.g. Matlab/Simulink, and the mechanical
+structure is modelled in CAD software. By implementation of the estimation
+algorithm in a commercial hardware component, the feasibility is also tested
+on the real machine. Both the results from the real machine and its CAD
+equivalent are compared with the inertia calculated from a theoretical model of
+the machine. This calculation is a complex and time-consuming task and only
+serves to have a valid reference inertia proﬁle.
+The paper is structured as follows. Section 2 shows the theoretical derivation
+for the reference inertia proﬁle. In section 3, the pick and place unit is simpliﬁed
+to a two-mass system in order to clarify the impact of the varying inertia on the
+system dynamics. Section 4 explains the principle of the SDFT algorithm and
+how the algorithm is used to estimate the inertia. In section 5, the estimation
+is done with co-simulations and the tuning for proper performance is discussed.
+Finally, validation by measurements are presented in section 6.
+2. Theoretical model
+A simpliﬁed scheme of the machine is shown in ﬁgure 2. In the ﬁgure,
+the diﬀerent joints (A, B, C, D, E, F and G) and linkages are depicted. The
+mechanism is driven at joint A, resulting in motion of the rotor positionθ1. The
+mass and inertia of each individual linkage is constant, but the reduced moment
+5
+rotor
+cam
+crank
+sledge
+rod1 rod2
+x
+y
+B(xb,yb)
+A(0,0)C(xc,yc) x’
+y’
+I(x’i,y’i)
+D(xd,yd) E(xe,ye)
+F(xf,yf) G(xg,yg)
+θ2
+θ1
+θ3 θ4
+θ5
+Figure 2: Simpliﬁed scheme of the pick and place unit, with its joints and linkages
+of inertia at the driven axis varies in function of this position. To determine the
+reduced load inertia Jl(θ1), the kinetic energy of the mechanism is considered.
+The total kinetic energy Etot resulting from the rotational motion at joint A is
+written as:
+Etot = 1
+2Jl(θ1) ˙θ1 (1)
+By rewriting (1), it is clear that the inertia Jl(θ1) is determined by dividing the
+kinetic energy Etot by the angular velocity ˙θ1 of the driven axis:
+Jl(θ1) = 2Etot
+˙θ1
+(2)
+The total kinetic energyEtot equals the sum of the kinetic energy of each linkage:
+Etot =Ecam +Ecrank +Esledge +Erod1 +Erod2 (3)
+Rod1 rotates around the ﬁxed joint F with angular velocity ˙θ3, rod2 rotates
+around the ﬁxed joint G with angular velocity ˙θ4 and the cam rotates around
+the ﬁxed joint A with angular velocity ˙θ1.
+Erod1 = 1
+2Jrod1( ˙θ3)2 Erod2 = 1
+2Jrod2( ˙θ4)2 Ecam = 1
+2Jcam( ˙θ1)2 (4)
+The sledge performs a translational motion at joint C.
+Esledge = 1
+2msledge( ˙x2
+c + ˙y2
+c) (5)
+6
+The crank rotates around joint C with angular velocity ˙θ2, while joint C
+translates in the x-direction with velocity ˙ xc and in the y-direction with
+velocity ˙yc. With the motion of the crank considered according to its local
+x′y′-frame (as depicted in ﬁgure 2), the kinetic energy is determined [26]:
+Ecrank = 1
+2mcrank( ˙x2
+c + ˙y2
+c)−mcrank ˙x′
+c ˙θ2¯y′
+i
++mcrank ˙y′
+c ˙θ2¯x′
+i + 1
+2Jcrank( ˙θ2)2 (6)
+In (6), ¯x′
+i and ¯y′
+i are the coordinates of the centre of mass I according to the
+x′y′-frame. ˙x′
+c and ˙y′
+c are the components of the velocity of joint C with respect
+to the same x′y′-frame. As shown in ﬁgure 2, the local x′y′-frame is rotated
+with an angle θ2 according to the global xy-frame. After transforming to the
+global frame, the kinetic energy of crank C is found:
+Ecrank = 1
+2mcrank( ˙x2
+C + ˙y2
+C)−mcrank ( ˙xCcos(θ2) + ˙yCsin(θ2)) ˙θ2¯y′
+I
++mcrank (− ˙xCsin(θ2) + ˙yCcos(θ2)) ˙θ2¯x′
+I + 1
+2Jcrank( ˙θ2)2 (7)
+With kinematic analysis, the position and velocity of all joints are written in
+function of the position θ1 and velocity ˙θ1 of the driven joint A. The derivation
+of the kinematic relations is described in the appendix 8.1.
+By substitution of the kinematic relations in (4), (5) and (7), the kinetic
+energy of each link is obtained in function of the position θ1 and velocity ˙θ1
+of the driven axis. After taking the sum, as shown in (3), dividing it by the
+angular velocity ˙θ1 and rewriting, the equation for the reduced load inertia
+Jl(θ1) is obtained:
+Jl(θ1) =Jcam +Jcrank
+(|AB|
+|CB|
+)2(sin(θ1−θ3)
+sin(θ2−θ3)
+)2
++ (Jrod1 +Jrod2)
+(|AB|
+|FD|
+)2(sin(θ1−θ2)
+sin(θ3−θ2)
+)2
++ (mcrank +msledge)|AB|2
+((sin(θ1−θ3)
+sin(θ2−θ3)
+)2
+− sin(2θ1−θ2−θ3)
+sin(θ2−θ3)
+)
+− 2¯y′
+imcrank
+|AB|2
+|CB|
+(sin(θ1−θ3)sin(θ2−θ1)
+sin(θ2−θ3)
+)
++ ¯x′
+imcrank
+|AB|2
+|CB|
+( sin(θ1−θ3)
+sin2(θ2−θ3)
+(
+sin(2θ2−θ1−θ3)− sin(θ1−θ3)
+))
+(8)
+7
+For convenience of the kinematic analysis, the rotor position θ1 is deﬁned
+according to the global xy-frame with a positive angle in counter clockwise
+direction. But as depicted in ﬁgure 3, this deﬁnition does not agree with the
+machine positionθ. The origin of θ is located at an angleδ with a positive angle
+in clockwise direction. The reduced inertia Jl(θ) in function of the machine
+position θ is thus found by substitution of θ1 = δ−θ in (8). The theoretical
+reference is plotted in ﬁgure 4. The reference is valid because it results from
+the fundamental laws of energy conservation. Note that the maximum inertia
+is about 18 times the minimum inertia.
+x
+y
+A
+θ1=δ-θ
+B
+δθ
+x
+y
+A
+B
+δ
+θ=0°
+Figure 3: The machine in starting position (left) and in a certain position θ (right)
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+Machine position θ [°]
+0
+1000
+2000
+3000
+4000
+5000
+6000
+7000
+8000
+9000
+10000
+Load inertia Jl [kg.mm²]
+θa
+θb
+θc
+Figure 4: Analytical calculation (8) of the reduced load inertia Jl(θ)
+8
+3. Inﬂuence of inertia in the frequency domain
+3.1. Simpliﬁcation to a two-mass system
+To clarify the inﬂuence of the load inertia on the mechanical dynamics,
+a simpliﬁed model of the industrial pick and place unit is deﬁned. With a
+standard procedure in the drive software, described in the drive manual [27],
+the gain characteristic of the real machine is identiﬁed at the position θa of high
+inertia (see ﬁgure 4). The choice of this position is justiﬁed later in section 3.2.
+The measured gain is shown in ﬁgure 5. Note that during the measurement
+the system behaviour is not linear. Although the system parameters are nearly
+constant because of the constant position setpoint, the velocity goes through
+zero due to the added frequency-rich torque signal. As a result, static friction
+is not negligible, leading to a biased frequency response. Despite the non-linear
+eﬀects, a clear pair of antiresonance and resonance is present. Representing
+the machine as a two-mass system is thus a logical simpliﬁcation [28, 29]. In
+ﬁgure 6, a schematic representation of this simpliﬁed model is shown. The
+simpliﬁcation assumes that the driven rotor represented with the rotor inertia
+10 100 1000
+Frequency f [Hz]
+-40
+-35
+-30
+-25
+-20
+-15
+-10
+-5
+0
+5
+Gain G [dB]
+Two-mass system
+Measurement
+Figure 5: Measured and calculated frequency response of the pick and place unit and the
+simpliﬁed two-mass system
+9
+Jr is connected with the load by a spring-damper coupling. The stiﬀness of the
+spring is represented withk andb is the damping coeﬃcient of the damper. The
+load is assumed to be the equivalent of all rigidly connected linkages, except the
+rotor, and is represented with the load inertia Jl. The rotor and load damping
+are represented respectively with br and bl.
+T θ k
+br
+θl
+bl
+b
+Jl(θl)Jr
+Figure 6: Model of a damped two-mass system
+The dynamics are described with the diﬀerential equations shown in (9).
+After Laplace transformation of (9), the transfer function describing the
+dynamic inﬂuence of the torque T on the velocity ˙θ, is found in (10).
+
+
+
+T−br ˙θ−b( ˙θ− ˙θl)−k(θ−θl) =Jr¨θ
+−bl ˙θl +b( ˙θ− ˙θl) +k(θ−θl) =Jl ¨θl
+(9)
+˙θ(s)
+T (s) =
+Jls2 + (b +bl)s +k
+JrJls3 + ((Jr +Jl)b +Jrbl +Jlbr)s2 + ((Jr +Jl)k +brbl + (br +bl)b)s + (br +bl)k
+(10)
+Realistic values of the mechanical parameters in (10) are listed in Table 1.
+The value of the rotor inertia Jr is found in the data-sheet of the motor. The
+value of the load inertia Jl is read from the inertia proﬁle in ﬁgure 4 at the
+position θa of high inertia. The other parameters k, b, br and bl are found by
+ﬁtting the measured gain characteristic with the gain of (10) with a manual
+trial and error approach. The result is shown in ﬁgure 5 with the mechanical
+parameters listed in Table 1.
+10
+Table 1: Mechanical parameters of the simpliﬁed two-mass system
+Jr 3200 kg·mm2
+k 4221 Nm/rad
+b 0.396 Nms/rad
+br 0.2 Nms/rad
+bl 0.1 Nms/rad
+3.2. Frequency regions of interest
+The gain characteristics according to (10) for selected values of the load
+inertiaJl and the constants in Table 1 are plotted in ﬁgure 7 in solid lines. The
+three selected values are the maximum inertia at position θa, an average inertia
+at position θb and the minimum inertia at position θc. The values are depicted
+in ﬁgure 4 and listed in Table 2.
+Table 2: Selected values of the load inertia Jl out of ﬁgure 4
+Positionθ [◦] Inertia Jl [kg·mm2]
+θa 87 9319
+θb 134 4927
+θc 179 548
+For each inertia value, the gain according to its equivalent pure inertial load
+is plotted in a dashed line of -20 dB/dec. The transfer function of this rigid
+undamped system is found by substitution of θ =θl and br =bl = 0 in (9):
+˙θ(s)
+T (s) = 1
+(Jr +Jl)s (11)
+Also in a dashed line, the gain of a pure inertial load existing of only the
+rotor inertia Jr is plotted. A ﬁnal characteristic is the static gain |G(s = 0)| of
+(10) in a dotted line.
+A ﬁrst observation is that for each characteristic, a range of frequencies
+is found where the gain according to the two-mass system (10) equals the gain
+11
+1 10 100 1000
+Frequency f [Hz]
+-40
+-35
+-30
+-25
+-20
+-15
+-10
+-5
+0
+5
+10Gain GdB [dB]
+f1 f2
+Jl(θa)
+Jl(θb)
+Jl(θc)
+f*
+1/Jrs
+1/(br+bl)
+R1 R5R4R3R2
+f*1 f*2
+Figure 7: Gain characteristic for the selected values of the load inertia Jl in solid lines and
+their equivalent pure inertial load in dashed lines. The regions of interest f∗ in green are
+suitable for inertia estimation.
+according to its pure inertial load (11). This means that for these frequencies the
+gain is only inﬂuenced by the rotor inertia Jr and load inertiaJl. Unfortunately
+this region is not the same for all characteristics. At 20 Hz for example, the
+gain of Jl(θa) equals the slope of -20 dB/dec but not for Jl(θb) and Jl(θc).
+By observing the deviation of the slope of -20 dB/dec, the frequency range
+can be divided in 5 regions. In each region, the gain of the two-mass system is
+inﬂuenced by diﬀerent mechanical parameters. As summarized in Table 3, R 2
+and R4 are the remaining regions of interest because of the reduced number of
+describing parameters.
+Region R 2 is considered as the ﬁrst frequency region f∗1 of interest where
+the system is described as a damped one-mass system:
+˙θ(s)
+T (s) = 1
+(Jr +Jl)s + (br +bl) (12)
+If the gain is measured inside f∗1 for varying positions, the load inertia Jl is
+determined by converting the gain of (12) with a known value of the rotor inertia
+Jr and the sum of the damping factors br and bl.
+The transfer function in region R 4, is found by substituting br = bl = 0 in
+12
+Table 3: Observations from the gain characteristics of the two-mass system
+Parameters Observation
+R1 br, bl The gain at θc equals the static gain |G(s = 0)|.
+R2 Jr, Jl, br, bl
+At all positions, the slope deviates due to external
+damping and not due to the spring-damper
+coupling.
+R3 Jr, Jl, br, bl, k, b
+Atθc the slope deviates due to external damping
+and at θa the slope deviates due to the
+spring-damper coupling.
+R4 Jr, Jl, k, b At all positions, the slope deviates due to the
+spring-damper coupling.
+R5 Jr
+At all positions, the gain equals the pure inertial
+load of the rotor. The spring-damper coupling is
+not able to respond to the high frequency input
+torque and the load inertia is not moving.
+the transfer function (10) of the two-mass system:
+˙θ(s)
+T (s) = Jls2 +bs +k
+JrJls3 + (Jr +Jl)bs2 + (Jr +Jl)ks (13)
+However, the slope of the gain between the antiresonance at position θa and
+the resonance at position θc is very diﬀerent for varying positions. At 200 Hz
+for example, the slope at position θa and θb is positive while being negative at
+position θc. By limiting region R 4 until a frequency slightly before the
+antiresonance at position θa, a second region of interest f∗2 is found. If the
+gain is measured inside f∗2, the load inertia Jl is known by converting the gain
+of (13) with the rotor inertia Jr, stiﬀness k and damping b as prior known
+parameters.
+3.3. Conversions from gain to inertia
+As concluded previously with ﬁgure 7, the varying load inertia Jl can be
+tracked by measuring the gain at varying positions. After calculation of the
+13
+modulus of the transfer function (12), which is valid for frequencies inside the
+region of interest f∗1, the conversion from gain G to load inertia Jl is found:
+Jl = 1
+ω
+(√
+1
+G2− (br +bl)2
+)
+−Jr (14)
+Note that the frequencyf is represented in (14) withω = 2πf and that in ﬁgure
+7 the gain G is represented in dB:
+GdB = 20log(G) (15)
+For frequencies inside the region of interest f∗2, the gain conversion is found in
+a similar way from the modulus of the transfer function in (13):
+Jl = A +
+√
+B
+C
+A = (k−b2)G2Jrω3− (G2Jrk2 + 1)kω
+B =−G4J 4
+rb2ω8 + 2G2J 2
+rb2ω6 + (G2b2− 1)b2ω4 + 2G2b2k2ω2 +G2k4
+C =G2J 2
+rω5− (2G2Jrk−G2b2 + 1)ω3 +G2k2ω
+(16)
+4. The SDFT approach
+4.1. The SDFT algorithm
+As concluded in the previous section 3, the inertia can be tracked for varying
+positions if the frequency response at one speciﬁc frequency is measured. To do
+so, the SDFT is of interest. This algorithm can determine frequency responses at
+consecutive time stamps in a computationally eﬃcient manner. Fourier analysis
+can be used to determine fundamental components of a measured signal. At a
+discrete time instance k the hth harmonic component Xh(k) based on a period
+of N samples can be written as:
+Xh(k) =
+N−1∑
+l=0
+x(k− (N− 1) +l)e
+−jh
+2π
+N
+l
+(17)
+As illustrated in ﬁgure 8, one signal period of N samples is needed to calculate
+the fundamental component. When a new measurement sample is available,
+14
+Raw signal
+Fundamental signal
+Discrete time samples n
+x
+Discrete time k
+* **
+Window size
+N
+*: Remove oldest sample x(k-N)
+**: Add newest sample x(k)
+x(k-N) x(k)
+kk-N
+Figure 8: Principle of the DFT applied on a sliding window [21]
+(17) could be reconsidered to update the fundamental component. Summing
+all measurement samples over one signal period according to (17) is time
+consuming. However, at each new time instance n only the last sample x(n) is
+added and the oldest sample x(n−N) is removed from the window. This
+appealing property, which is exploited in [20, 21, 22], is used to implement the
+frequency response estimation in a computationally eﬃcient manner. The
+Fourier componentXh(k) at time instance k is written as:
+Xh(k) =x (k− (N− 1)) +x (k− (N− 1) + 1))e
+−jh
+2π
+N +x (k)e
+−jh
+2π
+N
+(N−1))
+(18)
+While the previous component Xh(k− 1) is written as:
+Xh(k−1) =x (k−N)+x (k− (N− 1))e
+−jh
+2π
+N +x (k− 1)e
+−jh
+2π
+N
+(N−1))
+(19)
+After subtraction of (19) from (18):
+Xh(k) = (Xh(k− 1)−x(k−N))e
+jh
+2π
+N +x(k)e
+jh
+2π
+N
+(N−1)
+(20)
+Moreover:
+e
+jh
+2π
+N =e
+−jh
+2π
+N
+(N−1)
+(21)
+15
+Finally, (20) is rewritten as:
+Xh(k) = (Xh(k− 1) +x(k)−x(k−N))e
+jh
+2π
+N (22)
+For clariﬁcation, (22) is represented graphically in ﬁgure 9. Note that (22) can
+be interpreted as the angular shift of the previous Fourier component
+Xh(k− 1)ej2πh/N minus the oldest sample x(k− N) plus the most recent
+sample x(k). This SDFT approach is particularly interesting when only a
+limited number of Fourier components Xh(k) needs to be known. This is the
+case here as only one frequency, and therefore one fundamental component is
+considered.
+Figure 9 and (22) illustrate that regardless of the window length N, the
++
+x(k)
++
+-
+z-N
++
+z-1
+ej2πh/N
+x(k-N)
+Xh(k)
+Xh(k-1)
+add the most recent sample
+remove the oldest sample
+Figure 9: Implementation of the SDFT algorithm [21]
+SDFT only needs to determine one real sum, one complex sum and one
+complex multiplication to compute a successive DFT output. The SDFT is
+obviously computationally eﬃcient.
+4.2. Inertia estimation
+Figure 10 shows how the SDFT algorithm and the conversion from gain
+to inertia are combined to obtain an online inertia estimation. First of all, a
+controller is designed with the objective that the closed-loop mechatronic system
+is able to maintain constant speed under varying dynamics. This setpoint of
+constant speed ˙θ∗ is chosen with the intention to track the inertia proﬁle with a
+constant resolution. Because of the ﬁxed discrete sample time ts and a constant
+speed, the resolution ∆ θ of the position is also ﬁxed. At a certain time t, the
+16
+Controller
+++
+Ts
+System
+SDFT
+θ
+|T |f
+Gain
+to
+inertia
+Jl(θ)
+f
+Data processing
+Mechatronic system
+Tc Tθ* θ |θ |f
+Jr, k, b
++
+-
+1/s
+Jr, br, blA
+Figure 10: Principle of inertia estimation
+resolution ∆θ is found as:
+∆θ(t) =θ(t)−θ(t−ts) (23)
+Because the approach requires that the gain is tracked at a well-chosen
+frequency f, both the input signal T and output signal ˙θ must contain a
+fundamental component at this frequency f. This is achieved by adding an
+additional sinusoidal torque Ts with a frequency f and amplitude A, resulting
+in an input torque T that equals Tc +Ts. Next, both the input signal T and
+output signal ˙θ of the system are ﬁltered by the SDFT algorithm, shown in
+ﬁgure 9 to obtain the amplitude at frequency f for both input and output.
+The gain G is then found as:
+G = | ˙θ|f
+|T|f
+(24)
+Finally, by converting the measured gain G, the load inertia Jl is found in
+function of time. By taking the actual position θ into account, the load inertia
+Jl is found in function of the position θ. Depending on the selected frequency
+f, the conversion is either according to (14) with Jr, br and bl as prior known
+mechanical parameters or according to (16) with Jr, k and b as prior known
+parameters. The inertia is thus calculated at every new time sample without
+convergence.
+Guidelines for tuning of the amplitudeA, the speed setpoint ˙θ∗, and selecting
+the frequency f are presented in the next section 5.
+17
+5. Co-simulation
+5.1. Working principle
+During the design phase of a machine, a CAD model is often available. In
+this paper, Siemens NX is used to model the industrial pick and place unit.
+Siemens NX, among other CAD packages, delivers the possibility to represent
+the mechanical system in Matlab/Simulink. This representation is also called
+a plant. Global simulation of both the controller modelled in Simulink and the
+mechanical system modelled in Siemens NX, is then possible. This technique of
+combining two diﬀerent software packages is called a co-simulation. To clarify
+the working principle of the proposed estimation method, a model is build in
+Simulink existing of the algorithm in ﬁgure 10. The system is now replaced with
+the plant of the CAD equivalent of the real machine.
+Without the additional sinusoidal torque activated, a standard PI-controller
+CPI is designed to maintain stable constant speed under varying dynamics:
+CPI =Kp(1 +Ki
+1
+s) (25)
+The values Kp = 1 .1 and Ki = 50 are found by obtaining a closed-loop
+bandwidth 6 times lower than the antiresonance of the open-loop system in
+ﬁgure 5. The step response for ˙θ∗ = 180 ◦/s is shown in ﬁgure 11. The
+0
+0.2
+0.4
+0.6
+0.8
+1
+1.2
+1.4
+1.6
+1.8
+2
+0
+20
+40
+60
+80
+100
+120
+140
+160
+180
+200
+Time [s]
+Velocity θ [°/s]
+Speed setpoint θ* 
+Actual speed θ
+Figure 11: Step response without the added torque signal
+18
+ﬂuctuations around the setpoint conﬁrm the desired stable operation of the
+system under varying dynamics.
+To illustrate the inﬂuence of the added torque on the input and output
+signals of the system, a simulation is performed with a sampling time ts of
+0.25 ms, which corresponds to the sampling time of the real-time platform used
+for controlling the real machine. The other settings are a speed setpoint of ˙θ∗
+= 180◦/s, a frequency f = 10 Hz and amplitude A = 10 Nm of the sinusoidal
+torque. The amplitude A is chosen from the static torque that varies between
+-0,6 and 0,6 Nm due to gravity. In order to have a system response at frequency
+f due to the load inertia, the amplitude A should be signiﬁcantly more than the
+static torque while considering the maximum motor torque Tmax of 41.6 Nm.
+The input torque is shown in ﬁgure 12, the output speed in ﬁgure 13 and
+the position in ﬁgure 11. As desired, both the low frequency signal due to the
+inertia variation and the added frequency signal due to the sinusoidal torque
+0
+0.2
+0.4
+0.6
+0.8
+1
+1.2
+1.4
+1.6
+1.8
+2
+-12
+-8
+-4
+0
+4
+8
+12
+Torque T [Nm]
+Time t [s]
+Input torque T
+Controller torque Tc
+Added torque Ts
+Figure 12: Input torque, which is the sum of the controller torque and the added torque
+0
+0.2
+0.4
+0.6
+0.8
+1
+1.2
+1.4
+1.6
+1.8
+2
+-200
+-100
+0
+100
+200
+300
+400
+500
+600
+Velocity θ [°/s]
+Time t [s]
+Speed setpoint θ*
+Output speed θ
+Figure 13: Output speed and the speed setpoint
+19
+0
+0.2
+0.4
+0.6
+0.8
+1
+1.2
+1.4
+1.6
+1.8
+2
+0
+60
+120
+180
+240
+300
+360
+Position θ [°]
+Time t [s]
+Figure 14: Output position
+are clearly present. The ﬂuctuations around the desired speed are larger than
+the ones in ﬁgure 11 due to the added torque. This is also clearly visible in
+the position of the system. Consequently, the inertia is tracked with a varying
+resolution ∆θ and not with the intention to have a constant resolution. This
+property is taken into account for further analysis in the next sections where
+the performance of the SDFT approach is investigated for diﬀerent values of the
+speed setpoint ˙θ∗ and the excitation frequency f.
+5.2. Selection of the additional excitation frequency
+Figure 15 shows the results of three simulations with the same speed setpoint
+of ˙θ∗ = 180◦/s, the same amplitudeA = 11.86 Nm and three diﬀerent frequencies
+f. The value A = 11.86 Nm is chosen to be the same value as used in the
+measurements section 6. The value f = 10 Hz is chosen in the ﬁrst frequency
+region of interest f∗1, see ﬁgure 7, where the gain is converted according to
+(14). In that case, the prior known parameters are the rotor inertia Jr, the
+rotor damping br and load damping bl. The next value f = 80 Hz is chosen in
+the second frequency region of interestf∗2 where the gain is converted according
+to (16). The prior known parameters in that region are the rotor inertia Jr, the
+ﬂexibility k and damping b of the coupling. For the next value of f = 160 Hz
+the same conversion (16) is needed.
+The results show that only in the case of f = 80 Hz, a clear correspondence
+between the estimated inertia and the theoretical reference obtained with (8) is
+20
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+0
+2000
+4000
+6000
+8000
+10000
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+0
+5
+10
+15
+20
+Position θ [°]
+Load inertia Jl [kg.mm²]
+Position lag δθ [°]
+f = 10 Hz, A    12 Nm, θ* = 180 °/s 
+f = 80 Hz, A    12 Nm, θ* = 180 °/s 
+f = 160 Hz, A    12 Nm, θ* = 180 °/s 
+Theoretical reference
+Figure 15: Inﬂuence of the frequency f on the inertia estimation
+found. The result obtained with f = 10 Hz shows that the shape of the proﬁle
+is correct, despite a clear tracking error and ﬂuctuations.
+In the case of f = 160 Hz the load inertia is only accurately tracked at
+positions of low inertia. This conﬁrms that although the same prior known
+parameters as in f = 80 Hz are needed for the conversion (16), the frequency
+must be chosen inside region f∗2. Figure 7 shows that the antiresonance at
+diﬀerent positions shifts to the left if the inertia increases. If the frequency is
+chosen above the antiresonance frequency at high inertia, the gain is not situated
+before the antiresonance for all positions and thus not correctly converted.
+Together with the close-up view in ﬁgure 15, it is also clear that the lower
+the frequency f, the higher the tracking error. This is explained by
+considering the lagging behaviour of the SDFT algorithm [20]. As described in
+[23] and illustrated in ﬁgure 8 it takes one full SDFT window, existing of N
+samples, to obtain a completely updated SDFT result and thus an inertia
+value after conversion. In this case the time window δt is equal to the period
+of the additional torque Ts:
+δt = 1
+f =Nt s (26)
+In ﬁgure 16 a close-up view of the output position in ﬁgure 14 is shown. At time
+21
+tk, the full window from tk−N until tk is needed to obtain a result. Since the
+inertia is estimated in function of the position, this time window δt =tk−tk−N
+is transformed to a position window δθ:
+δθ =θ(tk)−θ(tk−N) (27)
+This position window is also called a position lag because it is a result of the
+lagging behaviour of the SDFT. Due to the obvious oscillations of the position,
+the position lag δθ is variable.
+The ﬁrst consequence is that the estimated inertia proﬁle lags according to
+the position lag δθ. This is clearly visible in ﬁgure 15 in the case of f = 10
+Hz. The higher the frequency f, the lower the time window δt, the higher the
+position lag δθ. This lagging error is a known error because the position is
+measured and therefore compensation is possible.
+The second consequence of the position lag is clariﬁed with the help of the
+theoretical inertia proﬁle in ﬁgure 17. During a certain position lag δθ, the
+load inertia Jl is variable. This means that for every window of the SDFT, an
+averaged inertia ˆJl is estimated which is not the correct value. The higher the
+lag δθ, the larger this averaging error. This consequence is represented with
+oscillations in the inertia proﬁle, which is clearly visible at f = 10 Hz in ﬁgure
+15. Because the load inertia is to be estimated, this error is unknown and cannot
+Position θ [°]
+Time t [s]
+δθ
+1
+1.1
+1.2
+1.3
+1.4
+1.5
+170
+180
+190
+200
+210
+220
+230
+240
+250
+260
+270
+Window size
+N
+tk
+θ(tk)
+tk-N
+θ(tk-N)
+δt
+Figure 16: Transformation from time window
+to position window
+180
+200
+220
+240
+260
+280
+300
+320
+340
+360
+Position θ [°]
+0
+1000
+2000
+3000
+4000
+5000
+6000
+7000
+8000
+9000
+10000
+Load inertia Jl [kgmm²]
+δθ
+Jl
+^
+Figure 17: Averaged inertia due to the
+position lag
+22
+be compensated.
+Due to the uncorrectable averaging error it can be concluded that choosing
+the frequency in the lower region f∗1 is not of interest for fast and accurate
+estimation of the rapidly changing inertia. By choosing the frequency f higher
+in region f∗2, the time window of the SDFT is smaller leading to more accurate
+results.
+A ﬁnal important condition for the selection of the frequency f relates to
+the fact that the SDFT-algorithm is a discrete algorithm with a sample time ts.
+Therefore, the number of samples N of the SDFT-window must be an integer
+value and more than 20 for accurate reproduction of the sine wave at frequency
+f:
+N = 1
+ft s
+≥ 20 (28)
+5.3. Inﬂuence of the speed setpoint
+Continuing with an additional frequency f of 80 Hz, the inﬂuence of the
+speed setpoint ˙θ∗ is investigated. Figure 18 shows the results of two simulations
+with the same amplitude A = 11.86 Nm and two diﬀerent values of the speed
+setpoint ˙θ∗.
+Position θ [°]
+Load inertia Jl [kg.mm²]
+Position lag δθ [°]
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+0
+2000
+4000
+6000
+8000
+10000
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+2
+3
+4
+5
+f = 80 Hz, A    12 Nm, θ* = 180 °/s 
+f = 80 Hz, A    12 Nm, θ* = 360 °/s 
+Theoretical reference
+Figure 18: Inﬂuence of the speed setpoint ˙θ∗ on the inertia estimation
+23
+Again, the lagging behaviour is clear. The higher the speed setpoint, the
+higher the position lag and thus the higher the tracking error. This conclusion
+is explained by looking at the average slope in ﬁgure 16. The ﬁgure shows the
+average slope for a speed setpoint of 180 ◦/s. If this setpoint is doubled, the
+slope and consequently the position lag δθ is also doubled for the same time
+windowδt.
+The achievable accuracy of the estimated inertia proﬁle hence depends on
+the operating speed of the machine. The higher the speed, the less accurate the
+result and vice versa. Figure 18 however shows that a full inertia proﬁle with a
+maximum value of 18 times the minimum value is accurately estimated within
+1 s. This validates that the proposed SDFT method contributes towards fast
+and accurate estimation of rapidly varying mechanical parameters.
+5.4. Sensitivity of the prior known mechanical parameters
+A drawback is that the proposed SDFT method requires that three
+mechanical parameters are known in advance. An exact value of the rotor
+inertiaJr is easily found in a data-sheet of the motor. But ﬁnding exact values
+for the ﬂexibility k and damping b of the spring-damper coupling might be a
+diﬃcult task in practice. As mentioned in section 3.1 an option is to ﬁnd k
+and b by ﬁtting a measured gain characteristic to the transfer function of a
+damped two-mass system. Because the measurement inherently contains
+non-linearities, the manual ﬁtting procedure leads to an uncertain guess. This
+uncertainty of both k and b is taken into account by presenting the sensitivity
+analysis in ﬁgure 19. In the analysis, the roughly found values of k and b are
+considered to be the exact values of the system model.
+In the ﬁgure, the reference inertia proﬁle is plotted together with an
+estimated proﬁle with exact values of k and b and settings f = 80 Hz, ˙θ∗ =
+360◦/s and A = 11.86 Nm. In the upper plot, the sensitivity related to k is
+observed by including estimations with the exact value of b and adjusted
+values of k± 5% and k± 10%. In the lower plot, the sensitivity related to b is
+observed by including estimations with the exact value of k and adjusted
+24
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+0
+2000
+4000
+6000
+8000
+10000
+Load inertia Jl [kg.mm²]
+Sensitivy related to the flexibility k
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+Shifted position θs [°]
+0
+2000
+4000
+6000
+8000
+10000
+Load inertia Jl [kg.mm²]
+Sensitivy related to the damping b
+Error 10%
+Error 5%
+Exact
+Reference
+Error 400%
+Error 200%
+Exact
+Reference
+Jku
+Jkd
+Jki
+Jbu
+Jbi
+Figure 19: Sensitivity related to uncertain values of the ﬂexibility k and damping b.
+values of b± 200% and b± 400% with a lower boundary of b = 0. Obviously,
+negative values of the damping b do not exist in practice.
+For convenience, the estimated proﬁlesJl are corrected with the position lag
+δθ and are thus shifted:
+Jl(θs) =Jl(θ−δθ) (29)
+The ﬁgure shows that at positions of low inertia a wrong guess of k and b
+does not result in a wrong estimation of the load inertia. The reason for that is
+clariﬁed with the observations from the gain characteristic in ﬁgure 7 in section
+3.2. Rough guesses of k and b only aﬀect the estimation at high inertia.
+A next conclusion is that the ﬂexibility k is the most sensitive parameter.
+While an error of k± 10% results in an inaccuracy of (Jku−Jkd)/Jki≈ 11%, it
+takes an error of b + 400% to have an inaccuracy of only (Jbu−Jbi)/Jbi≈ 5%.
+6. Measurements
+To enable online tracking of the varying inertia of the real machine, the
+Simulink code used for co-simulation in ﬁgure 10 is implemented in the
+real-time hardware target. The implementation is carried out with the PLC
+25
+Beckhoﬀ/TwinCAT environment. The system in ﬁgure 10 is now replaced
+with the equivalent input and output signals of the PLC in torque mode. As
+mentioned, the ﬁxed sample time ts of the real-time platform is 0.25 ms.
+The measurement settings are based on the investigated tuning rules with the
+co-simulation approach and are listed in Table 4. In the TwinCAT environment,
+Table 4: Measurement settings
+A [Nm] f [Hz] ˙θ∗ [◦/s]
+1 11.86 80 180
+2 11.86 80 360
+3 11.86 160 180
+the amplitude is speciﬁed as a percentage of the maximum motor torque. For
+all measurements this value is set to 28.5%, resulting in an amplitudeA of 11.86
+Nm. For illustration, a badly chosen frequency f = 160 Hz is included.
+For the measurement with index 1, the input and output signals are shown
+in ﬁgures 20, 21 and 22. Figure 20 shows the torque Tm and ﬁgure 21 shows the
+6.2
+6.4
+6.6
+6.8
+7
+7.2
+7.4
+7.6
+7.8
+8
+-15
+-10
+-5
+0
+5
+10
+15
+7.1
+7.11
+7.12
+7.13
+7.14
+7.15
+7.16
+7.17
+7.18
+7.19
+7.2
+-15
+-10
+-5
+0
+5
+10
+15
+Torque Tm [Nm]
+6
+Time t [s]
+Time t [s]
+Figure 20: Torque command value
+6.2
+6.4
+6.6
+6.8
+7
+7.2
+7.4
+7.6
+7.8
+8
+-200
+-100
+0
+100
+200
+300
+400
+500
+7.1
+7.11
+7.12
+7.13
+7.14
+7.15
+7.16
+7.17
+7.18
+7.19
+7.2
+-200
+-100
+0
+100
+200
+300
+400
+500
+Time t [s]
+Time t [s]
+Velocity θ [°/s]
+6
+Speed setpoint θ*
+Output speed θ
+Figure 21: Measured speed and the speed setpoint
+26
+6.9
+6.9125
+6.925
+6.9375
+6.95
+6.9625
+156
+158
+160
+162
+164
+166
+168
+170
+Position θ [°]
+Time t [s]
+Figure 22: Measured position (close-up of 5 SDFT windows)
+measured speed ˙θ, together with the setpoint ˙θ∗. In ﬁgure 22, a close-up view of
+the measured position θ is shown. When comparing the measured signals with
+the equivalent signals obtained through co-simulation in ﬁgures 12, 13 and 14 it
+is clear that the system behaviour during the estimation routine is very similar,
+except for the obvious noise.
+In ﬁgure 23, the results of the proposed SDFT approach for online tracking
+of varying inertia are presented. In the case of f = 160 Hz the estimated inertia
+is completely wrong. This conﬁrms that the frequency must be selected inside
+the region of interest and choosing a higher frequency with the intention to limit
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+-4000
+-2000
+0
+2000
+4000
+6000
+8000
+10000
+0
+40
+80
+120
+160
+200
+240
+280
+320
+360
+0
+1
+2
+3
+4
+5
+Position lag δθ [°]
+Position θ [°]
+Load inertia Jl [kg.mm²]
+f = 80 Hz, A    12 Nm, θ* = 180 °/s 
+f = 80 Hz, A    12 Nm, θ* = 360 °/s 
+f = 160 Hz, A    12 Nm, θ* = 180 °/s 
+Theoretical reference
+Figure 23: Online tracking of the load inertia with the settings in Table 4
+27
+the position lag δθ is not valid.
+In the case of f = 80 Hz a clear correspondence is found with the
+theoretical reference and therefore the approach is proven to be valid, even in
+noisy conditions. The inherent error due to the position lag δθ is again clearly
+present. However, despite the doubled speed of ˙θ∗ = 360◦/s compared with ˙θ∗
+= 180 ◦/s and thus doubled lag, the tracking error is rather the same. As
+indicated with the sensitivity analysis in section 5.4, the uncertain values of
+ﬂexibility k and damping b lead to an estimation that is smoother and more
+accurate at low inertia than at high inertia.
+7. Conclusion
+This paper presented a SDFT approach for online tracking of rapidly varying
+inertia. The feasibility of the method has been veriﬁed on an industrial machine
+and its CAD equivalent, modelled in a multibody dynamics software package.
+A theoretical reference of the inertia variation has been derived from the kinetic
+energy of a theoretical model of the machine. This theoretical approach has
+proven to be time-consuming and requires the knowledge of the mass properties
+of all linkages of the mechanism, which motivates online estimation.
+Based on the results, the online SDFT approach is valid for both real
+machines and their CAD equivalent. The conditions for proper performance
+are clariﬁed and a summarizing ﬂowchart is given in the appendix. An
+inherent property of the SDFT is the lagging behaviour. By respecting the
+proposed guidelines, the estimation errors due to this lagging behaviour can be
+limited.
+Furthermore it has been proven that the SDFT can track the system response
+online without any prior known mechanical parameters. Still, the conversion
+from the system response to the inertia requires information concerning the
+mechanical load. However, the presented guidelines prove that the number of
+prior known mechanical parameters can be reduced. For example, the approach
+28
+is valid for machines containing kinetic friction without having information of
+this mechanical parameter.
+Nonetheless, a drawback is that values of the stiﬀness and damping of an
+equivalent spring-damper coupling between rotor and load must be known in
+advance. Even a rough estimation of these parameters leads to an accurate
+result of the inertia proﬁle in 1 second. A sensitivity analysis conﬁrms that the
+remaining inaccuracy of the estimated proﬁle is mainly due to these uncertain
+values.
+When comparing the proposed method with existing methods like the
+recursive least-squares algorithm the main progresses are that the mechanical
+parameter is directly estimated leading to faster convergence, noise has nearly
+no inﬂuence on the estimation and less prior known parameters are needed.
+The SDFT approach is thus considered as a contribution towards fast and
+accurate estimation of rapidly varying mechanical parameters.
+Finally, the developed estimation algorithm has proven to be implementable
+in a commercial real-time platform.
+8. Appendix
+8.1. Kinematic relations
+By considering three kinematic loops,ABC,DEGF andABCDF (see ﬁgure
+2), the kinematic relations are found with complex vector analysis of planar
+mechanisms with multiple loops [30]. After position analysis, the geometric
+relations are:
+θ3 =θ4 = 2tan −1
+(
+−b−
+√
+b2− 4ac
+2a
+)
+(30)
+θ2 = sin −1
+(|AB|sin(θ1) +yc
+|CB|
+)
+(31)
+xc =− xf−|DC|sin(θ5)−|FD|cos(θ3) (32)
+yc =− yf−|DC|sin(θ5)−|FD|sin(θ3) (33)
+29
+After taking the continuous derivative, the velocity relations are found:
+˙θ3 = ˙θ4 = |AB|sin(θ1−θ2)
+|FD|sin(θ3−θ2)
+˙θ1 (34)
+˙θ2 = |AB|sin(θ1−θ3)
+|CB|sin(θ2−θ3)
+˙θ1 (35)
+˙xc =
+(
+−|AB|sin(θ1) +|AB|sin(θ1−θ3)
+sin(θ2−θ3) sin(θ2)
+)
+˙θ1 (36)
+˙yc =
+(
+−|AB|sin(θ1−θ3)
+sin(θ2−θ3) cos(θ2) +|AB|cos(θ1)
+)
+˙θ1 (37)
+Note that the distance between two joints of the same link are geometric
+constants. For example, |AB| in (31), which is the distance between joints A
+and B is a constant. Also note that the angle θ5, as depicted in ﬁgure 2, is a
+geometric constant. In (30) and (31), a, b and c are auxiliary variables:
+a = −h1−h5− cos(θ1)(1 +h3)−h4sin(θ1) (38)
+b = 2(sin( θ1) +h2) (39)
+c = h1−h5 + cos(θ1)(1−h3)−h4sin(θ1) (40)
+In (38), (39) and (40), h1, h2, h3, h4 and h5 are auxiliary constants:
+h1 = −xf−|DC|cos(θ5)
+|AB| (41)
+h2 = −yf−|DC|sin(θ5)
+|AB| (42)
+h3 = −xf−|DC|cos(θ5)
+|FD| (43)
+h4 = −yf−|DC|sin(θ5)
+|FD| (44)
+h5 =|AB|2 +|FD|2−|CB|2 + (−yf−|DC|sin(θ5))2 + (−xf−|DC|cos(θ5))2
+2|AB||FD| (45)
+The kinematic relations are now solved and can be used for the theoretical
+derivation of the reference inertia proﬁle in section 2.
+8.2. Flowchart
+A summarizing ﬂowchart for online tracking of varying inertia is given in
+ﬁgure 24. The ﬁrst step is to obtain the mechanical load parameters of the
+30
+simpliﬁed two-mass system. The rotor inertia Jr is found in a data-sheet of the
+motor. An option for ﬁnding the values of the stiﬀness k and damping b of the
+spring-damper coupling between rotor and load is through a model ﬁt with a
+measured frequency response of the machine. The measurement is done at the
+position θmax of maximum inertia because the additional frequency f is also
+selected based on this characteristic in the next step.
+The position θmax of maximum inertia corresponds to the position where
+the distance from the centre of mass of all linkages to the driven joint is
+largest. By considering this property, the position θmax is easily found for
+simple mechanisms like for instance a crank-shaft mechanism. But for more
+Prior knowledge
+f
+G
+Stiffness k, damping b
+Rotor inertia Jr
+Sample time ts
+Maximum torque Tmax 
+Estimation settings
+Additional frequency f
+f
+G
+f*
+θ* SystemPI
+A
+SDFT Jl
+Amplitude A, Speed setpoint θ*
+PI-settings
+Result
+Jl
+θ
+δθ
+Position θmax 
+Figure 24: Flowchart for online tracking of varying inertia
+31
+complex mechanisms like the pick and place unit, the location of the centre of
+mass is diﬃcult to imagine. If a CAD model is available, the position θmax is
+found with motion simulations [31]. If not, an alternative is to measure the
+frequency response at multiple positions. The position θmax of maximum
+inertia then corresponds with the position where the antiresonance is lowest.
+Also a few practical limitations need to be known in advance. The maximum
+motor torque Tmax is found in a data-sheet of the motor. From a manual of the
+real-time platform, the sample time ts is found.
+Next, the estimation settings are tuned. The additional frequency f is
+selected in the region of interest f∗ (located slightly before the antiresonance
+frequency at the position of maximum inertia) while considering that the
+number of samples N must be an integer value greater than 20. Afterwards,
+the PI-settings of the speed controller are tuned without the additional torque
+signal activated. The remaining settings, being the amplitude A of the
+additional torque and the speed setpoint ˙θ∗ are then experimentally tuned by
+using a co-simulation with the CAD equivalent. But if desired, the settings
+can be directly tuned on the real machine.
+The ﬁnal step is to execute the inertia estimation algorithm online and
+evaluate the result. Based on the expected position lag δθ, the estimation
+settings can be re-tuned. This iteration is depicted with the recurring line in
+the ﬂowchart.
+References
+[1] H. Dresig, F. Holzweibig, Dynamics of Machinery: Theory and
+Applications, Springer Science & Business Media, New York, 2010.
+[2] F. Roos, H. Johansson, J. Wikander, Optimal selection of motor and
+gearhead in mechatronic applications, Mechatronics 16 (2006) 63–72.
+[3] M. S. Huang, Y. L. Hsu, R. F. Fung, Minimum-energy point-to-point
+32
+trajectory planning for a motor-toggle servomechanism, IEEE/ASME
+Transactions on Mechatronics 17 (2012) 337–344.
+[4] Y. L. Hsu, M. S. Huang, R. F. Fung, Energy-saving trajectory planning for
+a toggle mechanism driven by a PMSM, Mechatronics 24 (2014) 23–31.
+[5] Y.-L. Hsu, Adaptive Tracking Control of a PMSM-Toggle System with
+a Clamping Eﬀect, International Journal of Mechanical Engineering and
+Applications (2016) 1–10.
+[6] N. V. Oosterwyck, F. Vanbecelaere, M. Haemers, D. Ceulemans,
+K. Stockman, S. Derammelaere, Cad enabled trajectory optimization and
+accurate motion control for repetitive tasks, IEEE 15th International
+Conference on Control and Automation (ICCA) (2019) 387–392.
+[7] A. Wahrburg, E. Jelavic, S. Klose, K. D. Listmann, Robust Semi-Automatic
+Identiﬁcation of Compliantly Coupled Two-Mass Systems, IFAC (2017)
+14569–14574.
+[8] R. Pintelon, J. Schoukens, FRF Measurement of Nonlinear Systems
+Operating in Closed Loop, IEEE Transactions on Instrumentation and
+Measurement (2013) 1334–1345.
+[9] S. Villwock, M. Pacas, T. Eutebach, Application of the welch-method for
+the automatic parameter identiﬁcation of electrical drives, IECON (2005)
+1449–1454.
+[10] M. Calvini, M. Carpita, A. Formentini, M. Marchesoni, PSO-based self-
+commissioning of electrical motor drives, IEEE Transactions on Industrial
+Electronics 62 (2015) 768–776.
+[11] R. Garrido, A. Concha, Inertia and Friction Estimation of a Velocity-
+Controlled Servo Using Position Measurements, IEEE Transactions on
+Industrial Electronics (2014) 4759–4770.
+33
+[12] I. Eker, Experimental on-line identiﬁcation of an electromechanical system,
+ISA Transactions 43 (2004) 13–22.
+[13] P. Kshirsagar, D. Jiang, Z. Zhang, Implementation and Evaluation of
+Online System Identiﬁcation of Electromechanical Systems Using Adaptive
+Filters, IEEE Transactions on Industry Applications 52 (2016) 2306–2314.
+[14] N. Nevaranta, J. Parkkinen, T. Lindh, M. Niemela, O. Pyrhonen,
+J. Pyrhonen, Online Estimation of Linear Tooth-belt Drive System
+Parameters, IEEE Transactions on Industrial Electronics 62 (2015) 7214–
+7223.
+[15] S. E. Saarakkala, M. Hinkkanen, Identiﬁcation of Two-Mass Mechanical
+Systems Using Torque Excitation: Design and Experimental Evaluation,
+IEEE Transactions on Industry Applications 51 (2015) 4180–4189.
+[16] F. Schutte, S. Beineke, A. Rolfsmeier, H. Grotstollen, Online identiﬁcation
+of mechanical parameters using extended Kalman ﬁlters, IEEE (1997) 501–
+508.
+[17] M. Perdomo, M. Pacas, T. Eutebach, J. Immel, Identiﬁcation of Variable
+Mechanical Parameters using Extended Kalman Filters, 2013 9th IEEE
+International Symposium on Diagnostics for Electric Machines, Power
+Electronics and Drives (SDEMPED) (2013) 377–383.
+[18] M. Goubej, Kalman ﬁlter based observer design for real-time frequency
+identiﬁcation in motion control systems, 20th International Conference on
+Process Control (2015) 296–301.
+[19] N. Nevaranta, S. Derammelaere, J. Parkkinen, B. Vervisch, T. Lindh,
+M. Niemela, O. Pyrhonen, Online Identiﬁcation of a Two-Mass System
+in Frequency Domain using a Kalman Filter, Modeling, Identiﬁcation and
+Control 37 (2016) 133–147.
+[20] E. Jacobsen, R. Lyons, The sliding DFT, IEEE Signal Processing Magazine
+20 (2003) 74–80.
+34
+[21] E. Jacobsen, R. Lyons, An Update to the Sliding DFT, IEEE Signal
+Processing Magazine 21 (2004) 110–111.
+[22] K. Duda, Accurate, Guaranteed Stable, Sliding Discrete Fourier Transform
+[DSP Tips & Tricks], IEEE Signal Processing Magazine 27 (2010) 124–127.
+[23] S. Derammelaere, C. Debruyne, F. De Belie, K. Stockman, L. Vandevelde,
+Load angle estimation for two-phase hybrid stepping motors, IET Electric
+Power Applications 8 (2014) 257–266.
+[24] N. Nevaranta, S. Derammelaere, J. Parkkinen, B. Vervisch, T. Lindh,
+K. Stockman, M. Niemela, O. Pyrhonen, J. Pyrhonen, Online Identiﬁcation
+of a Mechanical System in Frequency Domain Using Sliding DFT, IEEE
+Transactions on Industrial Electronics 63 (2016) 5712–5723.
+[25] J. De Viaene, S. Derammelaere, K. Stockman, Load angle estimation for
+dynamic stepping motor motion applications, Mechatronics 53 (2018) 229–
+240.
+[26] R. C. Hibbeler, Chapter 18: Planar Kinetics of a Rigid Body: Work and
+Energy, in: Engineering Mechanics: Dynamics, 14th Edition, Pearson,
+2016, pp. 472–515.
+[27] BECKHOFF, TC3 Bode Plot Manual, 2017, p. 46.
+[28] S. Villwock, M. Pacas, Application of the Welch-Method for the
+Identiﬁcation of Two- and Three-Mass-Systems, IEEE Transactions on
+Industrial Electronics (2008) 457–466.
+[29] M. A. Valenzuela, J. M. Bentley, R. D. Lorenz, Evaluation of torsional
+oscillations in paper machine sections, IEEE Transactions on Industry
+Applications 41 (2005) 493–501.
+[30] W. L. Cleghorn, N. Dechev, Mechanisms of Machines, Oxford University
+Press, 2016.
+35
+[31] G. Berselli, F. Balugani, M. Pellicciari, M. Gadaleta, Energy-optimal
+motions for Servo-Systems: A comparison of spline interpolants and
+performance indexes using a CAD-based approach, Robotics and
+Computer-Integrated Manufacturing 40 (2016) 55–65.
+36

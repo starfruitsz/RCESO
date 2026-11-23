@@ -1,0 +1,908 @@
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMA TICS, VOL. 21, NO. 9, SEPTEMBER 2025 7311
+Adaptive Parameter Estimation Based Nonlinear
+Active Disturbance Rejection Controller for a
+PMSM System
+Honghao Xia , Shengquan Li , Senior Member, IEEE , Zhengrong Xiang , Member, IEEE ,
+Donglei Chen, and Zhe Li
+Abstract— Considering total disturbances, i.e., parameter
+variation, model error, and load mutation, an adaptive ac-
+tive disturbance rejection control (adaptive ADRC) method
+is proposed to regulate the speed of permanent magnet
+synchronous motor system (PMSMs) in this article. First,
+a tracking state space model of a PMSMs is structured with
+adaptive parameter estimation of inertia and ﬂux. Second,
+a nonlinear extended state observer (ESO) based on an
+adaptive law is designed to estimate the total disturbances
+for feedforward compensation. A ﬁnite time bounded stabil-
+ity theory is established to analyze the proposed nonlinear
+ESO. In addition, the stability of the closed-loop system is
+proved by a Lyapunov stability theory based on a proposed
+positive deﬁnite scalar function. Finally, the speed regu-
+lation and antidisturbance performances of the proposed
+adaptive ADRC controller are veriﬁed by an experimental
+platform based on DSPF28335 and MATLAB/SIMULINK. The
+reliability and superiority of the proposed controller are
+veriﬁed by simulation and experiment results.
+Index Terms— Adaptive active disturbance rejection con-
+trol (Adaptive ADRC), adaptive law, parameter variations,
+permanent magnet synchronous motor (PMSM), system
+veriﬁcations.
+I. I NTRODUCTION
+P
+ERMANENT magnet synchronous motor system
+(PMSMs) has been widely used in military and industrial
+ﬁelds due to its advantages of high air gap ﬂux density, high
+torque capacity, and high power density [1], [2]. Unfortunately,
+in practical industrial productions, the speed regulation
+performance of PMSMs will be degraded due to the unknown
+parameters and total disturbances [3]. Conventional control
+algorithm is difﬁcult to obtain excellent anti-disturbance ability
+Received 14 March 2025; accepted 22 May 2025. Date of publication
+16 June 2025; date of current version 4 September 2025. This work
+was supported by the National Natural Science Foundation of China
+under Grant 61903322. Paper no. TII-25-1543. (Corresponding authors:
+Shengquan Li; Zhengrong Xiang.)
+Honghao Xia, Shengquan Li, Donglei Chen, and Zhe Li are with the
+College of Electrical, Energy and Power Engineering, Y angzhou Univer-
+sity , Y angzhou 225127, China (e-mail: mz120221190@stu.yzu.edu.cn;
+sqli@yzu.edu.cn; dlchen@yzu.edu.cn; lizhe@yzu.edu.cn).
+Zhengrong Xiang is with the School of Automation, Nanjing Univer-
+sity of Science & T echnology , Nanjing 210094, China (e-mail: xiangzr
+@njust.edu.cn).
+Digital Object Identiﬁer 10.1109/TII.2025.3575128
+and high-precision speed-tracking performance, simultaneously
+[4].
+Thus, parameter identiﬁcation and adaptive control technolo-
+gies are effective ways to solve the problem of unknown pa-
+rameters for PMSMs in recent years. In [5], a novel ﬁnite-time
+extended state observer based on an inertia identiﬁcation method
+is developed to real-time calculate the true inertia value. In [6],
+a variable structure extended sliding mode observer for load
+torque observation is designed to simultaneously realize identi-
+ﬁcation of load torque and rotational inertia. Parameter identi-
+ﬁcation method often depends on precise mathematical model,
+while accurate system model is difﬁcult to obtain in practical
+systems [7]. Adaptive control technologies have been gradually
+applied to solve unknown parameters for PMSMs, which can
+ﬂexibly adjust its own parameters according to the variations
+of the environment [8], [9], [10].I n [11], an adaptive nonlinear
+control with a three-layer neural network approximator is pro-
+posed to improve speed tracking performance by using nonlinear
+information gain subjected load torque variation. Meanwhile,
+the application of observer in adaptive control technologies can
+enhance the ability to estimate the unknown disturbances and
+improve the control accuracy of PMSMs [12], [13].I n [14],
+an adaptive sliding mode control law based on a disturbance
+observer is proposed to improve the ability of suppressing the
+load disturbance for PMSMs. However, model-based-observer
+control technologies are often limited due to their sensitivity to
+perturbations of model parameters in engineering applications.
+Active disturbance rejection controller (ADRC), i.e.,
+extended-state-observer (ESO) based controller, independent on
+system model, originated with a nonlinear control structure, is an
+alternative disturbance estimation technology with advantages
+of high precision and fast response in speed tracking [15], [16].
+However, the conventional ADRC is often designed with the
+ﬁxed observer bandwidth and gains [17], [18]. It is difﬁcult to
+achieve satisfactory speed regulation performance in the face
+of unknown parameters, which will also limit some practical
+industrial applications [19], [20].I n [21], an adaptive ADRC
+controller based on generalized integrator ESO is proposed to
+solve the instability problem caused by torque ripple. In [22],a n
+ESO is optimized by an adaptive resonant controller to attenuate
+both the aperiodic disturbances and periodic uncertainties. These
+adaptive ADRC controllers can suppress the uncertain ripple
+1941-0050 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artiﬁcial intelligence and similar technologi es.
+Personal use is permitted, but republication/redistribution requires IEEE permission. See https://www.ieee.org/publications/rights/index. html
+for more information.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+7312 IEEE TRANSACTIONS ON INDUSTRIAL INFORMA TICS, VOL. 21, NO. 9, SEPTEMBER 2025
+for current loop of PMSMs. A neural sliding mode control
+based on an ESO is proposed to solve uncertain parameters
+and the error of neural network in [23], while the satisfactory
+speed tracking performance and anti-disturbance ability of the
+proposed method is merely validated through the simulation
+results. In [24], an ESO with adaptive gains is proposed to
+attenuate the peak problem of ESO estimation and compensate
+for the mismatched disturbances of the noncascade-controlled
+PMSM, since it is adaptive to adjust the bandwidth of ESO and
+the estimated disturbances with the error of speed. To sum up,
+in order to consider the inﬂuence of parameter uncertainty and
+total disturbances on speed regulation performance of PMSMs,
+it is meaningful to combine ADRC method with the adaptive
+control technology.
+In this article, an adaptive ADRC controller is proposed to
+enhance the speed regulation and anti-disturbance ability of
+PMSMs under the double-loop structure. The main contributions
+of this article are summarized as follows.
+1) The conventional approach to solve unknown parameters
+is based on parameter identiﬁcation. However, the param-
+eter identiﬁcation often depends on precise mathematical
+model. In this article, a tracking state space model of a
+PMSMs is structured with adaptive parameter estimation
+of inertia and ﬂux.
+2) Compared to [24], this article combines adaptive laws
+that derived from the stability of the entire closed-loop
+system by cooperating ADRC for total disturbances. Fur-
+thermore, the parameter selection of the adaptive law also
+takes into account the system performance.
+The rest of this article is organized as follows. Mathematical
+modeling of PMSM is presented in Section II. The design
+and stability analysis of the proposed adaptive ADRC speed
+controller are illustrated in SectionIII. In Section IV, a hardware
+in the loop of experimental platform for PMSM experimental
+platform, combing MA TLAB/SIMULINK and DSP chip, is
+design to verify the reliability and superiority of the proposed
+speed controller. Finally, Section V concludes this article.
+II. P ROBLEM FORMULA TION
+The surface-type PMSM is discussed in the article, so the
+condition is satisﬁed approximately Ld = Lq . In synchronous
+d−q coordinate system, the PMSM can be modeled as follows:
+{ud = Rsid +Ld
+did
+dt −nωLqiq
+uq = Rsiq +Lq
+diq
+dt +nωLdid +nωψf
+(1)
+where uq , ud are stator voltage of q − axis, and d− axis, re-
+spectively. Parameters iq and id represent the state currents of
+q − axis, and d− axis, respectively. In addition, parameters Lq
+andLd represent the inductances ofq/d − axis[25]. Parameters
+RS ,ω, andψf are the stator winding resistance, mechanical an-
+gular speed, and permanent magnet ﬂux vector, respectively. The
+pole logarithm of motor is described by n. The magnetic ﬁeld
+oriented vector controller with i∗
+d = 0 is adopted to decoupling
+between angular velocity and currents. The mechanical dynamic
+model describing the relationship between the load and PMSM
+is further detailed as follows:
+{dω
+dt = 1
+J (Te −Tm −Bω)
+Te = 3
+2nψfiq
+(2)
+whereJ,Tm,B, and Te are the moment of inertia, load torque,
+friction factor, and electromagnetic torque, respectively.
+Remark 1: According to (2), electromagnetic torque Te is
+only inﬂuenced by currents iq , which is the control quantity of
+the speed of PMSMs. Therefore, due to the load mutation in
+practical PMSM system, variations of J and ψf will result in
+adverse effect on the speed regulation performance of PMSMs.
+The parameterˆb can be deﬁned as the estimated value of con-
+trol coefﬁcient of nominal model b0, deﬁned as b0 = 3nψf/2J.
+The mechanical dynamic model can be further deduced as
+follows:
+˙ω =ˆbiq + 1
+J (−Tm −Bω)+(b0 −ˆb)iq. (3)
+A novel speed tracking state space model is proposed by
+deﬁning the state variables x1 and x2 as x1 = ω and x2 =
+f = 1
+J (−Tm −Bω)+(b0 −ˆb)iq , so following(4) can be further
+constructed from (3)
+⎧
+⎨
+⎩
+˙x1 = x2 +(b0 +Δb)u
+˙x2 = ˙f
+x1 = ω
+(4)
+where the error betweenˆb andb0 can be deﬁned asΔb =ˆb−b0.
+The control quantity u can be deﬁned as the expected value of
+iq .
+Remark 2: The error Δb is deﬁned to enhance the accuracy
+of adaptive law of parameter estimation. This modeling of
+PMSMs deals with the unknown parameters and deﬁnes the total
+disturbances.
+III. C ONTROL SCHEME
+In practical applications on PMSMs, speed regulation and
+antidisturbance abilities are important indices for evaluating the
+performances of a control system, since an ADRC controller
+with parameter adaptive law is designed as follows.
+A. Design and Convergence of Nonlinear ESO
+In order to achieve satisfactory performance, a nonlinear ESO
+is developed to estimate total disturbances [15], [26]. According
+to (4), nonlinear ESO model can be established as follows:
+⎧
+⎨
+⎩
+e1 = z1 −ω
+˙z1 = z2 −β1ϕ(e1)+( b0+Δb)u
+˙z2 = −β2ϕ(e1)
+(5)
+where z1 and z2 are the estimation values of x1 and x2,r e -
+spectively. The positive gains β1 and β2 satisfy β1 = 2ω0 and
+β2 = ω02, where the coefﬁcient ω0 is the bandwidth of ESO, so
+a function ϕ(e1)can be deﬁned as follows:
+ϕ(e1)= fal(e1,α,δ )=
+{ e1
+δ1−α ,(|e1|≤ δ)
+sign(e1)|e1|α,(|e1| >δ ) (6)
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+XIA et al.: ADAPTIVE P ARAMETER ESTIMA TION-BASED NONLINEAR ACTIVE DISTURBANCE REJECTION CONTROLLER 7313
+Fig. 1. Structure of the proposed nonlinear ESO.
+where the factor α and δ are the degree of power and linear
+interval, respectively. Meanwhile, the structure of nonlinear
+ESO is shown in Fig. 1.
+It is essential to ensure convergence of the proposed nonlinear
+ESO for ADRC, since the proof of nonlinear ESO convergence
+will be given as following section.
+Theorem 1: If the coefﬁcients β1 and β2 of the proposed
+nonlinear ESO satisfy as follows:
+{
+βi > 0,(i = 1, 2)
+μβ1 −β2 > 0 (7)
+so observer error system (5) converges to zero in ﬁnite time.
+The variable μ is deﬁned to satisfy (7).
+Proof: The Lyapunov function can be selected as follows:
+Ve = ηTPη (8)
+where η and P can be deﬁned as η =[ ϕ(e1(t)) e2(t)]
+T
+andP =
+[
+β1
+2 +β2
+2
+−β2
+−β2
+2
+]
+, respectively. The observer error
+e2 is deﬁned as e2(t)= z2(t)−f(t). Then, (8) can be further
+calculated as follows:
+Ve = β1
+2ϕ(e1
+2(t))+ e2
+2(t)+( β2ϕ(e1(t))−e2(t))2 ≥ 0.
+(9)
+In addition, ˙η, deﬁned as the differentiation of vector, needs
+to satisfy following:
+˙η =
+[μ(e2(t)−β1ϕ(e1(t)))
+˙h(t)−β2ϕ(e1(t))
+]
+= Aη +B˙h(t),
+(10)
+where the matricesA and B are deﬁned asA =[ −μβ1
+−β2
+μ
+0 ] and
+B =[ 0
+1], respectively. The differentiationh(t) can be deﬁned as
+h(t)= f(t).
+According to system matrix A, the characteristic polynomial
+can be deﬁned as follows:
+G(ξ)= |ξI −A| = ξ2 +β1μξ +β2μ (11)
+where ξ is the Laplacian variable. In addition, observer ad-
+justable gains β1, β2, and the variable μ will satisfy (7) with
+positive numbers for coefﬁcients of G(ξ), so the matrix A is
+Hurwitz. The derivative of the Lyapunov function (9) can be
+deduced as follows:
+˙Ve =˙ηTPη +ηTP ˙η
+=( Aη +B˙h(t))
+T
+Pη +ηTP(Aη +B˙h(t))
+= ηT(ATP +PA)η + 2˙hT(t)M0η
+(12)
+where M0 and˙hT(t)satisfy M0 = −BTP =[ β2, 2] and
+|˙hT(t)|≤ H. The factor M can be deﬁned as M = ‖M0‖=√
+β2
+2 + 4. Considering that matrix A is Hurwitz, a positive
+deﬁnite matrix Q can be obtained as follows:
+ATP +PA = −Q. (13)
+Inequation (14) based on (8) can be expressed as follows:
+λmin {P}‖η‖2 ≤ Ve ≤ λmax {P}‖η‖2 (14)
+where‖η‖2 = ϕ2(e1(t))+ e22(t). According to (13), the deriva-
+tive of Ve = ηTPη is deduced as follows:
+˙Ve ≤− ηTQη + 2˙hT(t)M0 ‖η‖
+≤− λmin {Q}‖η‖2 + 2HM ‖η‖
+= − 1
+2(λmin {Q}‖η‖2 − 4HM ‖η‖)− 1
+2 λmin {Q}‖η‖2.
+(15)
+Inequation ˙Ve ≤ 0 is proved to select the parameters with
+‖η‖≥ 4HM
+λmin{Q} . In particular, when ‖η‖≥ 4HM
+vλmin{Q} and 0 <
+v< 1, inequation (15) can be deduced as follows:
+˙Ve ≤− λ1‖η‖2 − λ2 ‖η‖ (16)
+where the coefﬁcients λ1 and λ2 satisfy λ1 = − 1
+2 λmin{Q} and
+λ2 = 2HM(1−v)
+v , respectively. Inequation (17) can be obtained
+by substituting (14) into (16) as follows:
+˙Ve ≤ λ1
+λmax {P}Ve − λ2√
+λmax {P}
+√
+Ve. (17)
+When the coefﬁcients λ1 < 0 and λ2 > 0, the dynamic system
+is stable, since the observer error can converge to the region of
+{‖η‖≥ 4HM
+λmin{Q}} within the ﬁnite timeT1. In addition, the ﬁnite
+time T1 satisﬁes as follows:
+T1 ≤ 2λmax {P}
+λ1
+In
+λ1√
+λmax{P}
+√
+Ve(0)+ λ2√
+λmax{P}
+λ2√
+λmax{P}
+(18)
+whereVe(0) is the initial value of Ve(e(t)). The nonlinear ESO
+convergence is proved by the above deduction.
+B. Design of Adaptive ADRC Controller
+Signiﬁcant ﬂuctuations in the current loop can lead to exces-
+sively large transient currents when the given speed varies. A
+tracking differentiator (TD) is designed to manage the transi-
+tion process, balancing the contradiction between fast response,
+overshoot, and the initial surge of the manipulated variable [27].
+In addition, the TD is beneﬁcial for eliminating system noise
+by extracting differences in the speed signal. Similar to [28],
+transfer function of TD is selected as follows:
+W(s)= r2s
+s2 + 2rs +r2. (19)
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+7314 IEEE TRANSACTIONS ON INDUSTRIAL INFORMA TICS, VOL. 21, NO. 9, SEPTEMBER 2025
+Fig. 2. Speed loop control based on adaptive ADRC.
+For most engineering applications, linear TD sufﬁciently
+meets the balance between control accuracy and computational
+resource requirements. So, in order to simplify TD to achieve
+the purpose of reducing regulation parameters and practicality,
+a linear TD is designed as follows:
+{˙v1 = v2
+˙v2 = −r2(v1 −ω∗)− 2rv2
+(20)
+wherev1 andv2 are the tracking input signal and its differential
+of the given speed ω∗, respectively. Considering the tracking
+performance, the parameter r, satisﬁed r> 0, is deﬁned as the
+velocity coefﬁcient of the given speed. In addition, an adaptive
+ADRC controller with TD can be constructed as follows:{u0 = kpfal(e0,α,δ )
+u = u0 − z2
+b0+Δb
+(21)
+where the error e0 is deﬁned as e0 = v1 −z1. The gain of feed-
+back is described by kp, so the schematic diagram of adaptive
+ADRC controller for the speed of PMSMs is shown in Fig. 2.
+The adaptive law of parameter estimation can be designed as
+follows:
+(b0 +Δb)Δ˙b
+= −k1z1 [−β1fal(e1,α,δ )+ kp(b0 +Δb)fal(e0,α,δ )]
++k2z2β2fal(e1,α,δ )+ k3v2r2(v1 −ω∗),
+(22)
+where the coefﬁcientsk1,k2, andk3 are all the positive numbers.
+Thus, the adaptive law is integrated over time t on both sides
+according to (5) as follows:
+∫
+Δ˙b(b0+Δb)dt=
+∫
+[−k1z1 ˙z1−k2z2 ˙z2+k3 ˙v1r2(v1−ω∗)]dt.
+(23)
+Then, (23) is further deduced as follows:
+b0Δb+ 1
+2Δb2 = −k1
+2 z1 2 − k2
+2 z2 2 +k3r2
+( 1
+2v1
+2 −ω∗v1
+)
+.
+(24)
+When the load is applied to PMSMs, the moment of inertia
+J will increase, while the variation of permanent magnet ﬂux
+vector ψf will be minimal. According to b0 = 3nψf
+2J , the error
+Δb satisﬁes −b0 < Δb ≤ 0. So, inequation (25) can be deduced
+as follows:
+b0Δb+ 1
+2Δb2 > − 1
+2b0
+2. (25)
+Then, inequation (26) can be obtained by substituting (25)
+into (24)
+−k1
+2 z1 2 − k2
+2 z2 2 +k3r2
+( 1
+2v1
+2 −ω∗v1
+)
+> − 1
+2b0
+2. (26)
+Remark 3: In order to ensure the effectiveness of the adaptive
+law, the range of parameter k1,k2, and k3 should be satisﬁed as
+follows:
+⎧
+⎨
+⎩
+k1
+2 z1 2 < 1
+2b0
+2
+k2
+2 z2 2 < 1
+2b0
+2
+k3r2( 1
+2v12 −ω∗v1) > − 1
+2b0
+2
+. (27)
+So, the range of parameter k1 can be obtained by considering
+the condition −b0 < Δb ≤ 0 as follows:
+0 <k 1 <
+(b0
+z1
+)2
+. (28)
+The maximum value of z1 is the estimated value of given
+speedω∗, so the range of k1 satisﬁes following:
+0 <k 1 <
+( b0
+ω∗
+)2
+. (29)
+Considering z2 is the estimation value of x2, the maximum
+value of |z2| can be deﬁned as |z2|max = N = Tm+Bω∗
+J by
+taking an appropriate value of ω0 according to (4) and (5),s o
+the range of parameter k2 can be obtained as follows:
+0 <k 2 <
+(b0
+N
+)2
+. (30)
+Then, the condition k3r2( 1
+2v12 −ω∗v1) achieves the mini-
+mum value when the tracking signal v1 satisﬁes v1 = ω∗,s o
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+XIA et al.: ADAPTIVE P ARAMETER ESTIMA TION-BASED NONLINEAR ACTIVE DISTURBANCE REJECTION CONTROLLER 7315
+the range of parameter k3can be obtained by considering the
+condition k3r2( 1
+2v12 −ω∗v1) > − 1
+2b0
+2 as follows:
+0 <k 3 <
+( b0
+rω∗
+)2
+. (31)
+C. Closed-Loop System Stability Analysis
+The stability of closed-loop system is proved as the theorem.
+Theorem 2: If the coefﬁcients k1,k2, and k3 of the designed
+adaptive law (22) satisfy as follows:
+⎧
+⎪⎨
+⎪⎩
+0 <k 1 < (b0
+ω∗ )
+2
+0 <k 2 < (b0
+N )
+2
+0 <k 3 < ( b0
+rω∗ )
+2
+. (32)
+Therefore, the closed-loop system is stable.
+Proof: The Lyapunov function can be selected as follows:
+V=k1
+2 z1
+2 + k2
+2 z2
+2 + k3
+2 v2
+2 + 1
+2(b0 +Δb)2. (33)
+The derivative of Lyapunov function can be deduced as fol-
+lows:
+˙V=k1z1 ˙z1 +k2z2 ˙z2 +k3v2 ˙v2 +(b0 +Δb)Δ˙b. (34)
+Equation (35) can be obtained by substituting into (33)
+˙V = k1z1 [−β1fal(e1,α,δ )+ kp(b0 +Δb)fal(e0,α,δ )]
+−k2z2β2fal(e1,α,δ )+ k3v2
+[
+−r2(v1 −ω∗)− 2rv2
+]
++(b0 +Δb)Δ˙b. (35)
+According to (22), (35) can be deduced as follows:
+˙V=− 2k3rv2
+2 < 0. (36)
+The entire control system remains stable when the control
+parameters are appropriately selected, thus completing the proof.
+D. Parameter Selection Guidelines
+First, the coefﬁcients k1, k2, and k3 of the designed adaptive
+law need to satisfy (30). Then, system stability, estimation’s pre-
+cision and antidisturbance ability should be taken into account.
+The parameters tuning guidelines are summarized as following
+section.
+1) The selection of parameters ω0 necessitates a careful con-
+sideration of both the stability of system and the precision
+of the observer [29].
+2) The coefﬁcient kp is adjusted to strike a balance between
+response dynamics and overshoot.
+3) The parameter r of TD should be carefully selected to bal-
+ance computational efﬁciency and tracking performance.
+Finally, the parameters will be validated and reﬁned through
+simulation and experimental tests.
+IV . SYSTEM VERIFICA TION
+This section conducts simulation and experimental studies to
+validate the feasibility and effectiveness of the proposed adaptive
+ADRC controller. The performance of the proposed controller
+T ABLE I
+PARAMETERS OF THE EXPERIMENT BENCHMARK
+T ABLE II
+CONTROL PARAMETERS
+is veriﬁed by comparing with the conventional ADRC control
+strategy. The parameters of PMSMs are given in Table I.T h e
+output quantities of the methods, with the same bandwidth for
+both of ESO-based controllers, have the same saturation limit
+for fair comparison in the following simulation and experimental
+veriﬁcation for the sake of fairness in comparisons. Meanwhile,
+the same parameters as those of the proposed adaptive ADRC
+controller are also given in Table II.
+A. Simulation Results
+The control parameters of different controllers are selected to
+strike a balance between responsiveness and overshoot, with the
+parameters chosen as follows.
+1) ADRC: b0 = 4600.
+2) Adaptive ADRC: k1 = 12;k2 = 3× 10−4; andk3 = 1×
+10−6.
+The proposed adaptive ADRC controller is tested in MA T-
+LAB/Simulink environment. Comparisons of speed control and
+anti-disturbance performances are presented in Figs. 3, 4, 5, 6,
+7, 8, 9, and 10, with dynamic and stead state curves highlighted
+in partially enlarged views.
+Case 1: performance comparisons in speed control.
+To ensure consistency with the simulation and experimental
+results, the motor speednN is calculated bynN = 30ωm/π.T h e
+responses of motor speednN andq −axis currentiq are shown
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+7316 IEEE TRANSACTIONS ON INDUSTRIAL INFORMA TICS, VOL. 21, NO. 9, SEPTEMBER 2025
+Fig. 3. Motor speed nN under variable speed in simulation.
+Fig. 4. q-axis current iq under variable speed in simulation.
+Fig. 5. Error e1 under variable speed in simulation.
+Fig. 6. Error Δb under variable speed in simulation.
+in Figs. 3 and 4, respectively. First, the reference speed is given
+as 500 r/min, then it is varied to 1000 r/min without load torque
+at t = 0.2 s. As shown in Figs. 3 and 4, the reference speed
+can be more quickly tracked in adaptive ADRC method while
+keeping the same control current iq as the conventional ADRC
+Fig. 7. Motor speed nN under sudden load in simulation.
+Fig. 8. q-axis current iq under sudden load in simulation.
+Fig. 9. Error e1 under sudden load in simulation.
+Fig. 10. Error Δb under sudden load in simulation.
+controller. In addition, it is shown in Fig. 5 that the tracking
+error e1of adaptive ESO is smaller than that of conventional
+ESO about 70% with speed increasing. In addition, the value
+of Δb decreases at 0.3 s as shown in Fig. 6. The simulation
+results show that the adaptive ADRC controller can achieve the
+satisfactory speed regulation performances.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+XIA et al.: ADAPTIVE P ARAMETER ESTIMA TION-BASED NONLINEAR ACTIVE DISTURBANCE REJECTION CONTROLLER 7317
+Fig. 11. Motor speed nN under different coefﬁcients k1.
+Fig. 12. q-axis current iq under different coefﬁcients k1.
+Fig. 13. Motor speed nN under different coefﬁcients k2.
+Case 2: performance comparisons on disturbance.
+In this part, the response of motor speed nN and q −
+axiscurrent iq are shown in Figs. 7 and 8, respectively. The
+reference speed is given as 1000r/min, then the load is suddenly
+added at 0.2 s. As shown in Figs. 7 and 8, the adaptive ADRC
+controller has better antidisturbance ability by keeping the same
+response speed and control amountiq as the conventional ADRC
+controller. The value of e1 shown in Fig. 9 indicates that the
+tracking performance of adaptive ESO is better than that of
+conventional ESO. In addition, the value of Δb decreases when
+the load is suddenly subjected in Fig. 10.
+B. Comparative Veriﬁcation in Simulation
+In order to verify appropriate coefﬁcients k1, k2, and k3,t h e
+comparative results are shown in Figs. 11 , 12, 13, 14, and 15.
+As shown in Figs. 11, 12, 13, and 14, the ﬂuctuations of nN
+and iq are more stable with the smaller coefﬁcients k1 and k2.
+However, the performances of antidisturbance ability are not
+satisfactory. Thus, as shown in Fig. 15, the estimation of ESO
+will be more accurate with the smaller coefﬁcient k3, while
+Fig. 14. q-axis current iq under different coefﬁcients k2.
+Fig. 15. Error e1 under different coefﬁcients k3.
+the estimation’s precisions are consistent when k3 = 1× 10−6
+andk3 = 1× 10−10. The comparative results show that: (1) the
+coefﬁcients k1 and k2 have to be chosen to balance system
+stability and anti-disturbance ability; (2) the value of coefﬁcient
+k3 should be selected as small as possible.
+C. Experimental Platform Setup
+According to Fig. 16, the experimental platform is mainly
+composed of PMSM, DSP control chip, peripheral circuit, in-
+verter and host computer. The DSP control chip transmits in-
+structions and uploads data with the host computer through SCI
+module. Based on analog-to-digital converter (ADC) module
+and peripheral circuit, the detections of dc-bus volt age and line
+current during motor operation are realized. The PWM module is
+controlled to generate a complete vector-controlled space vector
+pulse width modulation (SVPWM) wave, which is output to the
+inverter to produce the circular rotating magnetic ﬁeld required
+for PMSM operation. Through quadrature encoded pulses (QEP)
+module, the feedback signal of photoelectric encoder on PMSM
+is collected and counted to obtain the position and speed infor-
+mation of PMSM in operation. The function of the hysteresis
+dynamometer is to applied as an inherent load for PMSM.
+D. Experiment Results and Analysis
+Compared with the simulation, the parameters selected in the
+experiment are chose as follows.
+1) ADRC: b0 = 4000.
+2) Adaptive ADRC: k1 = 8; k2 = 1.2× 10−6; and k3 =
+1× 10−12.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+7318 IEEE TRANSACTIONS ON INDUSTRIAL INFORMA TICS, VOL. 21, NO. 9, SEPTEMBER 2025
+Fig. 16. Hardware of the whole experimental system. (a) Upper com-
+puter and power source (b) PMSM, motor controller and load.
+Fig. 17. Motor speed nN under variable speed in experiment.
+Case 1: Performance Comparisons in Speed Control.
+The responses of motor speed nN and q − axiscurrent iq
+are shown in Figs. 17 and 18. To verify the simulation anal-
+ysis, the reference speed is also given as 500 r/min. Then,
+the speed is varied to 1000 r/min without load torque at t =
+5 s. As shown in Figs. 17 and 18, the reference speed can
+be quickly tracked in adaptive controller at 0.65 and 5.66 s,
+respectively. In comparison, the conventional ADRC controller
+reaches the reference speed at 0.98 and 5.95 s, respectively,
+while keeping the same control current iq . So, the speed reg-
+ulation performance of adaptive ADRC controller is better than
+that of conventional ADRC controller. The detailed dynamic
+performances under speed variations are given in Table III.
+From the Fig. 19, it can be seen that the tracking error e1 of
+adaptive ESO is smaller than conventional ESO about 30%
+when the speed is suddenly varied. Moreover, the error Δb
+Fig. 18. q-axis current iq under variable speed in experiment.
+T ABLE III
+DYNAMIC PERFORMANCE UNDER SPEED VARIA TIONS
+Fig. 19. Error e1 under variable speed in experiment.
+Fig. 20. Error Δb under variable speed in experiment.
+can be seen from Fig. 20, which is similar to simulation
+result.
+Case 2: Performance Comparisons on Disturbance.
+The curves of motor speed nN and q − axis current iq are
+shown in Figs. 21 and 22, respectively. The reference speed
+is given as 1000 r/min, then load is suddenly added at 9.2 s.
+As shown in Figs. 21 and 22, the maximum speed variation of
+adaptive ADRC controller is 59 r/min within 1.26 s which is
+smaller than that of conventional ADRC controller is 72 r/min
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+XIA et al.: ADAPTIVE P ARAMETER ESTIMA TION-BASED NONLINEAR ACTIVE DISTURBANCE REJECTION CONTROLLER 7319
+Fig. 21. Motor speed nN under sudden load in experiment.
+Fig. 22. q-axis current iq under sudden load in experiment.
+T ABLE IV
+DYNAMIC PERFORMANCE UNDER SUDDENL YAPPLIED LOAD
+T ABLE V
+PERFORMANCE OF ESO UNDER SUDDENL YAPPLIED LOAD
+within 1.69 s, while keeping the same control current iq .T h e
+detailed dynamic performances under suddenly applied load are
+given in Table IV. The integral of e1 is given in Table V.D u et o
+the experimental load, there are initial errors in the adaptive law,
+which causes the error e1 ﬂuctuations of the adaptive ADRC to
+be larger than those of the conventional ADRC during the 0 –2
+s. However, it is evident that the error e1 of the adaptive ADRC
+become smaller compared to the conventional ADRC after 2 s.
+When the load is added at 9.2 s, the observed values of adap-
+tive ADRC demonstrate signiﬁcantly higher accuracy shown in
+Fig. 23. The errorΔb can be seen from Fig. 24. Due to the initial
+load present in the hysteresis dynamometer, there exists an error
+in Δb within 0-2 s. However, the value of Δb will decrease
+Fig. 23. Error e1 under sudden load in experiment.
+Fig. 24. Error Δb under sudden load in experiment.
+abruptly at 9.2 s. The experimental results well verify the simu-
+lation analysis and show the effectiveness of the adaptive ADRC
+controller.
+V. C ONCLUSION
+The problem of unknown parameters is solved by constructing
+an adaptive law to estimate the variations of parameters in this
+article. Meanwhile, a nonlinear ESO is designed to estimate the
+total disturbances for feedforward compensation. In addition,
+the stability of the closed-loop system is proved by a Lyapunov
+stability theory based on the proposed positive deﬁnite scalar
+function. According to the experiment results, the speed re-
+sponse characteristics and anti-disturbance ability of the adap-
+tive ADRC have been enhanced by 53% and 22%, respectively.
+Compared to the conventional ADRC controller, the proposed
+adaptive ADRC controller not only offers improved speed reg-
+ulation performance but also exhibits stronger anti-disturbance
+ability. Both simulation and experimental results demonstrate
+the effectiveness and superiority of the proposed adaptive ADRC
+controller. In addition, the shortcoming of the adaptive ADRC
+controller proposed in this article is mainly manifested in the
+following aspect. Due to the unknown parameters of PMSMs,
+some motor parameters are estimated by adaptive law in this
+article, but these still need to be optimized, such as incorporating
+certain punitive mechanisms. Future work will focus on the anal-
+ysis of adaptive parameters and the design of bandwidth of ESO
+to develop control performance for engineering applications. In
+addition, it is necessary to compare with other control schemes
+to enhance performance, practicality, and range of application.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+7320 IEEE TRANSACTIONS ON INDUSTRIAL INFORMA TICS, VOL. 21, NO. 9, SEPTEMBER 2025
+REFERENCES
+[1] X. Lin et al., “Observer-based prescribed performance speed control for
+PMSMs: A data-driven RBF neural network approach,” IEEE Trans. Ind.
+Inform., vol. 20, no. 5, pp. 7502–7512, May 2024.
+[2] H. Y an, H. Wang, Y . Xu, and J. Zou, “Position sensorless control for PMSM
+drives with single current sensor,”IEEE Trans. Ind. Electron., vol. 70, no. 1,
+pp. 178–188, Jan. 2023.
+[3] Z. Ping, T. Wang, Y . Huang, H. Wang, J. Lu, and Y . Li, “Nonlinear
+internal model control of PMSM position servo system: Theory and exper-
+imental results,” IEEE Trans. Ind. Inform., vol. 16, no. 4, pp. 2202–2211,
+Apr. 2020.
+[4] T. Shi, W. Zou, J. Guo, and Z. Xiang, “Adaptive speed regulation for
+permanent magnet synchronous motor systems with speed and current
+constraints,” IEEE Trans. Circuits Syst. II, Exp. Briefs , vol. 71, no. 4,
+pp. 2079–2083, Apr. 2024.
+[5] Q. Hou and S. Ding, “Finite-time extended state observer-based super-
+twisting sliding mode controller for PMSM drives with inertia identi-
+ﬁcation,” IEEE Trans. Transp. Electriﬁc. , vol. 8, no. 2, pp. 1918–1929,
+Jun. 2022.
+[6] S. Tang, T. Shi, Y . Cao, Z. Lin, Z. Wang, and Y . Y an, “Simultaneous
+identiﬁcation of load torque and moment of inertia of PMSM based on
+variable structure extended sliding mode observer,” IEEE Trans. Power
+Electron., vol. 39, no. 7, pp. 8585–8596, Jul. 2024.
+[7] G. Su, P . Wang, Y . Guo, G. Cheng, S. Wang, and D. Zhao, “Multiparameter
+identiﬁcation of permanent magnet synchronous motor based on model ref-
+erence adaptive system-simulated annealing particle swarm optimization
+algorithm,” Electronics, vol. 11, no. 1, Jan. 2022. Art. no. 159.
+[8] L. Liu, W. Zheng, and S. Ding, “An adaptive SOSM controller design by
+using a sliding-mode-based ﬁlter and its application to buck converter,”
+IEEE Trans. Circuits Syst. I, Reg. Papers , vol. 67, no. 7, pp. 2409–2418,
+Jul. 2020.
+[9] J. Chen., W. Y ao., Y . Ren., R. Wang., L. Zhang., and L. Jiang., “Nonlinear
+adaptive speed control of a permanent magnet synchronous motor: A per-
+turbation estimation approach,”Control Eng. Pract., vol. 85, pp. 163–175,
+Apr. 2019.
+[10] A. J. Humaidi and A. H. Hameed, “PMLSM position control based on
+continuous projection adaptive sliding mode controller,”Syst. Sci. Control
+Eng., vol. 6, no. 3, pp. 242–252, Nov. 2018.
+[11] S. Y ou, J. Gil, and W. Kim, “Adaptive neural network control using
+nonlinear information gain for permanent magnet synchronous motors,”
+IEEE Trans. Cybern., vol. 53, no. 3, pp. 1392–1404, Mar. 2023.
+[12] Y . Deng, J. Wang, H. Li, J. Liu, and D. Tian, “Adaptive sliding mode
+current control with sliding mode disturbance observer for PMSM drives,”
+ISA Trans., vol. 88, pp. 113–126, May 2019.
+[13] A. Watil, A. E. Magri, A. Raihani, R. Lajouad, and F. Giri, “An adaptive
+nonlinear observer for sensorless wind energy conversion system with
+PMSG,” Control Eng. Pract., vol. 98, May 2020, Art. no. 104356.
+[14] D. Jin, L. Liu, Q. Lin, and D. Liang, “Sensorless control strategy of PMSM
+with disturbance rejection based on adaptive sliding mode control law,”
+IEEE Trans. Transp. Electriﬁc., vol. 10, no. 3, pp. 5424–5438, Sep. 2024.
+[15] A. Q. Al-Dujaili, A. F. Hasan, A. J. Humaidi, and A. Al-Jodah, “Anti-
+disturbance control design of exoskeleton knee robotic system for reha-
+bilitative care,” Heliyon, vol. 10, no. 9, May 2024, Art. no. e28911.
+[16] N. A. Alawad, A. J. Humaidi, and A. S. Alaraji, “Sliding mode-based
+active disturbance rejection control of assistive exoskeleton device for
+rehabilitation of disabled lower limbs,” Anais da Academia Brasileira de
+Ciências, vol. 95, no. 2, Jun. 2023, Art. no. 2652.
+[17] S. Gu, J. Zhang, and Y . Li, “Generalized variable gain ADRC for nonlinear
+systems and its application to delta parallel manipulators,” IEEE Trans.
+Circuits Syst. I, Reg. Papers, vol. 70, no. 2, pp. 921–930, Feb. 2023.
+[18] H. Cao et al., “Uniﬁed interpretation of active disturbance rejection control
+for electrical drives,” IEEE Trans. Circuits Syst. II, Exp. Briefs , vol. 71,
+no. 7, pp. 3433–3437, Jul. 2024.
+[19] B. Guo, S. Bacha, M. Alamir, A. Mohamed, and C. Boudinet, “LADRC
+applied to variable speed micro-hydro plants: Experimental validation,”
+Control Eng. Pract., vol. 85, pp. 290–298, Apr. 2019.
+[20] Y . Xu, B. Zheng, G. Wang, H. Y an, and J. Zou, “Current harmonic
+suppression in dual three-phase permanent magnet synchronous machine
+with extended state observer,”IEEE Trans. Power Electron., vol. 35, no. 11,
+pp. 12166–12180, Nov. 2020.
+[21] Y . Zuo et al., “Active disturbance rejection controller for smooth speed con-
+trol of electric drives using adaptive generalized integrator extended state
+observer,” IEEE Trans. Power Electron. , vol. 38, no. 4, pp. 4323–4334,
+Apr. 2023.
+[22] M. Tian, B. Wang, Q. Dong, and D. Xu, “Adaptive active disturbance re-
+jection control for uncertain current ripples suppression of PMSM drives,”
+IEEE Trans. Ind. Electron., vol. 71, no. 3, pp. 2320–2331, Mar. 2024.
+[23] J. Wang, P . Zhu, B. He, G. Deng, C. Zhang, and X. Huang, “An adaptive
+neural sliding mode control with ESO for uncertain nonlinear systems,”
+Int. J. Control Autom. Syst. , vol. 19, no. 2, pp. 687–697, Feb. 2021.
+[24] Y . Wang et al., “Adaptive observer-based current constraint control
+for electric vehicle used PMSM,” Appl. Energy , vol. 360, Feb. 2024,
+Art. no. 122802.
+[25] H. Lu, S. Li, P . Li, and J. Li, “A TD-based speed sensorless
+composite controller for a PMSM with disturbances: Design and
+veriﬁcations,” J. Elect. Eng. Technol. , vol. 20, pp. 489–500, 2025,
+doi: 10.1007/s42835-024-01964-y.
+[26] M. Tian, B. Wang, Y . Y u, Q. Dong, and D. Xu, “Discrete-time repetitive
+control-based ADRC for current loop disturbances suppression of PMSM
+drives,”IEEE Trans. Ind. Inform., vol. 18, no. 5, pp. 3138–3149, May 2022.
+[27] N. Q. Y ousif, A. F. Hasan, A. H. Shallal, A. J. Humaidi, and L. T. Rasheed,
+“Performance improvement of nonlinear differentiator based on optimiza-
+tion algorithms,” J. Eng. Sci. Technol. , vol. 18, no. 3, pp. 1696–1712,
+Jun. 2023.
+[28] J. Li, L. Zhang, L. Luo, and S. Li, “Extended state observer based
+current-constrained controller for a PMSM system in presence of distur-
+bances: Design, analysis and experiments,” Control Eng. Pract., vol. 132,
+Mar. 2023, Art. no. 105412.
+[29] J. Li, L. Zhang, S. Li, and J. Su, “A time delay estimation interpretation
+of extended state observer-based controller with application to structural
+vibration suppression,” IEEE Trans. Autom. Sci. Eng. , vol. 21, no. 2,
+pp. 1965–1973, Apr. 2024.
+Honghao Xia was born in Huaian, China, in
+1999. He received the B.S. degree in electrical
+engineering from Huaiyin Institute of T echnol-
+ogy , Huaian, China, in 2021. He is currently
+working toward the M.S. degree in power en-
+gineering with Y angzhou University , Y angzhou,
+China.
+His current research interests include distur-
+bance estimation theories and their applications
+to PMSM system.
+Shengquan Li (Senior Member, IEEE) was
+born in Changde, China, in 1982. He received
+the Ph.D. degree in Mechatronics from the Nan-
+jing University of Aeronautics and Astronautics,
+Nanjing, China, in 2012.
+From 2014 to 2015, he was a Research As-
+sistant with the Department of Automatic Con-
+trol and Systems Engineering, The University
+of Shefﬁeld, Shefﬁeld, U.K. Since 2012, he has
+been with Y angzhou University , China, where
+he is currently a Professor and a Doctoral Su-
+pervisor. His current research interests include disturbance estimation
+theories and their applications to mechatronic systems.
+Dr. Li has served on the technical program committee for several inter-
+national journal and conferences, including Measurement and Control,
+IEEE CYBER 2018, ICONIP2018, etc.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
+XIA et al.: ADAPTIVE P ARAMETER ESTIMA TION-BASED NONLINEAR ACTIVE DISTURBANCE REJECTION CONTROLLER 7321
+Zhengrong Xiang (Member, IEEE) received the
+B.S. degree in theoretical physics and the M.S.
+degree in fundamental mathematics from Xin-
+jiang University , Ürümqi, China, in 1989 and
+1995, respectively , and the Ph.D. degree in con-
+trol theory and control engineering from the
+Nanjing University of Science and T echnology ,
+Nanjing, China, in 1998.
+He was a Lecturer and an Associate Pro-
+fessor with the Nanjing University of Science
+and T echnology in 1998 and 2001, respectively .
+Since 1998, he has been a Faculty Member with the Nanjing University
+of Science and T echnology , where he is currently a Full Professor.
+He has coauthored around 380 journal and conference papers, many
+of which are highly cited status, ESI 1%. His main research interests
+include switched systems, nonlinear control, multiagent systems, rein-
+forcement learning, and networked control systems.
+Dr. Xiang was the recipient of many prestigious international awards
+and recognitions such as the CAA Outstanding Doctoral Dissertation
+Nomination and Mentor Award in 2022 and the Excellent Doctoral
+Dissertation Supervisor in Jiangsu Province in 2021. His one paper
+was selected as one of the “China’s 100 most inﬂuential international
+academic papers. ”
+Donglei Chen was born in Qidong, China, in
+1974. He is currently working toward the Ph.D.
+degree in instrument science and technology
+with Nanjing University of Aeronautics and As-
+tronautics, Nanjing, China.
+Since 1997, he has been a Full-Time T eacher
+with the Y angzhou University , Y angzhou, China,
+and is a Member of the Y angzhou Electrical En-
+gineering Society , the Jiangsu Instrument and
+Instrumentation Association and the Jiangsu
+Electrical T echnology Society . He has presided
+over and participated in 24 national, provincial, municipal, school-level,
+enterprise-commissioned projects, and applied for and authorized eight
+national patents. His current research interests include the theory and
+application of remote equipment online condition monitoring and fault
+diagnosis prediction, SCADA and virtual instrument technology .
+Zhe Li received the M.S. degree from Liaon-
+ing Shihua University , Fushun, China, in 2004,
+and the Ph.D. degree from Zhejiang University ,
+Hangzhou, China, in 2015, both in control sci-
+ence and engineering.
+Since 2004, she has been a Full-Time
+T eacher with the Y angzhou University . Her re-
+search includes multivariate statistical process
+control, data mining, fault diagnosis and system
+modeling. Her research interests focus on de-
+veloping innovative algorithmic as well as their
+application and industrial exploitation.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 18,2026 at 09:16:37 UTC from IEEE Xplore.  Restrictions apply. 
