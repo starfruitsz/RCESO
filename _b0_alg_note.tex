@@ -19,7 +19,7 @@
 \title{\bfseries RCESO 反馈通道的内模反演建模与新 $b_0$ 辨识方法\\[2mm]
 \large ——偏置机理、代数解与收敛性分析}
 \author{RCESO 项目组}
-\date{2026-11-18}
+\date{2026-11-23\quad 定稿修订版}
 
 \begin{document}
 \maketitle
@@ -29,7 +29,7 @@
 本文对“先用内模反演把观测误差 $e_1$ 还原成总扰动 $d$、再由 $d$ 在注入频率处的分量反解输入增益 $b$”这一思路作完整推导。
 主要内容有三。
 \textbf{一}，给出该观测器在 $1$ kHz 前向欧拉实现下的\textbf{精确离散域}传递函数，以及一个只依赖已测状态 $v$ 的恒等式，使得反演不需要知道重复内模的延迟 $T_d$、滤波时间 $\tau$ 与注入增益 $\beta_3$。
-\textbf{二}，严格证明在“递推更新”结构下估计值必然收敛到一个\textbf{与真值存在固定偏差}的不动点，并指出该偏置等于电流环在注入频率处的复传函实部 $\RE\{T(j\omega_h)\}$；实验上理论预测 $97.07$ 与实测 $97.24$ 吻合至 $0.2\%$。
+\textbf{二}，严格证明在“递推更新”结构下估计值必然收敛到一个\textbf{与真值存在固定偏差}的不动点，并指出该偏置等于电流环在注入频率处的复传函实部 $\RE\{T(j\omega_h)\}$；实验上理论预测 $97.07$ 与实测 $97.24$ 吻合至 $0.2\%$。该实部因子是递推结构内生的：定稿的两段式差分改用\textbf{模长}把它整体消去，$dq$ 闭环残差降到 $0.90\%$（\S\ref{sec:mag}）。
 \textbf{三}，给出\textbf{一次代数解} $b=(b_0+\hat d/u)/T$，证明它不存在零灵敏度点，并把整个迭代化归为收缩映射 $b_0^{(k+1)}=\alpha b+(1-\alpha)b_0^{(k)}+c_0$；实测收缩系数 $1-\alpha=0.181$、不动点 $97.7$，与两组 $90$ 秒闭环实验（$96.4$、$100.2$）一致。
 最后指出物理增益的独立测定值 $b=101.89$，指出代码中 $b_0$ 标称值所含的 $1.2$ 倍余量不应作为真值使用。
 \end{abstract}
@@ -320,15 +320,22 @@ b_0^{\infty}=101.89\times0.9527=97.07 .
 相反，比值法测量的是绝对量 $A_\omega/A_{iq}$，其参考点是零而非当前估计，
 故误差是乘性的、且在解点处灵敏度不为零。
 
-\subsection{为什么取实部}
+\subsection{递推结构为什么只能取实部}
+\label{sec:repart}
 
-待求量 $\Delta b$ 为实数，只能从 $\hat d/u$ 的实部取信息，故有效因子是
-$\RE\{T\}=|T|\cos\angle T$ 而非 $|T|$。
+递推式估计的增量 $\widehat{\Delta b}=\RE\{\hat d/u\}$ 必须落在实轴上才能累加进实数 $b_0$，
+故有效因子是
+$\RE\{T\}=|T|\cos\angle T$，不是 $|T|$。
 实测式 \eqref{eq:Tnum} 显示：幅值衰减 $4.7\%$，相位却仅超前 $1.65^{\circ}$，
-\textbf{不满足最小相位系统的 Bode 关系}（一阶环幅值衰减 $4.7\%$ 应对应 $17.6^{\circ}$ 滞后）。
+\textbf{不满足最小相位系统的 Bode 关系}（一阶环应滞后 $17.6^{\circ}$）。
 这说明该衰减主要不是环路滚降，而是死区、器件压降、限幅等引起的\textbf{等效增益损失}，
 几乎不带相位，于是 $\RE\{T\}\approx|T|$。
 \textbf{工程推论：偏置率近似等于电流环在注入频率处的幅值跟踪误差。}
+
+这一“实部投影”是递推结构内生的代价：当误差源是\textbf{纯相位旋转}（例如两个通道的采样时刻错开一拍）
+而不是幅值缺口时，$\cos\varepsilon$ 会把 $23^\circ$ 的错位记成 $8\%$ 的幅值损失、
+$44^\circ$ 记成 $28\%$，且在递推框架内无法避免。定稿的两段式差分把累加换成一次复除法，
+可以直接取模长，把该折扣整体消掉（\S\ref{sec:mag}）。
 
 \subsection{数值验证}
 
@@ -595,9 +602,11 @@ d=f+b\,\tilde u-b_0u .
 \begin{equation}
 \hat d_2-\hat d_1=b\,(\tilde u_2-\tilde u_1)-b_0(u_2-u_1)
 \;\Longrightarrow\;
-\boxed{\;b=\operatorname{Re}\Big\{\frac{(\hat d_2-\hat d_1)+b_0(u_2-u_1)}{\tilde u_2-\tilde u_1}\Big\}\;}
+\boxed{\;b=\left|\frac{(\hat d_2-\hat d_1)+b_0(u_2-u_1)}{\tilde u_2-\tilde u_1}\right|\;}
 \label{eq:curdiff}
 \end{equation}
+取模长而不是实部：当两路采样错刻或环路带相移时，右端是 $b\,e^{j\varepsilon}$，
+实部会得到 $b\cos\varepsilon$，模长才回到 $b$；二者的完整实测对照见 \S\ref{sec:mag}。
 式 \eqref{eq:curdiff} 中\textbf{致动传函 $T$ 完全消失}——因为 $T$ 的唯一作用就是把指令换算成实际
 电流，而这里直接测量电流。同时消失的还有由死区、器件压降造成的幅值衰减，以及它随电流电平
 的变化。实测（\S\ref{sec:collide}）表明，$20$ Hz 撞频处 $r=0.2$ 的差分给出 $-2.6\%$，而含 $T$
@@ -618,7 +627,8 @@ d=f+b\,\tilde u-b_0u .
 
 前段无注入，该段的 $\hat d_{\rm off}$ 就是外部扰动 $f$ 本身（撞频时为其在 $\omega_h$ 处的分量），
 因此相减时被整项减掉——撞频问题从结构上消失，而不需要靠频率回避。
-末端用注入段实测的 $T_{\rm on}$ 做一次复除法（式 \eqref{eq:E9}）。
+末端曾用注入段实测的 $T_{\rm on}$ 做一次复除法（式 \eqref{eq:E9}）；
+该修正现已默认关闭，理由见 \S\ref{sec:tcorr}。
 
 \textbf{为什么取 $r=0$。}噪声惩罚为
 \begin{equation}
@@ -647,16 +657,122 @@ w=\exp\!\Big[-\Big(\frac{d}{d_0}\Big)^2\Big],\qquad
 仅当 $w>0.5$ 时该估计才进入中位数历史，从而避免离群值污染参考基准。
 该机制对两种估计器同样适用，实测均获益（表 \ref{tab:final}）。
 
-\subsection{末端致动传函修正}
+\subsection{末端致动传函修正（默认关）}
+\label{sec:tcorr}
 
 差分式虽已用实测电流，但残余误差仍呈现 $T$ 的形状。理论上递推结构的不动点为 $b\,\operatorname{Re}\{T\}$，
 代入实测 $T=0.9531\angle+1.65^{\circ}$ 得 $101.89\times0.9527=97.07$；而剔除机制生效后，
-代数解的实际不动点落在 $96.8$，两者仅差 $0.3\%$。因此补一次复除法即可：
+代数解的实际不动点落在 $96.8$，两者仅差 $0.3\%$。曾因此补一次复除法：
 \begin{equation}
 b\leftarrow\frac{b}{\tfrac12\big[T_1+T_2\big]},\qquad T_k=\frac{1}{I_{\rm BASE}}\frac{\mathrm{IQ}_k}{U_k}.
 \label{eq:tcorr}
 \end{equation}
 $T$ 由同一窗内的 $i_q$ 与 $u$ 相干解调在线测得，无需离线标定。
+
+\textbf{适用条件。}定稿结论是把这一修正\textbf{默认关闭}（\texttt{tcorr\_en}$=0$），依据三条：
+
+\begin{enumerate}
+\item \textbf{对一阶电流环它是恒等变换，白做。}若 $T=1/(1+j\omega/\omega_{ci})$，则
+$1/T=1+j\omega_h/\omega_{ci}$，$\RE\{1/T\}\equiv1$，修正前后完全相同。
+\item \textbf{方向猜错会放大误差。}若残差来自采样错位（纯旋转），$\div T$ 不但无效，还会把模长估计
+再乘一个 $\RE\{T\}/|T|^2=\cos\angle T/|T|$：$T=0.95\angle+5^\circ$ 时为 $1.0487$，
+实测把误差从 $0.003\%$ 推到 $+4.95\%$（表 \ref{tab:selftest}）。
+\item \textbf{取模长之后不需要知道 $T$ 是什么。}$\div T$ 的本来作用是把旋转拉回实轴，
+而模长已对旋转免疫（\S\ref{sec:mag}）。
+\end{enumerate}
+
+解析自洽测试（\texttt{test\_b0.c}，MinGW gcc $8.1$，$b=400$，$40$ burst）给出表 \ref{tab:selftest}。
+前两行在数学上恒等，说明\textbf{自洽测试发现不了 $T$ 修正的方向问题}——它必须放到指令端与测量端
+存在错位的 $dq$ 闭环上才显形。上板前若不确定采样时序，\texttt{tcorr\_en} 一律置 $0$。
+
+\begin{table}[H]
+\centering
+\caption{解析自洽测试：$T$ 修正开/关}
+\label{tab:selftest}
+\begin{tabular}{lcc}
+\toprule
+用例 & 误差 & 说明\\
+\midrule
+正弦 $T=1.00\angle0^\circ$，修正开 & $+0.002\%$ & 基准\\
+正弦 $T=0.95\angle+5^\circ$，\textbf{修正关} & $\bm{+0.003\%}$ & \textbf{默认配置}\\
+正弦 $T=0.95\angle+5^\circ$，修正开 & $+4.950\%$ & 修正有害\\
+方波 $T=1.00\angle0^\circ$，修正开 & $+0.002\%$ & 与波形无关\\
+三角 $T=1.00\angle0^\circ$，修正开 & $+0.002\%$ & 与波形无关\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{取模长：把相位误差与幅值误差分开}
+\label{sec:mag}
+
+式 \eqref{eq:curdiff} 建成时方括号外写的是实部。定稿改为模长，这是全部改动中单项收益最大的一处：
+在 PMSM $dq$ 闭环上，把这一步由实部换成模长（并把两路采样对齐），$\hat b_0$ 就从 $383$ 变到 $531.6$（真值 $536.40$）。
+
+\paragraph{商上为什么会出现相位。}若差分两侧严格同刻、致动链又无相移，式 \eqref{eq:curdiff} 的商
+是实数量 $b$。实际系统有两个来源把它变成 $b\,e^{j\varepsilon}$：
+
+\begin{enumerate}
+\item \textbf{采样错位。}$i_q^k$ 实际响应的是一拍之前的指令：SVPWM 要等一个载波周期才把占空比
+变成电流。若辨识器把同拍的 $u^k$ 与 $i_q^k$ 配成一对，两路即错开 $1$ ms，在 $65$ Hz 处即 $23.4^\circ$。
+\item \textbf{环路相移。}电流环、SVPWM 与滤波在 $\omega_h$ 处本身带相移，实测
+$T=0.9531\angle+1.65^\circ$（式 \eqref{eq:Tnum}）。
+\end{enumerate}
+
+对纯旋转
+\begin{equation}
+\RE\{b\,e^{j\varepsilon}\}=b\cos\varepsilon,
+\qquad
+\big|b\,e^{j\varepsilon}\big|=b ,
+\label{eq:magre}
+\end{equation}
+即\textbf{实部把纯相位误差记成等比例的幅值损失，模长对它完全免疫}。
+“取实部”隐含一个假设：商的虚部只来自噪声。而当误差源是采样错位或环路相移时，
+虚部恰恰是误差的主部。
+
+\paragraph{逐项实测。}在 \texttt{b0\_foc2}（PMSM $dq$ 闭环，C Caller，$1$ kHz，注入 $0.118$ pu / $65$ Hz）
+上做 $90$ s 闭环，得表 \ref{tab:mag}。真值为
+\begin{equation}
+b=\frac{1.5\,p\,\psi_f\,I_{\rm BASE}}{J\,\omega_{\rm ref}}=536.40 ,
+\label{eq:focb}
+\end{equation}
+其中 $R=0.175\ \Omega$、$L=0.57$ mH、$\psi_f=0.016833$ Wb、$p=4$、$J=1.89\times10^{-5}$ kg$\cdot$m$^2$、
+$I_{\rm BASE}=6.3069$ A、$\omega_{\rm ref}=62.832$ rad/s。
+
+\begin{table}[H]
+\centering
+\caption{取实部与取模长（\texttt{b0\_foc2} 与 \texttt{b0\_foc\_m}，$90$ s 闭环）}
+\label{tab:mag}
+\begin{tabular}{llcc}
+\toprule
+口径 & 实现 & $\hat b_0$ & 对 $b$ 误差\\
+\midrule
+取实部 & \texttt{b0\_foc2}，早期 & $383.1$ & $-28.6\%$\\
+\textbf{取模长} & \texttt{b0\_foc2}，定稿 & $\bm{531.55}$ & $\bm{-0.90\%}$\\
+取模长 & \texttt{b0\_foc\_m}，MATLAB 版 & $531.84$ & $-0.85\%$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+两个版本（C 与 MATLAB Function）在取模长后相差 $0.05\%$，说明该修正是\textbf{算法层}的，
+不依赖某种实现的数值路径。而早期 C 版取实部落到 $383$，与之相差 $28\%$——差别不在代码，
+在口径。
+
+\paragraph{还有第二个口径问题。}换掉符号只解决一半：同一模型上若继续把未延迟的 $u^k$ 送给辨识器，
+$23^\circ$ 的错位仍在，实测则落在 $425$ 而非 $531.5$。因此定稿同时要求
+\textbf{$u$ 与 $i_q$ 同刻}（FOC 中即取 $u^{k-1}$），再取模长，两者缺一不可。
+这一条在 $65$ Hz 上等价于 $8\%$ 的幅值，与取实部造成的折扣同量级，混在一起时很容易被误记为“模型不准”。
+
+\paragraph{代价。}模长对噪声不是无偏的：若商为 $b+n$，$n$ 为零均值复噪声、$\sigma/b\approx5\%$
+（单 burst 散布约 $\pm10\%$，表 \ref{tab:final}），则 $E|b+n|-b\approx\sigma^2/(2b)\approx0.1\%$。
+该偏置单向、不可由平均消掉，但比 $0.90\%$ 的剩余误差小一个量级，可接受。
+
+\paragraph{实现。}C 与 MATLAB 两版同式，且都在取模长之后才做限幅与门控（门控比较的是模长，
+不会因为符号跳变而抖动）：
+
+\begin{verbatim}
+bq = b0_sqrt((nr*nr + ni*ni) / den2);   /* C：取模长，对相位误差免疫 */
+bq = abs(num/den);                      % MATLAB：同上
+\end{verbatim}
 
 \subsection{参数整定}
 
@@ -664,18 +780,20 @@ $T$ 由同一窗内的 $i_q$ 与 $u$ 相干解调在线测得，无需离线标�
 \centering
 \caption{定稿参数}
 \label{tab:param}
+\small
 \begin{tabular}{lll}
 \toprule
 项目 & 取值 & 依据\\
 \midrule
 注入频率 & 65 Hz（三约束选频） & 表 \ref{tab:sel}\\
 注入幅值 $A$ & 0.118 pu（0.75$\times$原值） & 纹波预算\\
-幅值比 $r$ & 0.5 & 差分对比度\\
+幅值比 $r$ & $0$（前段不注入） & 式 \eqref{eq:E4b}：噪声代价 $\sqrt2$ 最小\\
 burst 周期 / 长度 & 5 s / 0.4 s & 更新频率与纹波折中\\
 两段式段长 & 前后各 0.2 s（$200$ 拍） & 窗相干（$13$ 个抖动周期）\\
 $b_0$ 低通 & $\tau=k_p/50=0.663$ s & 实测：$k_p/15$ 时抖动标准差 17.4，$k_p/50$ 时 12.6\\
 异常剔除 & $d_0=0.10$, $\alpha_{\min}=0.02$, 窗 7 & 式 \eqref{eq:amed}\\
-末端修正 & $\div T(j\omega_h)$ & 式 \eqref{eq:tcorr}\\
+差分取法 & 模长（不取实部） & 式 \eqref{eq:curdiff}，\S\ref{sec:mag}\\
+末端修正 & 默认关（\texttt{tcorr\_en}$=0$） & 开启实测 $+4.95\%$，表 \ref{tab:selftest}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -936,14 +1054,14 @@ T    = (QC / I_BASE) / U                  # 电流环在该频点的复传函
 Qpu  = QC / I_BASE                        # 标幺实际电流
 
 if prev == None:                          # 首窗：单窗代数解
-    b_win = real( (b0 + dhat/U) / T )
+    b_win = abs( (b0 + dhat/U) / T )          # 取模长
 else:                                     # 非首窗：实测电流差分
     (dhat1, U1, T1, b01, Q1) = prev
     num = (dhat - dhat1) + b01*(U - U1)
     den = Qpu - Q1
     if abs(den) < eps:  skip this window
-    b_win = real(num / den)
-    b_win = real( b_win / (0.5*(T1 + T)) )     # 末端 T 修正
+    b_win = abs(num / den)                    # 取模长，不取实部
+    # 末端 T 修正默认关闭（tcorr_en=0），理由见 8.4 节
 b_win = clamp(b_win, 0.02*b0_nom, 2.4*b0_nom)
 
 prev = (dhat, U, T, b0, Qpu)
@@ -1158,7 +1276,7 @@ if n_acc >= N:                        # ---- 段末锁存 ----
 \end{verbatim}
 
 四路被锁存的量正是 $E_1,V,U,\mathrm{QC}$，外加诊断用的 $Y_m$；$T$ 由 $\mathrm{QC}/U$ 同段测得，
-只在注入段写入，供式 \eqref{eq:E9} 的末端修正使用。
+只在注入段写入，供式 \eqref{eq:E9} 的末端修正使用（该修正默认关闭）。
 
 \subsubsection*{数值稳定性}
 
@@ -1223,7 +1341,7 @@ S1 & 幅值交替 & 不变（但窗边界须与幅值段对齐）\\
 S2 & 复幅值 $E_1,V,U,\mathrm{QC}$ & 改由 \eqref{eq:S3b}、\eqref{eq:S5} 锁存取得\\
 S2 & 反演式 \eqref{eq:E6} & \textbf{不变}\\
 S2 & 差分式 \eqref{eq:E8} & \textbf{不变}（窗须同幅值）\\
-S2 & $T$ 修正 \eqref{eq:E9} & \textbf{不变}\\
+S2 & $T$ 修正 \eqref{eq:E9} & 不变（默认关）\\
 S3 & 加权 \eqref{eq:E10}、\eqref{eq:E11} & 不变\\
 S4 & 低通 \eqref{eq:E12} & 不变\\
 \bottomrule
@@ -1319,12 +1437,14 @@ $P(S)=S^2+\beta_1S+\beta_2$ 逐项除以 $S$：
 \label{eq:E7}
 \end{equation}
 \begin{equation}
-b=\operatorname{Re}\Big\{\frac{(\hat d_2-\hat d_1)+b_0(u_2-u_1)}{\tilde u_2-\tilde u_1}\Big\}.
+b=\left|\frac{(\hat d_2-\hat d_1)+b_0(u_2-u_1)}{\tilde u_2-\tilde u_1}\right|.
 \label{eq:E8}
 \end{equation}
-取实部是因为 $b\in\R$；其虚部即 $f_1-f_2$ 的映像，可作为窗口一致性检验量。
+取模长而不是实部：$b\in\R$ 只意味着\textbf{理论}商为实数；实测商带有 $e^{j\varepsilon}$
+（采样错位与环路相移），实部把它记成 $\cos\varepsilon$ 的折扣，模长则对它免疫（\S\ref{sec:mag}）。
+虚部仍可作为窗口一致性检验量。
 
-\subsubsection*{S2：末端 $T$ 修正}
+\subsubsection*{S2：末端 $T$ 修正（默认关）}
 
 若沿用指令 $u$ 而非实测电流，则 $d/u=\Delta b+b(T-1)+f/u$，其递推不动点为
 $b_0^{\infty}=\operatorname{Re}\{bT\}+\operatorname{Re}\{f/u\}$。补一次复除法
@@ -1378,8 +1498,8 @@ S1 累积 & $X=\frac2N\sum x_k e^{-j\omega_h t_k}$ & 式 \eqref{eq:E3}（单 bin
 S1 交替 & $A$ 与 $rA$ & 式 \eqref{eq:E4}（噪声惩罚）\\
 S2 算子 & $S_d=j\omega_h\operatorname{sinc}(\theta/2)e^{j\theta/2}$ & 式 \eqref{eq:E5}（前向欧拉）\\
 S2 反演 & $\hat d=V+(S_d+\beta_1+\beta_2/S_d)E_1$ & 式 \eqref{eq:E6}\\
-S2 差分 & $b=\operatorname{Re}\{[\Delta\hat d+b_0\Delta u]/\Delta\tilde u\}$ & 式 \eqref{eq:E7}、\eqref{eq:E8}\\
-S2 修正 & $b\leftarrow b/\bar T$ & 式 \eqref{eq:E9}（不动点 $\operatorname{Re}\{bT\}$）\\
+S2 差分 & $b=\big\lvert[\Delta\hat d+b_0\Delta u]/\Delta\tilde u\big\rvert$ & 式 \eqref{eq:E7}、\eqref{eq:E8}；取模长免相位折扣\\
+S2 修正 & $b\leftarrow b/\bar T$（默认关） & 式 \eqref{eq:E9}（仅幅值缺口场合）\\
 S3 加权 & $\alpha=\alpha_{\min}+(\alpha_{\max}-\alpha_{\min})e^{-(d/d_0)^2}$ & 式 \eqref{eq:E10}、\eqref{eq:E11}\\
 S4 追踪 & $b_0^{k+1}=b_0^k+(1-e^{-\Delta T/\tau})(\beta_{\rm goal}-b_0^k)$ & 式 \eqref{eq:E12}\\
 S5 回滚 & $b_0\leftarrow b_0^{\rm pre}$ & 门控失败\\
@@ -1392,13 +1512,17 @@ S5 回滚 & $b_0\leftarrow b_0^{\rm pre}$ & 门控失败\\
 
 \section{讨论}
 
-\subsection{剩余的 $3.4\%$}
+\subsection{剩余误差：从 $3.4\%$ 到 $0.9\%$}
 \label{sec:remain}
 
 式 \eqref{eq:contract} 中的 $1-\alpha=0.181$ 表明，在线测得的 $T$ 仅补偿了致动误差的一部分，
 其原因在于 $u$ 与 $i_q$ 的采样时刻约定：观测器在拍 $k$ 使用 $u^{k-1}$，而 $i_q^k$ 是拍 $k$ 的电流，
 二者相差半个到一个采样（在 $65$ Hz 处即 $12^{\circ}$ 至 $23^{\circ}$）。把该口径对齐后，
 预期 $1-\alpha$ 可降至 $0.02$ 以下，届时 $b^*$ 进入 $1\%$ 以内。
+
+该预期已在 $dq$ 闭环上兑现：把 $u$ 与 $i_q$ 对齐到同一拍并改用模长（\S\ref{sec:mag}），
+$\hat b_0$ 误差为 $-0.90\%$（C 版）与 $-0.85\%$（MATLAB 版），真值 $536.40$。
+剩余的 $0.9\%$ 已不属于致动链，而来自观测器离散化与门控末段的缓慢爬升。
 
 \subsection{电流电平依赖}
 
@@ -1426,17 +1550,19 @@ $f_{\rm rot}=10$ Hz 与 $f_h=65$ Hz 相干，这是必要条件而非可选优�
 \item 存在只依赖 $\beta_1,\beta_2$ 与可测状态的反演式 $\hat d=V+P(S_d)E_1/S_d$，
 延迟、滤波时间与注入增益均可消去。
 \item 递推式更新必然收敛到 $b_0^{\infty}=\RE\{bT\}+\RE\{f/u\}$，即偏置\textbf{等于电流环在注入频率处的复传函实部}。
-理论预测 $97.07$ 与实测 $97.24$ 吻合至 $0.2\%$。
+理论预测 $97.07$ 与实测 $97.24$ 吻合至 $0.2\%$。该实部折扣是递推结构的固有代价；定稿的两段式差分取\textbf{模长}、
+并把两路采样对齐，把它消去，$dq$ 闭环残差从 $-28.6\%$ 降到 $-0.90\%$（\S\ref{sec:mag}）。
 \item 一次代数解 $b=(b_0+\hat d/u)/T$ 消除了“自参考零灵敏度”退化，其迭代为几何收敛，
 收缩率实测 $0.181$；两次 burst 即由 $129.5$ 收敛到 $101.6$。
 \item $90$ 秒闭环实验中代数法的精度为 $-1.7\%$ 至 $-5.4\%$，旧比值法为 $+15.9\%$ 至 $+19.4\%$，
 精度提高约一个数量级，且 $10$ Hz 纹波同步下降 $22\%$。
 \item 物理增益为 $b=101.89$；代码标称值所含的 $1.2$ 倍余量不应作为真值。
 两种基准下的误差读数见表 \ref{tab:dual}，建议除历史对照外统一改用 $b=101.89$。
-\item 工程落地需要四件配套：三约束选频（自动排除 $1\times$）、双幅值实测电流差分（消去 $f$ 与 $T$）、
-中位数自适应权重的异常剔除（压制离群值）、末端 $\div T$ 修正（补掉最后的 $-5\%$）。
-四者叠加后，闭环 $90$ s 中 $\hat b_0$ 由旧法的 $+15.3\%$ 改善到 $+1.84\%$，
-稳态 RMS 仅上升 $4.6\%$，$10$ Hz 纹波下降 $5\%$。
+\item 工程落地需要五件配套：三约束选频（自动排除 $1\times$）、两段式实测电流差分（消去 $f$ 与 $T$）、
+$u$ 与 $i_q$ 采样同刻（消去 $23^\circ$ 错位）、中位数自适应权重的异常剔除（压制离群值）、
+\textbf{取模长}（消去相位折扣）。末端 $\div T$ 修正只在确证存在幅值缺口时开启，默认关闭。
+五者叠加后，一阶对象闭环 $90$ s 中 $\hat b_0$ 由旧法的 $+15.3\%$ 改善到 $+1.84\%$，
+稳态 RMS 仅上升 $4.6\%$，$10$ Hz 纹波下降 $5\%$；在 PMSM $dq$ 闭环上达到 $-0.90\%$（真值 $536.40$）。
 \end{enumerate}
 
 \appendix
