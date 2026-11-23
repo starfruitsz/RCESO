@@ -1,0 +1,51 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build self-test",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "\"C:/Program Files/x86_64-8.1.0-release-posix-seh-rt_v6-rev0/mingw64/bin/gcc.exe\" -O2 -std=c99 -Wall -Wextra -o test_b0.exe test_b0.c b0_ident.c -lm"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/simulink"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "run self-test",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "test_b0.exe"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/simulink"
+      },
+      "dependsOn": "build self-test",
+      "problemMatcher": []
+    },
+    {
+      "label": "build+run",
+      "type": "shell",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "echo running"
+      ],
+      "dependsOn": [
+        "run self-test"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

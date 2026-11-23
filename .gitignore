@@ -7,3 +7,12 @@ __pycache__/
 _texbuild/
 _ppt_preview*/
 
+
+# MATLAB / Simulink 构建缓存与 IDE 缓存
+simulink/slprj/
+simulink/build/
+.vs/
+*.slxc
+*.mexw64
+*.obj
+*.ipch
