@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""run_ppt5.py —— PPT 余下 5 图的组合故障数据：不对中 β=1° + 圆盘不平衡"""
+"""run_ppt5.py —— PPT 余下 5 图的组合故障数据：圆盘不平衡 + 角不对中 β=1° + 平行不对中"""
 import numpy as np, json
 from multiprocessing import Pool
 import noise_cfg as NC
@@ -7,7 +7,8 @@ import noise_cfg as NC
 DT = 2e-6
 FAULT = dict(start=2.0,
              unbalance=dict(M=0.1, e=1e-4, kappa=580.0),
-             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0))
+             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0),
+             parallel=dict(e=1e-4, dk=1.0e5, kappa=100.0))
 FAULT_REV = dict(FAULT, rev=5.98361)
 
 
@@ -65,4 +66,4 @@ if __name__ == "__main__":
     with Pool(5) as p:
         out = p.map(sim_one, build_jobs())
     print(out, flush=True)
-    json.dump(dict(out), open("_ppt5.json", "w"), indent=1)
+    json.dump([{"key": k, "rms": r, "iq": i} for k, r, i in out], open("_ppt5.json", "w"), indent=1)

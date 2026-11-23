@@ -16,7 +16,8 @@ VALID = (len(sys.argv) > 6 and sys.argv[6] == "1")
 DT = 2e-6; TEND = 30.0
 FAULT = dict(start=2.0,
              unbalance=dict(M=0.1, e=1e-4, kappa=580.0),
-             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0))
+             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0),
+             parallel=dict(e=1e-4, dk=1.0e5, kappa=100.0))
 t = np.arange(0.0, TEND, DT)
 TL = (0.50 * (t >= 2.0)).astype(float) * 0.637
 

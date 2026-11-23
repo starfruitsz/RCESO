@@ -50,7 +50,7 @@ axd.set_xlabel("时间 / s"); axd.set_ylabel(r"$b_0$ / s$^{-1}$")
 axd.set_title("(c) b0 收敛：%.1f（真实 122.3）" % J["adapt"]["b0"], fontsize=9.8, pad=5)
 axd.legend(loc="center right", fontsize=7.4)
 
-fig.suptitle("b0 自适应：辨识 → b0 更新 → 故障抑制（600 rpm、不对中 β=1° + 圆盘不平衡 M=0.1/e=1e-4）",
+fig.suptitle("b0 自适应：辨识 → b0 更新 → 故障抑制（600 rpm、圆盘不平衡 + 角不对中 β=1° + 平行不对中）",
              fontsize=10.8, y=0.965)
 fig.text(0.065, 0.012, "数据：pmsm_inv_sim.py；2 s 内 100 Hz dither 辨识，2 s 后冻结；9–10 s 稳态窗；实验室噪声、种子 20261018。",
          fontsize=6.8, color="#666")

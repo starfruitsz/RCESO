@@ -60,6 +60,21 @@ def misalign_torque(theta, omega, M, beta, l, kappa=1.0,
     return kappa * t
 
 
+def parallel_torque(theta, omega, e, dk, kappa=1.0):
+    """平行不对中的绕轴 2× 脉动转矩（N·m）。
+
+    theta : 机械角 (rad)
+    e     : 两轴平行偏移 (m)
+    dk    : 联轴器径向刚度各向异性 |k_x - k_y| (N/m)
+    kappa : 等效放大系数（1=物理值）
+
+    模型：偏移矢量在联轴器坐标系中以 θ 旋转，弹性势能
+          U(θ)=½e²(k_x cos²θ + k_y sin²θ) ⇒ T_θ=−∂U/∂θ=½e²(k_x−k_y) sin2θ。
+    各向同性联轴器 dk=0 时无绕轴转矩纹波（只剩恒定径向力 F=k·e）。
+    """
+    return kappa * 0.5 * e * e * dk * math.sin(2.0 * theta)
+
+
 def unbalance_force(omega, M, e):
     """离心力幅值（N），用于轴承/振动通道，不进入绕轴转矩。"""
     return M * e * omega * omega

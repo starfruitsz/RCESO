@@ -9,7 +9,8 @@ from pmsm_inv_sim import sim_inv
 TEND, NREF = 10.0, 600.0
 FAULT = {"start": 0.0,
          "unbalance": dict(M=0.1, e=1e-4, kappa=580.0),
-         "misalign": dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0)}
+         "misalign": dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0),
+         "parallel": dict(e=1e-4, dk=1.0e5, kappa=100.0)}
 CASES = [("fixed", dict()), ("adapt", dict(j_id=True, j_id_f=100.0, j_id_amp_u=0.157,
           j_id_win=0.2, j_id_lp=0.4, j_id_tend=2.0, j_adapt_b0=True, j_val=False)),
          ("oracle", dict(j_oracle=True))]

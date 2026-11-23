@@ -19,7 +19,7 @@ import math
 import numpy as np
 
 from eso_gain import make_gains
-from fault_torque import unbalance_torque, misalign_torque
+from fault_torque import unbalance_torque, misalign_torque, parallel_torque
 
 R_S = 0.175
 L_S = 0.57e-3
@@ -139,6 +139,45 @@ def sim_inv(t, TL, cfg=None):
     _jrec_amp_use = _jrec_amp
     _jrec_apply = bool(cfg.get("j_recheck_apply", True))
     _jrec_alpha = float(cfg.get("j_recheck_alpha", 0.8))
+    # ---- 逐 burst 异常剔除（2026-11-19）：按与滑动中位数的偏离度调 alpha ----
+    #   偏离越小 alpha 越接近 _jrec_alpha；偏离越大越趋近 _jrec_amin
+    #   只有被采信的估计才进入中位数历史，保证中位数本身干净
+    # 平台 + 陡降 + 硬截 的自适应权重（2026-11-19 v2）
+    #   基线改为指数滑动均值（每次采信即跟随），彻底避免"历史冻结→永久拒绝"的自锁
+    _amed = bool(cfg.get("j_amed", False))
+    _amed_d1 = float(cfg.get("j_amed_d1", 0.10))      # 平台半宽
+    _amed_d2 = float(cfg.get("j_amed_d2", 0.08))      # 陡降宽度
+    _amed_dmax = float(cfg.get("j_amed_dmax", 0.30))  # 硬截阈值
+    _amed_abase = float(cfg.get("j_amed_abase", 0.30))  # 平滑基增益
+    _amed_mu = float(cfg.get("j_amed_mu", 0.35))      # 基线滑动速率
+    _amed_warm = int(cfg.get("j_amed_warm", 3))       # 预热 burst 数
+    _amed_hist = []
+    _amed_base = [None]
+    def _amed_alpha(est):
+        if not _amed:
+            return _jrec_alpha
+        if _amed_base[0] is None:
+            _amed_base[0] = est
+            return _jrec_alpha
+        if len(_amed_hist) < _amed_warm:            # 预热：全速收敛
+            _amed_hist.append(est)
+            _amed_base[0] = est
+            return _jrec_alpha
+        _m = _amed_base[0]
+        _d = abs(est - _m) / max(abs(_m), 1e-9)
+        _s = max(_amed_d2, 1e-9)
+        if _d <= _amed_d1:
+            _w = 1.0
+        elif _d <= _amed_dmax:
+            _w = math.exp(-(_d - _amed_d1) / _s)
+        else:                                   # 软底：不再归零，留恒定逃生通道
+            _w = math.exp(-(_amed_dmax - _amed_d1) / _s)
+        if _w > 0.0:                                # 采信：基线与历史都跟随
+            _amed_base[0] = _m + _amed_mu * (est - _m)
+            _amed_hist.append(est)
+            if len(_amed_hist) > 15:
+                _amed_hist.pop(0)
+        return _amed_abase * _w
     _jrec_btau = float(cfg.get("j_recheck_btau", 0.0))   # b0 更新低通时间常数 / s，0=瞬时更新（原行为）
     _jrec_b0d = bool(cfg.get("j_b0_direct", False))      # True：直接测 b0（不经 J 中间量）
     _jrec_bgoal = None
@@ -147,6 +186,13 @@ def sim_inv(t, TL, cfg=None):
     _jrec_nmin = int(cfg.get("j_recheck_nmin", 2))
     _jrec_t0 = float(cfg.get("j_recheck_t0", 1.0))
     _jrec_next = _jrec_t0
+    # 周期调度：t < j_period_switch_t 用 j_recheck_period，之后改用 j_period_after
+    _jpsw = float(cfg.get("j_period_switch_t", 1.0e9))
+    _jpaft = float(cfg.get("j_period_after", 0.0))
+    if _jpaft <= 0.0:
+        _jpaft = float(cfg.get("j_recheck_period", 5.0))
+    def _jnext(tk):
+        return tk + (float(cfg.get("j_recheck_period", 5.0)) if tk < _jpsw else _jpaft)
     _jrec_active = False
     _jrec_end = 0.0
     _jrec_list = []
@@ -170,6 +216,7 @@ def sim_inv(t, TL, cfg=None):
     _jrec_abort_o = []
     # 每 burst 状态4校验：0.6 s 环形窗（基线与后窗），2 s 周期内完成
     _es_nofreeze = bool(cfg.get("es_nofreeze", False))   # True：换速时不冻结 ESC（用于验证无冻结行为）
+    _es_cont = bool(cfg.get("es_cont", False))          # True：连续滑动窗解调（窗内 δ̂ 每 1 ms 更新，不 hold）
     _jrec_val_on = bool(cfg.get("j_validate", False))  # 默认关闭状态4 的 burst 后校验（不回退）；b0 慢变，周期自检无需频繁
     _jrec_val_log = []      # 状态4 校验日志：(t, iq比, 幅值比, bad_iq, bad_a)
     _jrec_ring_n = 600
@@ -188,7 +235,46 @@ def sim_inv(t, TL, cfg=None):
     _jrec_jband = float(cfg.get("j_recheck_jband", 0.0))
     _jrec_jref = 0.0
     _jrec_reject = 0
-    _B0e = B0 * (J_M / J_TRUE) if _oracle else B0
+    _B0e = B0 * float(cfg.get("b0_scale", 1.0))     # 纯 b0 失配实验：直接缩放控制器/ESO 的 b0
+    # ---- 诊断日志（2026-11-18）：1 kHz 记录 ESO 内部量，用于内模传递函数核验 ----
+    _log_eso = bool(cfg.get("log_eso", False))
+    _lg = []
+    # ---- 内模反演自标定 b0 辨识（2026-11-18）------------------------------------
+    #   d^ = V + P(jw)E1/(jw)，  P/(jw) = b1 + j(w^2-b2)/w，  delta_b = Re(d^/U)
+    #   依据：1/G = Delta/(sD) = P/s + beta3/D 且 beta3/D = V/E1（见附录 D 的 H(s)）
+    _jnew = bool(cfg.get("j_b0_new", False))
+    _jalt = bool(cfg.get("j_b0_alt", False))          # 双幅值差分（抗撞频）
+    _jalt_r = float(cfg.get("j_b0_alt_ratio", 0.5))   # 第二档幅值比
+    _tcorr = bool(cfg.get("j_b0_tcorr", False))       # 差分结果再除以 T(jw_h)
+    _onoff = bool(cfg.get("j_b0_onoff", False))       # 前段不注入 + 后段注入，两段 SDFT 后差分
+    _dsq = bool(cfg.get("j_dith_sq", False))          # 方波注入（基波与正弦同峰值）
+    _dtri = bool(cfg.get("j_dith_tri", False))         # 三角波注入（峰值 1，基波 8/pi^2）
+    # ---- 批量辨识：连续 N 个 burst 后一次性定 b0，随后长时间冻结 ----
+    _jbatch = bool(cfg.get("j_b0_batch", False))
+    _jbn = int(cfg.get("j_batch_n", 12))               # burst 个数
+    _jbmad = float(cfg.get("j_batch_mad", 0.15))       # 相对 MAD 拒收门限
+    _jbwarm = int(cfg.get("j_batch_warm", 3))          # 预热 burst 数（直接采用，不进批）
+    _batch_list = []
+    _batch_cnt = 0
+    _blast = []                    # 最近若干 burst 的估计（冻结时取均值用）
+    _bwin = int(cfg.get("j_freeze_avg_n", 4))   # 取最近几个 burst 平均（4×5s=20s）
+    _jalg = bool(cfg.get("j_b0_alg", False))   # 代数法：b=(b0+d^/u)/T，T 在线测量
+    _jnew_ec = _jnew_es = _jnew_vc = _jnew_vs = 0.0
+    _jnew_uc = _jnew_us = _jnew_woe = 0.0
+    _jnew_qc = _jnew_qs = 0.0
+    _jnew_yc = _jnew_ys = 0.0
+    _jnew_n = 0
+    _jnew_log = []
+    _jnew_list = []
+    _jnew_pending = False
+    _jprev = None
+    _jnew_win = 0
+    _jnew_g0 = 0.0
+    _jb1g = float(getattr(ESO_G1, "slope0", 1.0))   # fal 小信号斜率（z1 通道，a1=1 -> 1）
+    _jb2g = float(getattr(ESO_G2, "slope0", 1.0))   # fal 小信号斜率（z2 通道，a=0.75 -> 1.778）
+
+    if _oracle:
+        _B0e *= (J_M / J_TRUE)
     _KPe = KP
     # ---- J 应用后校验 / 回退（状态 4）与死区（状态 5）（2026-11-13）----
     # 上电状态机扩展：0 空闲 / 1 辨识 / 2 已应用 / 3 超时回退 / 4 校验回退 / 5 死区保持标称。
@@ -241,7 +327,7 @@ def sim_inv(t, TL, cfg=None):
                     iq_pk=float(pk), t0=float(t0), t1=float(t1))
 
     BETA3 = cfg.get("beta3", 2000.0); TAU0 = cfg.get("tau0", 20e-3)
-    Q0 = cfg.get("Q0", 0.98); ZETA = 0.2
+    Q0 = cfg.get("Q0", 0.98); ZETA = float(cfg.get("zeta_inj", 0.2))   # 注入 tanh 的线性区宽度
     rc_inj = str(cfg.get("rc_inj", "tanh"))   # 重复通道注入非线性：tanh（默认）或 fal
     u_z1 = bool(cfg.get("u_z1", True))      # 控制律比例项：默认用 z1（2026-11-12 统一）；False 可复现旧法规 r-y
     kp_boost = cfg.get("kp_boost", 0.0); det_eps = cfg.get("det_eps", 0.01)
@@ -405,6 +491,10 @@ def sim_inv(t, TL, cfg=None):
     _bp_low = 0.0; _bp_band = 0.0
     _es_dh = es_d0; _es_delta = es_d0; _es_I = 0.0
     _es_tnext = es_t0 + es_N * es_Pd; _es_ph = 0.0
+    # es_cont：连续滑动窗（窗长 N·P_d），δ̂ 每 1 ms 按 (σ/T_win)·sgn(I) 更新
+    _es_win_s = max(es_N * es_Pd, 1e-3)
+    _es_ring_n = max(int(round(_es_win_s / 1e-3)), 10)
+    _es_ring = np.zeros(_es_ring_n); _es_ring_p = 0; _es_ring_fill = 0; _es_acc = 0.0
     _es_tfreeze = 0.0; _es_n = 0; _Tgnow = T; _Tgprev = None; _Tglp = T
     bp_acc = 0.0; bp_buf = np.zeros(nd); bp_p = 0; _A_now = 0.0; _b3_now = BETA3
     _dft_q = []                                   # T_dft：最近 N 个 (x·cosθ, x·sinθ)
@@ -472,6 +562,9 @@ def sim_inv(t, TL, cfg=None):
             _m = _tflt.get("misalign")
             if _m:
                 _tlf += misalign_torque(_phimf, w, **_m)
+            _p = _tflt.get("parallel")
+            if _p:
+                _tlf += parallel_torque(_phimf, w, **_p)
             if _tflt_rev is not None and (not _tflt_rev_done) and (k * dt >= _tflt_rev):
                 _tflt_rev_done = True
             if _tflt_rev_done:
@@ -537,12 +630,139 @@ def sim_inv(t, TL, cfg=None):
             e1m = e1g_acc / T
             eps_g = det_eps if det_eps > 0.0 else 0.01
             g = (e1m * e1m) / (e1m * e1m + eps_g * eps_g)
+            if _jnew and _jrec_active:   # 辨识窗内冻结律D 门控：保证窗内 LTI（否则 woe 变化使 1/G 无定义）
+                g = _jnew_g0
             _gp = g ** kp_gpow if kp_gpow != 1.0 else g   # 律D 门控形状（2026-11-11）
             kpe = _KPe * (1.0 + kp_boost * _gp)
             _g1 = ESO_G1(e1); _g2 = ESO_G2(e1)       # 线性档 G(e)=e（逐位不变）
             _woe = WO * (1.0 + kb_eso * g) if kb_eso > 0.0 else WO
             z1n = z1 + 1e-3 * (z2 + _B0e * u + v + 2.0 * _woe * _g1)
             z2n = z2 + 1e-3 * (_woe * _woe * _g2)
+            if _log_eso:   # tk, e1, v, z2, u(本步所用,含上一拍 dither), B0e, woe
+                _lg.append((k * dt, e1, v, z2, u, _B0e, _woe))
+            if _jnew and _jrec_active:   # 内模反演：在本步所用 (e1,v,u) 上同步解调
+                _jph = _jrec_w * (k * dt)
+                _jc = math.cos(_jph); _js = math.sin(_jph)
+                _jnew_ec += e1 * _jc; _jnew_es += e1 * _js
+                _jnew_vc += v * _jc;  _jnew_vs += v * _js
+                _jnew_uc += u * _jc;  _jnew_us += u * _js
+                _jnew_qc += idq[1] * _jc; _jnew_qs += idq[1] * _js
+                _jnew_yc += y_m * _jc;    _jnew_ys += y_m * _js
+                _jnew_woe += _woe; _jnew_n += 1
+                if _jnew_n >= _jrec_n:
+                    _nn = float(_jnew_n)
+                    _E = complex(2.0 * _jnew_ec / _nn, -2.0 * _jnew_es / _nn)
+                    _V = complex(2.0 * _jnew_vc / _nn, -2.0 * _jnew_vs / _nn)
+                    _U = complex(2.0 * _jnew_uc / _nn, -2.0 * _jnew_us / _nn)
+                    _QC = complex(2.0 * _jnew_qc / _nn, -2.0 * _jnew_qs / _nn)
+                    _Yc = complex(2.0 * _jnew_yc / _nn, -2.0 * _jnew_ys / _nn)
+                    _wm = _jnew_woe / _nn
+                    _b1n = 2.0 * _wm * _jb1g
+                    _b2n = _wm * _wm * _jb2g
+                    # 观测器按 1 ms 显式欧拉离散（beta1*dt≈1），必须用离散算子
+                    #   s_d = (e^{j w dt} - 1)/dt，否则 65 Hz 处实部差 ~82 rad/s
+                    _sd = complex(math.cos(_jrec_w * 1e-3) - 1.0,
+                                  math.sin(_jrec_w * 1e-3)) / 1e-3
+                    _pq = (_sd * _sd + _b1n * _sd + _b2n) / _sd
+                    if abs(_U) > 1e-6:
+                        _Tc = (_QC / I_BASE) / _U    # 电流环在 w_h 的复传函（标幺 iq/u）
+                        _dd = _V + _pq * _E            # d^（复数）
+                        if _jalg and abs(_Tc) > 1e-3:
+                            # 单窗代数解：b0 + d^/u = b*T  =>  b = (b0 + d^/u)/T
+                            _bhat = ((_B0e + _dd / _U) / _Tc).real
+                            _btn = min(max(_bhat, 0.02 * B0), 2.4 * B0)
+                        else:
+                            _btn = min(max(_B0e + (_dd / _U).real, 0.02 * B0), 2.4 * B0)
+                        # 实测电流差分（无 T）： d = f + b*It - b0*u
+                        #   => d2 - d1 = b*(It2-It1) - b0*(u2-u1)
+                        #   => b = [ (d2-d1) + b0*(u2-u1) ] / (It2-It1)
+                        _QCp = _QC / I_BASE
+                        _bpv = 0.0
+                        if _onoff:
+                            # 前后两段各自 SDFT，段末取均值后做差
+                            if _jnew_win == 0:
+                                _jprev = (_dd, _U, _Tc, _B0e, _QCp)
+                            elif _jprev is not None:
+                                _d1, _U1, _T1, _b1, _Q1 = _jprev
+                                if abs(_QCp - _Q1) > 1e-6:
+                                    _bpv = (((_dd - _d1) + _b1 * (_U - _U1))
+                                            / (_QCp - _Q1)).real
+                                    if abs(_Tc) > 1e-6:
+                                        _bpv = (_bpv / _Tc).real    # T 修正用注入段
+                                    _bpv = min(max(_bpv, 0.02 * B0), 2.4 * B0)
+                        elif _jalt and (_jprev is not None):
+                            _d1, _U1, _T1, _b1, _Q1 = _jprev
+                            if abs(_QCp - _Q1) > 1e-6:
+                                _bpv = (((_dd - _d1) + _b1 * (_U - _U1))
+                                        / (_QCp - _Q1)).real
+                                if _tcorr:
+                                    _Tp = 0.5 * (_T1 + _Tc)   # 两窗电流环传函均值
+                                    if abs(_Tp) > 1e-6:
+                                        _bpv = (_bpv / _Tp).real
+                                _bpv = min(max(_bpv, 0.02 * B0), 2.4 * B0)
+                        if not _onoff:
+                            _jprev = (_dd, _U, _Tc, _B0e, _QCp)
+                        if _onoff:
+                            if abs(_bpv) > 1e-9:      # 仅注入段末尾的差分有效
+                                _jnew_list.append(_bpv)
+                        else:
+                            _jnew_list.append(_bpv if abs(_bpv) > 1e-9 else _btn)
+                        _jnew_log.append((k * dt, _B0e, _btn, abs(_U), abs(_Tc), _bpv, abs(_Yc)))
+                        _jnew_win += 1
+                    _jnew_ec = _jnew_es = _jnew_vc = _jnew_vs = 0.0
+                    _jnew_uc = _jnew_us = _jnew_qc = _jnew_qs = 0.0
+                    _jnew_yc = _jnew_ys = 0.0
+                    _jnew_woe = 0.0; _jnew_n = 0
+            if _jnew and _jnew_pending and (not _jrec_active):
+                # burst 结束：用窗均值一次性更新（窗内不动 b0，避免更新本身污染测量）
+                _jnew_pending = False
+                _nmin_eff = 1 if _onoff else _jrec_nmin
+                if _jrec_apply and (not _jrec_abort) and len(_jnew_list) >= _nmin_eff:
+                    if _jbatch:
+                        _bt0 = sum(_jnew_list) / len(_jnew_list)
+                        _jnew_list = []
+                        _batch_cnt += 1
+                        if _batch_cnt <= _jbwarm:        # 预热段：立即采用
+                            if _jrec_btau > 0.0:
+                                _jrec_bgoal = _bt0
+                            else:
+                                _B0e = _bt0
+                            _jnew_log.append((k * dt, _B0e, _bt0, -3.0, 0.0, 0.0, 0.0))
+                            continue
+                        _batch_list.append(_bt0)         # 批量段：只收集
+                        if _batch_cnt >= _jbn:
+                            _bs = sorted(_batch_list)
+                            _n = len(_bs)
+                            _mdn = float(_bs[_n // 2])
+                            _nk = int(_n * 0.2)              # 双边各去 20%
+                            _core = _bs[_nk:_n - _nk] if (_n - 2 * _nk) >= 3 else _bs
+                            _mean = sum(_bs) / _n
+                            _bm = sum(_core) / len(_core)    # 截尾平均
+                            _mad = float(sorted(abs(x - _bm) for x in _bs)[_n // 2])
+                            _rel = _mad / max(abs(_bm), 1e-9)
+                            _jnew_log.append((k * dt, _B0e, _bm, -2.0, _rel,
+                                              _mean, _mdn))
+                            if _rel <= _jbmad:          # 通过一致性检验才采用
+                                if _jrec_btau > 0.0:
+                                    _jrec_bgoal = _bm
+                                else:
+                                    _B0e = _bm
+                            _jrec_next = 1.0e9           # 之后不再辨识
+                        continue
+                    _btm = sum(_jnew_list) / len(_jnew_list)
+                    _blast.append(_btm)
+                    if len(_blast) > _bwin:
+                        _blast.pop(0)
+                    _jnew_log.append((k * dt, _B0e, _btm, -1.0, 0.0, 0.0, 0.0))
+                    # 本 burst 若是辨识窗口内最后一个，冻结为最近若干 burst 的均值
+                    if _tk >= _jpsw - float(cfg.get("j_recheck_period", 5.0)):
+                        _B0e = sum(_blast) / len(_blast)
+                        _jrec_bgoal = None
+                    if _jrec_btau > 0.0:
+                        _jrec_bgoal = _B0e + _amed_alpha(_btm) * (_btm - _B0e)
+                    else:
+                        _B0e += _amed_alpha(_btm) * (_btm - _B0e)
+                _jnew_list = []
             e1p = (e1 - ff_phi * math.tanh(e1 / ff_phi)) if ff_phi > 0.0 else e1
             if _Tadapt:
                 if _Tfilt > 0.0:
@@ -604,6 +824,7 @@ def sim_inv(t, TL, cfg=None):
                         _es_tfreeze = k * dt + es_freeze
                         _es_I = 0.0
                         _es_tnext = k * dt + es_freeze + es_N * es_Pd
+                        _es_ring[:] = 0.0; _es_ring_p = 0; _es_ring_fill = 0; _es_acc = 0.0
                     _Tglp += _al * (_Tgnow - _Tglp)
                     _Tgprev = _Tgnow
                     if es_ff and (k * dt < _es_tfreeze):
@@ -611,17 +832,35 @@ def sim_inv(t, TL, cfg=None):
                         _dff = -math.atan(max(_wT, 1e-6) * TAU0) / (2.0 * math.pi)
                         _es_dh = max(-es_dmax, min(es_dmax, _dff))
                     if (k * dt >= es_t0) and (k * dt >= _es_tfreeze):
-                        # 锁相解调：I = 2/(N·P_d) ∫ A·sin(ω_d t) dt
-                        _es_I += _A_now * math.sin(_es_ph) * 1e-3
-                        if k * dt >= _es_tnext:
-                            _Nw = max(1.0, _es_tnext - (k * dt - es_N * es_Pd))
-                            _Ibar = 2.0 * _es_I / max(es_N * es_Pd, 1e-9)
-                            if abs(_Ibar) > es_dead:
-                                _es_dh = max(-es_dmax, min(es_dmax,
-                                           _es_dh - es_step * (1.0 if _Ibar > 0 else -1.0)))
-                            _es_I = 0.0
-                            _es_n += 1
-                            _es_tnext = k * dt + es_N * es_Pd
+                        if _es_cont:
+                            # 连续滑动窗（§15 连续版本）：δ̂ 每 1 ms 更新，窗内不 hold
+                            #   I = 2/T_win ∫_{t-T_win}^{t} A sin(ω_d τ) dτ（不满窗不动）
+                            _ev = _A_now * math.sin(_es_ph) * 1e-3
+                            _old = _es_ring[_es_ring_p]
+                            _es_ring[_es_ring_p] = _ev
+                            _es_ring_p = (_es_ring_p + 1) % _es_ring_n
+                            _es_acc += _ev - _old
+                            if _es_ring_fill < _es_ring_n:
+                                _es_ring_fill += 1
+                            if _es_ring_fill >= _es_ring_n:
+                                _Ibar = 2.0 * _es_acc / _es_win_s
+                                if abs(_Ibar) > es_dead:
+                                    _es_dh = max(-es_dmax, min(es_dmax,
+                                               _es_dh - (es_step / _es_win_s) * 1e-3 *
+                                               (1.0 if _Ibar > 0 else -1.0)))
+                                _es_n += 1
+                        else:
+                            # 锁相解调：I = 2/(N·P_d) ∫ A·sin(ω_d t) dt，窗边界更新（hold）
+                            _es_I += _A_now * math.sin(_es_ph) * 1e-3
+                            if k * dt >= _es_tnext:
+                                _Nw = max(1.0, _es_tnext - (k * dt - es_N * es_Pd))
+                                _Ibar = 2.0 * _es_I / max(es_N * es_Pd, 1e-9)
+                                if abs(_Ibar) > es_dead:
+                                    _es_dh = max(-es_dmax, min(es_dmax,
+                                               _es_dh - es_step * (1.0 if _Ibar > 0 else -1.0)))
+                                _es_I = 0.0
+                                _es_n += 1
+                                _es_tnext = k * dt + es_N * es_Pd
                 _r = _A_now / max(a_ref, 1e-9)
                 _b3_now = b3_min + (b3_max - b3_min) * min(1.0, _r * _r)
                 if (a_lim > 0.0) and (_A_now > a_lim):
@@ -750,14 +989,16 @@ def sim_inv(t, TL, cfg=None):
                     _pre_ok = (not _jrec_gate) or (len(_jrec_lp_hist) >= _pre_need and
                                                    (max(_jrec_lp_hist) - min(_jrec_lp_hist)) <= _jrec_gate_ac)
                     if not _pre_ok:
-                        _jrec_next = _tk + _jrec_period
+                        _jrec_next = _jnext(_tk)
                         _jstate = 6
                         _jrec_abort_o.append((_tk, 1.0))
                     else:
                         _jrec_active = True
                         _jrec_end = _tk + _jrec_len
-                        _jrec_next = _tk + _jrec_period
+                        _jrec_next = _jnext(_tk)
                         _jrec_list = []; _jrec_nid = 0
+                        _jnew_list = []; _jnew_pending = True; _jnew_g0 = g
+                        _jprev = None; _jnew_win = 0
                         _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0; _jrec_iq_c = _jrec_iq_s = 0.0
                         _jrec_B0_pre = _B0e
                         _jrec_abort = False
@@ -773,20 +1014,38 @@ def sim_inv(t, TL, cfg=None):
                         else:
                             _jrec_base_iq = float("nan"); _jrec_base_a = float("nan")
                         if _jrec_f_auto:
+                            # ---- 三约束选频（2026-11-19）----
+                            #   下界: 速度环衰减 3kp/2pi、谐波余量 2.5*f_rot、配置下限
+                            #   上界: ESO 带宽 wo/2pi、电流环 0.2*fci、配置上限
+                            #   栅格: 5 Hz（= 1/窗长），保证严格相干；避开整数倍谐波，优先半整数
                             _fv = max(n_ref / 60.0, 1e-3)
-                            _fd = (_jrec_f_q + _jrec_f_alpha) * _fv
-                            _fd = min(max(_fd, _jrec_f_min), _jrec_f_max)
-                            _fd = round(_fd / _jrec_f_grid) * _jrec_f_grid
-                            _ratio = _fd / _fv
-                            if abs(_ratio - round(_ratio)) < 0.05:
-                                _fd += _jrec_f_grid
-                                if _fd > _jrec_f_max:
-                                    _fd -= 2.0 * _jrec_f_grid
-                            _jrec_fd = _fd
+                            _lo = max(3.0 * KP / TWO_PI, 2.5 * _fv, _jrec_f_min)
+                            _hi = min(WO / TWO_PI, 0.2 * float(cfg.get("fci", 500.0)),
+                                      _jrec_f_max)
+                            _tg = (_jrec_f_q + _jrec_f_alpha) * _fv
+                            _best = None
+                            _nk = int(math.floor(_lo / _jrec_f_grid))
+                            while _nk * _jrec_f_grid <= _hi + 1e-9:
+                                _c = _nk * _jrec_f_grid
+                                if _c >= _lo - 1e-9:
+                                    _rt = _c / _fv
+                                    if abs(_rt - round(_rt)) > 0.10:
+                                        _pen = abs(_c - _tg)
+                                        if abs(_rt - round(_rt) - 0.5) > 0.12:
+                                            _pen += _jrec_f_grid
+                                        if (_best is None) or (_pen < _best[0]):
+                                            _best = (_pen, _c)
+                                _nk += 1
+                            _jrec_fd = _best[1] if (_best is not None) else min(max(_tg, _lo), _hi)
                         else:
                             _jrec_fd = _jrec_f
                         _jrec_w = 2.0 * math.pi * _jrec_fd
                         _jrec_amp_use = _jrec_amp * (max(1.0, _jrec_fd / 100.0) if _jrec_amp_auto else 1.0)
+                        # 纹波预算（可选）：u_d <= R*w/(600*b_nom)，需给出名义物理增益
+                        _bnom = float(cfg.get("j_recheck_b_nom", 0.0))
+                        _rbud = float(cfg.get("j_recheck_rpm_budget", 0.0))
+                        if (_bnom > 0.0) and (_rbud > 0.0):
+                            _jrec_amp_use = min(_jrec_amp_use, _rbud * _jrec_w / (600.0 * _bnom))
                         _jrec_fd_o.append((_tk, _jrec_fd))
                         _jstate = 1
                 if _jrec_active:
@@ -804,7 +1063,17 @@ def sim_inv(t, TL, cfg=None):
                             _jrec_abort_o.append((_tk, 1.0))
                     if _jrec_active and _tk < _jrec_end:
                         _ph = _jrec_w * _tk
-                        u += _jrec_amp_use * math.sin(_ph)
+                        if _onoff:
+                            _jampf = 0.0 if (_jnew_win == 0) else 1.0   # 前段不注入
+                        else:
+                            _jampf = _jalt_r if (_jalt and (_jnew_win % 2 == 1)) else 1.0
+                        if _dsq:
+                            _dsv = 1.0 if math.sin(_ph) >= 0.0 else -1.0
+                        elif _dtri:
+                            _dsv = (2.0 / math.pi) * math.asin(math.sin(_ph))
+                        else:
+                            _dsv = math.sin(_ph)
+                        u += _jrec_amp_use * _jampf * _dsv
                         _jrec_te_c += Te * math.cos(_ph); _jrec_te_s += Te * math.sin(_ph)
                         _jrec_w_c += w_enc * math.cos(_ph); _jrec_w_s += w_enc * math.sin(_ph)
                         _jrec_iq_c += idq[1] * math.cos(_ph); _jrec_iq_s += idq[1] * math.sin(_ph)
@@ -827,12 +1096,12 @@ def sim_inv(t, TL, cfg=None):
                                 if (not _jrec_gate) and len(_jrec_list) >= _jrec_nmin:
                                     _jrec_jhat = sum(_jrec_list) / len(_jrec_list)
                                     _jhat = (J_M * B0 / _jrec_jhat) if _jrec_b0d else _jrec_jhat
-                                    if _jrec_apply:
+                                    if _jrec_apply and (not _jnew):
                                         _bt = _jrec_jhat if _jrec_b0d else B0 * (J_M / _jrec_jhat)
                                         if _jrec_btau > 0.0:
-                                            _jrec_bgoal = _B0e + _jrec_alpha * (_bt - _B0e)
+                                            _jrec_bgoal = _B0e + _amed_alpha(_bt) * (_bt - _B0e)
                                         else:
-                                            _B0e += _jrec_alpha * (_bt - _B0e)
+                                            _B0e += _amed_alpha(_bt) * (_bt - _B0e)
                             _jrec_te_c = _jrec_te_s = _jrec_w_c = _jrec_w_s = 0.0; _jrec_iq_c = _jrec_iq_s = 0.0
                             _jrec_nid = 0
                     elif _jrec_active and _tk >= _jrec_end:
@@ -849,12 +1118,12 @@ def sim_inv(t, TL, cfg=None):
                                         _jrec_jref = _jn
                                     _jrec_jhat = _jn
                                     _jhat = (J_M * B0 / _jrec_jhat) if _jrec_b0d else _jrec_jhat
-                                    if _jrec_apply:
+                                    if _jrec_apply and (not _jnew):
                                         _bt = _jrec_jhat if _jrec_b0d else B0 * (J_M / _jrec_jhat)
                                         if _jrec_btau > 0.0:
-                                            _jrec_bgoal = _B0e + _jrec_alpha * (_bt - _B0e)
+                                            _jrec_bgoal = _B0e + _amed_alpha(_bt) * (_bt - _B0e)
                                         else:
-                                            _B0e += _jrec_alpha * (_bt - _B0e)
+                                            _B0e += _amed_alpha(_bt) * (_bt - _B0e)
                                     _jstate = 2
                                     _jrec_val_pending = True
                                     _jrec_val_t = _tk + 0.7
@@ -1108,7 +1377,7 @@ def sim_inv(t, TL, cfg=None):
                 trig=trig_log, oracle=oracle_log,
                 jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3,
                 jstate=np.asarray(jstate_o),
-                b0e=np.asarray(b0e_o),
+                b0e=np.asarray(b0e_o), lg=_lg, jnew=np.asarray(_jnew_log),
                 fd=np.asarray(_jrec_fd_o), abort=np.asarray(_jrec_abort_o), jval_log=_jrec_val_log,
                 # ---- J 应用后校验（状态 4）记录 ----
                 jval=dict(enable=bool(_j_val_on), rho=float(_jv_rho),

@@ -44,7 +44,7 @@ for i, (case, title, zr) in enumerate(cases):
     ax[1,i].plot(t[m], e1[m], color=C_B, lw=1.1, label="有低通")
     ax[1,i].set_xlim(*zr); ax[1,i].set_xlabel("时间 / s"); ax[1,i].set_ylabel("转速误差 / rpm")
     ax[1,i].set_title("局部：RMS %.0f vs %.0f rpm" % (np.sqrt(np.mean(e0[m]**2)), np.sqrt(np.mean(e1[m]**2))), fontsize=7.8)
-fig.suptitle("无自适应 RCESO：保留低通 vs 去掉低通（不对中 β=1° + 圆盘不平衡，600 rpm，8 s）", fontsize=10.4, y=0.965)
+fig.suptitle("无自适应 RCESO：保留低通 vs 去掉低通（圆盘不平衡 + 角不对中 β=1° + 平行不对中，600 rpm，8 s）", fontsize=10.4, y=0.965)
 fig.savefig("ppt_s5_combined.png", dpi=150, bbox_inches=None, facecolor="white")
 plt.close(fig)
 
@@ -67,7 +67,7 @@ ax[1].text(0.01,0.95,txt,transform=ax[1].transAxes,fontsize=8.0,va="top",bbox=di
 ax[1].legend(loc="lower left",fontsize=7.2)
 ax[2].set_ylabel("电流 / A"); ax[2].set_xlabel("时间 / s"); ax[2].set_xlim(0,8); ax[2].set_ylim(-0.5,6.4)
 ax[2].legend(loc="upper left",fontsize=7.0,ncol=2)
-fig.suptitle("同一组合故障：纯 ESO vs 无自适应 RCESO（600 rpm，8 s；不对中 β=1° + 圆盘不平衡）", fontsize=10.2, y=0.965)
+fig.suptitle("同一组合故障：纯 ESO vs 无自适应 RCESO（600 rpm，8 s；圆盘不平衡 + 角不对中 + 平行不对中）", fontsize=10.2, y=0.965)
 fig.savefig("ppt_s6_combined.png", dpi=150, bbox_inches=None, facecolor="white")
 plt.close(fig)
 
@@ -87,7 +87,7 @@ ax[1,0].set_xlim(1.9,2.5);ax[1,0].set_ylabel("转速误差 / rpm");ax[1,0].set_t
 for d,c,lab in ((A,C_A,"工况1"),(B,"#7f8c8d","工况2")):
     m=(d["t"]>=5.8)&(d["t"]<=6.4);ax[1,1].plot(d["t"][m],d["y"][m]*600,color=c,lw=0.9,label=lab)
 ax[1,1].set_xlim(5.8,6.4);ax[1,1].set_ylabel("转速 / rpm");ax[1,1].set_title("(d) 换速窗 5.8–6.4 s",fontsize=8.8);ax[1,1].legend(fontsize=7)
-fig.suptitle("两组对照：只有实验组换速 600→300（T 自适应；不对中 β=1° + 圆盘不平衡）", fontsize=10.0, y=0.965)
+fig.suptitle("两组对照：只有实验组换速 600→300（T 自适应；圆盘不平衡 + 角不对中 + 平行不对中）", fontsize=10.0, y=0.965)
 fig.savefig("ppt_s8_combined.png", dpi=150, bbox_inches=None, facecolor="white")
 plt.close(fig)
 
@@ -107,7 +107,7 @@ ac.plot(b["t"],b["tl"],color="#34495e",lw=0.7);ac.set_xlim(0,8);ac.set_ylim(-0.0
 m=(b["t"]>=1.9)&(b["t"]<=2.6);ad.plot(b["t"][m],(b["y"][m]-1)*600,color=C_B,lw=0.9);ad.plot(l["t"][m],(l["y"][m]-1)*600,color=C_A,lw=0.9);ad.set_xlim(1.9,2.6);ad.set_ylabel("误差 / rpm");ad.set_title("(d) 加载窗",fontsize=8.6)
 ae.plot(b["t"],b["iq"],color=C_B,lw=0.5,alpha=0.6,label="无自适应");ae.plot(l["t"],l["iq"],color=C_A,lw=0.5,label="律D");ae.axhline(6.31,color=C_N,ls="--",lw=0.8);ae.set_xlim(0,8);ae.set_ylim(0,7.5);ae.set_ylabel("$i_q$ / A");ae.set_xlabel("时间 / s");ae.set_title("(e) 电流代价",fontsize=8.6);ae.legend(fontsize=7)
 m=(b["t"]>=7)&(b["t"]<=8);af.plot(b["t"][m],(b["y"][m]-1)*600,color=C_B,lw=0.8);af.plot(l["t"][m],(l["y"][m]-1)*600,color=C_A,lw=0.8);af.set_xlim(7,8);af.set_ylabel("误差 / rpm");af.set_title("(f) 稳态 7–8 s",fontsize=8.6)
-fig.suptitle("律 D（$k_p$+ESO 带宽自适应）对加载的改善（600 rpm、8 s；不对中+圆盘不平衡）",fontsize=9.8,y=0.965)
+fig.suptitle("律 D（$k_p$+ESO 带宽自适应）对加载的改善（600 rpm、8 s；圆盘不平衡+角不对中+平行不对中）",fontsize=9.8,y=0.965)
 fig.savefig("ppt_s10_combined.png",dpi=150,bbox_inches=None,facecolor="white");plt.close(fig)
 
 # ---------------- s13 ----------------
@@ -123,6 +123,6 @@ a3.bar([0,1],[ab10,ae10],color=[C_B,C_A],width=0.55);a3.set_xticks([0,1]);a3.set
 a4.plot(b["t"],b["tl"],color="#34495e",lw=0.6);a4.set_xlim(0,30);a4.set_ylim(-0.03,0.62);a4.set_ylabel("$T_L$ / N·m");a4.set_xlabel("时间 / s");a4.set_title("(d) 负载：组合故障",fontsize=8.4)
 m=(e["t"]>=26)&(e["t"]<=27);a5.plot(e["t"][m],ee[m],color=C_A,lw=0.8);a5.set_xlim(26,27);a5.set_ylabel("误差 / rpm");a5.set_xlabel("时间 / s");a5.set_title("(e) 稳态 10 Hz 分量",fontsize=8.4)
 a6.plot(e["t"],e["es"]*100,color=C_A,lw=0.9);a6.set_xlim(0,30);a6.set_ylabel(r"$\delta$ / %");a6.set_xlabel("时间 / s");a6.set_title("(f) δ 收敛：末段 %.2f%%"%(100*np.mean(e["es"][e["t"]>=25])),fontsize=8.4)
-fig.suptitle("T 自适应 vs 无自适应（600 rpm、30 s；不对中 β=1° + 圆盘不平衡）",fontsize=9.8,y=0.965)
+fig.suptitle("T 自适应 vs 无自适应（600 rpm、30 s；圆盘不平衡 + 角不对中 + 平行不对中）",fontsize=9.8,y=0.965)
 fig.savefig("ppt_s13_combined.png",dpi=150,bbox_inches=None,facecolor="white");plt.close(fig)
 print("ok")

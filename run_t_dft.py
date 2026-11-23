@@ -13,7 +13,8 @@ AREF = float(sys.argv[4]) if len(sys.argv) > 4 else 1.0
 DT = 2e-6; TEND = 30.0
 FAULT = dict(start=2.0,
              unbalance=dict(M=0.1, e=1e-4, kappa=580.0),
-             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0))
+             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0),
+             parallel=dict(e=1e-4, dk=1.0e5, kappa=100.0))
 t = np.arange(0.0, TEND, DT)
 TL = (0.50 * (t >= 2.0)).astype(float) * 0.637
 cfg = dict(n_ref=600.0, T=0.1, T_adapt=True, T_filt=50e-3,
