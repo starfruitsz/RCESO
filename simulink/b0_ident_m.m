@@ -19,6 +19,8 @@ g_a1    = 1.00;     % z1 通道指数（g_mode=2 时生效）
 g_a     = 0.75;     % z2 通道指数
 g_delta = 0.10;     % 线性区宽度 δ
 g_lam   = 10.0;     % tanh 陡度 λ
+% ---- 识别使能：0 = 只注入不更新 b0（关闭识别，用于对照）----
+upd_on  = 1;
 % ---- 运行使能：转速门限 [rpm]（取绝对值，兼容反转；都设 0 = 不启用）----
 omega_on  = 180;    % |转速| 低于此值不启动 burst（本轮跳过，不占用 24 次预算）
 omega_off = 150;    % burst 进行中低于此值则丢弃本次，防止掉速污染窗口
@@ -139,7 +141,9 @@ acc(13)= acc(13)+ g2v*c;  acc(14)= acc(14)+ g2v*s;
             if abs(den) > 1e-9
                 bq = abs(num/den);              % 取模长：对相位误差免疫
                 bq = min(max(bq, b0lo), b0hi);
-                if ~bvalid
+                if upd_on == 0
+                    % 识别关闭：只算 bq，不更新 b0（b0 停在 b0_init）
+                elseif ~bvalid
                     base = bq; bvalid = 1; goal = bq; gv = 1; nest = 1;   % 经低通
                 elseif nest < warm
                     base = bq; goal = bq; gv = 1; nest = nest + 1;        % 经低通
@@ -156,7 +160,9 @@ acc(13)= acc(13)+ g2v*c;  acc(14)= acc(14)+ g2v*s;
                     base = base + mu*(bq - base);
                     nest = nest + 1;
                 end
-                if nblast < nfrz
+                if upd_on == 0
+                    % 识别关闭：不记录、不冻结
+                elseif nblast < nfrz
                     nblast = nblast + 1; blast(nblast) = bq;
                 else
                     blast(1:nfrz-1) = blast(2:nfrz); blast(nfrz) = bq;
@@ -164,7 +170,7 @@ acc(13)= acc(13)+ g2v*c;  acc(14)= acc(14)+ g2v*s;
             end
             active = 0;
             nburst = nburst + 1;
-            if nburst >= nident
+            if (upd_on ~= 0) && (nburst >= nident)
                 b0v = mean(blast(1:max(nblast,1)));
                 goal = b0v; gv = 0; frozen = 1; nxtick = tick + round(3600/dT);
             else
