@@ -8,7 +8,7 @@ plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 8.8
 
-z = np.load('_tjc_ali10_sin.npz'); jn = np.asarray(z['jnew'])
+z = np.load('_tjc_ali12_sin.npz'); jn = np.asarray(z['jnew'])
 e = [(float(r[0]), float(r[2])) for r in jn if r[0] > 0]
 be = e[2::3]
 tbq = np.array([b[0] for b in be])          # 每个 burst 结束时刻

@@ -31,7 +31,7 @@ nseg   = round(0.2/dT);     % 段长 0.2 s 对应的拍数
 % ---- 辨识调度 ----
 warm   = 3;         % 预热 burst 数：前几次估计直接采用
 nident = 24;        % 辨识 burst 总数：24 x 5 s = 120 s
-nfrz   = 10;        % 冻结时取最近 10 次（50 s）均值：前 10 个已收敛，末 10 个代表稳态
+nfrz   = 12;        % 冻结时取最近 12 次（60 s）均值：末 12 个覆盖 60–120 s
 % ---- 门控：平台 + 陡降 + 软底 ----
 d1     = 0.10;      % 平台半宽（偏离 <=10% 不衰减）
 d2     = 0.20;      % 陡降宽度
@@ -52,7 +52,7 @@ if isempty(init)
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
     b0v = b0_init; goal = b0_init; gv = 0;
     base = 0; bvalid = 0; nest = 0;
-    blast = zeros(1,10); nblast = 0; nburst = 0; frozen = 0;
+    blast = zeros(1,12); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
     b1 = 2*wo;                       % beta1 = 2*wo*kappa1，delta=1 时 kappa1=1
     b2 = wo*wo;                      % beta2 = wo^2*kappa2，delta=1 时 kappa2=1
