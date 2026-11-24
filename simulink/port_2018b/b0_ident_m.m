@@ -12,6 +12,13 @@ b0lo   = 200;       % 硬下限（防发散）
 b0hi   = 800;       % 硬上限
 wo     = 500;       % 观测器带宽 [rad/s]，必须与 ESO 一致
 kp     = 75.36;     % 转速环比例增益
+% ---- 反演用的观测器增益口径（代数恒等式，不依赖线性化）----
+% g_mode=1: G(e)=e（线性 ESO，交付配置）  g_mode=2: 类 fal
+g_mode  = 1;
+g_a1    = 1.00;     % z1 通道指数（g_mode=2 时生效）
+g_a     = 0.75;     % z2 通道指数
+g_delta = 0.10;     % 线性区宽度 δ
+g_lam   = 10.0;     % tanh 陡度 λ
 % ---- 运行使能：转速门限 [rpm]（取绝对值，兼容反转；都设 0 = 不启用）----
 omega_on  = 180;    % |转速| 低于此值不启动 burst（本轮跳过，不占用 24 次预算）
 omega_off = 150;    % burst 进行中低于此值则丢弃本次，防止掉速污染窗口
@@ -35,10 +42,10 @@ mu     = 0.35;      % 基线滑动速率
 cyc_nseg = cyc*nseg;   % 移植时人工确认该值为整数（65 Hz x 0.2 s = 13）
 persistent init ph acc nacc seg active tick nxtick tstart d0 u0 q0 t0
 persistent b0v goal gv base bvalid nest blast nblast nburst frozen
-persistent pdC sdC lpa
+persistent pdC sdC lpa b1 b2 bc
 if isempty(init)
     init = 1; ph = 0;
-    acc = zeros(1,10); nacc = 0; seg = 0; active = 0;
+    acc = zeros(1,14); nacc = 0; seg = 0; active = 0;   % 11-14: SDFT(G1(e1)), SDFT(G2(e1))
     tick = 0; nxtick = 1; tstart = 0;      % 整数拍时基（与 C 版一致）
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
     b0v = b0_init; goal = b0_init; gv = 0;
@@ -49,6 +56,7 @@ if isempty(init)
     b2 = wo*wo;                      % beta2 = wo^2*kappa2，delta=1 时 kappa2=1
     sdC = (exp(1i*wh*dT) - 1) / dT;
     pdC = sdC + b1 + b2/sdC;
+    bc  = b2/sdC;                    % beta2/Sd（精确反演用，只算一次）
     tau = 50/kp;                     % b0 低通时间常数 = 50/kp = 0.663 s（与 C 版一致）
     lpa = 1 - exp(-dT/tau);          % 低通系数，每拍执行一次
 end
@@ -85,6 +93,14 @@ if active
     acc(5) = acc(5) + u*c;   acc(6) = acc(6) + u*s;
     acc(7) = acc(7) + iq*c;  acc(8) = acc(8) + iq*s;
     acc(9) = acc(9) + omega*c; acc(10)= acc(10)+ omega*s;
+if g_mode == 1
+    g1v = e1; g2v = e1;                       % 线性 ESO：G 即恒等映射
+else
+    g1v = (abs(e1) + g_delta*g_lam^(-1/g_a1))^g_a1 * tanh(g_lam*e1/g_delta);
+    g2v = (abs(e1) + g_delta*g_lam^(-1/g_a))^g_a  * tanh(g_lam*e1/g_delta);
+end
+acc(11)= acc(11)+ g1v*c;  acc(12)= acc(12)+ g1v*s;
+acc(13)= acc(13)+ g2v*c;  acc(14)= acc(14)+ g2v*s;
     if seg == 1
         % 波形（峰值=1，与 C 版 b0_wave_value 一致）
         if wave == 1
@@ -107,7 +123,12 @@ if active
         Vc = k*(acc(3) - 1i*acc(4));
         Uc = k*(acc(5) - 1i*acc(6));
         Qc = k*(acc(7) - 1i*acc(8));
-        D  = Vc + pdC*E1;
+        % 代数恒等式（只依赖观测器方程，不含任何线性化）：
+        %   d^ = V + Sd*E1 + beta1*SDFT(G1(e1)) + (beta2/Sd)*SDFT(G2(e1))
+        % 线性观测器时 G1=G2=e1，自动退化为 V + (Sd+beta1+beta2/Sd)*E1
+        G1c = k*(acc(11) - 1i*acc(12));
+        G2c = k*(acc(13) - 1i*acc(14));
+        D  = Vc + sdC*E1 + b1*G1c + bc*G2c;
         if abs(Uc) > 1e-9, T = Qc/Uc; else, T = 1; end
         if seg == 0
             d0 = D; u0 = Uc; q0 = Qc; t0 = T;
