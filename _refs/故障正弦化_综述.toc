@@ -2,13 +2,17 @@
 \contentsline {section}{\numberline {2}论证链概览}{3}{section.2}%
 \contentsline {section}{\numberline {3}质量不平衡：严格的一倍频}{3}{section.3}%
 \contentsline {subsection}{\numberline {3.1}物理推导}{3}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}文献}{4}{subsection.3.2}%
-\contentsline {section}{\numberline {4}不对中：时变刚度与谐波生成}{4}{section.4}%
-\contentsline {subsection}{\numberline {4.1}核心机制：静态刚度 + 时变附加刚度}{4}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}文献}{4}{subsection.4.2}%
-\contentsline {section}{\numberline {5}傅里叶论证：从周期性到正弦叠加}{4}{section.5}%
-\contentsline {section}{\numberline {6}机械故障如何进入转矩通道}{5}{section.6}%
-\contentsline {section}{\numberline {7}等效载荷与分离辨识（方法层补充）}{5}{section.7}%
-\contentsline {section}{\numberline {8}开放获取的补充文献}{5}{section.8}%
-\contentsline {section}{\numberline {9}汇总：论证链与文献的对应}{6}{section.9}%
-\contentsline {section}{\numberline {10}结论}{7}{section.10}%
+\contentsline {subsection}{\numberline {3.2}文献}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}重力项：水平轴上 $1\times $ 转矩的来源与文献依据}{3}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}推导}{4}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}两个必须说明的性质}{4}{subsubsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.3}文献依据}{4}{subsubsection.3.3.3}%
+\contentsline {section}{\numberline {4}不对中：时变刚度与谐波生成}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}核心机制：静态刚度 + 时变附加刚度}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}文献}{6}{subsection.4.2}%
+\contentsline {section}{\numberline {5}傅里叶论证：从周期性到正弦叠加}{6}{section.5}%
+\contentsline {section}{\numberline {6}机械故障如何进入转矩通道}{6}{section.6}%
+\contentsline {section}{\numberline {7}等效载荷与分离辨识（方法层补充）}{6}{section.7}%
+\contentsline {section}{\numberline {8}开放获取的补充文献}{7}{section.8}%
+\contentsline {section}{\numberline {9}汇总：论证链与文献的对应}{7}{section.9}%
+\contentsline {section}{\numberline {10}结论}{8}{section.10}%

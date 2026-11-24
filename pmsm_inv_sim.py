@@ -799,7 +799,7 @@ def sim_inv(t, TL, cfg=None):
                             _jf_base += 0.35 * (_bq - _jf_base)       # 基线滑动
                             _jf_nest += 1
                         _jf_blast.append(_bq)
-                        if len(_jf_blast) > 4:
+                        if len(_jf_blast) > 10:      # 与 b0_ident_m 的 nfrz=10 一致
                             _jf_blast.pop(0)
                         if _jf_nest >= 24:                            # 冻结：末 4 次均值
                             _B0e = sum(_jf_blast) / len(_jf_blast)

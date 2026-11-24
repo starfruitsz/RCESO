@@ -122,6 +122,91 @@ Cambridge University Press, 2010. DOI 10.1017/CBO9780511780509
 \end{tabular}
 \end{table}
 
+\subsection{重力项：水平轴上 $1\times$ 转矩的来源与文献依据}
+\label{sec:gravity}
+
+前两小节的离心力是\textbf{径向力}，对转轴的力矩为零。
+但在\textbf{水平轴}机器上，偏移质心还会受到重力作用，而重力方向与质心位置矢量\textbf{不平行}，
+其力矩非零，且正是 $1\times$ 转矩的主要来源。
+
+\subsubsection{推导}
+
+设转轴水平，重力沿竖直向下。取转角 $\theta$ 自竖直向下量起，质心位置
+\begin{equation}
+\vec r_c=e\left(-\sin\theta,\ -\cos\theta\right),\qquad
+\vec F_g=\left(0,\ -Mg\right).
+\end{equation}
+绕转轴的力矩为
+\begin{equation}
+T_g=\left(\vec r_c\times\vec F_g\right)_z
+=r_xF_{gy}-r_yF_{gx}
+=(-e\sin\theta)(-Mg)=M\,g\,e\sin\theta .
+\end{equation}
+
+该式与\textbf{复摆}（physical pendulum）的重力矩完全同形：重力恒定，而力臂随转角按 $\sin\theta$ 变化，
+故为严格的 $1\times$ 分量，与转速无关。
+
+\subsubsection{两个必须说明的性质}
+
+\textbf{（1）保守性。} 重力矩在一整转上的积分为零：
+\begin{equation}
+\int_0^{2\pi}Mge\sin\theta\,\mathrm{d}\theta=0 .
+\end{equation}
+因此它只产生\textbf{转速脉动}，不贡献\textbf{平均负载}。
+若控制目标是抑制平均负载，此项不应计入；若目标是抑制纹波，则它是主项。
+
+\textbf{（2）与摩擦调制项的交叉。} 轴承摩擦调制项为 $\mu_b r_bMe\omega^2$，与 $\omega^2$ 成正比，
+而重力项与 $\omega$ 无关。两者之比
+\begin{equation}
+\frac{T_{\rm fric}}{T_{\rm grav}}=\frac{\mu_b r_b\,\omega^2}{g},
+\end{equation}
+交叉角频率
+\begin{equation}
+\omega^{*}=\sqrt{\frac{g}{\mu_b r_b}} .
+\end{equation}
+取 $\mu_b=0.01$、$r_b=0.01$ m，得 $\omega^{*}\approx313$ rad/s（约 3000 r/min）。
+故\textbf{低速段重力项主导，高速段摩擦调制项主导}。
+
+\subsubsection{文献依据}
+
+重力力矩是刚体静力学的基本结论，无需专门文献“提出”；
+需要文献支撑的是\textbf{把重力项显式写入转动系统运动方程}这一做法，
+以及\textbf{机械故障经此通道转化为 $1\times$ 转矩}的建模实践。
+下列文献均属此类，且以顶级期刊为主。
+
+\begin{table}[h]
+\centering
+\caption{显式包含重力项的转动系统建模文献}
+\small
+\begin{tabular}{@{}p{7.3cm}p{3.2cm}r@{}}
+\toprule
+文献 & 出处与分量 & 被引 \\
+\midrule
+Kallesøe (2007), \emph{Equations of motion for a rotor blade, \textbf{including gravity}, pitch action and rotor speed variations}
+& \textbf{Wind Energy} 10:209--230（风能顶刊，Q1） & 56 \\
+Yang, Huang et al. (2025), \emph{Investigation on vibration characteristics of a rotor system with \textbf{combined misalignment and eccentric faults}}
+& \textbf{MSSP} 240:113332（\textbf{机械信号处理顶刊}） & 6 \\
+Chung \& Jang (2003), \emph{Dynamic response and stability analysis of an \textbf{automatic ball balancer} for a flexible rotor}
+& \textbf{JSV} 259:31--43 & 49 \\
+Haidar \& Palacios (2021), \emph{Modified ball-type automatic balancer for rotating shafts}
+& \textbf{JSV} 496:115927 & 15 \\
+Rezaee \& Fathi (2015), \emph{Improving the working performance of automatic ball balancer}
+& \textbf{JSV} 358:375--391 & 10 \\
+Bhattacharyya \& Dutt (1997), \emph{Unbalance response and stability analysis of \textbf{horizontal rotor} systems mounted on nonlinear rolling element bearings}
+& \textbf{ASME J. Vibration and Acoustics} 119:539--544 & 10 \\
+Song \& Liu (2024), \emph{Research on unbalanced characteristics of axial-varying eccentric rotor}
+& \textbf{MSSP} 220:111647 & 13 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{说明}：以重力力矩作为\textbf{电机驱动负载扰动}的文献在公开检索中较少，
+原因是该量级仅 $10^{-4}$ N$\cdot$m，工程上常被忽略。
+因此本文将其定位为\textbf{建模完整性项}：其物理来源清楚（式 (7)），
+其方程形式有上列顶刊文献的建模先例，其保守性已明确声明。
+这一处理方式比强行引用一篇“提出该公式”的文献更为诚实。
+
 \section{不对中：时变刚度与谐波生成}
 \label{sec:mis}
 
