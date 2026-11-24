@@ -6,6 +6,7 @@ function [b0out, duout] = b0_ident_m(iq, u, omega, e1, v)
 dT     = 1e-3;      % 采样周期 [s]
 f_inj  = 65;        % 注入频率 [Hz]：须为 5 Hz 整数倍，且约等于 6.5 x 机械频率
 amp    = 0.118;     % 注入幅值 [pu]，上限 0.25
+wave   = 0;         % 注入波形：0=正弦 1=方波 2=三角（三者峰值均为 1）
 b0_init= 400;       % b0 初值，填控制器的标称值
 b0lo   = 200;       % 硬下限（防发散）
 b0hi   = 800;       % 硬上限
@@ -85,7 +86,19 @@ if active
     acc(7) = acc(7) + iq*c;  acc(8) = acc(8) + iq*s;
     acc(9) = acc(9) + omega*c; acc(10)= acc(10)+ omega*s;
     if seg == 1
-        du = amp*s;
+        % 波形（峰值=1，与 C 版 b0_wave_value 一致）
+        if wave == 1
+            if s >= 0, wv = 1; else, wv = -1; end
+        elseif wave == 2
+            a4 = ph*4;
+            if a4 < 1,        wv = a4;
+            elseif a4 < 3,    wv = 2 - a4;
+            else,             wv = a4 - 4;
+            end
+        else
+            wv = s;
+        end
+        du = amp*wv;
     end
     nacc = nacc + 1;
     if nacc >= nseg

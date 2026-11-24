@@ -196,6 +196,9 @@ try
     iqd = out.log_iq.Data; ud = out.log_u.Data; omd = out.log_om.Data;
     e1d = out.log_e1.Data; vd = out.log_v.Data;
     save([srcDir '\foc_io.mat'],'iqd','ud','omd','e1d','vd');
+    % 保存完整波形（与 build_foc2 的 foc2_log.mat 对应），供出图/对比
+    w_log=out.w_log; b0_log=out.b0_log; du_log=out.du_log; iq_log=out.iq_log;
+    save([srcDir '\foc_m_log.mat'],'w_log','b0_log','du_log','iq_log');
     fclose(fid2); fprintf('SIM_OK\n');
 catch e
     fprintf('SIM_FAIL: %s\n', e.message);
