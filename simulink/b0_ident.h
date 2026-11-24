@@ -4,7 +4,8 @@
  * --------------------------------------------------------------------------
  * 算法：注入前段(off, 0.2 s) 与 注入段(on, 0.2 s) 各自做一次相干解调，
  *       用复幅值差分解出 b，再经"平台+软底"门控与 kp/N 低通平滑。
- * 端口：iq/u/omega/e1/v 进，b0/deltau 出。全部 1 ms。
+ * 端口：iq/u/ge1/e1/v 进，b0/deltau 出。全部 1 ms。
+ *       ge1 = G(e1)，由外部提供（线性 ESO 时直接给 e1；类 fal 给 G 块输出）。
  * ========================================================================== */
 #ifndef B0_IDENT_H
 #define B0_IDENT_H
@@ -23,7 +24,7 @@ typedef float B0_REAL;
 /* ---- 编译期常数 -------------------------------------------------------- */
 #define B0_LUT_BITS   8
 #define B0_LUT_SIZE   (1u << B0_LUT_BITS)      /* 256 点 sin/cos 表 */
-#define B0_MAX_FREEZE 8                        /* 冻结均值的最大样本数 */
+#define B0_MAX_FREEZE 12                       /* 冻结均值的最大样本数（nfrz） */
 
 /* ---- 注入波形 ---------------------------------------------------------- */
 typedef enum {
@@ -50,7 +51,8 @@ typedef struct {
 
     /* 离散算子 Sd = (e^{j*wh*dT}-1)/dT 及其组合 P(Sd)/Sd（init 计算） */
     B0_REAL sd_re, sd_im;
-    B0_REAL pd_re, pd_im;  /* Sd + b1 + b2/Sd */
+    B0_REAL isd_re, isd_im; /* 1/Sd（init 计算，精确反演用） */
+    B0_REAL pd_re, pd_im;  /* Sd + b1 + b2/Sd（线性化口径，保留对照） */
 
     /* b0 */
     B0_REAL b0_init;       /* 初值（控制器标称值，约 400） */
@@ -79,10 +81,7 @@ typedef struct {
     B0_REAL  period_run;   /* 辨识期 burst 周期 [s]，5.0 */
     B0_REAL  period_idle;  /* 冻结后周期 [s]，3600.0 */
 
-    /* 运行使能：转速门限 [rpm]（取绝对值，兼容反转）。
-     * |omega| < omega_on  不启动 burst（本轮跳过，不占用 24 次预算）
-     * burst 中 |omega| < omega_off  丢弃本次（防止掉速污染窗口）
-     * 两个都设 0 表示不启用门限。 */
+    /* 已废弃：转速门限（新接口不再有 omega，保留字段仅为结构兼容） */
     B0_REAL  omega_on;
     B0_REAL  omega_off;
 } b0_ident_P;
@@ -96,7 +95,8 @@ typedef struct {
     B0_REAL  ac_v,  as_v;
     B0_REAL  ac_u,  as_u;
     B0_REAL  ac_q,  as_q;
-    B0_REAL  ac_w,  as_w;
+    B0_REAL  ac_g,  as_g;   /* SDFT(ge1)，精确反演用 */
+    B0_REAL  ac_w,  as_w;   /* 旧 omega 通道，保留不再使用 */
 
     /* 段机 */
     uint16_t n_acc;        /* 段内已累积拍数 */
@@ -138,14 +138,14 @@ void b0_ident_init(b0_ident_P *P, b0_ident_DW *DW);
 
 /* 1 ms 调用一次。
  *   iq, u   : pu（±4.5）
- *   omega   : rpm
+ *   ge1     : G(e1)，pu 同量纲；线性 ESO 时直接传 e1
  *   e1      : pu（转速误差，观测器输出）
  *   v       : pu/s（重复内模状态，观测器输出）
  *   b0_out  : 辨识结果（初值=标称，收敛后=实测）
  *   du_out  : 注入增量，由外部叠加到控制量上
  */
 void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
-                   B0_REAL iq, B0_REAL u, B0_REAL omega,
+                   B0_REAL iq, B0_REAL u, B0_REAL ge1,
                    B0_REAL e1, B0_REAL v,
                    B0_REAL *b0_out, B0_REAL *du_out);
 

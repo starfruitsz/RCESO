@@ -49,8 +49,10 @@ static float run_case(const char *name, float b_true, float b0_init,
         Vre = Dr - (P.pd_re*E1re - P.pd_im*E1im);
         Vim = Di - (P.pd_re*E1im + P.pd_im*E1re);
         v = Vre * c - Vim * s;
-        {   float om = ((float)k * dT < stop_s) ? 0.0f : 600.0f;
-            b0_ident_step(&P, &DW, iq, u, om, e1, v, &b0, &du); }
+        {   /* 运行使能改由外部实现：停机段不调用 step（门限外置） */
+            if ((float)k * dT >= stop_s) {
+                b0_ident_step(&P, &DW, iq, u, e1, e1, v, &b0, &du);   /* 线性 ESO：ge1 = e1 */
+            } }
         (void)du;
     }
     printf("  %-26s b_true=%6.1f  b0=%7.2f  误差=%+7.3f%%  bursts=%u\n",

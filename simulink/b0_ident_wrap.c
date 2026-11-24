@@ -65,12 +65,12 @@ void b0_ident_setup(void)
     s_P.n_seg     = 200u;               /* 0.2 s */
     s_P.n_warm    = 3u;
     s_P.n_ident   = 24u;                /* 24*5 s = 120 s */
-    s_P.n_freeze  = 4u;
+    s_P.n_freeze  = 12u;               /* 末 12 个 burst 均值（60 s） */
     s_P.period_run = 5.0f;
     s_P.period_idle= 3600.0f;
-    /* 运行使能：本机额定 600 rpm，30% 起辨识，掉到 25% 丢弃本次 */
-    s_P.omega_on   = 180.0f;
-    s_P.omega_off  = 150.0f;
+    /* 运行使能已外置（新接口无 omega）：这两个字段保留但不再使用 */
+    s_P.omega_on   = 0.0f;
+    s_P.omega_off  = 0.0f;
 
     b0_ident_init(&s_P, &s_DW);
     s_ready = 1u;
@@ -84,18 +84,18 @@ void b0_ident_u(const float in[5], float out[2])
                   &out[0], &out[1]);
 }
 
-void b0_ident_sim(float iq, float u, float omega, float e1, float v,
+void b0_ident_sim(float iq, float u, float ge1, float e1, float v,
                   float *b0, float *du)
 {
     if (!s_ready) { b0_ident_setup(); }
-    b0_ident_step(&s_P, &s_DW, iq, u, omega, e1, v, b0, du);
+    b0_ident_step(&s_P, &s_DW, iq, u, ge1, e1, v, b0, du);
 }
 
-b0_res_t b0_ident_res(float iq, float u, float omega, float e1, float v)
+b0_res_t b0_ident_res(float iq, float u, float ge1, float e1, float v)
 {
     b0_res_t r;
     if (!s_ready) { b0_ident_setup(); }
     r.b0 = 0.0f; r.du = 0.0f;
-    b0_ident_step(&s_P, &s_DW, iq, u, omega, e1, v, &r.b0, &r.du);
+    b0_ident_step(&s_P, &s_DW, iq, u, ge1, e1, v, &r.b0, &r.du);
     return r;
 }

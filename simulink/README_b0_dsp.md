@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|
 | `in[0]` iq | in | single | pu | ±4.5 | 实测 q 轴电流 |
 | `in[1]` u | in | single | pu | ±4.5 | 转速环输出，**不含**注入 |
-| `in[2]` omega | in | single | rpm | ±3000 | 实测转速 |
+| `in[2]` ge1 | in | single | 同 e1 | ±0.05 | **G(e1)，外部计算后输入**；线性 ESO 直接给 e1 |
 | `in[3]` e1 | in | single | pu | ±0.05 | 观测器误差 $e_1=\omega_{ref}-z_1$ |
 | `in[4]` v | in | single | pu/s | ±20 | 重复内模状态 |
 | `out[0]` b0 | out | single | 控制器标幺 | 200~800 | 辨识结果，初值 400 |
@@ -40,20 +40,19 @@
 
 ### 3.2 算法固定项（已按仿真整定）
 
-`d1=0.10, d2=0.20, dmax=0.50, alpha_base=0.30, mu=0.35, n_seg=200, n_warm=3, n_ident=24, n_freeze=4, period_run=5 s, period_idle=3600 s`
+`d1=0.10, d2=0.20, dmax=0.50, alpha_base=0.30, mu=0.35, n_seg=200, n_warm=3, n_ident=24, n_freeze=12, period_run=5 s, period_idle=3600 s`
 
-### 3.3 运行使能（转速门限）
+### 3.3 运行使能（已外置）
 
-`omega_on=180, omega_off=150`（rpm，取绝对值）：转速低于 `omega_on` 不启动 burst（本轮跳过、不占 24 次预算），
-burst 中低于 `omega_off` 丢弃本次（清累加器、`du=0`、不计数），两者构成迟滞；
-转速回升后下一个 5 s 机会**自动恢复**。两个参数设 0 即关闭门限。
-停机时不做辨识，避免死区/零反电动势下估出无意义的 $b$，也避免白耗预算。
+新接口不再有 `omega`，转速门限改由**外部**实现：停机或低速时屏蔽 `du`（或干脆不调用本函数）。
+块内只保留 `upd_on`（0 = 只注入不更新 b0）与冻结逻辑。
+停机时不做辨识依然是推荐做法——死区/零反电动势下估出的 $b$ 没有意义。
 
 ## 4. Simulink 接线
 
 1. 把 3 个 `.c/.h` 加进 **Configuration Parameters → Code Generation → Custom Code**（Include directories 与 Source files）。
 2. 放置 **C Caller** 块，函数名选 `b0_ident_u`。
-3. 输入端改成一个 **5×1 的 single 向量**（用 Mux 把 iq/u/omega/e1/v 合起来）；输出是一个 **2×1 向量**（用 Demux 拆成 b0 与 deltau）。
+3. 输入端改成一个 **5×1 的 single 向量**（用 Mux 把 iq/u/ge1/e1/v 合起来，ge1 由外部 G 块产生）；输出是一个 **2×1 向量**（用 Demux 拆成 b0 与 deltau）。
 4. 采样时间设为 **1 ms**（继承模型基速率）。
 5. **不需要**额外初始化块——`b0_ident_u()` 首次调用会自动执行 `b0_ident_setup()`。
 
@@ -174,7 +173,7 @@ LUT 输出远大于 1，注入量被放大 11 倍（应为 0.118，实测 1.344�
 
 ```c
 typedef struct { float b0; float du; } b0_res_t;
-b0_res_t b0_ident_res(float iq, float u, float omega, float e1, float v);
+b0_res_t b0_ident_res(float iq, float u, float ge1, float e1, float v);
 ```
 
 `b0_foc2` 即用此接口，闭环误差 −0.88%（531.67 / 真值 536.40）。教训：**自洽测试看不出的缺陷，跑一遍实际波形就露出来**——

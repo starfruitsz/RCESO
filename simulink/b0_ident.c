@@ -100,6 +100,7 @@ static void b0_clear_acc(b0_ident_DW *DW)
     DW->ac_v  = 0.0f; DW->as_v  = 0.0f;
     DW->ac_u  = 0.0f; DW->as_u  = 0.0f;
     DW->ac_q  = 0.0f; DW->as_q  = 0.0f;
+    DW->ac_g  = 0.0f; DW->as_g  = 0.0f;     /* SDFT(ge1) */
     DW->ac_w  = 0.0f; DW->as_w  = 0.0f;
 }
 
@@ -151,6 +152,9 @@ void b0_ident_init(b0_ident_P *P, b0_ident_DW *DW)
     si = (sd2 > B0_EPS) ? (-P->sd_im / sd2) : 0.0f;
     P->pd_re = P->sd_re + P->b1 + P->b2 * sr;
     P->pd_im = P->sd_im +         P->b2 * si;
+    /* 精确反演用：1/Sd */
+    P->isd_re = sr;
+    P->isd_im = si;
 
     /* 低通系数：tau = lp_div/kp -> a = 1-exp(-dT/tau) */
     tau = (P->kp > B0_EPS) ? (P->lp_div / P->kp) : 1.0f;
@@ -185,8 +189,9 @@ void b0_ident_init(b0_ident_P *P, b0_ident_DW *DW)
  * ===================================================================== */
 static void b0_seg_end(const b0_ident_P *P, b0_ident_DW *DW)
 {
-    B0_REAL k, e1r, e1i, vr, vi, ur, ui, qr, qi, wr, wi;
+    B0_REAL k, e1r, e1i, vr, vi, ur, ui, qr, qi, gr, gi, wr, wi;
     B0_REAL dhr, dhi, den, tr, ti;
+    B0_REAL t1r, t1i, t2r, t2i, cr, ci;
     B0_REAL nr, ni, dr, di, den2, bq, t2;
 
     k = 2.0f / (B0_REAL)DW->n_acc;
@@ -194,12 +199,25 @@ static void b0_seg_end(const b0_ident_P *P, b0_ident_DW *DW)
     vr  = k * DW->ac_v;  vi  = -k * DW->as_v;
     ur  = k * DW->ac_u;  ui  = -k * DW->as_u;
     qr  = k * DW->ac_q;  qi  = -k * DW->as_q;
-    wr  = k * DW->ac_w;  wi  = -k * DW->as_w;   /* 仅诊断，见 (void) */
+    gr  = k * DW->ac_g;  gi  = -k * DW->as_g;   /* SDFT(ge1) */
+    wr  = k * DW->ac_w;  wi  = -k * DW->as_w;   /* 旧 omega 通道，仅诊断 */
     (void)wr; (void)wi;
 
-    /* dhat = V + pd * E1 */
-    dhr = vr + P->pd_re * e1r - P->pd_im * e1i;
-    dhi = vi + P->pd_re * e1i + P->pd_im * e1r;
+    /* 精确反演（代数恒等式，与观测器律无关）：
+     *   d^ = V + Sd*E1 + b1*G^ + b2*(1/Sd)*G^
+     * 其中 G^ = SDFT(ge1)。线性 ESO 时 ge1=e1，自动退化为
+     *   V + (Sd + b1 + b2/Sd)*E1                              */
+    /* Sd * E1 */
+    t1r = P->sd_re * e1r - P->sd_im * e1i;
+    t1i = P->sd_re * e1i + P->sd_im * e1r;
+    /* (b1 + b2/Sd) * G^ */
+    cr  = P->b1 + P->b2 * P->isd_re;
+    ci  =        P->b2 * P->isd_im;
+    t2r = cr * gr - ci * gi;
+    t2i = cr * gi + ci * gr;
+
+    dhr = vr + t1r + t2r;
+    dhi = vi + t1i + t2i;
 
     /* T = Q / U */
     den = ur * ur + ui * ui;
@@ -283,7 +301,7 @@ static void b0_seg_end(const b0_ident_P *P, b0_ident_DW *DW)
  * 1 ms 主步
  * ===================================================================== */
 void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
-                   B0_REAL iq, B0_REAL u, B0_REAL omega,
+                   B0_REAL iq, B0_REAL u, B0_REAL ge1,
                    B0_REAL e1, B0_REAL v,
                    B0_REAL *b0_out, B0_REAL *du_out)
 {
@@ -315,12 +333,6 @@ void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
             *b0_out = DW->b0; *du_out = 0.0f;
             return;
         }
-        /* 运行使能：转速未达门限则跳过本轮（不占 24 次预算） */
-        if (b0_absf(omega) < P->omega_on) {
-            DW->next_tick = DW->tick + b0_ticks(P->period_run, P->dT);
-            *b0_out = DW->b0; *du_out = 0.0f;
-            return;
-        }
         DW->active = 1u;
         DW->seg = 0u;
         DW->n_acc = 0u;
@@ -328,21 +340,12 @@ void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
         b0_clear_acc(DW);
     }
 
-    /* ---- C2. 运行中掉速：丢弃本次 burst（不计数、不注入） ---- */
-    if (b0_absf(omega) < P->omega_off) {
-        DW->active = 0u; DW->seg = 0u; DW->n_acc = 0u;
-        b0_clear_acc(DW);
-        DW->next_tick = DW->tick + b0_ticks(P->period_run, P->dT);
-        *b0_out = DW->b0; *du_out = 0.0f;
-        return;
-    }
-
     /* ---- D. 段内累积 ---- */
     DW->ac_e1 += e1 * c; DW->as_e1 += e1 * s;
     DW->ac_v  += v  * c; DW->as_v  += v  * s;
     DW->ac_u  += u  * c; DW->as_u  += u  * s;
     DW->ac_q  += iq * c; DW->as_q  += iq * s;
-    DW->ac_w  += omega * c; DW->as_w += omega * s;   /* 仅诊断 */
+    DW->ac_g  += ge1 * c;   DW->as_g  += ge1 * s;    /* SDFT(ge1)，精确反演用 */
 
     /* ---- E. 注入（仅注入段） ---- */
     if (DW->seg == 1u) {
