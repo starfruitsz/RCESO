@@ -1,35 +1,24 @@
-# 用厂家模块重建被控对象（WIP，2026-11-24）
+# 厂家模块被控对象（进行中）
 
-目标：用 Simulink/Simscape 自带的 **PMSM** 与 **逆变器** 模块替换现有手搭 dq 对象。
+## 已完成
 
-## 已确认（本机 R2023b）
+- `pmsm_ol.slx`：**SPS 的 PMSM 模块 + 三个受控电压源（平均逆变器模型）**，1e-5 步长可运行
+- PMSM 参数已映射：R=0.175 Ω，L=0.57 mH，ψ=0.016833 Wb，p=4，J=1.89e-5
+- 机器自带测量总线直接给出 **id、iq、ωm、Te、θm**，省掉 Clarke/Park 测量链路：
+  `Stator_current_is_d__A_` / `is_q` / `Rotor_speed_wm__rad_s_` / `Electromagnetic_torque_Te__N_m_`
+- 电气端接线：受控源 LConn→PMSM LConn1..3，三个 RConn 互连成星点；机械端 Tm 接 Inport，总线出 Outport
 
-| 用途 | 库路径 | 备注 |
+## 待解决
+
+1. **开环 V/f 未标定**：反电势 ψ·ωe = 0.016833×2π×40 ≈ **4.23 V**（峰值），
+   当前给 4.8 V 仍出现反向旋转（−80 rpm）与 iq 6.6 A，说明相序/角度符号与机器约定不一致
+2. 需按机器约定重定相序（A/B/C 相移 ±120°），或直接用 `Rotor_angle_thetam` 做闭环（不用 V/f 开环）
+3. 下一步：**电流环 20 kHz**（dq PI + 反 Park 由 θe = p·θm 生成三相电压）→ 再加速度环 1 kHz + RCESO + b0_ident
+
+## 采样配置（用户指定）
+
+| 环 | 频率 | 步长 |
 |---|---|---|
-| PMSM（SPS 域） | `sps_lib/Electrical Machines/Permanent Magnet<换行>Synchronous Machine` | 名字含**换行符**，add_block 需 newline |
-| 逆变器（开关级） | `sps_lib/Power Electronics/Universal Bridge` | 需 PWM 门极 |
-| 直流母线 | `sps_lib/Sources/DC Voltage Source` | |
-| powergui | `sps_lib/powergui` | SPS 域必需 |
-| PMSM（Simscape 域） | `ee_lib/Electromechanical/Permanent Magnet/PMSM` | 物理端口 LConn/RConn |
-| 平均逆变器 | `ee_lib/Semiconductors & Converters/Converters/Average-Value Voltage Source Converter (Three-Phase)` | 物理端口 |
-| 求解器配置 | `nesl_utility/Solver Configuration` | Simscape 域必需 |
-
-SPS PMSM 参数名：`Resistance / Inductance / Flux / PolePairs / Mechanical=[J F p] / MeasurementBus`。
-本对象：R=0.175, L=0.57e-3, Flux=0.016833, p=4, J=1.89e-5, F=0。
-
-## 方案 A（已选定）
-
-SPS PMSM + **平均逆变器**，步长 1e-4（130 s ≈ 130 万步，单次 2–4 分钟）。
-接口保持 `vq/vd → iq/id/ω`，直接替换 `b0_foc_m` 里手搭的对象。
-
-## 待办
-
-1. 连接 Simscape 物理端口：两个块各有 2 个 LConn + 2 个 RConn，需按端口标签确认
-   （PMSM：三相 ~ / 机械 R；AVC：DC+ / DC- / 三相 ~ / 调制输入 m）
-2. AVC 的调制输入是 PS 信号，需要 `Simulink-PS Converter` 把 1 ms 的 dq 电压转成 PS 量
-3. 测量：`Current Sensor`(PS) + `PS-Simulink Converter` → idq；机械端 `Inertia` + `Rotational Sensor`
-4. 接入 RCESO + `b0_ident_m`（1 ms），先开环验证 40 Hz ↔ 600 rpm，再闭环对表
-
-## 已有脚手架
-
-- `build_pmsm_v1.m` / `build_pmsm_v2.m`：SPS 域开环尝试（块路径已修正处见上表）
+| 转速环 | 1 kHz | 1e-3 |
+| 电流环 | 20 kHz | 5e-5 |
+| 对象求解 | >50 kHz | **1e-5** |
