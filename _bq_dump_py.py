@@ -17,7 +17,7 @@ CFG = dict(n_ref=600.0, T=0.1, T_adapt=True, T_filt=50e-3, fci=500.0, beta3=4000
            Q0=0.98, tau0=20e-3, seed_i=20261018,
            i_noise_peak=NC.NOISE_LAB["i_noise_peak"],
            sig_n=NC.NOISE_LAB["sig_n_rpm"], sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
-           eso_law="fal", eso_a=0.75, eso_delta=1.0, eso_lam=10.0,   # δ=1 ⇒ κ1=κ2=1，与 b0_ident_m/C 一致
+           eso_law="fal", eso_a=0.75, eso_delta=0.10, eso_lam=10.0,   # δ=0.10（历史验证口径）
            rc_bp=5.0, b3_min=4000.0, b3_max=4000.0, J_true=9.95e-5,
            a_ref=1.0, log_eso=True,
            j_recheck=True, j_recheck_period=5.0, j_recheck_len=0.4,

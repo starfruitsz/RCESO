@@ -7,9 +7,9 @@ dT     = 1e-3;      % 采样周期 [s]
 f_inj  = 65;        % 注入频率 [Hz]：须为 5 Hz 整数倍，且约等于 6.5 x 机械频率
 amp    = 0.118;     % 注入幅值 [pu]，上限 0.25
 wave   = 0;         % 注入波形：0=正弦 1=方波 2=三角（三者峰值均为 1）
-b0_init= 120;       % b0 初值，填控制器的标称值
-b0lo   = 50;       % 硬下限（防发散）
-b0hi   = 300;       % 硬上限
+b0_init= 643.7;       % b0 初值，填控制器的标称值
+b0lo   = 100;       % 硬下限（防发散）
+b0hi   = 1500;       % 硬上限
 wo     = 500;       % 观测器带宽 [rad/s]，必须与 ESO 一致
 kp     = 75.36;     % 转速环比例增益
 % ---- 运行使能：转速门限 [rpm]（取绝对值，兼容反转；都设 0 = 不启用）----
@@ -45,8 +45,9 @@ if isempty(init)
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,4); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
-    b1 = 2*wo;                       % beta1 = 2*wo*kappa1，delta=1 时 kappa1=1
-    b2 = wo*wo;                      % beta2 = wo^2*kappa2，delta=1 时 kappa2=1
+    kap2 = 0.10^(0.75-1.0);          % kappa2 = delta^(a-1)
+    b1 = 2*wo;                       % kappa1 = 1（a1=1）
+    b2 = wo*wo*kap2;                 % beta2 = wo^2*kappa2
     sdC = (exp(1i*wh*dT) - 1) / dT;
     pdC = sdC + b1 + b2/sdC;
     tau = 50/kp;                     % b0 低通时间常数 = 50/kp = 0.663 s（与 C 版一致）
@@ -155,6 +156,7 @@ if active
         acc(:) = 0; nacc = 0;
     end
 end
+b0v = b0_init;          % 冻结 b0：与 Python 侧 apply=False 对齐
 b0out = b0v;
 duout = du;
 bqout = bqlast;
