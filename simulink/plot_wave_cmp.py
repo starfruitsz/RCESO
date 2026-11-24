@@ -11,7 +11,9 @@ plt.rcParams['font.size'] = 9
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-m = sio.loadmat(os.path.join(HERE, 'wave_cmp.mat'), squeeze_me=True, struct_as_record=False)
+import sys
+src = sys.argv[1] if len(sys.argv) > 1 else 'wave_cmp.mat'
+m = sio.loadmat(os.path.join(HERE, src), squeeze_me=True, struct_as_record=False)
 res = m['res']
 colors = ['#1f4e9c', '#c0392b', '#117864']
 TRUE = 536.40
@@ -77,7 +79,8 @@ h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels(
 ax.legend(h1+h2, l1+l2, frameon=False, fontsize=7, loc='upper left', ncol=1)
 ax.set_title('(c) 终值误差与收敛时间', fontsize=9, loc='left')
 
-fig.savefig(os.path.join(ROOT, 'fig_wave_cmp.png'), dpi=200, bbox_inches='tight')
+fig.savefig(os.path.join(ROOT, 'fig_wave_cmp_noise.png' if 'noise' in src else 'fig_wave_cmp.png'),
+            dpi=200, bbox_inches='tight')
 for r in res:
     print('%-4s final=%8.2f  err=%+.3f%%  t3=%s  t1=%s' % (r.name, r.final, r.err,
           ('%.2f' % r.t3) if np.isfinite(r.t3) else 'nan',

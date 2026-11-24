@@ -267,6 +267,9 @@ def sim_inv(t, TL, cfg=None):
     _jnew_log = []
     _jnew_list = []
     _jnew_pending = False
+    # ---- 定稿更新律（与 b0_ident_m/C 一致）：预热·门控·中值·冻结 ----
+    _jrec_b0final = bool(cfg.get("j_b0_final", False))
+    _jf_valid = False; _jf_nest = 0; _jf_base = 0.0; _jf_blast = []
     _jprev = None
     _jnew_win = 0
     _jnew_g0 = 0.0
@@ -759,7 +762,34 @@ def sim_inv(t, TL, cfg=None):
                     if _tk >= _jpsw - float(cfg.get("j_recheck_period", 5.0)):
                         _B0e = sum(_blast) / len(_blast)
                         _jrec_bgoal = None
-                    if _jrec_btau > 0.0:
+                    if _jrec_b0final:
+                        # ===== 定稿更新律（b0_ident_m 的等价实现）=====
+                        _bq = min(max(_btm, 0.5 * B0), 2.0 * B0)      # 限幅
+                        if not _jf_valid:                             # 首次：经低通
+                            _jf_base = _bq; _jf_valid = True
+                            _jrec_bgoal = _bq; _jf_nest = 1
+                        elif _jf_nest < 3:                            # 预热：经低通
+                            _jf_base = _bq; _jrec_bgoal = _bq; _jf_nest += 1
+                        else:                                         # 平台 + 软底门控
+                            _dd = abs(_bq - _jf_base) / max(abs(_jf_base), 1e-9)
+                            if _dd <= 0.10:
+                                _wg = 1.0
+                            elif _dd <= 0.50:
+                                _wg = math.exp(-(_dd - 0.10) / 0.20)
+                            else:
+                                _wg = math.exp(-(0.50 - 0.10) / 0.20)
+                            _al = 0.30 * _wg
+                            _jrec_bgoal = _B0e + _al * (_bq - _B0e)
+                            _jf_base += 0.35 * (_bq - _jf_base)       # 基线滑动
+                            _jf_nest += 1
+                        _jf_blast.append(_bq)
+                        if len(_jf_blast) > 4:
+                            _jf_blast.pop(0)
+                        if _jf_nest >= 24:                            # 冻结：末 4 次均值
+                            _B0e = sum(_jf_blast) / len(_jf_blast)
+                            _jrec_bgoal = None
+                            _jrec_next = 1.0e9
+                    elif _jrec_btau > 0.0:
                         _jrec_bgoal = _B0e + _amed_alpha(_btm) * (_btm - _B0e)
                     else:
                         _B0e += _amed_alpha(_btm) * (_btm - _B0e)

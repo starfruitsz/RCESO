@@ -10,7 +10,9 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 9
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-m = sio.loadmat(os.path.join(HERE, 'simulink', 'wave_cmp.mat'), squeeze_me=True, struct_as_record=False)
+import sys
+src = sys.argv[1] if len(sys.argv) > 1 else 'wave_cmp.mat'
+m = sio.loadmat(os.path.join(HERE, 'simulink', src), squeeze_me=True, struct_as_record=False)
 res = m['res']
 colors = ['#1f4e9c', '#c0392b', '#117864']
 TRUE = 536.40
@@ -43,7 +45,8 @@ for i, r in enumerate(res):
     ax2.text(60, 8.0 / (i + 1), '%s  %s' % (r.name, '，'.join(lab)), color=colors[i], fontsize=8)
 ax2.set_title('(b) 相对误差（对数）', fontsize=9, loc='left')
 
-fig.savefig(os.path.join(HERE, 'fig_b0_curves.png'), dpi=200, bbox_inches='tight')
+fig.savefig(os.path.join(HERE, 'fig_b0_curves_noise.png' if 'noise' in src else 'fig_b0_curves.png'),
+            dpi=200, bbox_inches='tight')
 for r in res:
     print('%-3s final=%.2f err=%+.2f%% t3=%.1f t1=%.1f' % (r.name, r.final, r.err, r.t3, r.t1))
 print('saved fig_b0_curves.png')

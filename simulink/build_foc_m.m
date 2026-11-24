@@ -66,6 +66,17 @@ add_block('simulink/Math Operations/Gain',A('gJ'),'Gain',num2str(1/Jm),'Position
 add_block('simulink/Discrete/Discrete-Time Integrator',A('wint'),'SampleTime','0.001','InitialCondition','0','Position',[1020 360 1050 390]);
 add_block('simulink/Math Operations/Gain',A('grpm'),'Gain',num2str(30/pi),'Position',[1080 360 1110 390]);
 add_block('simulink/Sources/Constant',A('wref'),'Value',num2str(WR),'SampleTime','0.001','Position',[180 400 220 430]);
+% ---------- 测量噪声与负载噪声（与 noise_cfg 的实验室档一致） ----------
+% 转速：σ=3 rpm（rad/s 方差 (3*pi/30)^2）；电流：均匀 ±0.1 A；负载：σ=0.01 N·m
+add_block('simulink/Sources/Random Number',A('nzw'),'Mean','0', ...
+    'Variance',num2str((3*pi/30)^2),'Seed','12345','SampleTime','1e-3','Position',[1080 470 1110 500]);
+add_block('simulink/Math Operations/Sum',A('wm'),'Inputs','++','Position',[1140 360 1160 400]);
+add_block('simulink/Sources/Uniform Random Number',A('nzi'),'Minimum','-0.1','Maximum','0.1', ...
+    'Seed','23456','SampleTime','1e-3','Position',[780 480 810 510]);
+add_block('simulink/Math Operations/Sum',A('iqm'),'Inputs','++','Position',[830 480 850 520]);
+add_block('simulink/Sources/Random Number',A('nzt'),'Mean','0', ...
+    'Variance',num2str(0.01^2),'Seed','34567','SampleTime','1e-3','Position',[820 470 850 500]);
+add_block('simulink/Math Operations/Sum',A('tlm'),'Inputs','++','Position',[880 400 900 440]);
 p('plant blocks ok\n');
 % ---------- C Caller ----------
 add_block('simulink/User-Defined Functions/MATLAB Function',A('C'),'Position',[700 20 820 180]);
@@ -93,7 +104,7 @@ add_line(mdl,'RCESO/1','sumu/1','autorouting','on');
 add_line(mdl,'dup/1','sumu/2','autorouting','on');
 % ---------- RCESO 外部接线 ----------
 add_line(mdl,'wref/1','RCESO/1','autorouting','on');
-add_line(mdl,'wint/1','RCESO/2','autorouting','on');
+add_line(mdl,'wm/1','RCESO/2','autorouting','on');
 add_line(mdl,'b0z/1','RCESO/3','autorouting','on');
 p('outer wiring ok\n');
 % ---------- RCESO 内部接线（以子系统为系统参数，用相对路径） ----------
@@ -140,28 +151,35 @@ p('inner wiring ok\n');
 % ---------- 对象接线 ----------
 add_line(mdl,'sumu/1','giqr/1','autorouting','on');
 add_line(mdl,'giqr/1','eq/1','autorouting','on');
-add_line(mdl,'iqp/1','eq/2','autorouting','on');
+add_line(mdl,'iqm/1','eq/2','autorouting','on');
 add_line(mdl,'eq/1','gkp/1','autorouting','on');
 add_line(mdl,'eq/1','iqint/1','autorouting','on');
 add_line(mdl,'iqint/1','gki/1','autorouting','on');
 add_line(mdl,'gkp/1','vq/1','autorouting','on');
 add_line(mdl,'gki/1','vq/2','autorouting','on');
 add_line(mdl,'vq/1','diqnum/1','autorouting','on');
-add_line(mdl,'iqp/1','gRq/1','autorouting','on');
+add_line(mdl,'iqm/1','gRq/1','autorouting','on');
 add_line(mdl,'gRq/1','diqnum/2','autorouting','on');
 add_line(mdl,'emf/1','diqnum/3','autorouting','on');
 add_line(mdl,'diqnum/1','giL/1','autorouting','on');
 add_line(mdl,'giL/1','iqp/1','autorouting','on');
 add_line(mdl,'wint/1','gwe/1','autorouting','on');
 add_line(mdl,'gwe/1','emf/1','autorouting','on');
-add_line(mdl,'iqp/1','gkt/1','autorouting','on');
+add_line(mdl,'iqm/1','gkt/1','autorouting','on');
 add_line(mdl,'gkt/1','dw/1','autorouting','on');
-add_line(mdl,'tl/1','dw/2','autorouting','on');
+add_line(mdl,'tlm/1','dw/2','autorouting','on');
 add_line(mdl,'dw/1','gJ/1','autorouting','on');
 add_line(mdl,'gJ/1','wint/1','autorouting','on');
-add_line(mdl,'iqp/1','giqp/1','autorouting','on');
-add_line(mdl,'wint/1','grpm/1','autorouting','on');
-p('plant wiring ok\n');
+add_line(mdl,'iqm/1','giqp/1','autorouting','on');
+add_line(mdl,'wm/1','grpm/1','autorouting','on');
+% 噪声接线：wm = wint + nzw（转速测量）；iqm = iqp + nzi（电流测量）；tlm = tl + nzt（负载）
+add_line(mdl,'wint/1','wm/1','autorouting','on');
+add_line(mdl,'nzw/1','wm/2','autorouting','on');
+add_line(mdl,'iqp/1','iqm/1','autorouting','on');
+add_line(mdl,'nzi/1','iqm/2','autorouting','on');
+add_line(mdl,'tl/1','tlm/1','autorouting','on');
+add_line(mdl,'nzt/1','tlm/2','autorouting','on');
+p('plant wiring ok (noise on)\n');
 % ---------- 记录 ----------
 vn={'w_log','b0_log','du_log','iq_log'};
 for k=1:4
@@ -171,7 +189,7 @@ end
 add_line(mdl,'grpm/1','ws1/1','autorouting','on');
 add_line(mdl,'b0d/1','ws2/1','autorouting','on');
 add_line(mdl,'C/2','ws3/1','autorouting','on');
-add_line(mdl,'iqp/1','ws4/1','autorouting','on');
+add_line(mdl,'iqm/1','ws4/1','autorouting','on');
 % 记录辨识器的 5 路输入（供逐点对比回放）
 inp = {'log_iq','log_u','log_om','log_e1','log_v'};
 src5 = {'giqp/1','RCESO/4','grpm/1','RCESO/2','RCESO/3'};

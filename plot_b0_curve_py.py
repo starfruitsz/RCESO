@@ -9,7 +9,9 @@ plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['font.size'] = 9
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-data = json.load(open(os.path.join(HERE, '_b0_curve_py.json'), encoding='utf-8'))
+import sys
+src = sys.argv[1] if len(sys.argv) > 1 else '_b0_curve_py.json'
+data = json.load(open(os.path.join(HERE, src), encoding='utf-8'))
 colors = ['#1f4e9c', '#c0392b', '#117864']
 bt = data[0]['b_true']
 
@@ -37,7 +39,8 @@ for i, d in enumerate(data):
     ax2.text(4, 6.0 / (i + 1), '%s  %s' % (d['name'], '，'.join(lab)), color=colors[i], fontsize=8)
 ax2.set_title('(b) 相对误差（对数）', fontsize=9, loc='left')
 
-fig.savefig(os.path.join(HERE, 'fig_b0_curve_py.png'), dpi=200, bbox_inches='tight')
+fig.savefig(os.path.join(HERE, 'fig_b0_final_py.png' if 'final' in src else 'fig_b0_curve_py.png'),
+            dpi=200, bbox_inches='tight')
 for d in data:
     print('%-3s final=%.2f err=%+.2f%% t3=%.1f t1=%.1f' % (d['name'], d['final'], d['err'],
           d['t3'] if d['t3'] == d['t3'] else -1, d['t1'] if d['t1'] == d['t1'] else -1))
