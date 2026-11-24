@@ -68,6 +68,9 @@ void b0_ident_setup(void)
     s_P.n_freeze  = 4u;
     s_P.period_run = 5.0f;
     s_P.period_idle= 3600.0f;
+    /* 运行使能：本机额定 600 rpm，30% 起辨识，掉到 25% 丢弃本次 */
+    s_P.omega_on   = 180.0f;
+    s_P.omega_off  = 150.0f;
 
     b0_ident_init(&s_P, &s_DW);
     s_ready = 1u;

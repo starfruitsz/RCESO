@@ -42,6 +42,13 @@
 
 `d1=0.10, d2=0.20, dmax=0.50, alpha_base=0.30, mu=0.35, n_seg=200, n_warm=3, n_ident=24, n_freeze=4, period_run=5 s, period_idle=3600 s`
 
+### 3.3 运行使能（转速门限）
+
+`omega_on=180, omega_off=150`（rpm，取绝对值）：转速低于 `omega_on` 不启动 burst（本轮跳过、不占 24 次预算），
+burst 中低于 `omega_off` 丢弃本次（清累加器、`du=0`、不计数），两者构成迟滞；
+转速回升后下一个 5 s 机会**自动恢复**。两个参数设 0 即关闭门限。
+停机时不做辨识，避免死区/零反电动势下估出无意义的 $b$，也避免白耗预算。
+
 ## 4. Simulink 接线
 
 1. 把 3 个 `.c/.h` 加进 **Configuration Parameters → Code Generation → Custom Code**（Include directories 与 Source files）。

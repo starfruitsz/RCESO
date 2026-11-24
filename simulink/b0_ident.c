@@ -315,11 +315,26 @@ void b0_ident_step(const b0_ident_P *P, b0_ident_DW *DW,
             *b0_out = DW->b0; *du_out = 0.0f;
             return;
         }
+        /* 运行使能：转速未达门限则跳过本轮（不占 24 次预算） */
+        if (b0_absf(omega) < P->omega_on) {
+            DW->next_tick = DW->tick + b0_ticks(P->period_run, P->dT);
+            *b0_out = DW->b0; *du_out = 0.0f;
+            return;
+        }
         DW->active = 1u;
         DW->seg = 0u;
         DW->n_acc = 0u;
         DW->burst_start = DW->tick;     /* 周期从起点算：起点 + 5 s */ 
         b0_clear_acc(DW);
+    }
+
+    /* ---- C2. 运行中掉速：丢弃本次 burst（不计数、不注入） ---- */
+    if (b0_absf(omega) < P->omega_off) {
+        DW->active = 0u; DW->seg = 0u; DW->n_acc = 0u;
+        b0_clear_acc(DW);
+        DW->next_tick = DW->tick + b0_ticks(P->period_run, P->dT);
+        *b0_out = DW->b0; *du_out = 0.0f;
+        return;
     }
 
     /* ---- D. 段内累积 ---- */

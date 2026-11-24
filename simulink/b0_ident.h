@@ -78,6 +78,13 @@ typedef struct {
     uint16_t n_freeze;     /* 冻结时取最近几个 burst 均值，4 */
     B0_REAL  period_run;   /* 辨识期 burst 周期 [s]，5.0 */
     B0_REAL  period_idle;  /* 冻结后周期 [s]，3600.0 */
+
+    /* 运行使能：转速门限 [rpm]（取绝对值，兼容反转）。
+     * |omega| < omega_on  不启动 burst（本轮跳过，不占用 24 次预算）
+     * burst 中 |omega| < omega_off  丢弃本次（防止掉速污染窗口）
+     * 两个都设 0 表示不启用门限。 */
+    B0_REAL  omega_on;
+    B0_REAL  omega_off;
 } b0_ident_P;
 
 /* ---- 状态（放在 DW 里，Simulink 自动生成 static） ---------------------- */

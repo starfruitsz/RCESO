@@ -11,6 +11,9 @@ b0lo   = 200;       % 硬下限（防发散）
 b0hi   = 800;       % 硬上限
 wo     = 500;       % 观测器带宽 [rad/s]，必须与 ESO 一致
 kp     = 75.36;     % 转速环比例增益
+% ---- 运行使能：转速门限 [rpm]（取绝对值，兼容反转；都设 0 = 不启用）----
+omega_on  = 180;    % |转速| 低于此值不启动 burst（本轮跳过，不占用 24 次预算）
+omega_off = 150;    % burst 进行中低于此值则丢弃本次，防止掉速污染窗口
 % ==================== 派生量（不要手改）====================
 cyc    = f_inj*dT;          % 每拍相位增量 [周期]
 wh     = 2*pi*f_inj;        % 注入角频率 [rad/s]
@@ -64,8 +67,16 @@ end
 tick = tick + 1;                        % 整数拍计数：不漂
 du = 0;
 if (~active) && (~frozen) && (tick >= nxtick)
-    active = 1; seg = 0; nacc = 0; acc(:) = 0;
-    tstart = tick;                      % 周期按 burst 起点计
+    if abs(omega) < omega_on
+        nxtick = tick + round(5/dT);    % 未达转速门限：本轮跳过（不占预算）
+    else
+        active = 1; seg = 0; nacc = 0; acc(:) = 0;
+        tstart = tick;                  % 周期按 burst 起点计
+    end
+end
+if active && (abs(omega) < omega_off)   % 运行中掉速：丢弃本次 burst
+    active = 0; seg = 0; nacc = 0; acc(:) = 0;
+    nxtick = tick + round(5/dT);
 end
 if active
     acc(1) = acc(1) + e1*c;  acc(2) = acc(2) + e1*s;

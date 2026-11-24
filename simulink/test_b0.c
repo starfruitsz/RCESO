@@ -8,7 +8,8 @@
 static b0_ident_P P; static b0_ident_DW DW;
 
 static float run_case(const char *name, float b_true, float b0_init,
-                      float Tmag, float Tdeg, int wave, int tcorr)
+                      float Tmag, float Tdeg, int wave, int tcorr,
+                      float stop_s)   /* stop_s 秒内转速为 0（验证运行使能门限） */
 {
     int k, nseg = 200, nburst = 40, ntot = nburst * 2 * nseg;
     float dT = 1e-3f, fh = 65.0f, wh = 2*PI_F*fh, A = 0.1f;
@@ -27,6 +28,7 @@ static float run_case(const char *name, float b_true, float b0_init,
     P.n_seg = (uint16_t)nseg; P.n_warm = 3; P.n_ident = (uint16_t)(nburst+1);
     P.n_freeze = 4; P.period_run = 1.0f;  /* 起点周期 1 s：0.4 s 段 + 0.6 s 空闲 */
     P.period_idle = 3600.0f;
+    P.omega_on = 180.0f; P.omega_off = 150.0f;   /* 运行使能门限 */
     b0_ident_init(&P, &DW);
 
     for (k = 0; k < ntot; k++) {
@@ -47,7 +49,8 @@ static float run_case(const char *name, float b_true, float b0_init,
         Vre = Dr - (P.pd_re*E1re - P.pd_im*E1im);
         Vim = Di - (P.pd_re*E1im + P.pd_im*E1re);
         v = Vre * c - Vim * s;
-        b0_ident_step(&P, &DW, iq, u, 600.0f, e1, v, &b0, &du);
+        {   float om = ((float)k * dT < stop_s) ? 0.0f : 600.0f;
+            b0_ident_step(&P, &DW, iq, u, om, e1, v, &b0, &du); }
         (void)du;
     }
     printf("  %-26s b_true=%6.1f  b0=%7.2f  误差=%+7.3f%%  bursts=%u\n",
@@ -58,10 +61,11 @@ static float run_case(const char *name, float b_true, float b0_init,
 int main(void)
 {
     printf("--- 解析自洽测试（T=电流环复传函） ---\n");
-    run_case("正弦 T=1.00<0deg  修正开", 400.0f, 300.0f, 1.00f, 0.0f, 0, 1);
-    run_case("正弦 T=0.95<+5deg   修正关", 400.0f, 300.0f, 0.95f, 5.0f, 0, 0);
-    run_case("正弦 T=0.95<+5deg   修正开", 400.0f, 300.0f, 0.95f, 5.0f, 0, 1);
-    run_case("方波 T=1.00<0deg  修正开", 400.0f, 300.0f, 1.00f, 0.0f, 1, 1);
-    run_case("三角 T=1.00<0deg  修正开", 400.0f, 300.0f, 1.00f, 0.0f, 2, 1);
+    run_case("正弦 T=1.00<0deg  修正开", 400.0f, 300.0f, 1.00f, 0.0f, 0, 1, 0.0f);
+    run_case("正弦 T=0.95<+5deg   修正关", 400.0f, 300.0f, 0.95f, 5.0f, 0, 0, 0.0f);
+    run_case("正弦 T=0.95<+5deg   修正开", 400.0f, 300.0f, 0.95f, 5.0f, 0, 1, 0.0f);
+    run_case("方波 T=1.00<0deg  修正开", 400.0f, 300.0f, 1.00f, 0.0f, 1, 1, 0.0f);
+    run_case("三角 T=1.00<0deg  修正开", 400.0f, 300.0f, 1.00f, 0.0f, 2, 1, 0.0f);
+    run_case("正弦 T=1.00 前8s停机", 400.0f, 300.0f, 1.00f, 0.0f, 0, 1, 8.0f);
     return 0;
 }
