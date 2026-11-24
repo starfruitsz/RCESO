@@ -36,10 +36,11 @@ T0 = float(os.environ.get("T0J", "1.0"))   # 律J 首个 burst 时刻 / s
 SS = 3.0                         # 稳态窗 = 末 3 s
 DT = 2e-6
 
+_FS = float(os.environ.get("FSCALE", "1.0"))      # 故障强度缩放（研究用）
 FAULT = dict(start=2.0,
-             unbalance=dict(M=0.1, e=1e-4, kappa=580.0),
-             misalign=dict(M=0.1, beta=0.01745, l=0.05, kappa=67.0),
-             parallel=dict(e=1e-4, dk=1.0e5, kappa=100.0))
+             unbalance=dict(M=0.1*_FS, e=1e-4*_FS, kappa=580.0),
+             misalign=dict(M=0.1*_FS, beta=0.01745*_FS, l=0.05, kappa=67.0),
+             parallel=dict(e=1e-4*_FS, dk=1.0e5, kappa=100.0))
 t = np.arange(0.0, TEND, DT)
 TL = (0.50 * (t >= 2.0)).astype(float) * 0.637
 
@@ -80,6 +81,7 @@ if use_j:
                j_recheck_amp_auto=True, j_recheck_gate=True, j_recheck_gate_ac=10.0,
                j_recheck_gate_step=10.0, j_recheck_alpha=1.0,
                j_recheck_apply=(os.environ.get("APPLY", "1") == "1"),
+               j_recheck_win=float(os.environ.get("WIN", "0.2")),
                j_recheck_btau=BTAU, j_b0_direct=True, j_validate=False,
                j_amed=(os.environ.get("AMED", "1") == "1"),
                j_b0_onoff=(os.environ.get("ONOFF", "0") == "1"),

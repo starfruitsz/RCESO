@@ -1,0 +1,357 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{array}
+\captionsetup{font=small,labelfont=bf}
+\linespread{1.18}
+\setlist{itemsep=2pt,topsep=3pt}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+
+\title{\bfseries 质量不平衡与不对中的等效扰动建模\\[2mm]
+\large ——为什么故障可以写成正弦叠加：文献综述}
+\author{RCESO 项目组}
+\date{2026-11-24}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+本文回答一个具体的建模缺口：在等效输入扰动（EID）框架中，扰动集被取为有限个正弦之和
+$\Phi=\{p_i(t)\sin(\omega_i t+\varphi_i)\}$，但原始文献并未论证\textbf{质量不平衡}与\textbf{不对中}为何落在该集合内。
+
+综述表明，这一结论由两步构成：
+第一，旋转机械的故障具有\textbf{旋转周期性}，因而其激励是转角的周期函数——
+不平衡的离心力为 $me\omega^2e^{j\omega t}$，严格落在 $1\times$；
+不对中使联轴器刚度呈现 $K_{\rm SCS}+K_{\rm ACS}(\theta)$ 的时变特性，参数激励使响应必然含 $1\times,2\times,\dots$ 谐波。
+第二，任何周期函数都可按傅里叶级数展开为有限（截断后）正弦之和。
+因此\textbf{正弦形式是数学结论而非建模假设}，物理假设只有“故障在旋转中周期复现”这一条。
+
+本文以顶级期刊文献为主干（IEEE TIE、MSSP、JSV、Cambridge 专著），
+并标注每篇的分量、被引次数与在论证链中的作用；
+对无法获取全文的订阅文献，另列开放获取（CC-BY）的补充文献，已随文归档。
+\end{abstract}
+
+\begin{quote}
+\small\itshape
+说明：标注 \(\dagger\) 的文献为订阅制，本文仅据其题录、摘要与可获取片段归纳，
+未通读全文；引用具体论断前请核对原文。
+\end{quote}
+
+\tableofcontents
+\newpage
+
+\section{问题的提出}
+
+EID 方法把一切未知扰动折算为作用在控制输入端的等效扰动，
+其理论依据是 She 等给出的存在性引理：
+在一定假设下，控制输入通道上\textbf{总存在}一个 EID，
+且它产生的输出与原扰动产生的输出完全相同。
+
+然而该引理只保证“存在”，并未回答\textbf{具体形态}问题。
+原文直接取扰动集为
+\begin{equation}
+\Phi=\left\{\,p_i(t)\sin(\omega_i t+\varphi_i)\,\right\},\qquad i=0,\dots,n,\ n<\infty,
+\end{equation}
+即有限个正弦（幅值可含多项式慢变）之和。
+
+对旋转机械故障诊断而言，这个取法是否成立，需要物理建模来回答。
+本文的结论是：\textbf{成立，且由两条独立的论证共同支撑}。
+
+\section{论证链概览}
+
+\begin{center}
+\fbox{\parbox{0.82\textwidth}{\centering\vspace{2pt}
+\textbf{① 故障几何具有旋转周期性}\\[1mm]
+$\downarrow$ \quad 物理建模（\S\ref{sec:unb}、\S\ref{sec:mis}）\\[1mm]
+\textbf{② 激励是转角 $\theta=\omega_{\rm rot}t$ 的周期函数}\\[1mm]
+$\downarrow$ \quad 傅里叶级数（\S\ref{sec:fourier}）\\[1mm]
+\textbf{③} $\displaystyle\sum_{i}p_i\sin(i\,\omega_{\rm rot}t+\varphi_i)\in\Phi$
+\vspace{2pt}}}
+\end{center}
+
+关键点在于：\textbf{物理假设只有一条}——故障在旋转中周期复现；
+正弦形式是傅里叶分解的必然结果。
+需要物理建模的只是\textbf{含哪些阶次}。
+
+\section{质量不平衡：严格的一倍频}
+\label{sec:unb}
+
+\subsection{物理推导}
+
+设转子偏心质量 $m$、偏心距 $e$、角速度 $\omega$。
+旋转坐标系中离心力大小为
+\begin{equation}
+F_u=m\,e\,\omega^2,
+\end{equation}
+方向固定于偏心方向。
+在\textbf{固定坐标系}中，该力随转子一起旋转，故为旋转矢量
+\begin{equation}
+\vec F_u(t)=m\,e\,\omega^2\,e^{j\omega t}.
+\end{equation}
+
+由此得到三条结论：
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{只有 $1\times$ 一个阶次}，不存在高次谐波；
+\item 幅值 $\propto\omega^2$，随转速平方增长；
+\item 相位锁定转子相位。
+\end{enumerate}
+
+这正是振动监测中“$1\times$ 幅值上升即为不平衡”这一判据的物理来源。
+
+\subsection{文献}
+
+\begin{table}[h]
+\centering
+\caption{不平衡建模的依据}
+\begin{tabular}{@{}p{7.2cm}ll@{}}
+\toprule
+文献 & 类型 & 被引 \\
+\midrule
+Friswell, Penny, Garvey, Lees, \emph{Dynamics of Rotating Machines},
+Cambridge University Press, 2010. DOI 10.1017/CBO9780511780509
+& \textbf{权威专著}（旋转机械标准教材） & \textbf{422} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{不对中：时变刚度与谐波生成}
+\label{sec:mis}
+
+\subsection{核心机制：静态刚度 + 时变附加刚度}
+
+不对中之所以产生 $1\times$、$2\times$ 乃至更高阶谐波，目前最清晰的物理解释来自 Lees (2007)：
+存在不对中时，联轴器刚度可分解为
+\begin{equation}
+K(\theta)=K_{\rm SCS}+K_{\rm ACS}(\theta),
+\end{equation}
+其中 $K_{\rm SCS}$ 为\textbf{静态联轴器刚度}（不随转角变化），
+$K_{\rm ACS}(\theta)$ 为\textbf{时变附加刚度}，随转角周期变化。
+
+$K_{\rm ACS}$ 的周期由不对中类型决定：
+
+\begin{table}[h]
+\centering
+\caption{不对中类型与主导阶次}
+\begin{tabular}{@{}lcl@{}}
+\toprule
+类型 & 每转刚度变化周期 & 主导阶次与物理图像 \\
+\midrule
+平行不对中 & 2 次（拉--压交替） & \textbf{$2\times$}：联轴器每半转变向一次 \\
+角度不对中 & 1 次 & \textbf{$1\times+2\times$}：椭圆涡动 \\
+复合不对中 & — & $1\times\sim4\times$：两者叠加 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{关键认识}：这是一个\textbf{参数激励}系统。
+刚度随时间周期变化，响应频谱必然含谐波；
+也就是说，不对中的高次谐波\emph{并非}非线性失真所致，
+而是\textbf{线性时变系统}的固有结果
+——周期系数微分方程的 Floquet 解本身就含各阶谐波。
+
+\subsection{文献}
+
+\begin{table}[h]
+\centering
+\caption{不对中建模的主要文献（按被引排序）}
+\small
+\begin{tabular}{@{}p{6.1cm}p{3.4cm}r@{}}
+\toprule
+文献 & 出处与分量 & 被引 \\
+\midrule
+Jalan \& Mohanty (2009), \emph{Model based fault diagnosis of a rotor--bearing system for misalignment and unbalance}
+& \textbf{JSV} 327:604--622（故障诊断权威期刊，Q1） & \textbf{228} \\
+Xu \& Marangoni (1994), Part I, \emph{Theoretical model and analysis}\(\dagger\)
+& \textbf{JSV} 176(5):663--679 & \textbf{209} \\
+Patel \& Darpe (2009), \emph{Experimental investigations on vibration response of misaligned rotors}\(\dagger\)
+& \textbf{MSSP} 23(7):2236--2252（\textbf{信号处理顶刊}） & \textbf{202} \\
+Patel \& Darpe (2009), \emph{Vibration response of misaligned rotors}\(\dagger\)
+& \textbf{JSV} 325(3):609--628 & \textbf{149} \\
+Lees (2007), \emph{Misalignment in rigidly coupled rotors}\(\dagger\)
+& \textbf{JSV} 305(1--2):261--271 & \textbf{124} \\
+Al-Hussain (2003), \emph{Dynamic stability of two rigid rotors connected by a flexible coupling with angular misalignment}\(\dagger\)
+& \textbf{JSV} 266(2):217--234 & 102 \\
+Xu \& Marangoni (1994), Part II, \emph{Experimental validation}\(\dagger\)
+& \textbf{JSV} 176(5):681--691 & 99 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+其中 Xu \& Marangoni (1994) 是与本课题最贴近的一篇：
+它建立的是\textbf{电机--柔性联轴器--转子}整体系统的理论模型，
+且\textbf{同时包含不对中与不平衡}两种故障，
+这正对应三合一故障中机械部分的建模需求。
+
+\section{傅里叶论证：从周期性到正弦叠加}
+\label{sec:fourier}
+
+设故障激励 $g(\theta)$ 是转角 $\theta=\omega_{\rm rot}t$ 的周期函数，
+周期为 $2\pi$（或 $2\pi/k$）。则其傅里叶展开为
+\begin{equation}
+g(\omega_{\rm rot}t)=\sum_{i=1}^{\infty}\left[a_i\cos(i\omega_{\rm rot}t)+b_i\sin(i\omega_{\rm rot}t)\right]
+=\sum_{i}p_i\sin(i\omega_{\rm rot}t+\varphi_i).
+\end{equation}
+
+由于工程中能量集中在低阶，截断至 $i=n<\infty$ 即可，
+即得式 (1) 所定义的集合 $\Phi$。
+
+值得注意的是，$\Phi$ 允许 $p_i(t)$ 为\textbf{多项式}，
+恰好覆盖故障幅值随转速、负载慢变的情形：
+不平衡幅值 $me\omega^2$ 在变速过程中即为慢变，
+落在 $p_i(t)$ 的描述能力之内。
+
+\section{机械故障如何进入转矩通道}
+
+RCESO 的被控对象是转速环，故障只能通过\textbf{负载转矩} $T_L(t)$ 进入控制回路。
+因此必须说明：离心力本身不是转矩，它是如何转化为转矩波动的。
+
+\begin{table}[h]
+\centering
+\caption{两类故障进入转矩通道的物理路径}
+\begin{tabular}{@{}p{2.6cm}p{8.4cm}c@{}}
+\toprule
+故障 & 进入转矩的物理路径 & 阶次 \\
+\midrule
+不平衡 &
+① 径向力调制轴承摩擦，形成阻力矩波动；\newline
+② \textbf{气隙偏心}引起不平衡磁拉力（UMP），产生附加转矩谐波 &
+$1\times$ \\
+不对中 &
+联轴器直接传递\textbf{周期性扭矩}（SCS 与 ACS 的角向效应） &
+$1\times,2\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+不平衡这一路径\textbf{必须借助电磁耦合}才能成立，不能直接断言“离心力产生转矩”。
+相关文献：
+
+\begin{table}[h]
+\centering
+\caption{电机侧耦合的文献}
+\small
+\begin{tabular}{@{}p{8.2cm}p{3.6cm}r@{}}
+\toprule
+文献 & 出处 & 被引 \\
+\midrule
+Liu et al. (2022), \emph{Four degrees-of-freedom rotor considering combined eccentricity and electromagnetic effects}
+& \textbf{MSSP} 169:108740（\textbf{顶刊}） & 29 \\
+Song et al. (2016), \emph{Cogging torque and unbalanced magnetic pull due to simultaneous dynamic and static eccentricities}
+& \textbf{IEEE Trans. Magnetics} & — \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{等效载荷与分离辨识（方法层补充）}
+
+除上述机理文献外，故障诊断领域另有一条以\textbf{等效载荷}为核心的方法论线索，
+其思想与 EID 高度一致：不重建故障本体，只辨识其等效作用。
+
+\begin{table}[h]
+\centering
+\caption{等效载荷方法论文献}
+\small
+\begin{tabular}{@{}p{8.2cm}p{3.4cm}r@{}}
+\toprule
+文献 & 出处 & 被引 \\
+\midrule
+Bachschmid, Pennacchi, Vania (2002), \emph{Identification of multiple faults in rotor systems}\(\dagger\)
+& \textbf{JSV} 254(2):327--366 & \textbf{162} \\
+Kumar \& Tiwari (2021), \emph{Unbalanced and misaligned flexible rotor system}\(\dagger\)
+& \textbf{MSSP} 152:107454 & 67 \\
+Tiwari \& Kumar (2022), \emph{Virtual trial misalignment approach}\(\dagger\)
+& \textbf{MSSP} 167:108540 & 30 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{开放获取的补充文献}
+
+上节与 \S\ref{sec:mis} 中的多篇为 Elsevier 订阅文献，
+经 Semantic Scholar 与 Unpaywall 双渠道核实\textbf{均无合法免费版本}。
+为使论证链在无法获取全文时仍然成立，另选取以下 CC-BY 文献作为补充，
+已随本文归档于 \texttt{\_refs/} 目录。
+
+\begin{table}[h]
+\centering
+\caption{开放获取补充文献（非顶刊，仅作可验证材料）}
+\small
+\begin{tabular}{@{}p{6.4cm}p{4.6cm}@{}}
+\toprule
+文献 & 覆盖内容 \\
+\midrule
+Ma, Liu, Li, Zhang, Han (2026), \emph{Nonlinear vibration responses of a rigid--flexible coupled dual-rotor system under coexisting unbalance, misalignment, and rub-impact faults}, \textbf{Machines} 14(11):1337
+& \textbf{不平衡 + 不对中共存}的建模与实验，最接近 Xu \& Marangoni 的定位 \\
+Xing, Zhang, Wang, Zhang (2024), \emph{The effect of support misalignment on vibration characteristics of aero-engine rotor systems}, \textbf{Machines} 12(10):669
+& 不对中\textbf{解析激励模型}的建立 \\
+Jin \& Liu (2022), \emph{Rod--disk rotor with inner misalignment}, \textbf{Machines} 10(5):355
+& 内部不对中与伴生不平衡 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{期刊分量说明}：\emph{Machines} 为 MDPI 开放获取期刊，
+学术分量明显低于 IEEE TIE、MSSP 与 JSV，
+\textbf{不宜作为主要论据}；此处仅用于在订阅文献不可得时提供可核验的物理描述。
+
+\section{汇总：论证链与文献的对应}
+
+\begin{longtable}{@{}p{6.6cm}p{6.4cm}@{}}
+\caption{论证链与文献对应表}\\
+\toprule
+论证环节 & 支撑文献 \\
+\midrule
+\endfirsthead
+\toprule
+论证环节 & 支撑文献 \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+等效扰动可折至输入端（存在性） & She et al. (2008), \textbf{IEEE TIE}, 574 次 \\
+EID 与 GESO 的关系（方法选型） & She et al. (2023), \textbf{IEEE/CAA JAS}, 79 次 \\
+不平衡为严格 $1\times$ & Friswell et al. (2010), \textbf{Cambridge UP}, 422 次 \\
+不对中的谐波机制（SCS+ACS 时变刚度） & Lees (2007), \textbf{JSV}, 124 次 \\
+电机--联轴器--转子，不对中+不平衡 & Xu \& Marangoni (1994), \textbf{JSV}, 209 次 \\
+不对中与不平衡的联合诊断 & Jalan \& Mohanty (2009), \textbf{JSV}, 228 次 \\
+不对中响应中的高次谐波（实验） & Patel \& Darpe (2009), \textbf{MSSP}, 202 次 \\
+故障即等效载荷（方法论） & Bachschmid et al. (2002), \textbf{JSV}, 162 次 \\
+多故障分离辨识 & Kumar \& Tiwari (2021), \textbf{MSSP}, 67 次 \\
+偏心 → 电磁力 → 扰动转矩 & Liu et al. (2022), \textbf{MSSP}, 29 次 \\
+共存故障的建模与实验（可获取） & Ma et al. (2026), \textbf{Machines}（CC-BY） \\
+\end{longtable}
+
+\section{结论}
+
+\begin{enumerate}[label=(\arabic*)]
+\item 质量不平衡与不对中之所以可等效为有限个正弦之和，
+\textbf{根源在于旋转机械故障的几何周期性}；
+正弦形式是傅里叶分解的结果，不是建模假设。
+
+\item 两类故障的阶次特征不同，但均可归入同一扰动集：
+不平衡严格为 $1\times$（离心力 $me\omega^2e^{j\omega t}$）；
+不对中因联轴器刚度呈 $K_{\rm SCS}+K_{\rm ACS}(\theta)$ 的时变特性而生成 $1\times,2\times,\dots$ 谐波。
+
+\item 不对中的高次谐波是\textbf{线性时变系统}（参数激励）的固有结果，
+而非非线性失真，这一点在建模时容易被误解。
+
+\item 故障进入转速环的通道是\textbf{负载转矩}；
+不平衡须经由电磁耦合（气隙偏心、UMP）方能产生转矩谐波，
+不对中则通过联轴器直接传递周期性扭矩。
+
+\item 本文所列主干文献以 IEEE TIE、MSSP、JSV 与 Cambridge 专著为主，
+均为相关领域顶级或权威出处；
+开放获取文献仅作可核验的补充材料，不承担主要论据。
+\end{enumerate}
+
+\end{document}

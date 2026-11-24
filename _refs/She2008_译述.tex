@@ -1,0 +1,440 @@
+\documentclass[11pt,a4paper]{ctexart}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\linespread{1.20}
+\setlist{itemsep=2pt,topsep=3pt}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+
+\title{\bfseries 基于等效输入扰动的扰动抑制性能改进\\[2mm]
+\large ——She 等（2008）主要内容译述}
+\author{RCESO 项目组}
+\date{2026-11-24}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+本文译述 She、Fang、Ohyama、Hashimoto、Wu 五位于 2008 年发表在
+\emph{IEEE Transactions on Industrial Electronics}
+第 55 卷第 1 期第 380--389 页的论文
+\emph{Improving Disturbance-Rejection Performance Based on an
+Equivalent-Input-Disturbance Approach}（DOI: 10.1109/TIE.2007.905976）。
+
+原文提出一种基于\textbf{等效输入扰动}（Equivalent Input Disturbance, EID）估计的伺服系统扰动抑制方法。
+逻辑主线为四步：先\textbf{定义} EID 并给出保证其存在的\textbf{引理}；
+再给出只依赖对象输入输出、不依赖对象状态的 EID \textbf{估计}结构；
+然后说明如何把扰动估计\textbf{并入}控制律，并给出闭环\textbf{稳定性定理}与五步设计算法；
+最后以两电机旋转控制系统验证，稳态跟踪误差由 $147.67$ rpm 降到 $9.15$ rpm（约 $6\%$）。
+文中给出的截止角频率取扰动最高角频率五倍这一准则，对同类方法具有普遍指导意义。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{引言}
+
+过去几十年间，未知扰动的估计与抑制受到大量关注。
+多数方法要求对测量输出做微分，文献 [1]--[8] 的方法则不需要；
+但其中 [1]--[3] 对未知输入施加了\textbf{秩条件}，[4] 要求扰动的精确信息，
+[5]、[6] 只处理某类特殊扰动，[7]、[8] 则在估计器构造中直接使用对象的\textbf{逆动力学}。
+She 等 [12] 曾提出一种克服上述缺点的新方法，但其估计过程\textbf{需要对象状态}。
+
+从控制系统的角度看，估计\textbf{控制输入通道上的扰动}比估计扰动本身更为合理，
+因为改善抑制性能只能借助控制输入。
+事实上，扰动观测器（DOB）等许多抑制方法都\textbf{隐含}地假设控制输入通道上存在一个 EID，
+但 EID 的存在性从未从理论上被讨论过；
+而 EID 估计只有在\textbf{它确实存在}时才有意义。
+
+本文的工作可归纳为三点：
+\begin{enumerate}[label=(\arabic*)]
+\item 首先给出一个\textbf{引理}，在一定假设下从理论上保证 EID 的存在性；
+\item 其次给出一种新的 EID 估计方法，它克服了已有方法的缺点，并具备如下优点：
+可抑制任意类型的扰动；不需要微分测量输出；不需要秩条件；不需要扰动的先验信息；
+\textbf{不使用对象逆动力学}，从而避免不稳定零极点的对消；
+只需对象的输入与输出，\textbf{不需要对象状态}，因此适用范围更广；
+\item 系统结构非常简单，且可借助\textbf{分离原理}把状态反馈、观测器与低通滤波器分别独立设计。
+\end{enumerate}
+
+\section{改进伺服系统的构成}
+
+\subsection{等效输入扰动的定义}
+
+考虑图 1 所示的线性时不变对象
+\begin{equation}
+\dot x_o(t)=A x_o(t)+B u(t)+B_d\,d(t),\qquad
+y_o(t)=C x_o(t),
+\end{equation}
+其中 $A\in\R^{n\times n}$，$B\in\R^{n\times n_u}$，$B_d\in\R^{n\times n_d}$，
+$C\in\R^{n_y\times n}$，$x_o\in\R^{n}$，$u\in\R^{n_u}$，$d\in\R^{n_d}$，$y_o\in\R^{n_y}$。
+
+对对象作如下假设。
+
+\textbf{假设 1}：$(A,B,C)$ 可控且可观。
+
+\textbf{注 1}：假设 1 只是为了叙述简便。由于我们要用控制输入改善输出跟踪性能，
+若对象不完全可控或可观，只需考虑其可控可观子系统。
+
+\textbf{假设 2}：$(A,B,C)$ 在\textbf{虚轴上没有零点}。
+
+\textbf{注 2}：假设 2 是保证伺服系统\textbf{内部稳定}、
+并使对象输出无稳态误差地跟踪参考输入所必需的。
+
+为简便起见考虑单输入单输出情形，即 $n_u=n_y=1$。
+注意 $B$ 与 $B_d$ 维数可以不同，扰动可以施加于控制输入通道以外的通道，
+扰动的个数也可以多于一个。
+但若\textbf{假设扰动只施加在控制输入通道上}（如图 2），则对象可写为
+\begin{equation}
+\dot x(t)=A x(t)+B\left[u(t)+d_e(t)\right],\qquad
+y(t)=C x(t).
+\end{equation}
+
+EID 的定义如下。
+
+\textbf{定义 1}：令控制输入 $u(t)=0$。
+对象 (1) 在扰动 $d(t)$ 作用下的输出为 $y_o(t)$，
+对象 (2) 在扰动 $d_e(t)$ 作用下的输出为 $y(t)$。
+若
+\begin{equation}
+y(t)\equiv y_o(t),\qquad \forall t\ge 0,
+\end{equation}
+则称 $d_e(t)$ 是扰动 $d(t)$ 的一个\textbf{等效输入扰动}（EID）。
+
+定义扰动集合
+\begin{equation}
+\Phi=\left\{\,p_i(t)\sin(\omega_i t+\varphi_i)\,\right\},\qquad i=0,\dots,n,\ \ n<\infty,
+\end{equation}
+其中 $\omega_i(\ge 0)$ 与 $\varphi_i$ 为常数，$p_i(t)$ 表示关于 $t$ 的任意多项式。
+
+若扰动 $d(t)$ 所引起的输出轨迹 $y_o(t)\in\Phi$，则由\textbf{稳定逆}（stable inversion）的概念可知：
+控制输入通道上存在一个 EID $d_e(t)\in\Phi$，能产生相同的轨迹。由此得到下述引理。
+
+\textbf{引理 1}：在假设 1 与假设 2 之下，
+对施加于对象 (1) 的扰动 $d(t)$，其控制输入通道上\textbf{总存在}一个 EID $d_e(t)\in\Phi$，
+并且由它产生的输出也属于 $\Phi$。
+
+\textbf{注 3}：稳定逆方法所计算的，是一个不激励系统零点、
+或以稳定方式激励零点的特定控制输入与特定状态轨迹；
+因此即使系统含有\textbf{不稳定零点或极点}，该方法也能给出令人满意的控制输入。
+
+\textbf{注 4}：由于我们关心的是扰动对\textbf{输出}的影响而非扰动本身，
+稳定逆方法保证了 EID 的存在性，
+而\textbf{与控制输入矩阵 $B$ 和扰动输入矩阵 $B_d$ 的维数是否相同、
+其线性变换的值域是否相同无关}。
+
+由上述引理可知，EID 可以由对象的输入与输出算出。
+但由于计算复杂、且需要关于未来输出的信息，这一途径无法直接用来求 EID。
+然而引理已经说明 EID 确实存在，
+因此它为 EID 估计的\textbf{有意义性提供了理论保证}。
+
+\subsection{EID 的估计}
+
+改进伺服系统的结构如图 3 所示，它可以看作一个常规伺服系统
+（内模、状态观测器、状态反馈）\textbf{外加}一个产生 EID 估计的扰动估计器。
+其中 $K_P$、$K_R$ 为状态反馈增益，$L$ 为观测器增益，
+$F(s)$ 为限制扰动估计角频率带的\textbf{低通滤波器}。
+由于参考输入的确切形式已知，控制系统中设置了参考输入的内模以提高跟踪精度；
+而扰动被假定为未知，故控制系统中不含扰动的内模，需要另想办法抑制其对输出的影响。
+
+\textbf{关键结构性差异}：EID 估计器使用\textbf{状态观测器}，
+而不是对象的逆动力学。这是它与扰动观测器方法在结构上的重要区别。
+
+记广义逆
+\begin{equation}
+B^{+}:=\frac{B^{T}}{B^{T}B}.
+\end{equation}
+
+状态观测器为
+\begin{equation}
+\dot{\hat x}(t)=A\hat x(t)+B u_f(t)+L\left[y(t)-C\hat x(t)\right].
+\end{equation}
+
+令观测误差
+\begin{equation}
+\Delta x(t)=\hat x(t)-x(t),
+\end{equation}
+代入式 (2) 可得
+\begin{equation}
+\dot{\hat x}(t)=A\hat x(t)+B u(t)
++\left\{B d_e(t)+\left[\Delta\dot x(t)-A\Delta x(t)\right]\right\}.
+\end{equation}
+
+假设存在一个控制输入 $\Delta d(t)$ 满足
+\begin{equation}
+\Delta\dot x(t)-A\Delta x(t)=B\,\Delta d(t),
+\end{equation}
+把它代入式 (7)，并令 EID 的估计为
+\begin{equation}
+\hat d(t)=d_e(t)+\Delta d(t),
+\end{equation}
+则对象可表示为
+\begin{equation}
+\dot{\hat x}(t)=A\hat x(t)+B\left[u(t)+\hat d(t)\right].
+\end{equation}
+
+\textbf{注 5}：式 (9) 与 (10) 表明，若把带 EID 的对象状态取为 $\hat x(t)$
+（它恰好就是观测器的状态），
+则\textbf{对象状态与观测器状态之差，等于 EID 精确值与其估计值之差}。
+式 (10) 在 EID 估计中起关键作用。
+
+由式 (5) 与 (10) 得
+\begin{equation}
+B\hat d(t)+u(t)-u_f(t)=LC\left[x(t)-\hat x(t)\right].
+\end{equation}
+解出 $\hat d(t)$，其最小二乘解为
+\begin{equation}
+\hat d(t)=B^{+}LC\left[x(t)-\hat x(t)\right]+u_f(t)-u(t).
+\end{equation}
+
+$\hat d(t)$ 再经 $F(s)$ 滤波，$F(s)$ 用来\textbf{选取扰动估计的角频率带}，
+于是滤波后的扰动估计为
+\begin{equation}
+\tilde D(s)=F(s)\hat D(s),
+\end{equation}
+其中 $\tilde D(s)$、$\hat D(s)$ 分别为 $\tilde d(t)$、$\hat d(t)$ 的拉普拉斯变换。
+
+\textbf{注 6}：由于估计的是 EID，其施加通道可能与实际扰动通道不同，
+故一般而言必须使用\textbf{全阶}状态观测器：
+若存在扰动，估计状态可能与实际状态不同，这一差异会降低跟踪精度。
+为获得高精度的 EID，保证 $\hat y(t)-y(t)\to 0$ 很重要，因此宜用全阶状态观测器。
+
+\section{控制系统设计}
+
+\subsection{扰动抑制}
+
+把扰动估计与原伺服控制律相结合，得到控制律
+\begin{equation}
+u(t)=u_f(t)-\tilde d(t).
+\end{equation}
+该控制律改善了扰动抑制性能。本文方法有两个其他方法不具备的特点：
+\begin{enumerate}[label=(\alph*)]
+\item 系统结构非常简单；
+\item 把扰动估计\textbf{直接}并入伺服控制律，使扰动抑制性能易于改进。
+\end{enumerate}
+
+设 $\omega_r$ 为需要抑制扰动的最高角频率，
+$\Omega_r:=\{\omega,\ 0\le\omega\le\omega_r\}$ 为扰动抑制的角频率带。
+观测器的适当设计可保证 $\hat d(t)$ 收敛于 $d_e(t)$；
+而对设计得当的低通滤波器 $F(s)$，有
+\begin{equation}
+\tilde D(j\omega)\approx\hat D(j\omega),\qquad \forall\omega\in\Omega_r,
+\end{equation}
+因此 $\tilde d(t)$ 是 $d_e(t)$ 的良好近似。
+
+\textbf{注 7}：Umeno 等提出的 Q 滤波器方法用于设计扰动观测器。
+Q 滤波器的截止角频率必须\textbf{足够高于}扰动的最高角频率，
+才能保证扰动估计落在控制输入上；本文的 $F(s)$ 情形相同。
+但对 Q 滤波器而言，提高扰动抑制性能需要提高滤波器阶数；
+而且为保证因果性，阶数不能低于对象的相对阶。
+相比之下，本文中\emph{即便是一阶 $F(s)$ 也能产生令人满意的扰动抑制性能}。
+
+\subsection{滤波器与观测器的设计}
+
+$L$ 与 $F(s)$ 应设计成不破坏系统的稳定性。
+
+令 $r(t)=0$、$d(t)=0$，则对象 (2) 化为
+\begin{equation}
+\dot x(t)=A x(t)+B u(t).
+\end{equation}
+把式 (5)、(6)、(14) 与之结合，得
+\begin{equation}
+\Delta\dot x(t)=(A-LC)\Delta x(t)+B\tilde d(t).
+\end{equation}
+另一方面，式 (12) 等价于
+\begin{equation}
+\hat d(t)=-B^{+}LC\,\Delta x(t)+\tilde d(t).
+\end{equation}
+由式 (15)--(18) 重画框图（图 4），由式 (17)、(18) 可得
+$\tilde d(t)$ 到 $\hat d(t)$ 的传递函数
+\begin{equation}
+G(s)=1-B^{+}LC\left[sI-(A-LC)\right]^{-1}B
+=B^{+}(sI-A)\left[sI-(A-LC)\right]^{-1}B.
+\end{equation}
+
+由小增益定理得到下述稳定性结论。
+
+\textbf{定理 1}：对于适当设计的状态反馈增益 $[K_P\ K_R]$，
+控制律 (14) 在下列条件下保证控制系统的稳定性：
+\begin{enumerate}[label=\arabic*)]
+\item $A-LC$ 稳定；
+\item $\norm{GF}_\infty<1$，其中
+$\norm{GF}_\infty:=\sup_{0\le\omega<\infty}\bar\sigma\left[G(j\omega)F(j\omega)\right]$，
+$\bar\sigma(\cdot)$ 表示最大奇异值。
+\end{enumerate}
+
+\textbf{注 8}：改进伺服系统的稳定性条件可按\textbf{分离原理}拆成两部分：
+其一，状态反馈伺服系统本身稳定；
+其二，定理 1 的条件成立。
+由于条件中只含 $L$ 与 $F(s)$，其设计比扰动观测器方法简单得多
+——后者需要靠低通滤波器保证整个系统的稳定性。
+
+另一方面，考虑对象的对偶系统
+\begin{equation}
+\dot x_L(t)=A^{T}x_L(t)+C^{T}u_L(t),\qquad
+y_L(t)=B^{T}x_L(t),
+\end{equation}
+考查由标量 $\rho>0$ 参数化的状态反馈
+\begin{equation}
+u_L(t)=\frac{1}{\rho}L^{T}x_L(t).
+\end{equation}
+若 $(A^{T},C^{T},B^{T})$（从而 $(A,B,C)$）为最小相位系统，
+则依\textbf{完全调节}（perfect regulation）的概念，可求得 $L_\rho$ 使
+\begin{equation}
+\lim_{\rho\to\infty}\left[sI-(A-L_\rho C)\right]^{-1}B=0.
+\end{equation}
+注意 $\left[sI-(A-L_\rho C)\right]^{-1}B$ 是 $G(s)$ 的一部分，
+这意味着取足够大的 $\rho$ 可使 $|G(j\omega)|$ 在所有 $\omega\in[0,\infty)$ 上足够小。
+因此依完全调节的概念，对给定的 $F(s)$，可以求得满足定理 1 条件的 $L$。
+
+\subsection{设计步骤}
+
+综合上述结果，得到如下设计算法。
+
+\begin{enumerate}[label=\textbf{Step \arabic*)}]
+\item 用现有方法（如最优控制方法）设计常规伺服系统的反馈增益 $K_P$、$K_R$。
+\item 选取扰动抑制的角频率带 $\Omega_r$。
+\item 选取低通滤波器，使其满足
+\begin{equation}
+F(j\omega)\approx 1,\qquad \forall\omega\in\Omega_r.
+\end{equation}
+\item 选取 $\rho$，计算使 $A-L_\rho C$ 稳定的 $L_\rho$，
+并绘制 $|1/G(j\omega)|$ 与 $|F(j\omega)|$ 的伯德图。
+\item 检查定理 1 的第二个条件是否成立，即
+\begin{equation}
+\left|1/G(j\omega)\right|>\left|F(j\omega)\right|,\qquad \omega\in[0,\infty).
+\end{equation}
+若不成立，则增大 $\rho$ 直至式 (22) 得到满足。
+\end{enumerate}
+
+该算法直观易懂；且由于只需调整一个参数 $\rho$，设计调整非常简便。
+
+\section{仿真与实验验证}
+
+验证对象为一个由\textbf{两台直流电机}构成的旋转控制系统（图 5）：
+一台作为被控对象，另一台作为\textbf{扰动发生器}，产生扰动并向转速中加入不规则成分。
+该系统与著名的双质量系统 [21] 非常相似。
+
+被控电机与扰动发生器的模型分别为
+\begin{equation}
+\begin{cases}
+R_p i_p(t)+K_p\omega_p(t)=u(t)\\
+\tau_p(t)=K_p i_p(t)\\
+J_p\dot\omega_p(t)=\tau_p(t)-\tau_{pd}(t)
+\end{cases}
+\qquad
+\begin{cases}
+R_d i_d(t)+K_d\omega_d(t)=d(t)\\
+\tau_d(t)=K_d i_d(t)\\
+J_d\dot\omega_d(t)=\tau_d(t)+\tau_{pd}(t)
+\end{cases}
+\end{equation}
+以及
+\begin{equation}
+\tau_{pd}(t)=K_{pd}\left[\theta_p(t)-\theta_d(t)\right].
+\end{equation}
+选取状态 $x_o(t)=\left[\omega_p(t),\ \omega_d(t),\ \theta_p(t)-\theta_d(t)\right]^{T}$、
+输出 $y_o(t)=\omega_p(t)$，即得到式 (1) 的状态空间描述。实验系统参数由辨识得到。
+
+\subsection{仿真结果}
+
+仿真中，阶跃参考输入在 $t=0$ s 时施加；
+系统进入稳态后，在 $t=10$--$30$ s 期间施加扰动。
+
+由于伺服系统只含\textbf{阶跃型}内模，它只能抑制扰动的\textbf{直流分量}，
+其余分量只能被一定程度地压制而无法抑制，
+因此产生很大的稳态跟踪误差：\textbf{峰峰值 $147.67$ rpm}。
+
+采用本文方法后效果显著改善：扰动在瞬态与稳态均得到令人满意的抑制，
+\textbf{稳态跟踪误差降至 $9.15$ rpm（峰峰值）}，
+约为无扰动估计时的 $6\%$。图中同时给出了估计出的 EID，
+它通过调整控制输入抑制了扰动的影响。
+
+\subsection{滤波器特性与扰动抑制性能的关系}
+
+低通滤波器 $F(s)$ 用于选取扰动抑制的角频率带，对抑制性能影响显著。
+本节考察其\textbf{截止角频率}与\textbf{阶数}同抑制性能的关系。
+
+此前设计的低通滤波器截止角频率为 $100$ rad/s，
+而扰动的最高角频率为 $4\pi$ rad/s。
+在该频率处 $|F(j4\pi)|=0.99220$、$\angle F(j4\pi)=7.16246^{\circ}$。
+滤波器几乎不衰减 EID 中该分量的幅值，但引入了轻微相移；
+结果扰动估计方法把该分量的功率抑制到约 $2\%$。
+更低频的分量通过滤波器时几乎没有增益衰减或相位滞后。
+因此滤波后的 EID 并入控制律 (14) 后，对扰动抑制贡献极大。
+
+为考察截止角频率与抑制性能的关系，在保证系统稳定（图 9）的前提下，
+选取截止角频率 $63,\ 32,\ 16,\ 8,\ 2$ rad/s 进行控制实验，
+并给出稳态输出在扰动各分量角频率处的功率谱密度。
+结果表明：\textbf{当低通滤波器的截止角频率为扰动分量角频率的五倍时}，
+扰动估计中该分量通过滤波器时几乎没有增益衰减或相位滞后，
+该分量的功率谱密度被抑制到无扰动估计时的 $5\%$ 以下。
+
+\begin{quote}
+\bfseries 设计准则：低通滤波器的截止角频率宜取为所需抑制扰动最高角频率的五倍。
+\end{quote}
+
+式 (31) 中使用了一阶滤波器来限制扰动估计的角频率带。
+一般而言也可以采用高阶低通滤波器
+\begin{equation}
+F(s)=\frac{b_{n-1}s^{n-1}+\cdots+b_1 s+b_0}{s^{n}+a_{n-1}s^{n-1}+\cdots+a_1 s+a_0}.
+\end{equation}
+原文进一步考察了滤波器阶数与抑制性能的关系。
+
+\section{结论}
+
+原文的主要贡献可概括为四点：
+\begin{enumerate}[label=(\arabic*)]
+\item 首次从理论上讨论了 EID 的\textbf{存在性}，
+给出了在假设 1、2 下 EID 必然存在的\textbf{引理}，
+从而为 EID 估计提供了理论依据；
+\item 提出一种只依赖对象\textbf{输入与输出}、不需对象状态的 EID 估计新方法，
+它不使用对象逆动力学，避免了不稳定零极点的对消，
+也不需要微分测量输出、秩条件或扰动先验信息；
+\item 给出把扰动估计并入控制律的结构，
+并按分离原理把状态反馈、观测器与低通滤波器的设计\textbf{解耦}，
+同时给出闭环稳定性定理与五步设计算法；
+\item 通过两电机旋转控制系统的仿真与实验验证了方法的有效性，
+并给出\textbf{截止角频率取扰动最高角频率五倍}这一设计准则。
+\end{enumerate}
+
+\appendix
+\section{与 RCESO 的对应关系}
+
+为便于本项目内部使用，下面列出原文概念与 RCESO 的对应。
+
+\begin{table}[h]
+\centering
+\caption{原文概念与 RCESO 的对应}
+\begin{tabular}{@{}ll@{}}
+\toprule
+原文概念 & RCESO 中的对应 \\
+\midrule
+$\dot x=Ax+B[u+d_e]$ & $\dot y=b\,u+d$（一阶，$B\equiv b$ 为标量） \\
+状态观测器 & ESO（状态 $z_1$、$z_2$）\\
+$F(s)$ 限制扰动估计频带 & ESO 带宽 $\omega_o=500$ rad/s（约 $80$ Hz）\\
+引理 1（存在性） & 把 $(b-b_0)u$ 折算进 $d$ 的合法性依据 \\
+假设 2（虚轴无零点） & 一阶 $\dot y=bu$ 无零点，自动满足 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+需要特别澄清一点：RCESO 中存在\textbf{两个}低通，作用不同，不可混为一谈。
+其一是 \textbf{ESO 带宽} $\omega_o=500$ rad/s，它才是原文 $F(s)$ 的对应物，
+必须覆盖注入频率 $65$ Hz；
+其二是 \textbf{$b_0$ 低通}，时间常数 $\tau=k_p/50\approx0.663$ s（约 $0.24$ Hz），
+它是对\textbf{参数估计}的跨 burst 平滑，在原文框架中\textbf{没有对应物}。
+若按 EID 框架把后者误认为 $F(s)$，会得出“把 $65$ Hz 扰动滤掉了”的错误结论。
+
+此外，原文的设计准则（截止角频率取扰动最高角频率的五倍）值得对照检查：
+ESO 带宽 $500$ rad/s 与注入角频率 $2\pi\times 65\approx408$ rad/s 之比仅约 $1.2$，
+\textbf{低于}该准则建议的 $5$ 倍。这一点可能是 RCESO 残余误差的来源之一，
+可作为后续调参的方向。
+
+\end{document}

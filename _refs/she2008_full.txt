@@ -1,0 +1,820 @@
+===== PAGE 1 =====
+380 IEEETRANSACTIONSONINDUSTRIALELECTRONICS,VOL.55,NO.1,JANUARY2008
+Improving Disturbance-Rejection Performance Based
+on an Equivalent-Input-Disturbance Approach
+Jin-HuaShe,Member,IEEE,MingxingFang,YasuhiroOhyama,Member,IEEE,
+HiroshiHashimoto,Member,IEEE,andMinWu
+Abstract—Thispaperpresentsanewmethodofimprovingthe inputchannel.However,theexistenceofanEIDhasneverbeen
+disturbance-rejection performance of a servo system based on discussedfromatheoreticalstandpoint,andtheestimationofan
+theestimationofanequivalentinputdisturbance(EID).First,the
+EIDismeaningfulonlywhenitsexistenceisguaranteed.Inthis
+conceptofEIDisdefined.Next,theconfigurationofanimproved
+paper, a lemma is first presented that theoretically guarantees
+servosystememployingthenewdisturbance-estimationmethodis
+described. Then, a method of designing a control law employing the existence of an EID for a plant under some assumptions.
+adisturbanceestimateisexplained.Finally,thespeedcontrolofa Next, a new method of estimating an EID is explained that
+rotationalcontrolsystemisusedtodemonstratethevalidityofthe overcomes thedrawbacks of,andhasseveraladvantages over,
+method,andsomedesignguidelinesarepresented.
+existing ones. For example, it can reject any kind of distur-
+Index Terms—Disturbance estimation, disturbance rejection, bance; it does not require the differentiation of measured
+equivalent input disturbance (EID), perfect regulation, servo outputs,rankconditions,orprioriinformationonadisturbance;
+system,stableinversion.
+and it does not use the inverse dynamics of the plant, thereby
+avoiding the cancellation of unstable poles/zeros. The method
+I. INTRODUCTION
+onlyneedstheinputandoutputoftheplanttoproduceanEID
+OVERTHEPASTfewdecades,aconsiderablenumberof and does not require the state of the plant. This enlarges its
+studieshavebeendevotedtotheestimationandrejection rangeofapplication.Thesystemconfigurationisalsoverysim-
+ofanunknowndisturbance(e.g.,[1]–[11]).Whilemostofthese ple,andtheSeparationTheoremcanbeusedtoindependently
+methods require the differentiation of measured outputs, the designthestatefeedback,andtheobserverandlow-passfilter.
+methodsin[1]–[8]donot.However,in[1]–[3],rankconditions This paper first defines an EID for a system containing
+are imposed on the unknown inputs; [4] requires exact infor- disturbancesthatmaynotnecessarilybeimposedonthecontrol
+mation on a disturbance; [5] and [6] consider only a special inputchannel.Next,anewmethodofEIDestimationbasedon
+class of disturbances; and [7] and [8] use the inverse dynam- thecontrolinputandtheoutputoftheplantisdescribed.Then,
+ics of the plant directly in the construction of the estimator. an improved servo system employing an estimate of an EID
+She et al. [12] devised a new method that overcomes the is constructed, and a design algorithm for the control system
+drawbacks of these methods. However, the state of the plant ispresented.Finally,theresultsofsimulationsandexperiments
+isneededfortheestimation. onthespeedcontrolofarotationalcontrolsystemarepresented
+Ontheotherhand,fromthestandpointofthecontrolsystem, to demonstrate the validity of the method, and some design
+it is more reasonable to estimate a disturbance on the control guidelinesaregiven.
+input channel than to estimate the disturbance itself because In this paper, to make block diagrams easier to understand,
+we have to use the control input to improve the disturbance- only the minus inputs of a summer are marked, and the plus
+rejection performance. In fact, many disturbance-rejection symbolsareomitted.
+methods, such as the disturbance observer, implicitly assume
+thatanequivalentinputdisturbance(EID)existsonthecontrol
+II. CONSTRUCTIONOFIMPROVEDSERVOSYSTEM
+This section first defines an EID and, then, describes the
+ManuscriptreceivedDecember6,2006;revisedJuly2,2007.Theworkof
+J.-H.She,Y.Ohyama,andH.HashimotowassupportedinpartbytheElectro- configuration of an improved servo system constructed by
+MechanicTechnologyAdvancingFoundation,Japan,bytheGrant-in-Aidfor inserting a disturbance estimator that estimates an EID into a
+Scientific Research (C), Japan Society for the Promotion of Science (JSPS)
+conventionalservosystem.
+underGrant18560259,andbytheHighTech-ResearchCenterProjectfunded
+by the Ministry of Education, Culture, Sports, Science and Technology of
+Japan.TheworkofM.FangandM.WuwassupportedbytheNationalScience
+FundforDistinguishedYouthScholarsofChinaunderGrant60425310. A. DefinitionofEID
+J.-H. She, Y. Ohyama and H. Hashimoto are with the School of Bionics,
+Tokyo University of Technology, Tokyo 192-0982, Japan (e-mail: Considerthelineartime-invariantplantinFig.1
+she@bs.teu.ac.jp;ohyama@bs.teu.ac.jp;hiro-hashimoto@ieee.org).
+(cid:1)
+M.FangiswiththeSchoolofInformationScienceandEngineering,Central
+x˙ (t)=Ax (t)+Bu(t)+B d(t)
+South University, Changsha 410083, China, and also with the College of o o d (1)
+PhysicsandElectronicInformation,AnhuiNormalUniversity,Wuhu241000, y o (t)=Cx o (t)
+China(e-mail:mingxing.fang@gmail.com).
+Sou
+M
+th
+.W
+Un
+u
+iv
+is
+er
+w
+si
+i
+t
+t
+y
+h
+,C
+th
+h
+e
+a
+S
+n
+c
+g
+h
+sh
+o
+a
+ol
+4
+o
+1
+f
+00
+In
+8
+f
+3
+o
+,
+r
+C
+m
+h
+a
+i
+t
+n
+io
+a
+n
+(e
+S
+-
+c
+m
+ie
+a
+n
+il
+c
+:
+e
+m
+a
+i
+n
+n
+d
+@
+E
+c
+n
+s
+g
+u
+i
+.e
+n
+d
+e
+u
+er
+.c
+in
+n
+g
+).
+,Central where A∈Rn×n, B ∈Rn×nu, B
+d
+∈Rn×nd, C ∈Rny ×n,
+DigitalObjectIdentifier10.1109/TIE.2007.905976 x o (t)∈Rn,u(t)∈Rnu,d(t)∈Rnd,andy o (t)∈Rny.
+0278-0046/$25.00©2008IEEE
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 2 =====
+SHEetal.:IMPROVINGDISTURBANCE-REJECTIONPERFORMANCEBASEDONANEIDAPPROACH 381
+Remark 3: Note that, since the stable-inversion approach
+computesaparticularcontrolinputandaparticularstatetrajec-
+torythateitherdoesnotexcitethezerosofthesystemorexcite
+theminastablemanner,thisapproachproducesasatisfactory
+controlinputforagivenoutput,evenforasystemwithunstable
+zeros/poles.
+Fig.1. Plant. Remark 4: Since we focus on the effect of disturbances
+on the output rather than on the disturbances themselves, the
+stable-inversion approach guarantees the existence of an EID,
+regardless of any difference in dimension between the control
+input matrix B and the disturbance input matrix B or any
+d
+differencebetweentherangesoftheirlineartransforms.
+From the aforementioned lemma, we know that we can
+calculateanEIDfromtheinputandoutputoftheplant.Since
+Fig.2. PlantwithEID.
+thecalculationiscomplicatedandalsorequiresinformationon
+Thefollowingassumptionsaremadeabouttheplant. future outputs, this approach cannot be directly used to obtain
+Assumption1: (A,B,C)iscontrollableandobservable. anEID.However,sincethislemmaclarifiesthatanEIDexists,
+Assumption2: (A,B,C)hasnozerosontheimaginaryaxis. itgivesusatheoreticalguaranteeofthemeaningfulnessofEID
+Remark 1: Assumption 1 is for simplicity. Since we want estimation. In the next section, we devise a simple method of
+to use a control input to improve the tracking performance of estimatinganEID.
+the output, if the plant is not controllable and/or observable, Considering the aforementioned lemma, we mainly use (2)
+then we only need to consider a controllable and observable asthemodeloftheplantintherestofthispaper.
+subsystemofit.
+Remark 2: Assumption 2 is necessary to guarantee the in-
+B. EstimationofEID
+ternalstabilityofaservosystemandtoallowtheoutputofthe
+planttotrackareferenceinputwithoutasteady-stateerror[13]. The configuration of an improved servo system is shown in
+For simplicity, we consider the single-input single-output Fig.3,where
+(SISO)case,whichmeansthatn =1andn =1.Notethat,
+u y
+sinceBandB mayhavedifferentdimensions,thedisturbance BT
+d B+ := . (4)
+may be imposed on a channel other than the control input BTB
+channel, and the number of disturbances and associated input
+Itcanbeviewedasaconventionalservosystem(internalmodel,
+channels may also be larger than one. However, if we assume
+stateobserver,andstatefeedback)combinedwithadisturbance
+thatadisturbanceisimposedonlyonthecontrolinputchannel,
+estimator that produces an estimate of an EID. K and K
+asshowninFig.2,thentheplantisgivenby R P
+are the state-feedback gains, L is the observer gain, and F(s)
+(cid:1)
+x˙(t)=Ax(t)+B[u(t)+d (t)] is a low-pass filter that limits the angular-frequency band of
+e (2)
+y(t)=Cx(t). thedisturbanceestimate.Sinceweknowtheexactformofthe
+reference input, an internal model is employed in the control
+AnEIDisdefinedasfollows. systemtoimprovethetrackingprecisionforthereferenceinput.
+Definition 1: Let the control input be u(t)=0. Then, the On the other hand, since the disturbance is assumed to be
+output of the plant (1) for the disturbance d(t) is y o (t), and unknown, no internal model of it is contained in the control
+theoutputoftheplant(2)forthedisturbanced e (t)isy(t).The system, and we need to devise a method of suppressing its
+disturbance d e (t) is called an EID of the disturbance d(t) if influence on the output. Note that the EID estimator makes
+y(t)≡y
+o
+(t)forallt≥0.
+use of the state observer instead of the inverse dynamics of
+Let the plant. This is a big difference in system structure between
+the disturbance-observer method and the one presented in this
+Φ={p (t)sin(ω t+φ )}, i=0,...,n, n<∞
+i i i paper.
+(3)
+InFig.3,forthestateobserver
+where ω (≥0) and φ are constants, and p (t) denotes any
+i i i xˆ˙(t)=Axˆ(t)+Bu (t)+L[y(t)−Cxˆ(t)] (5)
+polynomials in time t (i=0,...,n). If the trajectory of the f
+outputcausedbythedisturbanced(t)isy (t)∈Φ,then,from
+o holds.Letting
+theconceptofstableinversion[14],itfollowsthatthereexists
+an EID d e (t)∈Φ on the control input channel that produces ∆x(t)=xˆ(t)−x(t) (6)
+thesametrajectory.Thisleadstothefollowinglemma.
+Lemma 1: Under Assumptions 1 and 2, there always exists andsubstitutingitinto(2)yields
+an EID d (t)∈Φ on the control input channel of the distur-
+e
+banced(t)imposedontheplant(1),andtheoutputitproduces xˆ˙(t)=Axˆ(t)+Bu(t)+{Bd (t)+[∆x˙(t)−A∆x(t)]}.
+e
+belongstoΦ. (7)
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 3 =====
+382 IEEETRANSACTIONSONINDUSTRIALELECTRONICS,VOL.55,NO.1,JANUARY2008
+Fig.3. Configurationoftheimprovedservosystem.
+Assumethatthereexistsacontrolinput∆d(t)thatsatisfies includestheeffectsofthedisturbance.Thisdifferencedegrades
+thetrackingprecisionifwedirectlyusetheavailablestates.In
+∆x˙(t)−A∆x(t)=B∆d(t). (8) ordertoobtainanEIDwithahighprecision,itisimportantto
+guarantee that yˆ(t)−y(t) converges to zero. Therefore, using
+Substituting(8)into(7)andlettingtheestimateoftheEIDbe
+afull-orderstateobserverisdesirable.
+dˆ(t)=d (t)+∆d(t) (9)
+e
+C. DisturbanceRejection
+allowsustoexpresstheplantas
+(cid:2) (cid:3) Combining the disturbance estimate (13) with the original
+xˆ˙(t)=Axˆ(t)+B u(t)+dˆ(t) . (10) servocontrollawyieldsthefollowingcontrollaw:
+u(t)=u (t)−d˜(t) (14)
+Remark5: Equations(9)and(10)meanthat,ifwetakethe f
+state of the plant with an EID to be xˆ(t), which is exactly the
+as shown in Fig. 3. This modified control law improves the
+state of the observer, then the difference between the state of
+disturbance-rejection performance. The method described in
+theplantandthatoftheobserverisequivalenttothedifference
+this paper has two important features that are not provided by
+betweentheexactvalueandtheestimateoftheEID.Equation
+othermethods.
+(10)playsakeyroleintheEIDestimation.
+1) Theconfigurationofthesystemisverysimple.
+Equations(5)and(10)yield
+2) Incorporating the disturbance estimate directly into the
+(cid:2) (cid:3)
+B dˆ(t)+u(t)−u (t) =LC[x(t)−xˆ(t)]. (11) designed servo control law makes the disturbance-
+f
+rejectionperformanceeasytoimprove.
+Ifwesolve(11)fordˆ(t),thenaleastsquaresolutionis Regarding the first feature, the improved servo system can
+be viewed as a conventional servo system enhanced by the
+dˆ(t)=B+LC[x(t)−xˆ(t)]+u (t)−u(t). (12) plugging-in of a disturbance estimate. Therefore, the structure
+f
+is very simple and very easy to understand. Regarding the
+dˆ(t) is filtered by F(s), which selects the angular-frequency secondfeature,letω r bethehighestangularfrequencyfordis-
+turbancerejectionandΩ :={ω,0≤ω ≤ω }betheangular-
+band for disturbance estimation. Thus, the filtered disturbance r r
+estimated˜(t)isgivenby frequency band for disturbance rejection. A suitable design
+of the observer guarantees that dˆ(t) converges to d (t), and
+e
+D˜(s)=F(s)Dˆ(s) (13) D˜(jω)≈Dˆ(jω)forallω ∈Ω r istrueforaproperlydesigned
+low-pass filter F(s). Therefore, d˜(t) is a good approximation
+where D˜(s) and Dˆ(s) are the Laplace transforms of d˜(t) and ofd (t).
+e
+dˆ(t),respectively. Remark 7: Umeno et al. [15] presented a Q-filter method
+Remark 6: Since an estimate is obtained for an EID, the for the design of a disturbance observer. The cutoff angular
+channel on which the EID is imposed might be different from frequency of a Q-filter must be sufficiently higher than the
+that of the actual disturbance. Therefore, generally speaking, highestangularfrequencyofthedisturbancestoguaranteethat
+a full-order state observer must be used to estimate the state the disturbance estimate is imposed on the control input. The
+oftheplantbecause,ifadisturbanceexists,thentheestimated situation is the same for the low-pass filter F(s) in this paper.
+stateoftheplantmightbedifferentfromtheactualstate,which However, as pointed out in [16], for a Q-filter, improving the
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 4 =====
+SHEetal.:IMPROVINGDISTURBANCE-REJECTIONPERFORMANCEBASEDONANEIDAPPROACH 383
+Fig.4. Blockdiagramforthedesignoflow-passfilterandstateobserver.
+disturbance-rejection performance requires an increase on the thus,donotappearinthetransferfunction(19).Forthissystem,
+order of the filter; basically, to guarantee causality, the order weobtainthefollowingfromthesmall-gaintheorem[17].
+cannot be lower than the relative degree of the plant. In con- Theorem 1: For a suitably designed state-feedback gain
+trast,evenafirst-orderF(s)producessatisfactorydisturbance- [K K ], the control law (14) guarantees the stability of the
+P R
+rejectionperformance. controlsystemunderthefollowingconditions.
+This system also has another very important feature: The 1) A−LC isstable.
+state-feedbackcontrollawcanbedesignedindependentofthe 2) (cid:11)GF(cid:11) ∞ < 1 where (cid:11)GF(cid:11) ∞ := sup 0≤ω≤∞ σ max
+observerandthelow-passfilter,aslongasstabilityistheonly [G(jω)F(jω)], and σ (G) means the maximum
+max
+concern.Thisisdiscussedinthefollowingsection. singularvalueofG.
+Remark 8: The stability conditions for the improved servo
+D. DesignofFilterandStateObserver systemcanbebrokendownintotwoparts(SeparationTheorem
+[18]). First, the state-feedback servo system is stable. Second,
+ThestateobservergainLandthelow-passfilterF(s)should
+the conditions in Theorem 1 hold. Since the only parameters
+be designed so that they do not destroy the stability of the
+in those conditions are L and F(s), their design is much sim-
+system.Regardingstability,ifwelet
+pler than the design of parameters in the disturbance-observer
+method [7], which requires a low-pass filter to guarantee the
+r(t)=0, d(t)=0 (15)
+stabilityofthewholesystem.
+thentheplant(2)is Ontheotherhand,forthedualsystemoftheplant
+(cid:1)
+x˙(t)=Ax(t)+Bu(t). (16) x˙ (t)=ATx (t)+CTu (t)
+L L L (20)
+y (t)=BTx (t)
+L L
+Combining(5),(6),and(14)withtheaforementionedequation
+yields considerthestatefeedbackparameterizedbyascalarρ>0
+∆x˙(t)=(A−LC)∆x(t)+Bd˜(t). (17) u (t)=LTx (t).
+L ρ L
+Ontheotherhand,(12)isequivalentto If (AT,CT,BT) [and, thus, (A,B,C)] is a minimum-phase
+system, then, based on the concept of perfect regulation [19],
+dˆ(t)=−B+LC∆x(t)+d˜(t). (18)
+[20],wecanobtainanLTthatensures
+ρ
+Using the relationships (15)–(18) and redrawing Fig. 3 yield
+lim [sI−(A−L C)] −1B =0.
+Fig.4.Equations(17)and(18)yieldthetransferfunctionfrom ρ
+ρ→∞
+d˜(t)todˆ(t)
+Notethat[sI−(A−L C)]−1B ispartofG(s),whichmeans
+G(s)=1−B+LC[sI−(A−LC)] −1B that a large enough ρ ρ makes |G(jω)| sufficiently small for
+=B+(sI−A)[sI−(A−LC)] −1B. (19) all ω ∈[0,∞). Therefore, based on the concept of perfect
+regulation, for a given F(s), we can obtain an L that satisfies
+NotethatthestabilizeddynamicsunderthedottedlineinFig.4 theconditionsinTheorem1.Thedesignprocedureisexplained
+areunobservablefromthedynamicsabovethedottedlineand, inthenextsection.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 5 =====
+384 IEEETRANSACTIONSONINDUSTRIALELECTRONICS,VOL.55,NO.1,JANUARY2008
+E. DesignProcedure
+Summarizingtheaforementionedresultsyieldsthefollowing
+designalgorithmfortheimprovedservosystem.
+Designalgorithm:
+Step1) DesignthefeedbackgainsK andK foraconven-
+P R
+tional servo system using an existing method (e.g.,
+theoptimalcontrolmethod).
+Step2) Choose an angular-frequency band Ω for distur-
+r
+bancerejection.
+Step3) Choosealow-passfilterthatsatisfies
+F(jω)≈1 ∀ω ∈Ω . (21)
+r
+Step4) Select a ρ and calculate an L that stabilizes
+ρ
+A−L C,andthen,plot|1/G(jω)|and|F(jω)|.
+ρ
+Step5) CheckifthesecondconditioninTheorem1,i.e.,
+|1/G(jω)|>|F(jω)|, ω ∈[0,∞) (22)
+istruefromtheBodeplots.Ifitisnot,thenincreaseρuntil(22)
+issatisfied.
+This design algorithm is intuitive and easy to understand.
+Furthermore,sinceonlyoneparameterρneedstobechanged,
+adjustmentofthedesignisverysimple.
+III. SIMULATIONSANDEXPERIMENTALVERIFICATION Fig.5. Rotationalcontrolsystem.(a)Model.(b)Blockdiagram.
+Weemployedthemethodpreviouslydescribedforthespeed
+In(23)–(25),thevariablesandparameterswiththesubscriptp
+controlofarotationalcontrolsystem(Fig.5)consistingoftwo
+(ord)indicatethattheyarerelatedtothecontrolledmotor(or
+dcmotors:Onewasusedasthecontrolledobject,andtheother
+disturbancegenerator).Theyaredefinedasfollows:
+wasusedasadisturbancegenerator.Thesystemisverysimilar
+u Appliedvoltage(involts).
+to the well-known two-mass system [21]. However, in this
+d Disturbancevoltage(involts).
+paper,weusedonemotortogenerateatorquedisturbancethat
+i (i ) Armaturecurrent(inamperes).
+p d
+wasimposedonthecontrolledmotorfromachannelotherthan
+τ (τ ) Torqueproduced(innewtonmeters).
+p d
+thecontrolinputchannel.Theaxlesofthemotorswerecoupled
+τ Twistingtorque(innewtonmeters).
+pd
+togetherwithaspring:1)Thecontrolledmotormaintainedthe
+ω (ω ) Rotationalspeed(inradianspersecond).
+p d
+specified rotational speed, in spite of any disturbances; and
+θ (θ ) Rotationangle(inradians).
+p d
+2) the disturbance generator produced disturbances, adding ir-
+J (J ) Inertia(inkilogramsquaremeters).
+p d
+regularitiestotherotationalspeed.Themodelsofthecontrolled
+R (R ) Resistanceofarmaturecoil(inohms).
+p d
+motorandthedisturbancegeneratorare
+K (K ) Back-electromotive-forceconstant(involtseconds
+p d
+
+perradian)ortorqueconstant(innewtonmetersper
+R
+p
+i
+p
+(t)+K
+p
+ω
+p
+(t)=u(t)
+ampere).
+ τ p (t)=K p i p (t) (23) K pd Twisting elasticity coefficient of coupling (in new-
+J ω˙ (t)=τ (t)−τ (t) tonmetersperradian).
+p p p pd
+Choosing the state to be x (t)=[ω (t) ω (t) θ (t)−
+o p d p
+θ (t)]Tandtheoutputtobey (t)=ω (t)yieldsthefollowing
+and d o p
+statespacedescriptionin(1):
+
+R i (t)+K ω (t)=d(t)   
+
+J
+τ
+d
+d
+d (
+ω˙
+t d
+d
+)
+(
+=
+t)
+K
+=
+d
+τ
+i
+d
+d
+d
+(
+(
+t
+t
+)
+) d
++τ pd(t)
+(24) 
+A=
+
+
+−
+J
+0
+K
+pR
+p 2
+p
+−
+0
+K d 2
+−
+K
+K
+p
+J
+d
+p
+p
+d
+
+
+1 − Jd 1 Rd J 0 d
+      (26)
+respectively,and
+τ pd (t)=K pd [θ p (t)−θ d (t)]. (25)
+B
+= J
+K
+p 0 0 R
+p
+p  B d =  J K d
+0
+0 R d d  C = 
+1
+0 0 
+T
+.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 6 =====
+SHEetal.:IMPROVINGDISTURBANCE-REJECTIONPERFORMANCEBASEDONANEIDAPPROACH 385
+For the experimental system, the parameters were iden-
+tifiedtobe
+  
+
+A= 
+−31
+0
+.31
+−10
+0
+.25
+−2.8
+8
+3
+0
+3
+0
+×
+1
+104
+
+(27)
+ 1 −1 0
+B =[28.06 0 0]T,B =[0 7.210 0]T.
+d
+Simple verification shows that the plant is controllable and
+observable, and has no zeros on the imaginary axis. The fact
+thatthisplantisaminimum-phasesystemallowsustousethe
+aforementioned method to design an observer gain and a low-
+Fig.6. TuningofG(s)andselectionofF(s).
+passfilter.Weletthereferenceinputbethestepsignal
+where ω is the cutoff angular frequency of the filter. Then,
+c
+r(t)=1000×1(t)rpm. (28) an optimal observer gain L was designed that minimized the
+performanceindex
+Therefore, the internal model in the control system is
+chosentobe (cid:17)∞ (cid:21) (cid:22)
+J = ρxT(t)Q x (t)+R u2(t) dt
+L L L L L L
+A =0, B =1.
+R R
+0
+Thefollowingdisturbanceisaddedtothesystem: Q =diag{1 10−6 10−6}, R =1
+L L
+(cid:14)
+0, t<10ort>30 for the system (20) [the parameters are given in (27)]. ρ was
+d(t)= 0.25×[sin4πt+cos2πt adjusted so that (cid:11)GF(cid:11) ∞ <1. The resulting ρ was 106, which
++sinπt+sin(0.5πt)]−1, 10≤t≤30.
+yielded
+(29)
+L=[972.313 −11.57900 −0.11079]T.
+An improved servo system was designed by following the
+designprocedureintheprevioussection.First,thedisturbance
+It is clear from Fig. 6 that the second condition in Theorem
+wasignored,andasingleaugmented-staterepresentationcon-
+1 is satisfied, which means that the improved servo system is
+taining the plant and an internal model of the step signal [22]
+stable.
+wasconstructed
+(cid:15) (cid:16) (cid:15) (cid:16)(cid:15) (cid:16) (cid:15) (cid:16)
+δx˙(t) A 0 δx(t) B A. Simulations
+= + δu(t) (30)
+δx˙ (t) −B C A δx (t) 0
+R R R R Some simulation results are shown in Figs. 7 and 8. In
+Fig. 7, the step reference input was imposed at t=0 s. After
+where
+the system entered the steady state, the disturbance (29) was
+δx(t)=x(t)−x(+∞)
+imposedonthesystemduringthetimet=10–30s.
+δx (t)=x (t)−x (+∞) Since the servo system contains only a step-type internal
+R R R
+model, it can only reject the dc component of the distur-
+δu(t)=u(t)−u(+∞).
+bance and merely suppresses the other components in (29) to
+some extent but cannot reject them. Thus, a large steady-state
+Minimizingtheperformanceindex
+tracking error arises (peak-to-peak value: 147.67 rpm). The
+(cid:17)∞(cid:1) (cid:15) (cid:16) (cid:20) corresponding control input is also shown in the same figure.
+(cid:18) (cid:19)
+J = δxT(t)δxT(t) Q δx(t) +R δu2(t) dt Our new method yields a big improvement. The simulation
+K R K δx R (t) K resultsobtainedwithdisturbanceestimationinFig.8showthat
+0 thedisturbanceissatisfactorilyrejectedinboththetransientand
+Q K =diag{1 1 1 10}, R K =1 steadystates.Thesteady-statetrackingerrordropsto9.15rpm
+(peak to peak), which is about 6% of that without disturbance
+yields
+estimation.TheestimatedEIDisalsoshowninthesamefigure.
+It adjusts the control input, thereby suppressing the effects of
+[K |K ]=[0.42217 0.13939 −1.47170| −3.16228].
+P R thedisturbance.
+Next, since the highest angular frequency contained in the
+disturbance d(t) is 4π rad/s, we selected Ω r by setting ω r to B. RelationshipBetweenCharacteristicsofFilterand
+13 rad/s. Then, we chose a first-order filter and set T = Disturbance-RejectionPerformance
+0.01s(<1/(5ω )).Thisyieldedthelow-passfilter
+r
+In Fig. 3, the low-pass filter F(s) is used to select the
+1 1 angular-frequency band for disturbance rejection. It markedly
+F(s)= , ω = (31)
+Ts+1 c T affects the disturbance-rejection performance. Here, we
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 7 =====
+386 IEEETRANSACTIONSONINDUSTRIALELECTRONICS,VOL.55,NO.1,JANUARY2008
+Fig.7. Simulationresultswithoutdisturbanceestimation. Fig.8. Simulationresultswithdisturbanceestimation.
+investigate the relationship between that performance and (a)
+the cutoff angular frequency and (b) the order of the filter for
+the experimental system. However, the results are generally
+applicableandcanbeusedasaguidelineinchoosingasuitable
+low-passfilter.
+In the previous section, the cutoff angular frequency of the
+low-pass filter was 100 rad/s. The highest angular frequency
+of the disturbance in (29) was 4π rad/s. At this frequency,
+|F(j4π)|=0.99220 and ∠F(j4π)=7.16246◦.Whilethe fil-
+ter attenuated the amplitude of the component of 4π rad/s in
+the EID very little, it slightly shifted the phase. As a result,
+the disturbance-estimation method reduced the power of this
+componenttoabout2%.Lowerfrequencycomponentspassthe
+filterwithvirtuallynogainattenuationorphaselag.Thus,this
+filteredEIDcontributesagreatdealtothedisturbancerejection
+whenitisincorporatedintothecontrollaw(14).
+To investigate the relationship between the cutoff angular
+frequencyandthedisturbance-rejectionperformance,underthe
+constraintthatthestabilityofthecontrolsystemisguaranteed
+Fig.9. BodeplotofF(s)[(31),ωc=100,63,32,16,8, and2rad/s].
+(Fig. 9), we chose cutoff angular frequencies of 63, 32, 16,
+8, and 2 rad/s and carried out control. Table I shows the
+powerspectraldensityofthesteady-stateoutputattheangular the component is suppressed to less than 5% of that without
+frequencies of the disturbance components. Clearly, when the disturbanceestimation.Thus,itisdesirabletochoosethecutoff
+cutoff angular frequency of the low-pass filter is five times angular frequency to be five times higher than the highest
+higher than a disturbance component, the component of the angularfrequencyofthedisturbancetoberejected.
+disturbance estimate passes the filter with virtually no gain In (31), a first-order filter was used to limit the angular-
+attenuation or phase lag, and the power spectral density of frequency band of disturbance estimation. However, generally
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 8 =====
+SHEetal.:IMPROVINGDISTURBANCE-REJECTIONPERFORMANCEBASEDONANEIDAPPROACH 387
+TABLE I
+POWERSPECTRALDENSITYOFSTEADY-STATEOUTPUTFORVARIOUS
+CUTOFFANGULARFREQUENCIESOFLOW-PASSFILTER(31)
+(NDE:NODISTURBANCEESTIMATION)
+speaking, it is possible to use a high-order low-pass filter,
+suchas
+F(s)= b n−1 sn−1+···+b 1 s+b 0 . (32)
+sn+a n−1 sn−1+···+a 1 s+a 0
+Weinvestigatedtherelationshipbetweentheorderofthelow-
+pass filter and the disturbance-rejection performance. Specifi-
+cally, we examined the widely used Butterworth, Chebyshev,
+Fig.10. BodeplotofButterworthfilter[(32),n=1,2,3,4].
+Bessel, and Elliptic (Cauer) filters with orders of two, three,
+and four [23]. Note that, when n=1, these filters all reduce TABLE II
+POWERSPECTRALDENSITYOFSTEADY-STATEOUTPUTFOR
+tothesameform(31).Sincetheresultsforthesefiltersexhibit
+BUTTERWORTHFILTER(32)(NDE:NODISTURBANCEESTIMATION)
+thesametrend,wepresentonlythosefortheButterworthfilter.
+Fig.10showsaBodeplotofthefilter,andTableIIshowsthe
+controlresults.
+It is clear from Fig. 10 that, for a given cutoff frequency
+(100 rad/s), the higher the order of the filter is, the lower the
+angular frequency is at which phase lag occurs. Therefore,
+eventhoughthedisturbanceestimatepassesthelow-passfilter
+without gain attenuation, the phase shifts, which degrades the
+The experimental results with and without disturbance esti-
+disturbance-rejectionperformance.
+mationareshowninFig.12.Acomparisonoftheexperimental
+In this paper, we require that the disturbance estimates pass
+andsimulationresultsrevealsthat,whilebothareverysimilar
+through the filter without any damping or phase lag in the
+for the conventional servo system (i.e., the control system
+angular-frequency band Ω and are not concerned about the
+r without disturbance estimation), the rise time was longer in
+rolloffspeedofthegainofF(jω)outsidethatband.Toachieve
+theexperimentsthaninthesimulationswhentheEIDestimate
+this,afirst-orderlow-passfilteristhebest.Therefore,regarding
+was incorporated into the system. This can be explained as
+thechoiceoflow-passfilter,wecanconcludeasfollows.
+follows:Thenonlinearities(staticfriction,deadzones,etc.)in
+1) The structure of the low-pass filter should be F(s)= the experimental system make the initial output of the actual
+1/(Ts+1). plant slower than that of the observer because the observer
+2) The time constant of the filter T should be chosen to does not take the nonlinearities into account. The EID esti-
+satisfytheconditionT ≤1/(5ω r ). mator took this difference to be a disturbance, produced an
+EID, and added it to the control input channel. Regarding the
+experimental results, when the disturbance was removed from
+C. ExperimentalResults
+thesystem(t=30–40s),thestandarddeviationofthetracking
+Experiments werecarriedouttodemonstratethevalidityof error was 13.66. However, during the period t=20–30 s, the
+the new method using the setup in Fig. 11. The ratings of the standard deviation of the tracking error was 57.75 without
+twomotorsarethefollowing:80W,dc24V,and2500rpm.The disturbance estimation and 22.33 with disturbance estimation.
+controllerwasadesktopcomputer,andthecontrolprogramwas The power spectral density reveals that the components of the
+written in C language and run under MS-DOS. A tachometer disturbance were greatly suppressed. This demonstrates that
+generator measured the rotational speed and converted it into our new method is very useful in rejecting disturbances and
+a voltage. Next, a 12-bit A/D converter converted the analog improvingcontrolperformance.
+speed signal into a digital signal and sent it to the controller.
+Then,thecontrolinputwascalculatedbasedontheoutputand
+IV. CONCLUSION
+the tracking error between the reference speed and the output.
+Itandthedisturbanceweresentthrougha12-bitD/Aconverter In a conventional servo system, the tracking performance
+tothemotordrivers. may be degraded by unknown disturbances even if an internal
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 9 =====
+388 IEEETRANSACTIONSONINDUSTRIALELECTRONICS,VOL.55,NO.1,JANUARY2008
+Fig.11. Experimentalsystem.
+modelofthereferenceinputisemployed.Thispaperdescribes
+a new method of improving the disturbance-rejection perfor-
+mance of a servo system that involves the estimation of an
+EID and an improved servo system configuration based on
+the method. This method has significant advantages over the
+existingones.
+1) Eventhoughthecontrolsystemdoesnotcontainaninter-
+nalmodelofadisturbance,theinfluenceofanunknown
+disturbance is almost completely rejected in both the
+transientandsteady-stateresponses.
+2) Theconfigurationisverysimple.
+3) It does not require the differentiation of measured
+outputs.
+4) Itavoidscancellationofunstablepoles/zeros.
+5) Thestabilityofthesystemcanbebrokendownintotwo
+independentparts:statefeedback,andobserverandlow-
+passfilter.
+Guidelines for the selection of the low-pass filter are given,
+based on an examination of simulation results, and a design
+methodforthestateobserverispresented,basedontheconcept
+of perfect regulation. The validity of the method was demon-
+stratedusingthespeedcontrolofarotationalcontrolsystemas
+anexample.
+It is also worth mentioning that the discussion in this paper
+wasrestrictedtotheSISOcasetokeepthedescriptionsimple.
+However, the results obtained are easy to extend to the multi-
+inputmulti-outputcase.
+REFERENCES
+[1] M.CorlessandJ.Tu,“Stateandinputestimationforaclassofuncertain
+systems,”Automatica,vol.34,no.6,pp.757–764,1998.
+[2] M.HouandR.J.Patton,“Optimalfilteringforsystemswithunknown
+inputs,” IEEE Trans. Autom. Control, vol. 43, no. 3, pp. 445–449,
+Mar.1998.
+[3] J.-L.Chang,“Applyingdiscrete-timeproportionalintegralobserversfor
+stateanddisturbanceestimations,”IEEETrans.Autom.Control,vol.51,
+no.5,pp.814–818,May2006.
+Fig. 12. Experimental results. (a) Disturbance. (b) Control results with- [4] F.-J. Lin and P.-H. Shen, “Robust fuzzy neural network sliding-mode
+out disturbance estimation. (c) Control results with disturbance estimation. controlfortwo-axismotioncontrolsystem,”IEEETrans.Ind.Electron.,
+(d)Powerspectraldensity. vol.53,no.4,pp.1209–1225,Jun.2006.
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
+===== PAGE 10 =====
+SHEetal.:IMPROVINGDISTURBANCE-REJECTIONPERFORMANCEBASEDONANEIDAPPROACH 389
+[5] M. Sun, Y. Wang, and D. Wang, “Variable-structure repetitive control: MingxingFangreceivedtheB.S.andM.S.degrees
+A discrete-time strategy,” IEEE Trans. Ind. Electron., vol. 52, no. 2, insciencefromtheAnhuiNormalUniversity,Wuhu,
+pp.610–616,Apr.2005. China, in 1995 and 2003, respectively. He is cur-
+[6] G. Cheng and K. Peng, “Robust composite nonlinear feedback control rently working toward the Ph.D. degree in control
+withapplicationtoaservopositioningsystem,”IEEETrans.Ind.Elec- engineeringintheSchoolofInformationScienceand
+tron.,vol.54,no.2,pp.1132–1140,Apr.2007. Engineering, Central South University, Changsha,
+[7] K.Ohnishi,N.Matsui,andY.Hori,“Estimation,identification,andsen- China.
+sorless control in motion control system,” Proc. IEEE, vol. 82, no. 8, HehasbeenworkingwiththeCollegeofPhysics
+pp.1253–1265,Aug.1994. and Electronic Information, Anhui Normal Uni-
+[8] S.Katsura,K.Ohnishi,andK.Ohishi,“Transmissionofforcesensation versity since 1995. His research interests include
+byenvironmentquarrierbasedonmultilateralcontrol,”IEEETrans.Ind. mechatronicsandtheapplicationofcontroltheory.
+Electron.,vol.54,no.2,pp.898–906,Apr.2007.
+[9] C.-S. Liu and H. Peng, “Inverse-dynamics based state and disturbance
+observersforlineartime-invariantsystems,”Trans.ASME,J.Dyn.Syst.
+Meas.Control,vol.124,no.3,pp.375–381,2002.
+[10] Y. Xiong and M. Saif, “Sliding mode observer for nonlinear uncertain
+systems,”IEEETrans.Autom.Control,vol.46,no.12,pp.2012–2017,
+Dec.2001.
+[11] X.Chen,T.Fukuda,andK.D.Young,“Anewnonlinearrobustdistur- YasuhiroOhyama(M’96)receivedtheB.S.,M.S.,
+banceobserver,”Syst.ControlLett.,vol.41,no.3,pp.189–199,2000.
+and Ph.D. degrees in engineering from the Tokyo
+[12] J.-H.She,Y.Ohyama,andM.Nakano,“Anewapproachtotheestimation InstituteofTechnology,Tokyo,Japan,in1980,1982,
+andrejectionofdisturbancesinservosystems,”IEEETrans.ControlSyst.
+and1985,respectively.
+Technol.,vol.13,no.3,pp.378–385,May2005.
+Heworkedondevelopingcontrollersforindustrial
+[13] W. S. Levine, The Control Handbook. Boca Raton, FL: CRC Press, robots and on CAD systems for control design as
+1996. theDirectorofAdvancedControlLaboratory,Inc.,
+[14] L.R.Hunt,G.Meyer,andR.Su,“Noncausalinversesforlinearsystems,” Tokyo,from1985to1991.HeiscurrentlyaProfes-
+IEEETrans.Autom.Control,vol.41,no.4,pp.608–611,Apr.1996.
+sorwiththeSchoolofBionics,TokyoUniversityof
+[15] T.Umeno,T.Kaneko,andY.Hori,“Robustservosystemdesignwithtwo Technology,Tokyo,wherehedoesresearchonthe
+degreesoffreedomanditsapplicationtonovelmotioncontrolofrobot applicationofcontroltheory,robotics,andengineer-
+manipulators,”IEEETrans.Ind.Electron.,vol.40,no.5,pp.473–485,
+ingeducation.
+Oct.1993. Dr.OhyamaisamemberoftheSocietyofInstrumentandControlEngineers
+[16] S.Komada,N.Machii,andT.Hori,“Controlofredundantmanipulators andtheInstituteofElectricalEngineersofJapan.
+consideringorderofdisturbanceobserver,”IEEETrans.Ind.Electron.,
+vol.47,no.2,pp.413–420,Apr.2000.
+[17] K. Zhou, J. C. Doyle, and K. Glover, Robust and Optimal Control.
+EnglewoodCliffs,NJ:Prentice-Hall,1996.
+[18] B.D.O.AndersonandJ.B.Moore,OptimalControl—LinearQuadratic
+Methods. EnglewoodCliffs,NJ:Prentice-Hall,1989.
+[19] H. Kwakernaak and R. Sivan, “The maximally achievable accuracy of
+linearoptimalregulatorsandlinearoptimalfilters,”IEEETrans.Autom.
+Control,vol.AC-17,no.1,pp.79–86,Feb.1972. HiroshiHashimoto(M’93)receivedthePh.D.de-
+[20] H.Kimura,“Anewapproachtotheperfectregulationandthebounded greeinengineeringfromWasedaUniversity,Tokyo,
+peaking in linear multivariable control systems,” IEEE Trans. Autom. Japan,in1990.
+Control,vol.AC-26,no.1,pp.253–270,Feb.1981. He is currently an Associate Professor with the
+[21] K.SugiuraandY.Hori,“Vibrationsuppressionin2-and3-masssystem School of Bionics, Tokyo University of Technol-
+basedonthefeedbackofimperfectderivativeoftheestimatedtorsional ogy,Tokyo,wherehedoesresearchonautonomous-
+torque,”IEEETrans.Ind.Electron.,vol.43,no.1,pp.56–64,Feb.1996. distributed-cooperativerobots,cyberneticinterfaces,
+[22] F.L.Lewis,AppliedOptimalControlandEstimation—DigitalDesignand visionsystems,welfaretechnology,ande-learning.
+Implementation. EnglewoodCliffs,NJ:Prentice-Hall,1992. Dr. Hashimoto is a member of the Society of
+[23] SignalProcessingToolboxUser’sGuideVersion6,TheMathWorksInc., InstrumentandControlEngineersandtheInstitute
+Natick,MA,2005. ofElectricalEngineersofJapan.
+Min Wu received the B.S. and M.S. degrees in
+Jin-Hua She (M’94) received the B.S. degree engineering from the Central South University,
+in engineering from the Central South University, Changsha,China,in1983and1986,respectively.He
+Changsha,China,in1983,andtheM.S.andPh.D. receivedthePh.D.degreeinengineeringfromTokyo
+degrees in engineering from the Tokyo Institute InstituteofTechnology,Tokyo,Japan,in1999.
+of Technology, Tokyo, Japan, in 1990 and 1993, Since July 1986, he has been with the Central
+respectively. SouthUniversity,whereheiscurrentlyaProfessor
+In1993,hewaswiththeDepartmentofMecha- of automatic control engineering in the School of
+tronics, School of Engineering, Tokyo University InformationScienceandEngineering.HewasaVis-
+of Technology, Hachioji, Tokyo, Japan, and in iting Scholar at the Department of Electrical En-
+April2004,hetransferredtotheUniversity’sSchool gineering, Tohoku University, Sendai, Japan, from
+ofBionics,whereheiscurrentlyanAssociatePro- 1989to1990,andaVisitingResearchScholarattheDepartmentofControl
+fessor.Hiscurrentresearchinterestsincludetheapplicationofcontroltheory, andSystemsEngineering,TokyoInstituteofTechnology,Tokyo,from1996
+repetitivecontrol,processcontrol,Internet-basedengineeringeducation,and to1999.Hiscurrentresearchinterestsarerobustcontrolanditsapplication,
+robotics. processcontrol,andintelligentcontrol.
+Dr. She is a member of the Society of Instrument and Control Engineers Dr. Wu is a member of the Nonferrous Metals Society of China and the
+and the Institute of Electrical Engineers of Japan. He received the Control ChinaAutomationAssociation.HereceivedtheBestPaperAwardattheInter-
+EngineeringPracticePaperPrizeoftheInternationalFederationofAutomatic nationalFederationofAutomaticControlin1999(jointlywithM.Nakanoand
+Controlin1999(jointlywithM.WuandM.Nakano). J.-H.She).
+Authorized licensed use limited to: YANGZHOU UNIVERSITY. Downloaded on November 24,2026 at 10:03:06 UTC from IEEE Xplore. Restrictions apply.
