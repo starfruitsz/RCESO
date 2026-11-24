@@ -49,6 +49,7 @@ cfg = dict(n_ref=600.0, T=0.1, T_adapt=True, T_filt=50e-3, fci=500.0, beta3=_B3,
            sig_n=NC.NOISE_LAB["sig_n_rpm"],
            sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
            eso_law="fal", eso_a=0.75, eso_delta=0.10, eso_lam=_LAM,
+           b0_scale=float(os.environ.get("B0SCALE", "1.0")),
            rc_bp=5.0, b3_min=_B3, b3_max=_B3,
            tl_fault=FAULT, J_true=9.95e-5)
 
@@ -77,7 +78,8 @@ if use_j:
                j_recheck_nmin=2, j_recheck_t0=T0, j_recheck_f_auto=True, j_recheck_f_q=6.0,
                j_recheck_f_alpha=0.35, j_recheck_f_min=50.0, j_recheck_f_max=110.0,
                j_recheck_amp_auto=True, j_recheck_gate=True, j_recheck_gate_ac=10.0,
-               j_recheck_gate_step=10.0, j_recheck_apply=True, j_recheck_alpha=1.0,
+               j_recheck_gate_step=10.0, j_recheck_alpha=1.0,
+               j_recheck_apply=(os.environ.get("APPLY", "1") == "1"),
                j_recheck_btau=BTAU, j_b0_direct=True, j_validate=False,
                j_amed=(os.environ.get("AMED", "1") == "1"),
                j_b0_onoff=(os.environ.get("ONOFF", "0") == "1"),
