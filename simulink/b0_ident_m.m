@@ -1,4 +1,4 @@
-function [b0out, duout, bqout] = b0_ident_m(iq, u, ge1, e1, v)
+function [b0out, duout, bqout, dD, dU, dQ] = b0_ident_m(iq, u, ge1, e1, v)
 %#codegen
 % 两段式高频注入 b0 在线辨识 —— MATLAB 版（配合 MATLAB Function 块，无需 C 编译器）
 % 与 b0_ident.c 逐行等价：R2018b 及以后版本均可用
@@ -39,13 +39,14 @@ mu     = 0.35;      % 基线滑动速率
 cyc_nseg = cyc*nseg;   % 移植时人工确认该值为整数（65 Hz x 0.2 s = 13）
 persistent init ph acc nacc seg active tick nxtick tstart d0 u0 q0 t0
 persistent b0v goal gv base bvalid nest blast nblast nburst frozen
-persistent pdC sdC lpa b1 b2 bc bqlast
+persistent pdC sdC lpa b1 b2 bc bqlast dDlast dUlast dQlast
 if isempty(init)
     init = 1; ph = 0;
     acc = zeros(1,14); nacc = 0; seg = 0; active = 0;   % 11-14: SDFT(G1(e1)), SDFT(G2(e1))
     tick = 0; nxtick = round(t_start/dT); tstart = 0;   % 起跑延时后再注入
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
     b0v = b0_init; goal = b0_init; gv = 0; bqlast = 0;
+    dDlast = 0; dUlast = 0; dQlast = 0;
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,12); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
@@ -123,6 +124,9 @@ if active
                 bq = abs(num/den);              % 取模长：对相位误差免疫
                 bq = min(max(bq, b0lo), b0hi);
                 bqlast = bq;                       % 诊断输出：本窗原始估计
+                dDlast = abs(num);                 % |Δd̂ + b0Δu|（分子）
+                dUlast = abs(Uc - u0);             % |Δu|
+                dQlast = abs(den);                 % |Δĩ|
                 if upd_on == 0
                     % 识别关闭：只算 bq，不更新 b0（b0 停在 b0_init）
                 elseif ~bvalid
@@ -166,4 +170,7 @@ end
 b0out = b0v;
 duout = du;
 bqout = bqlast;
+dD = dDlast;
+dU = dUlast;
+dQ = dQlast;
 end
