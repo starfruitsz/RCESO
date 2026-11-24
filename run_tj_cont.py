@@ -91,7 +91,10 @@ if use_j:
                j_b0_new=(os.environ.get("JB0NEW", "0") == "1"),
                j_b0_alg=(os.environ.get("JB0ALG", "0") == "1"),
                j_b0_alt=(os.environ.get("JB0ALT", "0") == "1"),
-               j_b0_tcorr=(os.environ.get("TCORR", "0") == "1"))
+               j_b0_tcorr=(os.environ.get("TCORR", "0") == "1"),
+               j_b0_final=(os.environ.get("B0FINAL", "0") == "1"),
+               j_b0_lo=float(os.environ.get("B0LO", "10")),
+               j_b0_hi=float(os.environ.get("B0HI", "5000")))
 
 t0 = time.time()
 Y = sim_inv(t, TL, cfg)
