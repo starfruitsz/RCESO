@@ -16,3 +16,6 @@ simulink/build/
 *.mexw64
 *.obj
 *.ipch
+
+# MATLAB 自动保存
+*.asv
