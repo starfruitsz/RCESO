@@ -469,6 +469,7 @@ def sim_inv(t, TL, cfg=None):
     th = 0.0
     z1 = z2 = v = 0.0
     u = 0.0
+    _inj_now = 0.0
     int_d = int_q = 0.0
     vd_cmd = vq_cmd = 0.0
     duty = np.array([0.5, 0.5, 0.5])
@@ -517,6 +518,7 @@ def sim_inv(t, TL, cfg=None):
     y_o = np.zeros(no); id_o = np.zeros(no); iq_o = np.zeros(no)
     ia_o = np.zeros(no); vd_o = np.zeros(no); vq_o = np.zeros(no)
     u_o = np.zeros(no); vqc_o = np.zeros(no); iqr_o = np.zeros(no)
+    inj_o = np.zeros(no)                      # 注入分量（含波形），供三波对比""
     fl_o = np.zeros(no)
     dm_o = np.zeros(no)
     sg_o = np.zeros(no)
@@ -908,6 +910,7 @@ def sim_inv(t, TL, cfg=None):
             else:
                 _yref = 1.0
             _tk = k * dt
+            _inj_now = 0.0
             _fb = (_yref - z1n) if u_z1 else (_yref - y_m)
             u = (kpe * _fb - z2n - vn) / _B0e
             # ---- ESO/DO 在线 J 辨识（实验）：DO 估 T_L，梯度更新 J，慢更新 b0 ----
@@ -1073,7 +1076,8 @@ def sim_inv(t, TL, cfg=None):
                             _dsv = (2.0 / math.pi) * math.asin(math.sin(_ph))
                         else:
                             _dsv = math.sin(_ph)
-                        u += _jrec_amp_use * _jampf * _dsv
+                        _inj_now = _jrec_amp_use * _jampf * _dsv
+                        u += _inj_now
                         _jrec_te_c += Te * math.cos(_ph); _jrec_te_s += Te * math.sin(_ph)
                         _jrec_w_c += w_enc * math.cos(_ph); _jrec_w_s += w_enc * math.sin(_ph)
                         _jrec_iq_c += idq[1] * math.cos(_ph); _jrec_iq_s += idq[1] * math.sin(_ph)
@@ -1364,12 +1368,13 @@ def sim_inv(t, TL, cfg=None):
             y_o[j] = w / w_ref; id_o[j] = idq[0]; iq_o[j] = idq[1]
             ia_o[j] = ia; vd_o[j] = vd; vq_o[j] = vq
             u_o[j] = u; vqc_o[j] = vq_cmd; iqr_o[j] = u * I_BASE
+            inj_o[j] = _inj_now
             tl_o[j] = _tl_tot                                 # 出图用：含负载噪声的总负载
             sg_o[j] = sg_now
             b3_o[j] = _b3_now; a_o[j] = _A_now; es_o[j] = _es_delta
     tt = t[::dec]
     m = min(len(tt), no)
-    return dict(t=tt[:m], y=y_o[:m], id=id_o[:m], iq=iq_o[:m], ia=ia_o[:m],
+    return dict(t=tt[:m], y=y_o[:m], id=id_o[:m], iq=iq_o[:m], ia=ia_o[:m], inj=inj_o[:m],
                 vd=vd_o[:m], vq=vq_o[:m], u=u_o[:m], vqc=vqc_o[:m],
                 iqr=iqr_o[:m], fl=fl_o[:m], dm=dm_o[:m], tl=tl_o[:m], sg=sg_o[:m],
                 b3=b3_o[:m], amp=a_o[:m], es=es_o[:m],
