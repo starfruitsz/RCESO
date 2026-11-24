@@ -10,9 +10,19 @@
 \contentsline {section}{\numberline {4}不对中：时变刚度与谐波生成}{5}{section.4}%
 \contentsline {subsection}{\numberline {4.1}核心机制：静态刚度 + 时变附加刚度}{5}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}文献}{6}{subsection.4.2}%
-\contentsline {section}{\numberline {5}傅里叶论证：从周期性到正弦叠加}{6}{section.5}%
-\contentsline {section}{\numberline {6}机械故障如何进入转矩通道}{6}{section.6}%
-\contentsline {section}{\numberline {7}等效载荷与分离辨识（方法层补充）}{6}{section.7}%
-\contentsline {section}{\numberline {8}开放获取的补充文献}{7}{section.8}%
-\contentsline {section}{\numberline {9}汇总：论证链与文献的对应}{7}{section.9}%
-\contentsline {section}{\numberline {10}结论}{8}{section.10}%
+\contentsline {section}{\numberline {5}故障等效负载的构成}{6}{section.5}%
+\contentsline {subsection}{\numberline {5.1}分解原则：按故障源，而非按物理机制}{6}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}两源分解式}{6}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}源内机理说明}{7}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}与已有分离范式的对应}{8}{subsection.5.4}%
+\contentsline {subsubsection}{\numberline {5.4.1}频率指纹：本分解可分的依据}{8}{subsubsection.5.4.1}%
+\contentsline {paragraph}{可逐字引用的原文}{8}{paragraph*.9}%
+\contentsline {paragraph}{证据强度说明}{8}{paragraph*.10}%
+\contentsline {subsection}{\numberline {5.5}与实现代码的对应}{9}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}小结}{9}{subsection.5.6}%
+\contentsline {section}{\numberline {6}傅里叶论证：从周期性到正弦叠加}{10}{section.6}%
+\contentsline {section}{\numberline {7}机械故障如何进入转矩通道}{10}{section.7}%
+\contentsline {section}{\numberline {8}等效载荷与分离辨识（方法层补充）}{11}{section.8}%
+\contentsline {section}{\numberline {9}开放获取的补充文献}{11}{section.9}%
+\contentsline {section}{\numberline {10}汇总：论证链与文献的对应}{12}{section.10}%
+\contentsline {section}{\numberline {11}结论}{12}{section.11}%

@@ -7,6 +7,7 @@
 \usepackage{enumitem}
 \usepackage{caption}
 \usepackage{array}
+\usepackage{multirow}
 \captionsetup{font=small,labelfont=bf}
 \linespread{1.18}
 \setlist{itemsep=2pt,topsep=3pt}
@@ -275,6 +276,250 @@ Xu \& Marangoni (1994), Part II, \emph{Experimental validation}\(\dagger\)
 它建立的是\textbf{电机--柔性联轴器--转子}整体系统的理论模型，
 且\textbf{同时包含不对中与不平衡}两种故障，
 这正对应三合一故障中机械部分的建模需求。
+
+\section{故障等效负载的构成}
+\label{sec:decomp}
+
+\subsection{分解原则：按故障源，而非按物理机制}
+
+等效负载可以沿多种维度分解，但不同维度对应不同的可辨识性前提。
+本文采用\textbf{按故障源分解}，理由有三：
+
+\begin{enumerate}[label=(\arabic*)]
+\item \textbf{与已有分离范式一致}。多故障转子系统的参数辨识文献以“故障源”为分离单元
+（不平衡参数与不对中参数分别辨识），本文沿用同一粒度。
+\item \textbf{两个源具有不同的频率指纹}。不平衡锁定基频，不对中同时含基频与二阶谐波，
+因而在频谱上天然可分，不需要额外激励即可区分。
+\item \textbf{与可标定参数的数量相匹配}。分解越细，需要独立确定的系数越多；
+而驱动侧可测信号仅转速一项，自由度有限。按物理机制拆到五项会使部分参数不可辨识。
+\end{enumerate}
+
+\subsection{两源分解式}
+
+作用于转速环的等效负载转矩分解为两个故障源之和：
+\begin{equation}
+\boxed{\;T_{\rm eq}(t)=\underbrace{T_{\rm unb}(t)}_{\text{不平衡源},\;1\times}
++\underbrace{T_{\rm mis}(t)}_{\text{不对中源},\;1\times,\,2\times}\;}
+\end{equation}
+
+两源各自的源内构成为
+\begin{align}
+T_{\rm unb}(t)&=\underbrace{M\,g\,e\,\sin\theta}_{T_u^{g}\;\text{重力矩}}
++\underbrace{\mu_b r_b M e\,\omega^2\cos\theta}_{T_u^{f}\;\text{摩擦调制}},\\
+T_{\rm mis}(t)&=\underbrace{M\,g\,l\sin\beta\,\sin\theta}_{T_m^{g}\;\text{重力矩}}
++\underbrace{T_0\!\left[\frac{1-\sin^2\beta\cos^2\theta}{\cos\beta}-1\right]}_{T_m^{H}\;\text{Hooke 联轴器}}
++\underbrace{\tfrac12 e^2(k_x-k_y)\sin 2\theta}_{T_k\;\text{刚度各向异性}},
+\end{align}
+其中 \(\theta=\omega_{\rm rot}t\) 为机械转角。
+
+此外还有两个\textbf{不进入转矩通道}的量，必须与上式严格区分：
+\begin{align}
+\text{离心力（径向）} &: \quad F_u=M e\,\omega^2, \\
+\text{弯曲/陀螺力矩} &: \quad |I_{t,\rm eff}-I_p|\,\omega^2\sin\beta\cos\beta .
+\end{align}
+它们作用于轴承与横向振动通道，对绕轴转矩的贡献为零。
+
+\subsection{源内机理说明}
+
+\begin{table}[h]
+\centering
+\caption{两源及其源内机理}
+\small
+\begin{tabular}{@{}p{1.7cm}p{1.7cm}p{3.0cm}ccp{1.3cm}@{}}
+\toprule
+源 & 机理 & 表达式 & 阶次 & 保守? & 量级 \\
+\midrule
+\multirow{2}{*}{\(T_{\rm unb}\)} & 重力矩 & \(Mge\sin\theta\) & \(1\times\) & 是 & \(10^{-4}\) \\
+ & 摩擦调制 & \(\mu_b r_bMe\omega^2\cos\theta\) & \(1\times\) & 否 & \(10^{-6}\) \\
+\midrule
+\multirow{3}{*}{\(T_{\rm mis}\)} & 重力矩 & \(Mg\,l\sin\beta\sin\theta\) & \(1\times\) & 是 & \(10^{-4}\) \\
+ & Hooke 联轴器 & 见式 (11) & \(2\times\) & 是 & \(T_0\beta^2\) \\
+ & 刚度各向异性 & \(\tfrac12e^2(k_x-k_y)\sin2\theta\) & \(2\times\) & 是 & \(10^{-4}\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{关于表中公式的出处}：上列五个表达式均由本文按力学与能量法直接导出
+（重力矩为力的力矩，Hooke 项为万向节运动学，刚度项为二次型势能的转角导数），
+\textbf{不是引自文献}。文献支撑的是各机理的\textbf{物理存在性}，而非这些具体表达式：
+
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{重力矩}：水平轴上偏移质心的重力矩与复摆同形（\S\ref{sec:gravity}）。
+  Kallesøe (2007) 将重力项显式写入转动系统运动方程（题目即含 “including gravity”）；
+  Chung \& Jang (2003) 的自动平衡球方程含同形的 \(mgr\sin\theta\) 项。【均为题录】
+\item \textbf{摩擦调制}：径向载荷经摩擦系数折算为阻力矩，是摩擦学的基本关系。
+  Jin \& Liu (2022) 明确将不平衡力写作 \(m_e d\,\omega^2\) 并指出其随转速变化。【原文】
+\item \textbf{Hooke 联轴器}：单万向节的非匀速传动
+  \(\omega_2/\omega_1=\cos\beta/(1-\sin^2\beta\cos^2\theta)\) 为机构学经典结果，
+  转矩按功率守恒取倒数关系，故产生 \(2\times\) 调制。
+\item \textbf{刚度各向异性}：平行不对中下偏移矢量随转角旋转，
+  弹性势能为二次型，其转角导数为 \(2\times\)；各向同性时该项消失。
+  Lees (2007) 以静态刚度与附加时变刚度（SCS + ACS）解释其生成机制。【题录】
+\end{itemize}
+
+\subsection{与已有分离范式的对应}
+
+\begin{table}[h]
+\centering
+\caption{已有的四种分离轴与本文的选择}
+\small
+\begin{tabular}{@{}p{2.3cm}p{3.9cm}p{3.4cm}p{2.2cm}@{}}
+\toprule
+分离轴 & 代表文献 & 拆成什么 & 本文 \\
+\midrule
+\textbf{按故障源} & Kumar \& Tiwari (2021), \textbf{MSSP} 152:107454（67 次）
+& 不平衡参数与不对中参数 & \textbf{采用} \\
+按载荷位置 & Bachschmid et al. (2002), \textbf{JSV} 254:327--366（162 次）
+& 各节点上的未知载荷向量 & 不适用 \\
+按信号通道 & Wu \& Habetler (2005), IEMDC
+& 负载转矩振荡与转子故障 & 目的不同 \\
+按响应频率 & Ma et al. (2026), \textbf{Machines} 14:1337
+& 基频 \(N_1,N_2\) 与二阶 \(2N_1\) & 作为验证判据 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+“按载荷位置”不适用于本文，是因为该范式依赖沿轴多个测点的振动响应，
+而驱动侧仅可测转速与电流，不具备空间分辨率。
+“按信号通道”解决的是\textbf{区分}问题（判断异常来自负载还是来自电机本体），
+与本文的\textbf{分解}目标不同。
+“按响应频率”则为本分解提供了直接的实验判据，见下。
+
+\subsubsection{频率指纹：本分解可分的依据}
+
+“不平衡激发基频、不对中激发二阶及以上谐波”这一判据，在顶级期刊中有长期、
+独立的证据积累，并非单一来源。按证据类型整理如下。
+
+\begin{table}[h]
+\centering
+\caption{“不平衡 $1\times$ / 不对中 $2\times$”判据的顶刊证据}
+\small
+\begin{tabular}{@{}p{5.6cm}p{2.9cm}rp{3.2cm}@{}}
+\toprule
+文献 & 出处 & 被引 & 证据类型 \\
+\midrule
+Jalan \& Mohanty (2009), \emph{Model based fault diagnosis of a rotor--bearing system for misalignment and unbalance}
+& \textbf{JSV} 327:604--622 & 228 & 不对中与不平衡联合建模 \\
+Xu \& Marangoni (1994), Part I, \emph{Theoretical model and analysis}
+& \textbf{JSV} 176(5):663--679 & 209 & 电机--联轴器--转子，含两故障 \\
+Patel \& Darpe (2009), \emph{Experimental investigations on vibration response of misaligned rotors}
+& \textbf{MSSP} 23(7):2236--2252 & 202 & 不对中谐波实验 \\
+Sekhar \& Prabhu (1995), \emph{Effects of coupling misalignment}
+& \textbf{JSV} 185(4):655--671 & 190 & $2\times$ 主导的经典依据 \\
+Bachschmid et al. (2002), \emph{Identification of multiple faults}
+& \textbf{JSV} 254(2):327--366 & 162 & 等效载荷多故障辨识 \\
+Lees (2007), \emph{Misalignment in rigidly coupled rotors}
+& \textbf{JSV} 305(1--2):261--271 & 124 & 时变刚度生成谐波的机制 \\
+Al-Hussain (2003), \emph{Dynamic stability \dots\ angular misalignment}
+& \textbf{JSV} 266(2):217--234 & 102 & 角不对中双转子 \\
+\textbf{Ma et al. (2025)}, \emph{Vibration characteristics of rotor system with coupling misalignment and disc-shaft nonlinear contact}
+& \textbf{MSSP} 223:111839 & 30 & 联轴器不对中振动特性 \\
+\textbf{Yang et al. (2025)}, \emph{Rotor system with combined misalignment and eccentric faults}
+& \textbf{MSSP} 240:113332 & 5 & \textbf{不对中+偏心复合，理论+实验} \\
+\midrule
+Pennacchi \& Vania (2004), \emph{Diagnosis and model based identification of a coupling misalignment}
+& \textbf{Shock and Vibration} 12:293--308 & 38 & 等效载荷法辨识不对中 \\
+Ma et al. (2026), \emph{Dual-rotor with coexisting unbalance, misalignment and rub-impact}
+& \textbf{Machines} 14:1337 & --- & 可直接获取全文 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+其中前九篇发表于 \textbf{JSV} 或 \textbf{MSSP}，均为本领域顶级刊物。
+
+\paragraph{可逐字引用的原文}
+
+Ma et al. (2026) 的实验与仿真结论（全文已归档）：
+
+\begin{quote}
+\small\itshape
+“Dual-rotor test-rig experiments validate the simulation findings: \textbf{unbalance excites
+fundamental components, misalignment amplifies 2N1 harmonics}, rub-impact generates combined
+frequencies, and coupled faults cause feature aliasing and amplitude modulation.”
+\hfill —— Ma et al. (2026), \emph{Machines} 14:1337, 摘要【原文】
+\end{quote}
+
+\begin{quote}
+\small\itshape
+“When misalignment is introduced solely at the rear support of the low-pressure turbine,
+\dots\ \textbf{Only the second-order harmonic component corresponding to the low-pressure
+rotating frequency (2N1) is present within the amplitude spectrum}, and the shaft orbit
+takes a regular elliptical shape.”
+\hfill —— Ma et al. (2026), \S3.2【原文】
+\end{quote}
+
+Pennacchi \& Vania (2004) 摘要明确指出以等效载荷法处理联轴器角不对中：
+
+\begin{quote}
+\small\itshape
+“an experimental case study that concerns a gas turbine-generator unit of a small power plant
+whose rotor-train was affected by an \textbf{angular misalignment in a flexible coupling},
+caused by a wrong machine assembling. The fault type is identified by means of the
+\textbf{orbit shape analysis}, then the \textbf{equivalent bending} \dots”
+\hfill —— Pennacchi \& Vania (2004), \emph{Shock and Vibration} 12:293--308, 摘要【原文】
+\end{quote}
+
+\paragraph{证据强度说明}
+
+两类结论的证据强度不同，引用时应区别对待：
+
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{不平衡只激发基频（\(1\times\)）}：这是刚体动力学的\textbf{直接推论}
+（\S\ref{sec:unb} 的离心力推导），也是振动监测领域的\textbf{教科书级判据}，
+  不需依赖某一篇论文，可引 Friswell et al. (2010) 专著。
+\item \textbf{不对中激发 \(2\times\) 及高阶}：此为\textbf{实验与建模共同支持的经验规律}，
+  成因由 Lees (2007) 的时变刚度机制解释。
+  上表中 Sekhar \& Prabhu (1995, 190 次)、Patel \& Darpe (2009, 202 次)
+  与 Ma et al. (2026) 三处独立来源结论一致，可视为已确立。
+\end{itemize}
+
+\noindent
+即：\textbf{不平衡只激发基频，不对中额外激发二阶谐波}。
+这与式 (9) 的源内构成一致——\(T_{\rm unb}\) 全部为 \(1\times\)，
+\(T_{\rm mis}\) 同时含 \(1\times\) 与 \(2\times\)。
+因此两源在频谱上可分离，本文的分解粒度与可观测性相匹配。
+
+\subsection{与实现代码的对应}
+
+\begin{table}[h]
+\centering
+\caption{两源与 \texttt{fault\_torque.py} 函数的对应}
+\small
+\begin{tabular}{@{}llp{5.4cm}@{}}
+\toprule
+源 / 机理 & 函数 & 说明 \\
+\midrule
+\(T_{\rm unb}\)：重力矩 & \texttt{unbalance\_torque} & 主项，\(\mu_b=0\) 时只剩重力项 \\
+\(T_{\rm unb}\)：摩擦调制 & \texttt{unbalance\_torque} & 需同时给 \texttt{mu\_b}、\texttt{r\_b} \\
+\(T_{\rm mis}\)：重力矩 + Hooke & \texttt{misalign\_torque} & \texttt{hooke=True} 且 \(T_0\neq0\) 时启用 Hooke 项 \\
+\(T_{\rm mis}\)：刚度各向异性 & \texttt{parallel\_torque} & \(\propto e^2(k_x-k_y)/2\) \\
+\(F_u\)（不进转矩） & \texttt{unbalance\_force} & 仅用于轴承/振动通道 \\
+弯曲力矩（不进转矩） & \texttt{misalign\_moment} & 由轴承弯矩承担 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{放大系数说明}：上列物理量级仅 \(10^{-4}\) N\(\cdot\)m，
+台架复现需乘等效放大系数 \(\kappa\gg1\)（代码中分别取 580、67、100）。
+论文中\textbf{必须}注明此处为“等效放大”，否则数值不能与物理量直接比较。
+
+\subsection{小结}
+
+\begin{enumerate}[label=(\arabic*)]
+\item 本文按\textbf{故障源}（不平衡、不对中）分解等效负载，与多故障参数辨识文献的分离粒度一致。
+\item 两源的频率指纹不同：\(T_{\rm unb}\) 仅 \(1\times\)，\(T_{\rm mis}\) 含 \(1\times\) 与 \(2\times\)，
+  因而按源分解在频谱上可分。
+\item 源内的五种机理只作\textbf{物理说明}，其表达式为本文推导，不承担对文献的引用；
+  文献支撑的是各机理的物理存在性。
+\item 五个机理分量中四个保守，只产生脉动；仅摩擦调制项非保守，构成附加阻尼。
+\item \textbf{未解决项}：上述分解的定量部分尚未经实验标定。
+  五个机理分量的相对权重（尤其摩擦项在 \(600\) r/min 时仅为重力项的 \(1/25\)）需实验确定，
+  在此之前该分解宜视为\textbf{定性框架}而非定量模型。
+\end{enumerate}
 
 \section{傅里叶论证：从周期性到正弦叠加}
 \label{sec:fourier}
