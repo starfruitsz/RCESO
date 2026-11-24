@@ -766,7 +766,8 @@ def sim_inv(t, TL, cfg=None):
                         _jrec_bgoal = None
                     if _jrec_b0final:
                         # ===== 定稿更新律（b0_ident_m 的等价实现）=====
-                        _bq = min(max(_btm, 0.5 * B0), 2.0 * B0)      # 限幅
+                        _bq = min(max(_btm, float(cfg.get("j_b0_lo", 0.5 * B0))),
+                                  float(cfg.get("j_b0_hi", 2.0 * B0)))  # 限幅（可配）
                         if not _jf_valid:                             # 首次：经低通
                             _jf_base = _bq; _jf_valid = True
                             _jrec_bgoal = _bq; _jf_nest = 1

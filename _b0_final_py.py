@@ -23,7 +23,7 @@ BASE = dict(n_ref=600.0, T=0.1, T_adapt=True, T_filt=50e-3, fci=500.0, beta3=400
             Q0=0.98, tau0=20e-3, seed_i=20261018,
             i_noise_peak=NC.NOISE_LAB["i_noise_peak"],
             sig_n=NC.NOISE_LAB["sig_n_rpm"], sig_T_nm=NC.NOISE_LAB["sig_T_nm"],
-            eso_law="fal", eso_a=0.75, eso_delta=0.10, eso_lam=10.0,
+            eso_law="linear",          # 线性 ESO：反演式严格成立（fal 在大误差段不等价）
             rc_bp=5.0, b3_min=4000.0, b3_max=4000.0, J_true=9.95e-5,
             a_ref=1.0, log_eso=True,
             j_recheck=True, j_recheck_period=5.0, j_recheck_len=0.4,
@@ -33,7 +33,9 @@ BASE = dict(n_ref=600.0, T=0.1, T_adapt=True, T_filt=50e-3, fci=500.0, beta3=400
             j_recheck_gate=False, j_recheck_apply=True, j_recheck_alpha=1.0,
             j_recheck_btau=50.0/75.36, j_b0_direct=True, j_validate=False,
             j_b0_new=True, j_b0_onoff=True, j_amed=False,
-            j_b0_final=True)          # ← 定稿更新律
+            j_b0_final=True,          # ← 定稿更新律
+            j_b0_lo=10.0, j_b0_hi=5000.0,   # 本算例 J_true=6.3×J_M，标称 643.7 远离真值 102
+            b0_scale=0.16)                  # 标称拉到 ~103（≈真值），与 FOC 的 −25% 失配可比
 
 CASES = [('正弦', {}), ('方波', dict(j_dith_sq=True)), ('三角', dict(j_dith_tri=True))]
 out = []

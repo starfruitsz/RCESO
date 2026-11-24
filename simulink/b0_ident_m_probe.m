@@ -45,9 +45,8 @@ if isempty(init)
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,4); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
-    kap2 = 0.10^(0.75-1.0);          % kappa2 = delta^(a-1)
-    b1 = 2*wo;                       % kappa1 = 1（a1=1）
-    b2 = wo*wo*kap2;                 % beta2 = wo^2*kappa2
+    b1 = 2*wo;                       % beta1 = 2*wo*kappa1，delta=1 时 kappa1=1
+    b2 = wo*wo;                      % beta2 = wo^2*kappa2，delta=1 时 kappa2=1
     sdC = (exp(1i*wh*dT) - 1) / dT;
     pdC = sdC + b1 + b2/sdC;
     tau = 50/kp;                     % b0 低通时间常数 = 50/kp = 0.663 s（与 C 版一致）
