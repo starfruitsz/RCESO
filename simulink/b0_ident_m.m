@@ -1,4 +1,4 @@
-function [b0out, duout] = b0_ident_m(iq, u, ge1, e1, v)
+function [b0out, duout, bqout] = b0_ident_m(iq, u, ge1, e1, v)
 %#codegen
 % 两段式高频注入 b0 在线辨识 —— MATLAB 版（配合 MATLAB Function 块，无需 C 编译器）
 % 与 b0_ident.c 逐行等价：R2018b 及以后版本均可用
@@ -8,8 +8,8 @@ f_inj  = 65;        % 注入频率 [Hz]：须为 5 Hz 整数倍，且约等于 6
 amp    = 0.118;     % 注入幅值 [pu]，上限 0.25
 wave   = 0;         % 注入波形：0=正弦 1=方波 2=三角（三者峰值均为 1）
 b0_init= 536.4;     % b0 初值：必须与控制器/ESO 用的标称一致
-b0lo   = 300;       % 硬下限（防发散）
-b0hi   = 900;       % 硬上限
+b0lo   = 1.0;       % 硬下限（诊断期临时放开）
+b0hi   = 5000;      % 硬上限
 wo     = 500;       % 观测器带宽 [rad/s]，必须与 ESO 一致
 kp     = 75.36;     % 转速环比例增益
 % ---- 反演用的增益由外部输入 ge1 提供（G(e1) 在块外计算）----
@@ -39,13 +39,13 @@ mu     = 0.35;      % 基线滑动速率
 cyc_nseg = cyc*nseg;   % 移植时人工确认该值为整数（65 Hz x 0.2 s = 13）
 persistent init ph acc nacc seg active tick nxtick tstart d0 u0 q0 t0
 persistent b0v goal gv base bvalid nest blast nblast nburst frozen
-persistent pdC sdC lpa b1 b2 bc
+persistent pdC sdC lpa b1 b2 bc bqlast
 if isempty(init)
     init = 1; ph = 0;
     acc = zeros(1,14); nacc = 0; seg = 0; active = 0;   % 11-14: SDFT(G1(e1)), SDFT(G2(e1))
     tick = 0; nxtick = round(t_start/dT); tstart = 0;   % 起跑延时后再注入
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
-    b0v = b0_init; goal = b0_init; gv = 0;
+    b0v = b0_init; goal = b0_init; gv = 0; bqlast = 0;
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,12); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
@@ -122,6 +122,7 @@ if active
             if abs(den) > 1e-9
                 bq = abs(num/den);              % 取模长：对相位误差免疫
                 bq = min(max(bq, b0lo), b0hi);
+                bqlast = bq;                       % 诊断输出：本窗原始估计
                 if upd_on == 0
                     % 识别关闭：只算 bq，不更新 b0（b0 停在 b0_init）
                 elseif ~bvalid
@@ -164,4 +165,5 @@ if active
 end
 b0out = b0v;
 duout = du;
+bqout = bqlast;
 end
