@@ -265,6 +265,7 @@ def sim_inv(t, TL, cfg=None):
     _jnew_yc = _jnew_ys = 0.0
     _jnew_n = 0
     _jnew_log = []
+    _jnew_bpv_log = []        # 逐窗原始估计 (t, bpv)，供与 MATLAB 的 bq 对照
     _jnew_list = []
     _jnew_pending = False
     # ---- 定稿更新律（与 b0_ident_m/C 一致）：预热·门控·中值·冻结 ----
@@ -694,6 +695,7 @@ def sim_inv(t, TL, cfg=None):
                                     _bpv = abs(((_dd - _d1) + _b1 * (_U - _U1))
                                                / (_QCp - _Q1))
                                     _bpv = min(max(_bpv, 0.02 * B0), 2.4 * B0)
+                                    _jnew_bpv_log.append((k * dt, _bpv))
                         elif _jalt and (_jprev is not None):
                             _d1, _U1, _T1, _b1, _Q1 = _jprev
                             if abs(_QCp - _Q1) > 1e-6:
@@ -1412,6 +1414,7 @@ def sim_inv(t, TL, cfg=None):
                 jhat=np.asarray(jhat_o), t_j=np.arange(len(jhat_o)) * 1e-3,
                 jstate=np.asarray(jstate_o),
                 b0e=np.asarray(b0e_o), lg=_lg, jnew=np.asarray(_jnew_log),
+                bpv=np.asarray(_jnew_bpv_log),
                 fd=np.asarray(_jrec_fd_o), abort=np.asarray(_jrec_abort_o), jval_log=_jrec_val_log,
                 # ---- J 应用后校验（状态 4）记录 ----
                 jval=dict(enable=bool(_j_val_on), rho=float(_jv_rho),
