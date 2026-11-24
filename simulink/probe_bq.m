@@ -18,7 +18,7 @@ for iv = 1:size(variants,1)
     kv = variants{iv,2};
     clear b0_ident_m_probe;
     for k = 1:N
-        [~, ~, bq(k)] = b0_ident_m_probe(iq(k), u(k), om(k), e1(k), v(k)*kv);
+        [~, ~, bq(k)] = b0_ident_m_probe(iq(k), u(k), e1(k), e1(k), v(k)*kv);   % ge1 = e1（线性）
     end
     idx = find([true; diff(bq) ~= 0]);
     vv = bq(idx(2:end));

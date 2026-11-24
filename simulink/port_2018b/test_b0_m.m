@@ -73,7 +73,7 @@ for k = 0:K-1
     Vre = Dr - real(pdC);
     Vim = Di - imag(pdC);
     v = Vre*c - Vim*s;
-    [b0, ~] = b0_ident_m(iq, u, om, e1, v);
+    [b0, ~] = b0_ident_m(iq, u, e1, e1, v);   % 线性 ESO：ge1 = e1
     if stop_s > 0 && tsec >= stop_s - dT && tsec < stop_s
         b0_at_stop = b0;                   % 停机段末尾读数
     end

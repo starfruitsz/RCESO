@@ -85,13 +85,22 @@ ch2.Script = fileread([srcDir '\b0_ident_m.m']);
 p('ML function set\n');
 % MATLAB Function: 无 FunctionName 参数
 add_block('simulink/Math Operations/Gain',A('giqp'),'Gain',num2str(1/IB),'Position',[560 15 590 45]);
-% RCESO 输出端口顺序: 1=u 2=eo_o 3=v_o 4=up_o
-nm={'fiq','fu','fom','fe1','fv'}; sg={'giqp/1','RCESO/4','grpm/1','RCESO/2','RCESO/3'};
-for i=1:5
+% 端口顺序: 1=iq 2=u 3=ge1(=G(e1)，外部输入) 4=e1 5=v
+% ge1 由块外计算：线性 ESO 时 G 为恒等，用单位增益把 fe1 直接送进去；
+% 若观测器是类 fal，把 gGe1 换成你的 G 块（输入 fe1、输出单精度）即可。
+add_block('simulink/Math Operations/Gain',A('gGe1'),'Gain','1','Position',[680 90 710 120]);
+nm={'fiq','fu','fe1','fv'}; sg={'giqp/1','RCESO/4','RCESO/2','RCESO/3'};
+for i=1:4
     add_block('simulink/Signal Attributes/Data Type Conversion',A(nm{i}),'OutDataTypeStr','single','Position',[620 10+40*(i-1) 660 35+40*(i-1)]);
     add_line(mdl,sg{i},[nm{i} '/1'],'autorouting','on');
-    add_line(mdl,[nm{i} '/1'],['C/' num2str(i)],'autorouting','on');
 end
+% iq / u / e1 / v 直接进块；第 3 路 ge1 经 gGe1
+add_line(mdl,'fiq/1','C/1','autorouting','on');
+add_line(mdl,'fu/1','C/2','autorouting','on');
+add_line(mdl,'fe1/1','gGe1/1','autorouting','on');
+add_line(mdl,'gGe1/1','C/3','autorouting','on');
+add_line(mdl,'fe1/1','C/4','autorouting','on');
+add_line(mdl,'fv/1','C/5','autorouting','on');
 % 总线拆分：b0 / du 都是纯输出
 
 add_block('simulink/Signal Attributes/Data Type Conversion',A('b0d'),'OutDataTypeStr','double','Position',[900 40 940 70]);
