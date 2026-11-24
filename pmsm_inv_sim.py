@@ -687,16 +687,15 @@ def sim_inv(t, TL, cfg=None):
                             elif _jprev is not None:
                                 _d1, _U1, _T1, _b1, _Q1 = _jprev
                                 if abs(_QCp - _Q1) > 1e-6:
-                                    _bpv = (((_dd - _d1) + _b1 * (_U - _U1))
-                                            / (_QCp - _Q1)).real
-                                    if abs(_Tc) > 1e-6:
-                                        _bpv = (_bpv / _Tc).real    # T 修正用注入段
+                                    # 定稿口径：取模长（不是实部），免相位折扣；T 修正默认关
+                                    _bpv = abs(((_dd - _d1) + _b1 * (_U - _U1))
+                                               / (_QCp - _Q1))
                                     _bpv = min(max(_bpv, 0.02 * B0), 2.4 * B0)
                         elif _jalt and (_jprev is not None):
                             _d1, _U1, _T1, _b1, _Q1 = _jprev
                             if abs(_QCp - _Q1) > 1e-6:
-                                _bpv = (((_dd - _d1) + _b1 * (_U - _U1))
-                                        / (_QCp - _Q1)).real
+                                _bpv = abs(((_dd - _d1) + _b1 * (_U - _U1))
+                                           / (_QCp - _Q1))
                                 if _tcorr:
                                     _Tp = 0.5 * (_T1 + _Tc)   # 两窗电流环传函均值
                                     if abs(_Tp) > 1e-6:
