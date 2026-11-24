@@ -263,6 +263,8 @@ def sim_inv(t, TL, cfg=None):
     _jnew_uc = _jnew_us = _jnew_woe = 0.0
     _jnew_qc = _jnew_qs = 0.0
     _jnew_yc = _jnew_ys = 0.0
+    # 精确反演：类 fal 两路增益的 SDFT（Ĝ1、Ĝ2）；线性观测器时自动退化为 E1
+    _jnew_g1c = _jnew_g1s = _jnew_g2c = _jnew_g2s = 0.0
     _jnew_n = 0
     _jnew_log = []
     _jnew_bpv_log = []        # 逐窗原始估计 (t, bpv)，供与 MATLAB 的 bq 对照
@@ -270,6 +272,9 @@ def sim_inv(t, TL, cfg=None):
     _jnew_pending = False
     # ---- 定稿更新律（与 b0_ident_m/C 一致）：预热·门控·中值·冻结 ----
     _jrec_b0final = bool(cfg.get("j_b0_final", False))
+    # 转速门限（与 b0_ident_m 一致）：低于 on 不启动；burst 中低于 off 丢弃本次
+    _jomega_on = float(cfg.get("j_omega_on", 180.0))
+    _jomega_off = float(cfg.get("j_omega_off", 150.0))
     _jf_valid = False; _jf_nest = 0; _jf_base = 0.0; _jf_blast = []
     _jprev = None
     _jnew_win = 0
@@ -654,6 +659,9 @@ def sim_inv(t, TL, cfg=None):
                 _jnew_uc += u * _jc;  _jnew_us += u * _js
                 _jnew_qc += idq[1] * _jc; _jnew_qs += idq[1] * _js
                 _jnew_yc += y_m * _jc;    _jnew_ys += y_m * _js
+                _g1v = ESO_G1(e1); _g2v = ESO_G2(e1)     # 类 fal 增益输出（精确反演用）
+                _jnew_g1c += _g1v * _jc; _jnew_g1s += _g1v * _js
+                _jnew_g2c += _g2v * _jc; _jnew_g2s += _g2v * _js
                 _jnew_woe += _woe; _jnew_n += 1
                 if _jnew_n >= _jrec_n:
                     _nn = float(_jnew_n)
@@ -669,10 +677,14 @@ def sim_inv(t, TL, cfg=None):
                     #   s_d = (e^{j w dt} - 1)/dt，否则 65 Hz 处实部差 ~82 rad/s
                     _sd = complex(math.cos(_jrec_w * 1e-3) - 1.0,
                                   math.sin(_jrec_w * 1e-3)) / 1e-3
-                    _pq = (_sd * _sd + _b1n * _sd + _b2n) / _sd
+                    _pq = (_sd * _sd + _b1n * _sd + _b2n) / _sd   # 线性化口径（保留：对照用）
+                    # 精确口径：β1·Ĝ1 + β2/Sd·Ĝ2，线性观测器时 Ĝ=E1，与 _pq 完全相同
+                    _G1 = complex(2.0 * _jnew_g1c / _nn, -2.0 * _jnew_g1s / _nn)
+                    _G2 = complex(2.0 * _jnew_g2c / _nn, -2.0 * _jnew_g2s / _nn)
                     if abs(_U) > 1e-6:
                         _Tc = (_QC / I_BASE) / _U    # 电流环在 w_h 的复传函（标幺 iq/u）
-                        _dd = _V + _pq * _E            # d^（复数）
+                        # d^ = V + Sd·E1 + β1·Ĝ1 + (β2/Sd)·Ĝ2（精确恒等式）
+                        _dd = _V + _sd * _E + (2.0 * _wm) * _G1 + ((_wm * _wm) / _sd) * _G2
                         if _jalg and abs(_Tc) > 1e-3:
                             # 单窗代数解：b0 + d^/u = b*T  =>  b = (b0 + d^/u)/T
                             _bhat = ((_B0e + _dd / _U) / _Tc).real
@@ -718,6 +730,7 @@ def sim_inv(t, TL, cfg=None):
                     _jnew_ec = _jnew_es = _jnew_vc = _jnew_vs = 0.0
                     _jnew_uc = _jnew_us = _jnew_qc = _jnew_qs = 0.0
                     _jnew_yc = _jnew_ys = 0.0
+                    _jnew_g1c = _jnew_g1s = _jnew_g2c = _jnew_g2s = 0.0
                     _jnew_woe = 0.0; _jnew_n = 0
             if _jnew and _jnew_pending and (not _jrec_active):
                 # burst 结束：用窗均值一次性更新（窗内不动 b0，避免更新本身污染测量）
@@ -1019,7 +1032,9 @@ def sim_inv(t, TL, cfg=None):
                     _pre_need = int(round(_jrec_gate_pre / 1e-3))
                     if len(_jrec_lp_hist) > _pre_need:
                         _jrec_lp_hist.pop(0)
-                if (not _jrec_active) and _tk >= _jrec_next:
+                _jwrpm_now = abs(w_enc) * 30.0 / math.pi
+                _jspd_ok = (_jomega_on <= 0.0) or (_jwrpm_now >= _jomega_on)
+                if (not _jrec_active) and _tk >= _jrec_next and _jspd_ok:
                     _pre_need = int(round(_jrec_gate_pre / 1e-3))
                     _pre_ok = (not _jrec_gate) or (len(_jrec_lp_hist) >= _pre_need and
                                                    (max(_jrec_lp_hist) - min(_jrec_lp_hist)) <= _jrec_gate_ac)
@@ -1084,7 +1099,12 @@ def sim_inv(t, TL, cfg=None):
                         _jrec_fd_o.append((_tk, _jrec_fd))
                         _jstate = 1
                 if _jrec_active:
-                    if _jrec_gate:
+                    # burst 中掉速到 off 以下：丢弃本次（窗口已被污染）
+                    if (_jomega_off > 0.0) and (abs(w_enc) * 30.0 / math.pi < _jomega_off):
+                        _jrec_active = False; _jrec_abort = True
+                        _jrec_list = []; _jnew_list = []
+                        _jstate = 3
+                    if _jrec_active and _jrec_gate:
                         if abs(_jrec_er_lp - _jrec_pre_mean) > _jrec_gate_step:
                             _jrec_bad_cnt += 1
                         else:
