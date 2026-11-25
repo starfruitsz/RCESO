@@ -205,3 +205,45 @@ w 与 wref **单位必须一致**（建议都用 rad/s）。
 | 基线（识别开） | 599.8 rpm | **545.1**（+1.63%） | 0.0500 |
 | upd_on = 0 | 600.0 rpm | 536.4（不变） | **0.0000** |
 | 10 Hz 故障 0.1 N·m | 636.2 rpm | 536.4（不启动） | **0.0000** |
+
+### 9.6 如何把新算法覆盖到目标机的现有模型
+
+不要手动复制粘贴（容易漏行、端口对不上）。用脚本覆盖：
+
+**① 把两个文件拷到目标机**（与模型同目录即可）
+
+- `b0_ident_m.m` —— 新算法全文
+- `update_b0_block.m` —— 覆盖脚本
+
+**② 在目标机 MATLAB 命令窗口执行**
+
+```matlab
+% 先点一下模型里的 ID 块，用 gcb 拿到它的准确路径
+gcb
+% 假设输出 'PMSM_2Loop_ADRC/ADRC Speed Control1/ID1'
+update_b0_block('PMSM_2Loop_ADRC', 'PMSM_2Loop_ADRC/ADRC Speed Control1/ID1', 'b0_ident_m.m')
+```
+
+脚本会：写入新代码 → 采样时间设为 1 ms → 保存模型 → 打印当前输入端口数。
+
+**③ 接上新加的两个输入**
+
+块会从 5 入变 7 入，第 6、7 个是：
+
+| 端口 | 信号 | 来源 |
+|---|---|---|
+| 6 | `w` | 实测转速（与 wref 同单位，建议 rad/s） |
+| 7 | `wref` | 参考转速 |
+
+**④ Ctrl+D 更新框图**
+
+确认：无未接线端口、无代数环（b0/du 反馈路径上应有 Unit Delay）。
+
+**⑤ 数据类型**
+
+若报 `Input 'u' expects single ... driven by double`，在 5(7) 个输入前各加一个
+Data Type Conversion（输出 `single`）。
+
+**⑥ 先正常模式跑 5 s，再 Build**
+
+正常模式应能看到 b0 从 b0_init 开始、du 在 ±amp 内；确认无误后再生成代码。
