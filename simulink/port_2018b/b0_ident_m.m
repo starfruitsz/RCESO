@@ -29,10 +29,17 @@ w_gate = 0;
 w_ss   = 0.02;      % 2% 参考转速
 tau_w  = 0.2;       % 转速低通时间常数 [s]
 w_hold = 0.1;       % 需连续保持 [s]
-% ---- 类型统一：目标机若把 w/wref 定成 fi（定点），与 double 比较会报
-%      "In fi < non-fi ... the non-fi must be a constant"。入口先转 double。----
-wd  = double(w);
-wrd = double(wref);
+% ---- 类型统一（重要）：目标机若把输入定成 fi（定点），与 double 混合运算/比较会报
+%      "In fi .* non-fi ... the non-fi must be a constant"。
+%      例：ge1*s（ge1 是 fi、s 是 double）、|w-wlp| < w_ss*|wref|。
+%      入口一次性全转 double，块内从此只有 double。----
+iqd  = double(iq);
+ud   = double(u);
+ge1d = double(ge1);
+e1d  = double(e1);
+vd   = double(v);
+wd   = double(w);
+wrd  = double(wref);
 % ==================== 派生量（不要手改）====================
 cyc    = f_inj*dT;          % 每拍相位增量 [周期]
 wh     = 2*pi*f_inj;        % 注入角频率 [rad/s]
@@ -85,11 +92,12 @@ if gv ~= 0
 end
 % ---- 转速低通 + 稳态计时（每拍无条件更新，burst 起点才不会被人为推后）----
 wlp = wlp + (wd - wlp)*min(dT/max(tau_w, dT), 1);
-% 归一化偏差：r_ss = |w-w_lp| / |wref|，与常量 w_ss 比（避免变量对变量的比较）
-if abs(wrd) > 1e-6
-    r_ss = abs(wd - wlp)/abs(wrd);
+% 相对转速脉动：r_ss = |w-w_lp| / max(|w|,eps)，与常量 w_ss 比。
+% 用 |w| 作分母（而不是 |wref|）：这样 w 与 wref 单位不一致时判据依然成立。
+if abs(wd) > 1e-6
+    r_ss = abs(wd - wlp)/abs(wd);
 else
-    r_ss = 0;
+    r_ss = 1;                       % 接近零速视为"不稳态"，不注入
 end
 if (w_ss > 0) && (r_ss < w_ss)
     wcnt = wcnt + 1;
@@ -117,13 +125,13 @@ if (upd_on ~= 0) && (~active) && (~frozen) && (tick >= nxtick)
     % 不满足：本轮跳过，不消耗预算，下一拍再判
 end
 if active
-    acc(1) = acc(1) + e1*c;  acc(2) = acc(2) + e1*s;
-    acc(3) = acc(3) + v*c;   acc(4) = acc(4) + v*s;
-    acc(5) = acc(5) + u*c;   acc(6) = acc(6) + u*s;
-    acc(7) = acc(7) + iq*c;  acc(8) = acc(8) + iq*s;
+    acc(1) = acc(1) + e1d*c;  acc(2) = acc(2) + e1d*s;
+    acc(3) = acc(3) + vd*c;   acc(4) = acc(4) + vd*s;
+    acc(5) = acc(5) + ud*c;   acc(6) = acc(6) + ud*s;
+    acc(7) = acc(7) + iqd*c;  acc(8) = acc(8) + iqd*s;
     % G(e1) 由外部输入 ge1 提供（不在块内推导）
-    acc(11)= acc(11)+ ge1*c;  acc(12)= acc(12)+ ge1*s;
-    acc(13)= acc(13)+ ge1*c;  acc(14)= acc(14)+ ge1*s;
+    acc(11)= acc(11)+ ge1d*c;  acc(12)= acc(12)+ ge1d*s;
+    acc(13)= acc(13)+ ge1d*c;  acc(14)= acc(14)+ ge1d*s;
     if seg == 1
         % 波形（峰值=1，与 C 版 b0_wave_value 一致）
         if wave == 1
