@@ -63,6 +63,7 @@ mu     = 0.35;      % 基线滑动速率
 cyc_nseg = cyc*nseg;   % 移植时人工确认该值为整数（65 Hz x 0.2 s = 13）
 persistent init ph acc nacc seg active tick nxtick tstart d0 u0 q0 t0
 persistent b0v goal gv base bvalid nest blast nblast nburst frozen wlp wcnt
+persistent dg_en dg_num dg_den dg_bq      % 诊断量（供 b0_ident_dbg 输出，主接口不用）
 persistent pdC sdC lpa b1 b2 bc
 if isempty(init)
     init = 1; ph = 0;
@@ -70,6 +71,7 @@ if isempty(init)
     tick = 0; nxtick = round(t_start/dT); tstart = 0;   % 起跑延时后再注入
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
     b0v = b0_init; goal = b0_init; gv = 0; wlp = wd; wcnt = 0;
+    dg_en = 0; dg_num = 0; dg_den = 0; dg_bq = 0;
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,12); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
@@ -184,6 +186,7 @@ if active
                     bq = 0;                     % 丢弃：对象未就绪/量纲不符/接线错
                 end
             end
+            dg_en  = abs(E1);  dg_num = abs(num);  dg_den = abs(den);  dg_bq = bq;
             if bq > 0
                 if upd_on == 0
                     % 识别关闭：只算 bq，不更新 b0（b0 停在 b0_init）
@@ -237,5 +240,5 @@ if active
 end
 b0out = b0v;
 duout = du;
-dbg = [double(upd_on ~= 0), double(frozen), double(active), double(tick), double(nxtick), double(wcnt), r_ss, wd, double(du)/amp];
+dbg = [double(upd_on ~= 0), double(frozen), double(active), double(tick), double(nxtick), double(wcnt), r_ss, wd, double(du)/amp, dg_en, dg_num, dg_den, dg_bq];
 end

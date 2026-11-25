@@ -411,3 +411,41 @@ first_win_guard = 0;% 先关，看到 b0 量级后填 b0_init 再打开
 ```
 
 确认注入正常后，再逐项打开判据。
+
+#### 9.9.2 诊断输出（13 列）
+
+`b0_ident_dbg.m` 的输出：
+
+```
+dbg = [upd_on, frozen, active, tick, nxtick, wcnt, r_ss, w, du/amp, |E1|, |num|, |den|, bq]
+```
+
+| 列 | 含义 | 判读 |
+|---|---|---|
+| 1 | upd_on | 恒 1；0 ⇒ 完全不注入 |
+| 2 | frozen | 前 120 s 应为 0 |
+| 3 | active | burst 期间为 1（每 burst 400 拍） |
+| 4 | tick | 以 1000/s 增长；不增长 ⇒ 采样率不对 |
+| 5 | nxtick | 首值 8000，之后每 5000 递增 |
+| 6 | wcnt | 稳态时涨到 ≥100 |
+| 7 | r_ss | 稳态应 < w_ss |
+| 8 | w | 实测转速；恒 0 ⇒ w 没接 |
+| 9 | du/amp | 注入段为 ±1 |
+| 10 | \|E1\| | e1 的 65 Hz 分量幅值；**恒 0 ⇒ e1 没接/为 0** |
+| 11 | \|num\| | 差分分子 \|Δd̂ + b0·Δu\| |
+| 12 | \|den\| | 差分分母 \|Δĩ\|，应 ≈ amp |
+| 13 | bq | 本窗估计；为 0 ⇒ 该窗被守卫丢弃 |
+
+**函数级自检**（不连模型，直接调用）：
+
+```matlab
+clear b0_ident_dbg
+W = 2*pi*65;
+for k = 1:9000
+    t = (k-1)*1e-3;
+    [~, du, dbg] = b0_ident_dbg(0.8, 0.8, sin(W*t), sin(W*t), 0, 62.83, 62.83);
+end
+% 期望：dbg(4)=9000（tick 增长）、max|du|=0.05、dbg(3) 在 burst 内为 1
+```
+
+本机实测输出：tick=9000、maxdu=0.0500、active_ticks=399、wcnt=9000 ✓
