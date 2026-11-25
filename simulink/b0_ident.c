@@ -240,7 +240,9 @@ static void b0_seg_end(const b0_ident_P *P, b0_ident_DW *DW)
     dr = qr - DW->q0_re;
     di = qi - DW->q0_im;
     den2 = dr * dr + di * di;
-    if (den2 <= B0_EPS) { return; }            /* 分母过小，跳过本 burst */
+    /* 判据①：电流必须真的跟上了注入（|Δĩ| 至少是 amp 的 1/4），否则本窗作废。
+     * 用相对阈值：原来只判 B0_EPS 等于没门槛，噪声会被 1/ε 放大成 b0_hi。 */
+    if (den2 <= (0.25f * P->amp) * (0.25f * P->amp)) { return; }
 
     nr = (dhr - DW->d0_re) + DW->b0 * (ur - DW->u0_re);
     ni = (dhi - DW->d0_im) + DW->b0 * (ui - DW->u0_im);
@@ -257,6 +259,11 @@ static void b0_seg_end(const b0_ident_P *P, b0_ident_DW *DW)
     /* 限幅 */
     if (bq < P->b0_lo) { bq = P->b0_lo; }
     if (bq > P->b0_hi) { bq = P->b0_hi; }
+
+    /* 判据②：首窗必须落在标称附近，防"一拍顶到上限"
+     * （对象未就绪 / 量纲不符 / 注入点接错 时常见） */
+    if (!DW->base_valid && b0_absf(bq - P->b0_init) > 0.5f * P->b0_init) { return; }
+
     DW->b_est = bq;
 
     /* ---- 门控 ---- */

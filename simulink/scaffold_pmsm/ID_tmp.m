@@ -1,15 +1,15 @@
-function [b0out, duout, bqout, dD, dU, dQ] = b0_ident_m(iq, u, ge1, e1, v)
+function [b0out, duout] = b0_ident_m(iq, u, ge1, e1, v, w, wref)
 %#codegen
 % 两段式高频注入 b0 在线辨识 —— MATLAB 版（配合 MATLAB Function 块，无需 C 编译器）
 % 与 b0_ident.c 逐行等价：R2018b 及以后版本均可用
 % ==================== 顶层可调参数（移植时只改这里）====================
 dT     = 1e-3;      % 采样周期 [s]
 f_inj  = 65;        % 注入频率 [Hz]：须为 5 Hz 整数倍，且约等于 6.5 x 机械频率
-amp    = 0.05;     % 注入幅值 [pu]，上限 0.25
+amp    = 0.05;      % 注入幅值 [pu]（0.05 时 burst 冲击小；上限 0.25）
 wave   = 0;         % 注入波形：0=正弦 1=方波 2=三角（三者峰值均为 1）
-b0_init= 800;     % b0 初值：必须与控制器/ESO 用的标称一致
-b0lo   = 300;       % 硬下限（诊断期临时放开）
-b0hi   = 1500;      % 硬上限
+b0_init= 536.4;     % b0 初值：必须与控制器/ESO 用的标称一致
+b0lo   = 300;       % 硬下限（约 0.56×标称）
+b0hi   = 900;       % 硬上限（约 1.7×标称）
 wo     = 500;       % 观测器带宽 [rad/s]，必须与 ESO 一致
 kp     = 75.36;     % 转速环比例增益
 % ---- 反演用的增益由外部输入 ge1 提供（G(e1) 在块外计算）----
@@ -18,7 +18,14 @@ kp     = 75.36;     % 转速环比例增益
 upd_on  = 0;
 % ---- 起跑延时 [s]：等闭环进入稳态后再开始注入（避开启动饱和）----
 t_start = 8.0;
-% ---- 运行使能：转速门限已移除（omega 不再作为入参，门限请在块外用使能信号实现）----
+% ---- 运行使能（转速门限）：w = 实测转速, wref = 参考转速（两者单位必须一致，如都用 rad/s）----
+% w_gate = 0    关闭门限
+% w_gate = 0.3  转速低于 0.3*wref 时不启动 burst（本轮跳过、不消耗 24 次预算）
+w_gate = 0;
+% ---- 稳态判据：|w - w_lp| < w_ss*|wref| 才认为进入稳态（0 = 关闭）----
+% w_lp 是 w 的一阶低通（tau = 0.2 s），用于滤掉注入/故障造成的抖动
+w_ss   = 0.02;      % 2% 参考转速
+tau_w  = 0.2;       % 转速低通时间常数 [s]
 % ==================== 派生量（不要手改）====================
 cyc    = f_inj*dT;          % 每拍相位增量 [周期]
 wh     = 2*pi*f_inj;        % 注入角频率 [rad/s]
@@ -38,15 +45,14 @@ mu     = 0.35;      % 基线滑动速率
 % （"无法沿循环求取信号维度"），此检查只保留在 C 版与移植文档里。
 cyc_nseg = cyc*nseg;   % 移植时人工确认该值为整数（65 Hz x 0.2 s = 13）
 persistent init ph acc nacc seg active tick nxtick tstart d0 u0 q0 t0
-persistent b0v goal gv base bvalid nest blast nblast nburst frozen
-persistent pdC sdC lpa b1 b2 bc bqlast dDlast dUlast dQlast
+persistent b0v goal gv base bvalid nest blast nblast nburst frozen wlp
+persistent pdC sdC lpa b1 b2 bc
 if isempty(init)
     init = 1; ph = 0;
     acc = zeros(1,14); nacc = 0; seg = 0; active = 0;   % 11-14: SDFT(G1(e1)), SDFT(G2(e1))
     tick = 0; nxtick = round(t_start/dT); tstart = 0;   % 起跑延时后再注入
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
-    b0v = b0_init; goal = b0_init; gv = 0; bqlast = 0;
-    dDlast = 0; dUlast = 0; dQlast = 0;
+    b0v = b0_init; goal = b0_init; gv = 0; wlp = w;
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,12); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
@@ -70,12 +76,22 @@ if gv ~= 0
         b0v = goal; gv = 0;
     end
 end
+% ---- 转速低通（用于稳态判据）----
+wlp = wlp + (w - wlp)*min(dT/max(tau_w, dT), 1);
 % ---- 调度 ----
 tick = tick + 1;                        % 整数拍计数：不漂
 du = 0;
-if (~active) && (~frozen) && (tick >= nxtick)
-    active = 1; seg = 0; nacc = 0; acc(:) = 0;
-    tstart = tick;                      % 周期按 burst 起点计
+% upd_on = 0：既不辨识也不注入（整段关闭）
+if (upd_on ~= 0) && (~active) && (~frozen) && (tick >= nxtick)
+    % ① 启动判据：转速够高
+    ok_w = (w_gate <= 0) || (abs(wref) < 1e-6) || (abs(w) >= w_gate*abs(wref));
+    % ② 稳态判据：转速相对低通量的偏差小于 w_ss*wref
+    ok_ss = (w_ss <= 0) || (abs(wref) < 1e-6) || (abs(w - wlp) < w_ss*abs(wref));
+    if ok_w && ok_ss
+        active = 1; seg = 0; nacc = 0; acc(:) = 0;
+        tstart = tick;                  % 周期按 burst 起点计
+    end
+    % 不满足：本轮跳过，不消耗预算，下一拍再判
 end
 if active
     acc(1) = acc(1) + e1*c;  acc(2) = acc(2) + e1*s;
@@ -120,13 +136,21 @@ if active
         else
             num = (D - d0) + b0v*(Uc - u0);
             den = Qc - q0;
-            if abs(den) > 1e-9
+            % 判据①：电流必须真的跟上了注入（Δĩ ≈ amp），否则本窗作废。
+            % 用相对判据（1e-9 那种绝对阈值等于没门槛，会把噪声放大成 b0max）
+            if abs(den) > 0.25*amp
                 bq = abs(num/den);              % 取模长：对相位误差免疫
                 bq = min(max(bq, b0lo), b0hi);
-                bqlast = bq;                       % 诊断输出：本窗原始估计
-                dDlast = abs(num);                 % |Δd̂ + b0Δu|（分子）
-                dUlast = abs(Uc - u0);             % |Δu|
-                dQlast = abs(den);                 % |Δĩ|
+            else
+                bq = 0;                         % 0 = 本窗无效，下面跳过所有更新
+            end
+            if bq > 0
+                % 判据②：首窗必须落在标称附近，防"一拍顶到上限"
+                if ~bvalid && (abs(bq - b0_init) > 0.5*b0_init)
+                    bq = 0;                     % 丢弃：对象未就绪/量纲不符/接线错
+                end
+            end
+            if bq > 0
                 if upd_on == 0
                     % 识别关闭：只算 bq，不更新 b0（b0 停在 b0_init）
                 elseif ~bvalid
@@ -157,7 +181,17 @@ if active
             active = 0;
             nburst = nburst + 1;
             if (upd_on ~= 0) && (nburst >= nident)
-                b0v = mean(blast(1:max(nblast,1)));
+                % 冻结：末 nfrz 个 burst 的均值
+                % 注意：这里不能用 blast(1:max(nblast,1))——ERT 代码生成会把动态上界
+                % 当成变长切片而报错（"Variable-size arrays are currently disabled"）。
+                % 改成定长数组 + 动态循环上界，代码生成器可接受。
+                nf = nblast;
+                if nf < 1, nf = 1; end
+                bs = 0;
+                for i = 1:nf
+                    bs = bs + blast(i);
+                end
+                b0v = bs / nf;
                 goal = b0v; gv = 0; frozen = 1; nxtick = tick + round(3600/dT);
             else
                 nxtick = tstart + round(5/dT);        % 5 s 起点周期
@@ -169,8 +203,4 @@ if active
 end
 b0out = b0v;
 duout = du;
-bqout = bqlast;
-dD = dDlast;
-dU = dUlast;
-dQ = dQlast;
 end
