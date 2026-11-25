@@ -147,3 +147,29 @@ b0 ≈ 530.6、误差 −1.08%，与 C 版 530.61 一致到 0.01%。转速 600 r
 2. 导出时 Simulink 报了三条例外警告（CC/ID/SL 的“将数组当作一维矩阵”）。这是 R2021b 才收紧的行为；
    在 R2018b 上仍按旧语义运行，与本模型的写法一致。若以后要迁到 R2021b+，
    需把 `blast(1:nfrz-1) = blast(2:nfrz)` 这类线性索引改成显式循环。
+
+### 9.4 目标机（R2018b + ERT）编译注意事项
+
+**① 冻结循环不能用动态上界切片**
+
+原写法 `b0v = mean(blast(1:max(nblast,1)))` 在 ERT 下报：
+
+> Variable-size arrays are currently disabled for code generation ... line 155: blast(1:max(nblast,1))
+
+已改为定长数组 + 动态循环上界（`for i = 1:nf, bs = bs + blast(i); end`），
+代码生成器可接受，且数值结果不变（本机验证 b̂0 = 545.1，与改前一致）。
+
+**② 端口数据类型**
+
+ID 块的输入若是 single 而模型里是 double，会报：
+
+> Input 'u' expects a signal of data type 'single'. However, it is driven by a signal of data type 'double'.
+
+在该块的 5 个输入（iq / u / ge1 / e1 / v）前各加一个 **Data Type Conversion**（输出 `single`），
+或在块端口属性里把数据类型设为 `Inherit via internal rule`。
+
+**③ powergui 的库链接**
+
+导出后 `powergui` 的库链接是 inactive（Simulink 导出时的已知现象）。
+在 R2018b 打开后若提示，右键 → Library Link → **Restore**，或直接删掉重放一个 powergui
+（参数：Discrete，Ts = 1e-5）。

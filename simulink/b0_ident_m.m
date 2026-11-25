@@ -152,7 +152,17 @@ if active
             active = 0;
             nburst = nburst + 1;
             if (upd_on ~= 0) && (nburst >= nident)
-                b0v = mean(blast(1:max(nblast,1)));
+                % 冻结：末 nfrz 个 burst 的均值
+                % 注意：这里不能用 blast(1:max(nblast,1))——ERT 代码生成会把动态上界
+                % 当成变长切片而报错（"Variable-size arrays are currently disabled"）。
+                % 改成定长数组 + 动态循环上界，代码生成器可接受。
+                nf = nblast;
+                if nf < 1, nf = 1; end
+                bs = 0;
+                for i = 1:nf
+                    bs = bs + blast(i);
+                end
+                b0v = bs / nf;
                 goal = b0v; gv = 0; frozen = 1; nxtick = tick + round(3600/dT);
             else
                 nxtick = tstart + round(5/dT);        % 5 s 起点周期
