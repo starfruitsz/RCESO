@@ -29,6 +29,10 @@ w_gate = 0;
 w_ss   = 0.02;      % 2% 参考转速
 tau_w  = 0.2;       % 转速低通时间常数 [s]
 w_hold = 0.1;       % 需连续保持 [s]
+% ---- 类型统一：目标机若把 w/wref 定成 fi（定点），与 double 比较会报
+%      "In fi < non-fi ... the non-fi must be a constant"。入口先转 double。----
+wd  = double(w);
+wrd = double(wref);
 % ==================== 派生量（不要手改）====================
 cyc    = f_inj*dT;          % 每拍相位增量 [周期]
 wh     = 2*pi*f_inj;        % 注入角频率 [rad/s]
@@ -55,7 +59,7 @@ if isempty(init)
     acc = zeros(1,14); nacc = 0; seg = 0; active = 0;   % 11-14: SDFT(G1(e1)), SDFT(G2(e1))
     tick = 0; nxtick = round(t_start/dT); tstart = 0;   % 起跑延时后再注入
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
-    b0v = b0_init; goal = b0_init; gv = 0; wlp = w; wcnt = 0;
+    b0v = b0_init; goal = b0_init; gv = 0; wlp = wd; wcnt = 0;
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,12); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
@@ -80,8 +84,14 @@ if gv ~= 0
     end
 end
 % ---- 转速低通 + 稳态计时（每拍无条件更新，burst 起点才不会被人为推后）----
-wlp = wlp + (w - wlp)*min(dT/max(tau_w, dT), 1);
-if (w_ss > 0) && (abs(wref) > 1e-6) && (abs(w - wlp) < w_ss*abs(wref))
+wlp = wlp + (wd - wlp)*min(dT/max(tau_w, dT), 1);
+% 归一化偏差：r_ss = |w-w_lp| / |wref|，与常量 w_ss 比（避免变量对变量的比较）
+if abs(wrd) > 1e-6
+    r_ss = abs(wd - wlp)/abs(wrd);
+else
+    r_ss = 0;
+end
+if (w_ss > 0) && (r_ss < w_ss)
     wcnt = wcnt + 1;
 else
     wcnt = 0;
@@ -91,10 +101,15 @@ tick = tick + 1;                        % 整数拍计数：不漂
 du = 0;
 % upd_on = 0：既不辨识也不注入（整段关闭）
 if (upd_on ~= 0) && (~active) && (~frozen) && (tick >= nxtick)
-    % ① 启动判据：转速够高
-    ok_w = (w_gate <= 0) || (abs(wref) < 1e-6) || (abs(w) >= w_gate*abs(wref));
+    % ① 启动判据：转速够高（同样用归一化比值，与常量比）
+    if abs(wrd) > 1e-6
+        r_w = abs(wd)/abs(wrd);
+    else
+        r_w = 1;
+    end
+    ok_w = (w_gate <= 0) || (abs(wrd) < 1e-6) || (r_w >= w_gate);
     % ② 稳态判据：偏差已在上面连续保持 w_hold 秒
-    ok_ss = (w_ss <= 0) || (abs(wref) < 1e-6) || (wcnt >= round(w_hold/dT));
+    ok_ss = (w_ss <= 0) || (wcnt >= round(w_hold/dT));
     if ok_w && ok_ss
         active = 1; seg = 0; nacc = 0; acc(:) = 0;
         tstart = tick;                  % 周期按 burst 起点计

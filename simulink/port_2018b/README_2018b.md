@@ -247,3 +247,36 @@ Data Type Conversion（输出 `single`）。
 **⑥ 先正常模式跑 5 s，再 Build**
 
 正常模式应能看到 b0 从 b0_init 开始、du 在 ±amp 内；确认无误后再生成代码。
+
+### 9.7 fi / non-fi 比较报错的修复（2026-11-25）
+
+目标机报：
+
+> In fi < non-fi, or non-fi < fi, the non-fi must be a constant.
+> line 84: "abs(w - wlp) < w_ss*abs(wref)"
+> line 95: "abs(w) >= w_gate*abs(wref)"
+
+原因：模型里 w/wref 是**定点（fi）**，而 `w_ss*abs(wref)` 是 double，
+R2018b 不允许定点与非定点直接比较（除非非定点是常量）。
+
+修复两处：
+
+1. 入口统一转 double：
+
+```matlab
+wd  = double(w);
+wrd = double(wref);
+```
+
+2. 判据改成**归一化比值与常量比**，不再出现变量对变量：
+
+```matlab
+r_ss = abs(wd - wlp)/max(abs(wrd), 1e-6);   % 归一化稳态偏差
+if (w_ss > 0) && (r_ss < w_ss)             % 与常量 w_ss 比
+r_w = abs(wd)/max(abs(wrd), 1e-6);         % 归一化转速
+ok_w = (w_gate <= 0) || (r_w >= w_gate);   % 与常量 w_gate 比
+```
+
+本机复验（输入本就是 double）：599.8 rpm、b̂₀ = 545.1、du 峰值 0.05 —— 行为不变。
+
+**目标机需要重新执行一次** `update_b0_block.m` 覆盖代码。
