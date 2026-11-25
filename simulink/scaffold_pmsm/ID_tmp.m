@@ -7,7 +7,7 @@ dT     = 1e-3;      % 采样周期 [s]
 f_inj  = 65;        % 注入频率 [Hz]：须为 5 Hz 整数倍，且约等于 6.5 x 机械频率
 amp    = 0.05;      % 注入幅值 [pu]（0.05 时 burst 冲击小；上限 0.25）
 wave   = 0;         % 注入波形：0=正弦 1=方波 2=三角（三者峰值均为 1）
-b0_init= 536.4;     % b0 初值：必须与控制器/ESO 用的标称一致
+b0_init= 250;     % b0 初值：必须与控制器/ESO 用的标称一致
 b0lo   = 300;       % 硬下限（约 0.56×标称）
 b0hi   = 900;       % 硬上限（约 1.7×标称）
 wo     = 500;       % 观测器带宽 [rad/s]，必须与 ESO 一致
@@ -15,7 +15,7 @@ kp     = 75.36;     % 转速环比例增益
 % ---- 反演用的增益由外部输入 ge1 提供（G(e1) 在块外计算）----
 % 第 3 个入参 ge1 即 G(e1)：线性 ESO 时 ge1 = e1；类 fal 时由外部 G 块给出。
 % ---- 识别使能：0 = 只注入不更新 b0（关闭识别，用于对照）----
-upd_on  = 0;
+upd_on  = 1;
 % ---- 起跑延时 [s]：等闭环进入稳态后再开始注入（避开启动饱和）----
 t_start = 8.0;
 % ---- 运行使能（转速门限）：w = 实测转速, wref = 参考转速（两者单位必须一致，如都用 rad/s）----
@@ -29,10 +29,20 @@ w_gate = 0;
 w_ss   = 0.02;      % 2% 参考转速
 tau_w  = 0.2;       % 转速低通时间常数 [s]
 w_hold = 0.1;       % 需连续保持 [s]
-% ---- 类型统一：目标机若把 w/wref 定成 fi（定点），与 double 比较会报
-%      "In fi < non-fi ... the non-fi must be a constant"。入口先转 double。----
-wd  = double(w);
-wrd = double(wref);
+% 说明：不再设“首窗守卫”。严重失配（如 b0_init 与真值差 1 倍以上）时，
+% 任何基于 b0_init 的首窗限幅都会把正确的估计挡掉，使辨识永久失效。
+% 现只保留相对判据 ①（|Δĩ| > 0.25*amp），它不依赖 b0 的标称值。
+% ---- 类型统一（重要）：目标机若把输入定成 fi（定点），与 double 混合运算/比较会报
+%      "In fi .* non-fi ... the non-fi must be a constant"。
+%      例：ge1*s（ge1 是 fi、s 是 double）、|w-wlp| < w_ss*|wref|。
+%      入口一次性全转 double，块内从此只有 double。----
+iqd  = double(iq);
+ud   = double(u);
+ge1d = double(ge1);
+e1d  = double(e1);
+vd   = double(v);
+wd   = double(w);
+wrd  = double(wref);
 % ==================== 派生量（不要手改）====================
 cyc    = f_inj*dT;          % 每拍相位增量 [周期]
 wh     = 2*pi*f_inj;        % 注入角频率 [rad/s]
@@ -53,6 +63,7 @@ mu     = 0.35;      % 基线滑动速率
 cyc_nseg = cyc*nseg;   % 移植时人工确认该值为整数（65 Hz x 0.2 s = 13）
 persistent init ph acc nacc seg active tick nxtick tstart d0 u0 q0 t0
 persistent b0v goal gv base bvalid nest blast nblast nburst frozen wlp wcnt
+persistent dg_en dg_num dg_den dg_bq      % 诊断量（供 b0_ident_dbg 输出，主接口不用）
 persistent pdC sdC lpa b1 b2 bc
 if isempty(init)
     init = 1; ph = 0;
@@ -60,6 +71,7 @@ if isempty(init)
     tick = 0; nxtick = round(t_start/dT); tstart = 0;   % 起跑延时后再注入
     d0 = 0; u0 = 0; q0 = 0; t0 = 1;
     b0v = b0_init; goal = b0_init; gv = 0; wlp = wd; wcnt = 0;
+    dg_en = 0; dg_num = 0; dg_den = 0; dg_bq = 0;
     base = 0; bvalid = 0; nest = 0;
     blast = zeros(1,12); nblast = 0; nburst = 0; frozen = 0;
     % ---- 派生常量（只算一次）----
@@ -85,11 +97,12 @@ if gv ~= 0
 end
 % ---- 转速低通 + 稳态计时（每拍无条件更新，burst 起点才不会被人为推后）----
 wlp = wlp + (wd - wlp)*min(dT/max(tau_w, dT), 1);
-% 归一化偏差：r_ss = |w-w_lp| / |wref|，与常量 w_ss 比（避免变量对变量的比较）
-if abs(wrd) > 1e-6
-    r_ss = abs(wd - wlp)/abs(wrd);
+% 相对转速脉动：r_ss = |w-w_lp| / max(|w|,eps)，与常量 w_ss 比。
+% 用 |w| 作分母（而不是 |wref|）：这样 w 与 wref 单位不一致时判据依然成立。
+if abs(wd) > 1e-6
+    r_ss = abs(wd - wlp)/abs(wd);
 else
-    r_ss = 0;
+    r_ss = 1;                       % 接近零速视为"不稳态"，不注入
 end
 if (w_ss > 0) && (r_ss < w_ss)
     wcnt = wcnt + 1;
@@ -117,13 +130,13 @@ if (upd_on ~= 0) && (~active) && (~frozen) && (tick >= nxtick)
     % 不满足：本轮跳过，不消耗预算，下一拍再判
 end
 if active
-    acc(1) = acc(1) + e1*c;  acc(2) = acc(2) + e1*s;
-    acc(3) = acc(3) + v*c;   acc(4) = acc(4) + v*s;
-    acc(5) = acc(5) + u*c;   acc(6) = acc(6) + u*s;
-    acc(7) = acc(7) + iq*c;  acc(8) = acc(8) + iq*s;
+    acc(1) = acc(1) + e1d*c;  acc(2) = acc(2) + e1d*s;
+    acc(3) = acc(3) + vd*c;   acc(4) = acc(4) + vd*s;
+    acc(5) = acc(5) + ud*c;   acc(6) = acc(6) + ud*s;
+    acc(7) = acc(7) + iqd*c;  acc(8) = acc(8) + iqd*s;
     % G(e1) 由外部输入 ge1 提供（不在块内推导）
-    acc(11)= acc(11)+ ge1*c;  acc(12)= acc(12)+ ge1*s;
-    acc(13)= acc(13)+ ge1*c;  acc(14)= acc(14)+ ge1*s;
+    acc(11)= acc(11)+ ge1d*c;  acc(12)= acc(12)+ ge1d*s;
+    acc(13)= acc(13)+ ge1d*c;  acc(14)= acc(14)+ ge1d*s;
     if seg == 1
         % 波形（峰值=1，与 C 版 b0_wave_value 一致）
         if wave == 1
@@ -167,12 +180,7 @@ if active
             else
                 bq = 0;                         % 0 = 本窗无效，下面跳过所有更新
             end
-            if bq > 0
-                % 判据②：首窗必须落在标称附近，防"一拍顶到上限"
-                if ~bvalid && (abs(bq - b0_init) > 0.5*b0_init)
-                    bq = 0;                     % 丢弃：对象未就绪/量纲不符/接线错
-                end
-            end
+            dg_en  = abs(E1);  dg_num = abs(num);  dg_den = abs(den);  dg_bq = bq;
             if bq > 0
                 if upd_on == 0
                     % 识别关闭：只算 bq，不更新 b0（b0 停在 b0_init）
