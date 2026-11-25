@@ -29,6 +29,9 @@ w_gate = 0;
 w_ss   = 0.02;      % 2% 参考转速
 tau_w  = 0.2;       % 转速低通时间常数 [s]
 w_hold = 0.1;       % 需连续保持 [s]
+% ---- 首窗守卫：1 = 首窗估计必须落在 b0_init ±50% 内，否则丢弃 ----
+% 若对 b0 标称值没有把握（b0_init 只是随便填的），先设 0 关掉，等看到量级再打开
+first_win_guard = 1;
 % ---- 类型统一（重要）：目标机若把输入定成 fi（定点），与 double 混合运算/比较会报
 %      "In fi .* non-fi ... the non-fi must be a constant"。
 %      例：ge1*s（ge1 是 fi、s 是 double）、|w-wlp| < w_ss*|wref|。
@@ -175,8 +178,8 @@ if active
             else
                 bq = 0;                         % 0 = 本窗无效，下面跳过所有更新
             end
-            if bq > 0
-                % 判据②：首窗必须落在标称附近，防"一拍顶到上限"
+            if (bq > 0) && (first_win_guard ~= 0)
+                % 判据②：首窗必须落在标称附近，防“一拍顶到上限”
                 if ~bvalid && (abs(bq - b0_init) > 0.5*b0_init)
                     bq = 0;                     % 丢弃：对象未就绪/量纲不符/接线错
                 end
@@ -234,6 +237,5 @@ if active
 end
 b0out = b0v;
 duout = du;
-% dbg = [upd_on, frozen, active, tick, nxtick, wcnt, r_ss, wd, du/amp]
 dbg = [double(upd_on ~= 0), double(frozen), double(active), double(tick), double(nxtick), double(wcnt), r_ss, wd, double(du)/amp];
 end
